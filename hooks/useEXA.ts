@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { zeroAddress } from 'viem';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 import { useWeb3 } from './useWeb3';
 import {
@@ -14,7 +15,6 @@ import useContract from './useContract';
 import useAccountData from './useAccountData';
 import usePrices from './usePrices';
 import { NATIVE_TOKEN_ADDRESS } from 'types/Bridge';
-import { WAD } from 'utils/queryRates';
 
 export const useEXA = () => {
   return useContract('EXA', exaABI);

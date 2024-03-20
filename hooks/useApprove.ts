@@ -1,5 +1,8 @@
 import { useCallback, useState } from 'react';
 import { parseUnits, type Address, type EstimateContractGasParameters, type Hex, formatUnits } from 'viem';
+import MAX_UINT256 from '@exactly/lib/esm/fixed-point-math/MAX_UINT256';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+
 import { ERC20, Market } from 'types/contracts';
 import { useWeb3 } from './useWeb3';
 import { useOperationContext } from 'contexts/OperationContext';
@@ -8,7 +11,6 @@ import handleOperationError from 'utils/handleOperationError';
 import waitForTransaction from 'utils/waitForTransaction';
 import { useTranslation } from 'react-i18next';
 
-import { MAX_UINT256, WEI_PER_ETHER } from 'utils/const';
 import useEstimateGas from './useEstimateGas';
 import { gasLimit } from 'utils/gas';
 import { track } from 'utils/mixpanel';
@@ -154,7 +156,7 @@ function useApprove({
         contractName: 'Market',
         spender,
         amount: formatUnits(quantity, marketAccount.decimals),
-        usdAmount: formatUnits((quantity * marketAccount.usdPrice) / WEI_PER_ETHER, marketAccount.decimals),
+        usdAmount: formatUnits((quantity * marketAccount.usdPrice) / WAD, marketAccount.decimals),
       });
 
       if (!hash) return;
@@ -165,7 +167,7 @@ function useApprove({
       track('TX Completed', {
         symbol,
         amount: formatUnits(quantity, marketAccount.decimals),
-        usdAmount: formatUnits((quantity * marketAccount.usdPrice) / WEI_PER_ETHER, marketAccount.decimals),
+        usdAmount: formatUnits((quantity * marketAccount.usdPrice) / WAD, marketAccount.decimals),
         status,
         hash,
         operation,

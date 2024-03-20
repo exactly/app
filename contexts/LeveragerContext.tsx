@@ -25,6 +25,8 @@ import {
 } from 'viem';
 import { splitSignature } from '@ethersproject/bytes';
 import { AbiParametersToPrimitiveTypes, ExtractAbiFunction, ExtractAbiFunctionNames } from 'abitype';
+import MAX_UINT256 from '@exactly/lib/esm/fixed-point-math/MAX_UINT256';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 import type { ErrorData } from 'types/Error';
 import type { Transaction } from 'types/Transaction';
@@ -33,7 +35,6 @@ import useAccountData, { type MarketAccount } from 'hooks/useAccountData';
 import useMarket from 'hooks/useMarket';
 import { useWeb3 } from 'hooks/useWeb3';
 import type { DebtManager, Market } from 'types/contracts';
-import { MAX_UINT256, WEI_PER_ETHER } from 'utils/const';
 import handleOperationError from 'utils/handleOperationError';
 import useIsContract from 'hooks/useIsContract';
 import useBalance from 'hooks/useBalance';
@@ -203,9 +204,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
   const minHealthFactor = useCallback(
     (_maIn: MarketAccount, _maOut: MarketAccount): bigint => {
       const currentHF =
-        healthFactor && healthFactor.debt > 0
-          ? (healthFactor.collateral * WEI_PER_ETHER) / healthFactor.debt
-          : undefined;
+        healthFactor && healthFactor.debt > 0 ? (healthFactor.collateral * WAD) / healthFactor.debt : undefined;
       const truncatedHF = currentHF ? (currentHF / 10n ** 13n) * 10n ** 13n : undefined;
       const marketsMinHF = minHealthFactorMarkets(_maIn, _maOut);
       return truncatedHF && truncatedHF < marketsMinHF ? truncatedHF : marketsMinHF;
@@ -285,7 +284,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
   const maxRatio = useMemo(() => {
     const ratio = limit?.maxRatio ?? leverageStatus?.maxRatio ?? 1n;
-    return ratio < WEI_PER_ETHER ? WEI_PER_ETHER : ratio;
+    return ratio < WAD ? WAD : ratio;
   }, [leverageStatus?.maxRatio, limit?.maxRatio]);
 
   const userInput = useMemo(() => {
@@ -367,8 +366,8 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
     const borrowsUSD = ((limit.borrow - leverageStatus.borrow) * maOut.usdPrice) / 10n ** BigInt(maOut.decimals);
 
-    const collateral = (depositsUSD * maIn.adjustFactor) / WEI_PER_ETHER;
-    const debt = (borrowsUSD * WEI_PER_ETHER) / maOut.adjustFactor;
+    const collateral = (depositsUSD * maIn.adjustFactor) / WAD;
+    const debt = (borrowsUSD * WAD) / maOut.adjustFactor;
 
     return parseHealthFactor(healthFactor.debt + debt, healthFactor.collateral + collateral);
   }, [healthFactor, leverageStatus, limit, maIn, maOut]);
@@ -430,10 +429,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
   }, [maIn?.decimals, principal]);
 
   const currentLeverageRatio = useMemo(
-    () =>
-      leverageStatus
-        ? Number(leverageStatus.ratio < WEI_PER_ETHER ? WEI_PER_ETHER : leverageStatus.ratio) / 1e18
-        : minLeverageRatio,
+    () => (leverageStatus ? Number(leverageStatus.ratio < WAD ? WAD : leverageStatus.ratio) / 1e18 : minLeverageRatio),
     [leverageStatus],
   );
 
@@ -585,7 +581,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
           setApprovalStatus('MARKET-OUT');
           const marketOutAllownce = await marketOut.read.allowance([walletAddress, debtManager.address], opts);
-          const _slippage = (leverageStatus.borrow * ((maIn.floatingBorrowRate * 300n) / 31_536_000n)) / WEI_PER_ETHER;
+          const _slippage = (leverageStatus.borrow * ((maIn.floatingBorrowRate * 300n) / 31_536_000n)) / WAD;
           const borrowShares = await marketIn.read.previewWithdraw(
             [limit.borrow - leverageStatus.borrow + _slippage],
             opts,
@@ -594,8 +590,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
         } else {
           setApprovalStatus('MARKET-IN');
           const marketInAllowance = await marketIn.read.allowance([walletAddress, debtManager.address], opts);
-          const _slippage =
-            (maIn.floatingBorrowAssets * ((maIn.floatingBorrowRate * 300n) / 31_536_000n)) / WEI_PER_ETHER;
+          const _slippage = (maIn.floatingBorrowAssets * ((maIn.floatingBorrowRate * 300n) / 31_536_000n)) / WAD;
           const permitShares = await marketIn.read.previewWithdraw(
             [
               (maIn.floatingBorrowAssets < limit.borrow ? 0n : maIn.floatingBorrowAssets - limit.borrow) +
@@ -669,8 +664,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
           break;
         }
         case 'MARKET-IN': {
-          const _slippage =
-            (maIn.floatingBorrowAssets * ((maIn.floatingBorrowRate * 5000n) / 31_536_000n)) / WEI_PER_ETHER;
+          const _slippage = (maIn.floatingBorrowAssets * ((maIn.floatingBorrowRate * 5000n) / 31_536_000n)) / WAD;
           const permitShares = await marketIn.read.previewWithdraw(
             [
               (maIn.floatingBorrowAssets < limit.borrow ? 0n : maIn.floatingBorrowAssets - limit.borrow) +
@@ -688,7 +682,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
           break;
         }
         case 'MARKET-OUT': {
-          const _slippage = (leverageStatus.borrow * ((maIn.floatingBorrowRate * 5000n) / 31_536_000n)) / WEI_PER_ETHER;
+          const _slippage = (leverageStatus.borrow * ((maIn.floatingBorrowRate * 5000n) / 31_536_000n)) / WAD;
           const borrowShares = await marketIn.read.previewWithdraw(
             [limit.borrow - leverageStatus.borrow + _slippage],
             opts,
@@ -891,8 +885,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
               break;
             }
 
-            const _slippage =
-              (leverageStatus.borrow * ((maIn.floatingBorrowRate * 300n) / 31_536_000n)) / WEI_PER_ETHER;
+            const _slippage = (leverageStatus.borrow * ((maIn.floatingBorrowRate * 300n) / 31_536_000n)) / WAD;
             const borrowShares = await marketIn.read.previewWithdraw(
               [limit.borrow - leverageStatus.borrow + _slippage],
               opts,
@@ -940,8 +933,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
               break;
             }
 
-            const _slippage =
-              (maIn.floatingBorrowAssets * ((maIn.floatingBorrowRate * 300n) / 31_536_000n)) / WEI_PER_ETHER;
+            const _slippage = (maIn.floatingBorrowAssets * ((maIn.floatingBorrowRate * 300n) / 31_536_000n)) / WAD;
             const permitShares = await marketIn.read.previewWithdraw(
               [
                 (maIn.floatingBorrowAssets < limit.borrow ? 0n : maIn.floatingBorrowAssets - limit.borrow) +

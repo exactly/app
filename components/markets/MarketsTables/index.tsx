@@ -3,6 +3,8 @@ import Grid from '@mui/material/Grid';
 import PoolTable, { TableRow } from './poolTable';
 import { useTranslation } from 'react-i18next';
 import { formatEther, formatUnits } from 'viem';
+import MAX_UINT256 from '@exactly/lib/esm/fixed-point-math/MAX_UINT256';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 import formatNumber from 'utils/formatNumber';
 import getFloatingDepositAPR from 'utils/getFloatingDepositAPR';
@@ -16,7 +18,6 @@ import PoolMobile from './poolMobile';
 import { TableHeader } from 'components/common/TableHeadCell';
 import useAccountData from 'hooks/useAccountData';
 import { useGlobalError } from 'contexts/GlobalErrorContext';
-import { MAX_UINT256, WEI_PER_ETHER } from 'utils/const';
 import useRewards from 'hooks/useRewards';
 
 const { smOrLess, mdOrMore } = globals;
@@ -200,8 +201,8 @@ const MarketTables: FC = () => {
 
           tempRows.push({
             symbol,
-            totalDeposited: formatNumber(formatUnits((totalDeposited * usdPrice) / WEI_PER_ETHER, decimals)),
-            totalBorrowed: formatNumber(formatUnits((totalBorrowed * usdPrice) / WEI_PER_ETHER, decimals)),
+            totalDeposited: formatNumber(formatUnits((totalDeposited * usdPrice) / WAD, decimals)),
+            totalBorrowed: formatNumber(formatUnits((totalBorrowed * usdPrice) / WAD, decimals)),
             depositAPR: bestDeposit.rate,
             depositMaturity: bestDeposit.maturity,
             borrowAPR: bestBorrow.rate,

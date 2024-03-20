@@ -22,6 +22,7 @@ import { escrowedExaABI } from 'types/abi';
 import { AbiParametersToPrimitiveTypes, ExtractAbiFunction, ExtractAbiFunctionNames } from 'abitype';
 import Draggable from 'react-draggable';
 import CloseIcon from '@mui/icons-material/Close';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 import { ModalBox } from 'components/common/modal/ModalBox';
 
@@ -39,7 +40,6 @@ import {
   useEscrowedEXAVestingPeriod,
 } from 'hooks/useEscrowedEXA';
 import formatNumber from 'utils/formatNumber';
-import { WEI_PER_ETHER } from 'utils/const';
 import { toPercentage } from 'utils/utils';
 import useIsContract from 'hooks/useIsContract';
 import { gasLimit } from 'utils/gas';
@@ -168,7 +168,7 @@ function VestingInput({ refetch }: Props) {
     if (!qty || !EXAPrice) return;
 
     const parsedQty = parseEther(qty);
-    const usd = (parsedQty * EXAPrice) / WEI_PER_ETHER;
+    const usd = (parsedQty * EXAPrice) / WAD;
 
     return formatEther(usd);
   }, [EXAPrice, qty]);
@@ -176,7 +176,7 @@ function VestingInput({ refetch }: Props) {
   const [reserve, moreThanBalance, exaRemaining] = useMemo(() => {
     if (reserveRatio === undefined || exaBalance === undefined || !qty) return [undefined, false];
     const parsed = parseEther(qty);
-    const _reserve = (parsed * reserveRatio) / WEI_PER_ETHER;
+    const _reserve = (parsed * reserveRatio) / WAD;
     const _exaRemaining = _reserve - exaBalance;
 
     return [formatEther(_reserve), _reserve > exaBalance, _exaRemaining];
@@ -191,7 +191,7 @@ function VestingInput({ refetch }: Props) {
 
     const deadline = BigInt(dayjs().unix() + 3_600);
     const _qty = parseEther(qty);
-    const value = (_qty * reserveRatio) / WEI_PER_ETHER + 1n;
+    const value = (_qty * reserveRatio) / WAD + 1n;
 
     const nonce = await exa.read.nonces([walletAddress], opts);
     const name = await exa.read.name(opts);
@@ -243,7 +243,7 @@ function VestingInput({ refetch }: Props) {
 
     setIsLoading(true);
     const amount = parseEther(qty);
-    const res = (amount * reserveRatio) / WEI_PER_ETHER + 1n;
+    const res = (amount * reserveRatio) / WAD + 1n;
 
     let hash;
     try {

@@ -1,6 +1,7 @@
 import React, { FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatUnits } from 'viem';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 import formatNumber from 'utils/formatNumber';
 import { toPercentage } from 'utils/utils';
@@ -13,7 +14,6 @@ import useAccountData from 'hooks/useAccountData';
 import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
 import useRewards from 'hooks/useRewards';
 import ItemCell from 'components/common/ItemCell';
-import { WEI_PER_ETHER } from 'utils/const';
 
 type FloatingPoolInfoProps = {
   symbol: string;
@@ -35,8 +35,8 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
     } = marketAccount;
 
     return {
-      deposited: Number((totalDeposited * usdPrice) / WEI_PER_ETHER) / 10 ** decimals,
-      borrowed: Number((totalBorrowed * usdPrice) / WEI_PER_ETHER) / 10 ** decimals,
+      deposited: Number((totalDeposited * usdPrice) / WAD) / 10 ** decimals,
+      borrowed: Number((totalBorrowed * usdPrice) / WAD) / 10 ** decimals,
     };
   }, [marketAccount]);
 

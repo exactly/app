@@ -1,3 +1,5 @@
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+
 import { useCallback, useMemo, useState } from 'react';
 import { useOperationContext } from 'contexts/OperationContext';
 import useAccountData from 'hooks/useAccountData';
@@ -8,7 +10,6 @@ import usePreviewer from 'hooks/usePreviewer';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useTranslation } from 'react-i18next';
 import { OperationHook } from 'types/OperationHook';
-import { WEI_PER_ETHER } from 'utils/const';
 import { CustomError } from 'types/Error';
 import useEstimateGas from './useEstimateGas';
 import { formatUnits, parseUnits } from 'viem';
@@ -90,7 +91,7 @@ export default (): DepositAtMaturity => {
       }
 
       const amount = parseUnits(quantity, marketAccount.decimals);
-      const minAmount = (amount * slippage) / WEI_PER_ETHER;
+      const minAmount = (amount * slippage) / WAD;
 
       if (marketAccount.assetSymbol === 'WETH') {
         const sim = await ETHRouterContract.simulate.depositAtMaturity([date, minAmount], {
@@ -171,7 +172,7 @@ export default (): DepositAtMaturity => {
     setIsLoadingOp(true);
     try {
       const amount = parseUnits(qty, marketAccount.decimals);
-      const minAmount = (amount * slippage) / WEI_PER_ETHER;
+      const minAmount = (amount * slippage) / WAD;
       if (marketAccount.assetSymbol === 'WETH') {
         const args = [date, minAmount] as const;
         const gasEstimation = await ETHRouterContract.estimateGas.depositAtMaturity(args, {
@@ -189,7 +190,7 @@ export default (): DepositAtMaturity => {
           hash,
           symbol,
           amount: qty,
-          usdAmount: formatUnits((amount * marketAccount.usdPrice) / WEI_PER_ETHER, marketAccount.decimals),
+          usdAmount: formatUnits((amount * marketAccount.usdPrice) / WAD, marketAccount.decimals),
         });
       } else {
         const args = [date, amount, minAmount, walletAddress] as const;
@@ -203,7 +204,7 @@ export default (): DepositAtMaturity => {
           method: 'depositAtMaturity',
           symbol,
           amount: qty,
-          usdAmount: formatUnits((amount * marketAccount.usdPrice) / WEI_PER_ETHER, marketAccount.decimals),
+          usdAmount: formatUnits((amount * marketAccount.usdPrice) / WAD, marketAccount.decimals),
           hash,
         });
       }
@@ -214,7 +215,7 @@ export default (): DepositAtMaturity => {
       track('TX Completed', {
         symbol,
         amount: qty,
-        usdAmount: formatUnits((amount * marketAccount.usdPrice) / WEI_PER_ETHER, marketAccount.decimals),
+        usdAmount: formatUnits((amount * marketAccount.usdPrice) / WAD, marketAccount.decimals),
         status,
         hash: transactionHash,
       });
@@ -268,8 +269,8 @@ export default (): DepositAtMaturity => {
           initialAssets,
         ]);
         const currentTimestamp = BigInt(dayjs().unix());
-        const rate = (finalAssets * WEI_PER_ETHER) / initialAssets;
-        const fixedAPR = ((rate - WEI_PER_ETHER) * 31_536_000n) / (date - currentTimestamp);
+        const rate = (finalAssets * WAD) / initialAssets;
+        const fixedAPR = ((rate - WAD) * 31_536_000n) / (date - currentTimestamp);
 
         setFixedRate(fixedAPR);
       } catch (error) {

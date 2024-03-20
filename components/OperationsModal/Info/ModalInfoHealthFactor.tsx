@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
 import { useTranslation } from 'react-i18next';
 import { parseUnits } from 'viem';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 import parseHealthFactor from 'utils/parseHealthFactor';
 
@@ -10,7 +11,6 @@ import type { Operation } from 'types/Operation';
 import ModalInfo, { FromTo, Variant } from 'components/common/modal/ModalInfo';
 import useHealthFactor from 'hooks/useHealthFactor';
 import useAccountData from 'hooks/useAccountData';
-import { WEI_PER_ETHER } from 'utils/const';
 
 type Props = {
   qty: string;
@@ -49,7 +49,7 @@ function ModalInfoHealthFactor({ qty, symbol, operation, variant = 'column' }: P
     switch (operation) {
       case 'deposit': {
         if (isCollateral) {
-          const adjustedNewQtyUsd = (newQtyUsd * adjustFactor) / WEI_PER_ETHER;
+          const adjustedNewQtyUsd = (newQtyUsd * adjustFactor) / WAD;
 
           return parseHealthFactor(healthFactor.debt, healthFactor.collateral + adjustedNewQtyUsd);
         } else {
@@ -63,7 +63,7 @@ function ModalInfoHealthFactor({ qty, symbol, operation, variant = 'column' }: P
 
       case 'withdraw': {
         if (isCollateral) {
-          const adjustedNewQtyUsd = (newQtyUsd * adjustFactor) / WEI_PER_ETHER;
+          const adjustedNewQtyUsd = (newQtyUsd * adjustFactor) / WAD;
 
           return parseHealthFactor(healthFactor.debt, healthFactor.collateral - adjustedNewQtyUsd);
         } else {
@@ -77,13 +77,13 @@ function ModalInfoHealthFactor({ qty, symbol, operation, variant = 'column' }: P
 
       case 'borrowAtMaturity':
       case 'borrow': {
-        const adjustedNewQtyUsd = (newQtyUsd * WEI_PER_ETHER) / adjustFactor;
+        const adjustedNewQtyUsd = (newQtyUsd * WAD) / adjustFactor;
         return parseHealthFactor(healthFactor.debt + adjustedNewQtyUsd, healthFactor.collateral);
       }
 
       case 'repayAtMaturity':
       case 'repay': {
-        const adjustedNewQtyUsd = (newQtyUsd * WEI_PER_ETHER) / adjustFactor;
+        const adjustedNewQtyUsd = (newQtyUsd * WAD) / adjustFactor;
 
         return parseHealthFactor(healthFactor.debt - adjustedNewQtyUsd, healthFactor.collateral);
       }

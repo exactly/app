@@ -26,6 +26,9 @@ import * as wagmiChains from 'wagmi/chains';
 import { useSignTypedData, useWalletClient } from 'wagmi';
 import { optimism } from 'wagmi/chains';
 
+import MAX_UINT256 from '@exactly/lib/esm/fixed-point-math/MAX_UINT256';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+
 import {
   type Route,
   type Chain,
@@ -58,7 +61,6 @@ import { gasLimit } from 'utils/gas';
 import useIsContract from 'hooks/useIsContract';
 import useIsPermit from 'hooks/useIsPermit';
 import usePermit2 from 'hooks/usePermit2';
-import { MAX_UINT256, WEI_PER_ETHER } from 'utils/const';
 import waitForTransaction from 'utils/waitForTransaction';
 import dayjs from 'dayjs';
 import { splitSignature } from '@ethersproject/bytes';
@@ -454,9 +456,9 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
       ? 0n
       : exaethPrice !== undefined
         ? nativeSwap
-          ? (parseEther(qtyIn) * WEI_PER_ETHER) / exaethPrice
+          ? (parseEther(qtyIn) * WAD) / exaethPrice
           : route
-            ? (BigInt(route.toAmount) * WEI_PER_ETHER) / exaethPrice
+            ? (BigInt(route.toAmount) * WAD) / exaethPrice
             : 0n
         : undefined;
 
@@ -691,7 +693,7 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
     protocol:
       route?.userTxs?.[route?.userTxs.length - 1]?.protocol ||
       route?.userTxs?.[0].steps?.[(route.userTxs[0]?.stepCount || 0) - 1].protocol,
-    qtyOutUSD: qtyOut !== undefined && exaPrice ? (qtyOut * exaPrice) / WEI_PER_ETHER : undefined,
+    qtyOutUSD: qtyOut !== undefined && exaPrice ? (qtyOut * exaPrice) / WAD : undefined,
     activeRoutes,
     bridgeStatus,
     isBridge,

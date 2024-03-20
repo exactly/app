@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useCallback } from 'react';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 import ModalTxCost from 'components/OperationsModal/ModalTxCost';
 import ModalGif from 'components/OperationsModal/ModalGif';
@@ -22,7 +23,7 @@ import useAccountData from 'hooks/useAccountData';
 import useHandleOperationError from 'hooks/useHandleOperationError';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
-import { ETH_ROUTER_SLIPPAGE, WEI_PER_ETHER } from 'utils/const';
+import { ETH_ROUTER_SLIPPAGE } from 'utils/const';
 import { CustomError } from 'types/Error';
 import useEstimateGas from 'hooks/useEstimateGas';
 import { formatUnits, parseUnits } from 'viem';
@@ -123,24 +124,24 @@ function Repay() {
           const args = [floatingBorrowShares] as const;
           const gasEstimation = await ETHRouterContract.estimateGas.refund(args, {
             ...opts,
-            value: (floatingBorrowAssets * ETH_ROUTER_SLIPPAGE) / WEI_PER_ETHER,
+            value: (floatingBorrowAssets * ETH_ROUTER_SLIPPAGE) / WAD,
           });
 
           hash = await ETHRouterContract.write.refund(args, {
             ...opts,
-            value: (floatingBorrowAssets * ETH_ROUTER_SLIPPAGE) / WEI_PER_ETHER,
+            value: (floatingBorrowAssets * ETH_ROUTER_SLIPPAGE) / WAD,
             gasLimit: gasLimit(gasEstimation),
           });
         } else {
           const args = [amount] as const;
           const gasEstimation = await ETHRouterContract.estimateGas.repay(args, {
             ...opts,
-            value: (amount * ETH_ROUTER_SLIPPAGE) / WEI_PER_ETHER,
+            value: (amount * ETH_ROUTER_SLIPPAGE) / WAD,
           });
 
           hash = await ETHRouterContract.write.repay(args, {
             ...opts,
-            value: (amount * ETH_ROUTER_SLIPPAGE) / WEI_PER_ETHER,
+            value: (amount * ETH_ROUTER_SLIPPAGE) / WAD,
             gasLimit: gasLimit(gasEstimation),
           });
         }
@@ -198,7 +199,7 @@ function Repay() {
       }
 
       if (marketAccount.assetSymbol === 'WETH') {
-        const value = (parseUnits(quantity, marketAccount.decimals) * ETH_ROUTER_SLIPPAGE) / WEI_PER_ETHER;
+        const value = (parseUnits(quantity, marketAccount.decimals) * ETH_ROUTER_SLIPPAGE) / WAD;
         const amount = isMax ? marketAccount.floatingBorrowShares : value;
 
         const sim = isMax

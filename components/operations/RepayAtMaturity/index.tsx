@@ -1,4 +1,5 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 import ModalTxCost from 'components/OperationsModal/ModalTxCost';
 import ModalGif from 'components/OperationsModal/ModalGif';
@@ -30,7 +31,6 @@ import useTranslateOperation from 'hooks/useTranslateOperation';
 import ModalInfoRepayWithDiscount from 'components/OperationsModal/Info/ModalInfoRepayWithDiscount';
 import usePreviewer from 'hooks/usePreviewer';
 import useDelayedEffect from 'hooks/useDelayedEffect';
-import { WEI_PER_ETHER } from 'utils/const';
 import { CustomError } from 'types/Error';
 import useEstimateGas from 'hooks/useEstimateGas';
 import { formatUnits, parseUnits, zeroAddress } from 'viem';
@@ -83,7 +83,7 @@ const RepayAtMaturity: FC = () => {
   const { marketAccount } = useAccountData(symbol);
 
   const maxAmountToRepay = useMemo(
-    () => ((positionAssetsAmount + penaltyAssets) * slippage) / WEI_PER_ETHER,
+    () => ((positionAssetsAmount + penaltyAssets) * slippage) / WAD,
     [positionAssetsAmount, penaltyAssets, slippage],
   );
 
@@ -116,8 +116,8 @@ const RepayAtMaturity: FC = () => {
 
       const feeAtMaturity =
         ((((positionAssets > pool.position.principal ? pool.position.principal : positionAssets) * pool.position.fee) /
-          WEI_PER_ETHER) *
-          WEI_PER_ETHER) /
+          WAD) *
+          WAD) /
         pool.position.principal;
       const principal = positionAssets - feeAtMaturity;
       const discount = assets - positionAssets;
@@ -144,7 +144,7 @@ const RepayAtMaturity: FC = () => {
     const currentTimestamp = BigInt(dayjs().unix());
     const penaltyTime = currentTimestamp - date;
 
-    return (penaltyRate * penaltyTime * totalPositionAssets) / WEI_PER_ETHER;
+    return (penaltyRate * penaltyTime * totalPositionAssets) / WAD;
   }, [marketAccount, date, isLateRepay, totalPositionAssets]);
 
   const {
@@ -237,7 +237,7 @@ const RepayAtMaturity: FC = () => {
       const newPositionAssetsAmount =
         totalPositionAssets === 0n
           ? 0n
-          : (input * ((totalPositionAssets * WEI_PER_ETHER) / (totalPositionAssets + totalPenalties))) / WEI_PER_ETHER;
+          : (input * ((totalPositionAssets * WAD) / (totalPositionAssets + totalPenalties))) / WAD;
       const newPenaltyAssets = input - newPositionAssetsAmount;
       setPenaltyAssets(newPenaltyAssets);
       setPositionAssetsAmount(newPositionAssetsAmount);

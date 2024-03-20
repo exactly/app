@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+
 import useAccountData from './useAccountData';
 import useTotalsUsd from './useTotalsUsd';
 import { AssetPosition } from 'components/newDashboard/DashboardSummary/DashboardOverview/DualProgressBarPosition';
-import { WEI_PER_ETHER } from 'utils/const';
 
 export default function useDashboardOverview(type: 'deposit' | 'borrow') {
   const { accountData } = useAccountData();
@@ -45,7 +46,7 @@ export default function useDashboardOverview(type: 'deposit' | 'borrow') {
             fixedValueUSD,
             floatingAssets: floatingAssets,
             floatingValueUSD,
-            percentageOfTotal: ((fixedValueUSD + floatingValueUSD) * WEI_PER_ETHER) / totalUSD,
+            percentageOfTotal: ((fixedValueUSD + floatingValueUSD) * WAD) / totalUSD,
           };
         },
       )
@@ -58,8 +59,8 @@ export default function useDashboardOverview(type: 'deposit' | 'borrow') {
       assetPositions: _assetPositions,
       totalFixedUSD: _totalFixedUSD,
       totalFloatingUSD: _totalFloatingUSD,
-      fixedPercentage: (_totalFixedUSD * WEI_PER_ETHER) / totalUSD,
-      floatingPercentage: (_totalFloatingUSD * WEI_PER_ETHER) / totalUSD,
+      fixedPercentage: (_totalFixedUSD * WAD) / totalUSD,
+      floatingPercentage: (_totalFloatingUSD * WAD) / totalUSD,
     };
   }, [accountData, totalUSD, type]);
 

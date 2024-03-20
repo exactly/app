@@ -14,6 +14,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 import OperationSquare from 'components/common/OperationSquare';
 import parseTimestamp from 'utils/parseTimestamp';
@@ -21,7 +22,6 @@ import formatNumber from 'utils/formatNumber';
 import BestPill from 'components/common/BestPill';
 import { Rates as RewardRates } from 'hooks/useRewards';
 import { formatEther, formatUnits } from 'viem';
-import { WEI_PER_ETHER } from 'utils/const';
 import Rates from 'components/Rates';
 
 export type PositionTableRow = {
@@ -82,7 +82,7 @@ function PositionTable({ data, onClick, loading = false, showBalance = false }: 
               ))
             : data.map((row) => {
                 const balance = row.balance
-                  ? formatNumber(formatUnits((row.balance * row.usdPrice) / WEI_PER_ETHER, row.decimals), 'USD')
+                  ? formatNumber(formatUnits((row.balance * row.usdPrice) / WAD, row.decimals), 'USD')
                   : '0';
                 return (
                   <TableRow

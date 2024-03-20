@@ -33,7 +33,7 @@ import formatNumber from 'utils/formatNumber';
 import { Transaction } from 'types/Transaction';
 import Loading from 'components/common/modal/Loading';
 import useRewards from 'hooks/useRewards';
-import { WEI_PER_ETHER } from 'utils/const';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 import { LoadingButton } from '@mui/lab';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useNetwork, useSwitchNetwork } from 'wagmi';
@@ -113,7 +113,7 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, close }) => {
       Object.entries(rs).map(([symbol, { amount, usdPrice }]) => ({
         symbol,
         amount: formatEther(amount),
-        valueUSD: usdPrice ? formatEther((amount * usdPrice) / WEI_PER_ETHER) : undefined,
+        valueUSD: usdPrice ? formatEther((amount * usdPrice) / WAD) : undefined,
       })),
     [rs],
   );
@@ -342,14 +342,14 @@ export function RewardsButton() {
         .map(([symbol, { amount, usdPrice }]) => ({
           symbol,
           amount: formatEther(amount),
-          valueUSD: usdPrice ? formatEther((amount * usdPrice) / WEI_PER_ETHER) : undefined,
+          valueUSD: usdPrice ? formatEther((amount * usdPrice) / WAD) : undefined,
         }))
         .sort((a, b) => (b.valueUSD ? parseFloat(b.valueUSD) : 0) - (a.valueUSD ? parseFloat(a.valueUSD) : 0)),
     [rs],
   );
 
   const totalAmount = useMemo(
-    () => Object.values(rs).reduce((acc, { amount, usdPrice }) => acc + (amount * usdPrice) / WEI_PER_ETHER, 0n),
+    () => Object.values(rs).reduce((acc, { amount, usdPrice }) => acc + (amount * usdPrice) / WAD, 0n),
     [rs],
   );
   const handleClick = useCallback(() => {
@@ -373,7 +373,7 @@ export function RewardsButton() {
             ))}
           </AvatarGroup>
           <Typography fontSize={14} fontWeight={700}>
-            {totalAmount < WEI_PER_ETHER ? t('Rewards') : `$${formatNumber(formatEther(totalAmount), 'USD')}`}
+            {totalAmount < WAD ? t('Rewards') : `$${formatNumber(formatEther(totalAmount), 'USD')}`}
           </Typography>
         </Box>
       </Button>

@@ -1,12 +1,13 @@
 import React, { useMemo } from 'react';
 import { formatUnits } from 'viem';
 import { Box, Skeleton, Typography } from '@mui/material';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+
 import { BorrowLimitIcon } from 'components/Icons';
 import { useTranslation } from 'react-i18next';
 import useHealthFactor from 'hooks/useHealthFactor';
 import useAccountData from 'hooks/useAccountData';
 import formatNumber from 'utils/formatNumber';
-import { WEI_PER_ETHER } from 'utils/const';
 
 const BorrowLimit = () => {
   const { t } = useTranslation();
@@ -33,10 +34,9 @@ const BorrowLimit = () => {
     const { debt, collateral } = healthFactor;
 
     return formatNumber(
-      Math.max(
-        0,
-        Number(formatUnits(((((collateral - debt) * WEI_PER_ETHER) / usdPrice) * adjustFactor) / WEI_PER_ETHER, 18)),
-      ).toFixed(decimals),
+      Math.max(0, Number(formatUnits(((((collateral - debt) * WAD) / usdPrice) * adjustFactor) / WAD, 18))).toFixed(
+        decimals,
+      ),
       'USD',
       false,
     );

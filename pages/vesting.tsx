@@ -41,7 +41,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import Image from 'next/image';
 import Draggable from 'react-draggable';
 import { TransitionProps } from '@mui/material/transitions';
-import { WEI_PER_ETHER } from 'utils/const';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
@@ -429,7 +429,7 @@ const Vesting: NextPage = () => {
                         </Box>
                         <Box display="flex" gap={0.5} justifyContent="space-around">
                           <Typography fontSize={12} fontWeight={500}>
-                            ${formatNumber(formatEther((usdPrice * totalVestedEsEXA) / WEI_PER_ETHER), 'USD')}
+                            ${formatNumber(formatEther((usdPrice * totalVestedEsEXA) / WAD), 'USD')}
                           </Typography>
                         </Box>
                       </Box>
@@ -475,7 +475,7 @@ const Vesting: NextPage = () => {
                           </Box>
                           <Box display="flex" gap={0.5} justifyContent="space-around">
                             <Typography fontSize={12} fontWeight={500}>
-                              ${formatNumber(formatEther((usdPrice * totalReserve) / WEI_PER_ETHER), 'USD')}
+                              ${formatNumber(formatEther((usdPrice * totalReserve) / WAD), 'USD')}
                             </Typography>
                           </Box>
                         </Box>
@@ -548,7 +548,7 @@ const Vesting: NextPage = () => {
                           </Box>
                           <Box display="flex" gap={0.5} justifyContent="space-around">
                             <Typography fontSize={12} fontWeight={500}>
-                              ${formatNumber(formatEther((usdPrice * totalWithdrawable) / WEI_PER_ETHER), 'USD')}
+                              ${formatNumber(formatEther((usdPrice * totalWithdrawable) / WAD), 'USD')}
                             </Typography>
                             <Typography fontSize={12} fontWeight={500}>
                               /
@@ -556,7 +556,7 @@ const Vesting: NextPage = () => {
                             <Typography fontSize={12} fontWeight={500} color="grey.400">
                               $
                               {formatNumber(
-                                formatEther((usdPrice * (totalVestedEsEXA - totalWithdrawnEXA)) / WEI_PER_ETHER),
+                                formatEther((usdPrice * (totalVestedEsEXA - totalWithdrawnEXA)) / WAD),
                                 'USD',
                               )}
                             </Typography>

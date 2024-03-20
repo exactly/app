@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+
 import useAccountData from './useAccountData';
-import { WEI_PER_ETHER } from 'utils/const';
 import useDashboard from './useDashboard';
 import { parseEther } from 'viem';
 import { useWeb3 } from './useWeb3';
@@ -79,7 +80,7 @@ export default () => {
       (total, { assetSymbol, floatingDepositAssets, decimals, usdPrice }) =>
         total +
         (((floatingDepositAssets * usdPrice) / BigInt(10 ** decimals)) * (floatingDepositAPRs[assetSymbol] || 0n)) /
-          WEI_PER_ETHER,
+          WAD,
       0n,
     );
 
@@ -91,7 +92,7 @@ export default () => {
             acc + ((floatingDepositAssets * usdPrice) / BigInt(10 ** decimals)) * depositAPR,
           0n,
         ) /
-          WEI_PER_ETHER,
+          WAD,
       0n,
     );
 
@@ -99,7 +100,7 @@ export default () => {
       .filter(({ assetSymbol }) => assetSymbol === 'wstETH')
       .reduce(
         (total, { floatingDepositAssets, decimals, usdPrice }) =>
-          total + (((floatingDepositAssets * usdPrice) / BigInt(10 ** decimals)) * stETHNativeAPR) / WEI_PER_ETHER,
+          total + (((floatingDepositAssets * usdPrice) / BigInt(10 ** decimals)) * stETHNativeAPR) / WAD,
         0n,
       );
 
@@ -112,8 +113,7 @@ export default () => {
     const projectedFloatingBorrows = markets.reduce(
       (total, { assetSymbol, floatingBorrowAssets, decimals, usdPrice }) =>
         total +
-        (((floatingBorrowAssets * usdPrice) / BigInt(10 ** decimals)) * (floatingBorrowAPRs[assetSymbol] || 0n)) /
-          WEI_PER_ETHER,
+        (((floatingBorrowAssets * usdPrice) / BigInt(10 ** decimals)) * (floatingBorrowAPRs[assetSymbol] || 0n)) / WAD,
       0n,
     );
 
@@ -124,7 +124,7 @@ export default () => {
           (acc, { borrow }) => acc + ((floatingBorrowAssets * usdPrice) / BigInt(10 ** decimals)) * borrow,
           0n,
         ) /
-          WEI_PER_ETHER,
+          WAD,
       0n,
     );
 
@@ -142,7 +142,7 @@ export default () => {
           fixedAcc +
           (((principal * usdPrice) / BigInt(10 ** decimals)) *
             (fixedDepositsAPRs[asset.toLowerCase() + maturity] || 0n)) /
-            WEI_PER_ETHER,
+            WAD,
         0n,
       );
       return total + fixedPosition;
@@ -153,7 +153,7 @@ export default () => {
       .reduce((total, { fixedDepositPositions, decimals, usdPrice }) => {
         const fixedPosition = fixedDepositPositions.reduce(
           (fixedAcc, { position: { principal } }) =>
-            fixedAcc + (((principal * usdPrice) / BigInt(10 ** decimals)) * stETHNativeAPR) / WEI_PER_ETHER,
+            fixedAcc + (((principal * usdPrice) / BigInt(10 ** decimals)) * stETHNativeAPR) / WAD,
           0n,
         );
         return total + fixedPosition;
@@ -173,7 +173,7 @@ export default () => {
           fixedAcc +
           (((principal * usdPrice) / BigInt(10 ** decimals)) *
             (fixedBorrowsAPRs[asset.toLowerCase() + maturity] || 0n)) /
-            WEI_PER_ETHER,
+            WAD,
         0n,
       );
       return total + fixedPosition;
@@ -188,7 +188,7 @@ export default () => {
               (acc, { borrow }) => acc + ((principal * usdPrice) / BigInt(10 ** decimals)) * borrow,
               0n,
             ) /
-              WEI_PER_ETHER,
+              WAD,
           0n,
         );
         return total + fixedPosition;
@@ -215,11 +215,11 @@ export default () => {
 
     const projectedNativeEarnings = projectedFixedDepositNative + projectedFloatingDepositNative;
 
-    const marketAPR = (projectedMarketEarnings * WEI_PER_ETHER) / netPosition;
+    const marketAPR = (projectedMarketEarnings * WAD) / netPosition;
 
-    const rewardsAPR = (projectedRewardsEarnings * WEI_PER_ETHER) / netPosition;
+    const rewardsAPR = (projectedRewardsEarnings * WAD) / netPosition;
 
-    const nativeAPR = (projectedNativeEarnings * WEI_PER_ETHER) / netPosition;
+    const nativeAPR = (projectedNativeEarnings * WAD) / netPosition;
 
     const netAPR = marketAPR + rewardsAPR + nativeAPR;
 

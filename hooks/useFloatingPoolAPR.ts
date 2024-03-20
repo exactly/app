@@ -1,5 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { parseUnits } from 'viem';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+
 import networkData from 'config/networkData.json' assert { type: 'json' };
 import type { Operation } from 'types/Operation';
 import { floatingInterestRateCurve, globalUtilization, floatingUtilization } from 'utils/interestRateCurve';
@@ -8,7 +10,6 @@ import useAccountData from './useAccountData';
 import useDelayedEffect from './useDelayedEffect';
 import { useWeb3 } from './useWeb3';
 import { useGlobalError } from 'contexts/GlobalErrorContext';
-import { WEI_PER_ETHER } from 'utils/const';
 import useIRM from './useIRM';
 
 type FloatingPoolAPR = {
@@ -67,8 +68,7 @@ export default (
         const { totalFloatingDepositAssets, decimals } = marketAccount;
 
         const futureSupply = totalFloatingDepositAssets + parseUnits(qty || '0', decimals);
-        const ratio =
-          Number(futureSupply === 0n ? 0n : (totalFloatingDepositAssets * WEI_PER_ETHER) / futureSupply) / 1e18;
+        const ratio = Number(futureSupply === 0n ? 0n : (totalFloatingDepositAssets * WAD) / futureSupply) / 1e18;
         const finalAPR = ratio * depositAPRRate;
 
         setDepositAPR(finalAPR);

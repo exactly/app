@@ -2,13 +2,13 @@ import React, { useMemo } from 'react';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import { useTranslation } from 'react-i18next';
 import { formatUnits, parseUnits } from 'viem';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 import formatNumber from 'utils/formatNumber';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 import ModalInfo, { FromTo, Variant } from 'components/common/modal/ModalInfo';
 import type { Operation } from 'types/Operation';
 import useAccountData from 'hooks/useAccountData';
-import { WEI_PER_ETHER } from 'utils/const';
 
 type Props = {
   qty: string;
@@ -45,7 +45,7 @@ function ModalInfoBorrowLimit({ qty, symbol, operation, variant = 'column' }: Pr
     switch (operation) {
       case 'deposit':
         if (isCollateral) {
-          const adjustedDepositBorrowLimit = (newQtyUsd * adjustFactor) / WEI_PER_ETHER;
+          const adjustedDepositBorrowLimit = (newQtyUsd * adjustFactor) / WAD;
 
           newAfterBorrowLimit = Number(formatUnits(beforeBorrowLimitUSD + adjustedDepositBorrowLimit, 18)).toFixed(2);
         } else {
@@ -70,7 +70,7 @@ function ModalInfoBorrowLimit({ qty, symbol, operation, variant = 'column' }: Pr
       case 'repay':
       case 'repayAtMaturity':
         if (isCollateral) {
-          const adjustedRepayBorrowLimit = (newQtyUsd * adjustFactor) / WEI_PER_ETHER;
+          const adjustedRepayBorrowLimit = (newQtyUsd * adjustFactor) / WAD;
 
           newAfterBorrowLimit = Number(formatUnits(beforeBorrowLimitUSD + adjustedRepayBorrowLimit, 18)).toFixed(2);
         } else {

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import useAccountData from './useAccountData';
-import { WEI_PER_ETHER } from 'utils/const';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 export function useFloatingBalances(symbol: string) {
   const { marketAccount } = useAccountData(symbol);
@@ -15,9 +15,9 @@ export function useFloatingBalances(symbol: string) {
       usdPrice: exchangeRate,
     } = marketAccount;
 
-    const totalFloatingDepositUSD = (totalDeposited * exchangeRate) / WEI_PER_ETHER;
-    const totalFloatingBorrowUSD = (totalBorrowed * exchangeRate) / WEI_PER_ETHER;
-    const totalBackupBorrowUSD = (totalBackupBorrowed * exchangeRate) / WEI_PER_ETHER;
+    const totalFloatingDepositUSD = (totalDeposited * exchangeRate) / WAD;
+    const totalFloatingBorrowUSD = (totalBorrowed * exchangeRate) / WAD;
+    const totalBackupBorrowUSD = (totalBackupBorrowed * exchangeRate) / WAD;
 
     return {
       floatingDeposits: totalFloatingDepositUSD,

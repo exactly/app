@@ -1,12 +1,13 @@
 import React, { useMemo, type FC } from 'react';
 import Grid from '@mui/material/Grid';
+import MAX_UINT256 from '@exactly/lib/esm/fixed-point-math/MAX_UINT256';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 import MaturityPoolsTable from './MaturityPoolsTable';
 import MaturityPoolInfo from './MaturityPoolInfo';
 import { Box, useMediaQuery, useTheme } from '@mui/material';
 import MaturityPoolsMobile from './MaturityPoolsMobile';
 import useAccountData from 'hooks/useAccountData';
-import { MAX_UINT256, WEI_PER_ETHER } from 'utils/const';
 import { formatUnits } from 'viem';
 import SpreadModelChart from 'components/charts/SpreadModelChart';
 
@@ -42,8 +43,8 @@ const AssetMaturityPools: FC<Props> = ({ symbol }) => {
     });
 
     return {
-      totalDeposited: Number(formatUnits((tempTotalDeposited * usdPrice) / WEI_PER_ETHER, decimals)),
-      totalBorrowed: Number(formatUnits((tempTotalBorrowed * usdPrice) / WEI_PER_ETHER, decimals)),
+      totalDeposited: Number(formatUnits((tempTotalDeposited * usdPrice) / WAD, decimals)),
+      totalBorrowed: Number(formatUnits((tempTotalBorrowed * usdPrice) / WAD, decimals)),
       bestDeposit: fixedPools.reduce(
         (best, { maturity, depositRate: rate }) => (rate > best.rate ? { maturity, rate } : best),
         {

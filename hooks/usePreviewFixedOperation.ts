@@ -1,10 +1,11 @@
 import { useCallback, useState } from 'react';
 import { parseUnits } from 'viem';
 import { captureException } from '@sentry/nextjs';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+
 import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasicContext';
 import { useOperationContext } from 'contexts/OperationContext';
 import dayjs from 'dayjs';
-import { WEI_PER_ETHER } from 'utils/const';
 import useAccountData from './useAccountData';
 import useDelayedEffect from './useDelayedEffect';
 import useMaturityPools from './useMaturityPools';
@@ -48,8 +49,8 @@ export default (operation: MarketsBasicOperation): PreviewFixedOperation => {
         const currentTimestamp = BigInt(dayjs().unix());
 
         const fixedOptions: MarketsBasicOption[] = previewPools.map(({ maturity, assets }) => {
-          const rate = (assets * WEI_PER_ETHER) / initialAssets;
-          const fixedAPR = Number(((rate - WEI_PER_ETHER) * 31_536_000n) / (maturity - currentTimestamp)) / 1e18;
+          const rate = (assets * WAD) / initialAssets;
+          const fixedAPR = Number(((rate - WAD) * 31_536_000n) / (maturity - currentTimestamp)) / 1e18;
 
           return {
             maturity,

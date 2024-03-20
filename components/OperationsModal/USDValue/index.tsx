@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Typography } from '@mui/material';
 import { formatUnits, parseUnits } from 'viem';
-import { WEI_PER_ETHER } from 'utils/const';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 import useAccountData from 'hooks/useAccountData';
 import formatNumber from 'utils/formatNumber';
@@ -19,7 +19,7 @@ function USDValue({ qty, symbol }: Props) {
     if (!qty || !marketAccount || !checkPrecision(qty, marketAccount.decimals)) return;
 
     const parsedqty = parseUnits(qty, marketAccount.decimals);
-    const usd = (parsedqty * marketAccount.usdPrice) / WEI_PER_ETHER;
+    const usd = (parsedqty * marketAccount.usdPrice) / WAD;
 
     return formatUnits(usd, marketAccount.decimals);
   }, [qty, marketAccount]);

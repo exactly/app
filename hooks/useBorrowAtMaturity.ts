@@ -1,5 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+
 import { useOperationContext } from 'contexts/OperationContext';
 import useAccountData from 'hooks/useAccountData';
 import useApprove from 'hooks/useApprove';
@@ -10,7 +12,6 @@ import { useWeb3 } from 'hooks/useWeb3';
 import { OperationHook } from 'types/OperationHook';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 import useHealthFactor from './useHealthFactor';
-import { WEI_PER_ETHER } from 'utils/const';
 import useEstimateGas from './useEstimateGas';
 import { formatUnits, parseUnits } from 'viem';
 import waitForTransaction from 'utils/waitForTransaction';
@@ -95,7 +96,7 @@ export default (): BorrowAtMaturity => {
       }
 
       const amount = parseUnits(quantity, marketAccount.decimals);
-      const maxAmount = (amount * slippage) / WEI_PER_ETHER;
+      const maxAmount = (amount * slippage) / WAD;
       if (marketAccount.assetSymbol === 'WETH') {
         const sim = await ETHRouterContract.simulate.borrowAtMaturity([date, amount, maxAmount], opts);
         return estimate(sim.request);
@@ -134,20 +135,14 @@ export default (): BorrowAtMaturity => {
     const hasDepositedToFloatingPool = floatingDepositAssets > 0n;
 
     if (!isCollateral && hasDepositedToFloatingPool) {
-      col = col + (floatingDepositAssets * adjustFactor) / WEI_PER_ETHER;
+      col = col + (floatingDepositAssets * adjustFactor) / WAD;
     }
 
     const { debt } = healthFactor;
 
     return Math.max(
       0,
-      Number(
-        formatUnits(
-          ((((((col - (hf * debt) / WEI_PER_ETHER) * WEI_PER_ETHER) / hf) * WEI_PER_ETHER) / usdPrice) * adjustFactor) /
-            WEI_PER_ETHER,
-          18,
-        ),
-      ),
+      Number(formatUnits(((((((col - (hf * debt) / WAD) * WAD) / hf) * WAD) / usdPrice) * adjustFactor) / WAD, 18)),
     ).toFixed(decimals);
   }, [marketAccount, healthFactor]);
 
@@ -172,7 +167,7 @@ export default (): BorrowAtMaturity => {
 
       const borrowLimit = getBeforeBorrowLimit(marketAccount, 'borrow');
 
-      if (borrowLimit < (parseUnits(value || '0', decimals) * usdPrice) / WEI_PER_ETHER) {
+      if (borrowLimit < (parseUnits(value || '0', decimals) * usdPrice) / WAD) {
         return setErrorData({
           status: true,
           message: t("You can't borrow more than your borrow limit"),
@@ -198,7 +193,7 @@ export default (): BorrowAtMaturity => {
     if (!marketAccount || !date || !qty || !walletAddress || !opts) return;
 
     const amount = parseUnits(qty, marketAccount.decimals);
-    const maxAmount = (amount * slippage) / WEI_PER_ETHER;
+    const maxAmount = (amount * slippage) / WAD;
 
     let hash;
     try {
@@ -218,7 +213,7 @@ export default (): BorrowAtMaturity => {
           method: 'borrowAtMaturity',
           symbol,
           amount: qty,
-          usdAmount: formatUnits((amount * marketAccount.usdPrice) / WEI_PER_ETHER, marketAccount.decimals),
+          usdAmount: formatUnits((amount * marketAccount.usdPrice) / WAD, marketAccount.decimals),
           hash,
         });
       } else {
@@ -237,7 +232,7 @@ export default (): BorrowAtMaturity => {
           method: 'borrowAtMaturity',
           symbol,
           amount: qty,
-          usdAmount: formatUnits((amount * marketAccount.usdPrice) / WEI_PER_ETHER, marketAccount.decimals),
+          usdAmount: formatUnits((amount * marketAccount.usdPrice) / WAD, marketAccount.decimals),
           hash,
         });
       }
@@ -248,7 +243,7 @@ export default (): BorrowAtMaturity => {
       track('TX Completed', {
         symbol,
         amount: qty,
-        usdAmount: formatUnits((amount * marketAccount.usdPrice) / WEI_PER_ETHER, marketAccount.decimals),
+        usdAmount: formatUnits((amount * marketAccount.usdPrice) / WAD, marketAccount.decimals),
         status,
         hash: transactionHash,
       });
@@ -297,8 +292,8 @@ export default (): BorrowAtMaturity => {
           initialAssets,
         ]);
         const currentTimestamp = BigInt(dayjs().unix());
-        const rate = (finalAssets * WEI_PER_ETHER) / initialAssets;
-        const fixedAPR = ((rate - WEI_PER_ETHER) * 31_536_000n) / (date - currentTimestamp);
+        const rate = (finalAssets * WAD) / initialAssets;
+        const fixedAPR = ((rate - WAD) * 31_536_000n) / (date - currentTimestamp);
 
         setFixedRate(fixedAPR);
       } catch (error) {

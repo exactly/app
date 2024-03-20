@@ -14,6 +14,7 @@ import {
   IconButton,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 import AddIcon from '@mui/icons-material/Add';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -27,7 +28,6 @@ import formatNumber from 'utils/formatNumber';
 import parseHealthFactor from 'utils/parseHealthFactor';
 import usePreviewer from 'hooks/usePreviewer';
 import { useWeb3 } from 'hooks/useWeb3';
-import { WEI_PER_ETHER } from 'utils/const';
 import { formatUnits } from 'viem';
 import Rates from 'components/Rates';
 
@@ -69,9 +69,9 @@ function Overview({ from, to, percent }: Props) {
     const wad = 10n ** BigInt(decimals);
 
     const originalDebt = (from.balance * percent) / 100n;
-    const previousBorrowDebt = (((originalDebt * usdPrice) / wad) * WEI_PER_ETHER) / adjustFactor;
+    const previousBorrowDebt = (((originalDebt * usdPrice) / wad) * WAD) / adjustFactor;
     const futureBorrowDebt =
-      ((((to && isToFixed ? to.balance ?? 0n : originalDebt) * usdPrice) / wad) * WEI_PER_ETHER) / adjustFactor;
+      ((((to && isToFixed ? to.balance ?? 0n : originalDebt) * usdPrice) / wad) * WAD) / adjustFactor;
 
     const newHF = to
       ? parseHealthFactor(healthFactor.debt - previousBorrowDebt + futureBorrowDebt, healthFactor.collateral)

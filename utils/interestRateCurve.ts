@@ -1,5 +1,6 @@
-import { MAX_UINT256 } from './const';
 import { WAD, expWad, lnWad, sqrtWad } from './fixedMath';
+
+const MAX_UINT256 = 2n ** 256n - 1n;
 
 type FloatingInterestRateCurve = (uFloating: bigint, uGlobal: bigint) => bigint;
 

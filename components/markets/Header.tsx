@@ -1,6 +1,7 @@
 import React, { type FC, useMemo } from 'react';
 import { formatUnits, parseUnits } from 'viem';
 import { useTranslation } from 'react-i18next';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 import HeaderInfo from 'components/common/HeaderInfo';
 import { ItemInfoProps } from 'components/common/ItemInfo';
@@ -8,7 +9,6 @@ import { ItemInfoProps } from 'components/common/ItemInfo';
 import formatNumber from 'utils/formatNumber';
 import useAccountData from 'hooks/useAccountData';
 import { toPercentage } from 'utils/utils';
-import { WEI_PER_ETHER } from 'utils/const';
 
 const MarketsHeader: FC = () => {
   const { t } = useTranslation();
@@ -81,7 +81,7 @@ const MarketsHeader: FC = () => {
       label: t('Global Utilization'),
       value:
         totalBorrowed && totalDeposited
-          ? toPercentage(Number((totalBorrowed * WEI_PER_ETHER) / totalDeposited) / 1e18)
+          ? toPercentage(Number((totalBorrowed * WAD) / totalDeposited) / 1e18)
           : undefined,
     },
   ];

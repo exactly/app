@@ -1,4 +1,4 @@
-import { WAD } from './queryRates';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 const YEAR_IN_SECONDS = 60n * 60n * 24n * 365n;
 

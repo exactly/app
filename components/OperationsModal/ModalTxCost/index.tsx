@@ -2,7 +2,7 @@ import React from 'react';
 import { Typography, Skeleton, Box } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { formatUnits } from 'viem';
-import { WEI_PER_ETHER } from 'utils/const';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 import ModalInfo from 'components/common/modal/ModalInfo';
 import useAccountData from 'hooks/useAccountData';
@@ -24,7 +24,7 @@ function ModalTxCost({ gasCost }: Props) {
   if (!gas || !marketAccount) return <Skeleton width={100} />;
 
   const eth = parseFloat(formatUnits(gas, 18)).toFixed(6);
-  const usd = parseFloat(formatUnits((gas * marketAccount.usdPrice) / WEI_PER_ETHER, 18)).toFixed(2);
+  const usd = parseFloat(formatUnits((gas * marketAccount.usdPrice) / WAD, 18)).toFixed(2);
 
   return (
     <ModalInfo label={t('TX Cost')} variant="row">

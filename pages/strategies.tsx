@@ -4,6 +4,8 @@ import { Box, Button, Divider, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
 import { optimismSepolia, optimism } from 'wagmi/chains';
+import MAX_UINT256 from '@exactly/lib/esm/fixed-point-math/MAX_UINT256';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 import { useStartDebtManagerButton, useStartLeverager } from 'hooks/useActionButton';
 import StrategyRowCard from 'components/strategies/StrategyRowCard';
@@ -11,7 +13,6 @@ import useRouter from 'hooks/useRouter';
 import useHealthFactor from 'hooks/useHealthFactor';
 import parseHealthFactor from 'utils/parseHealthFactor';
 import useAccountData from 'hooks/useAccountData';
-import { MAX_UINT256, WEI_PER_ETHER } from 'utils/const';
 import { toPercentage } from 'utils/utils';
 import { type Props as Strategy } from 'components/strategies/StrategyCard';
 import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
@@ -55,21 +56,16 @@ const Strategies: NextPage = () => {
   const maxYield = useMemo(() => {
     const usdc = getMarketAccount('USDC');
     if (!usdc || !usdcDepositAPR) return '0%';
-    const ratio =
-      (WEI_PER_ETHER * WEI_PER_ETHER) / (WEI_PER_ETHER - (usdc.adjustFactor * usdc.adjustFactor) / WEI_PER_ETHER);
+    const ratio = (WAD * WAD) / (WAD - (usdc.adjustFactor * usdc.adjustFactor) / WAD);
 
     const marketAPR =
-      (parseEther(String(usdcDepositAPR)) * ratio) / WEI_PER_ETHER -
-      (usdc.floatingBorrowRate * (ratio - WEI_PER_ETHER)) / WEI_PER_ETHER;
+      (parseEther(String(usdcDepositAPR)) * ratio) / WAD - (usdc.floatingBorrowRate * (ratio - WAD)) / WAD;
 
     const collateralRewardsAPR =
-      rates['USDC']?.map((r) => (r.floatingDeposit * ratio) / WEI_PER_ETHER).reduce((acc, curr) => acc + curr, 0n) ??
-      0n;
+      rates['USDC']?.map((r) => (r.floatingDeposit * ratio) / WAD).reduce((acc, curr) => acc + curr, 0n) ?? 0n;
 
     const borrowRewardsAPR =
-      rates['USDC']
-        ?.map((r) => (r.borrow * (ratio - WEI_PER_ETHER)) / WEI_PER_ETHER)
-        .reduce((acc, curr) => acc + curr, 0n) ?? 0n;
+      rates['USDC']?.map((r) => (r.borrow * (ratio - WAD)) / WAD).reduce((acc, curr) => acc + curr, 0n) ?? 0n;
 
     return toPercentage(Number(marketAPR + collateralRewardsAPR + borrowRewardsAPR) / 1e18);
   }, [getMarketAccount, rates, usdcDepositAPR]);

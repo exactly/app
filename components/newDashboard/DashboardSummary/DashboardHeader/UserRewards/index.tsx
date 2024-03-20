@@ -3,11 +3,12 @@ import { formatUnits } from 'viem';
 import { Box, Button, Skeleton, Typography, useMediaQuery, useTheme } from '@mui/material';
 import StarsIcon from '@mui/icons-material/Stars';
 import Link from 'next/link';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+
 import formatNumber from 'utils/formatNumber';
 import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
 import useRewards from 'hooks/useRewards';
-import { WEI_PER_ETHER } from 'utils/const';
 import useAccountData from 'hooks/useAccountData';
 import useRouter from 'hooks/useRouter';
 import { track } from 'utils/mixpanel';
@@ -63,15 +64,13 @@ const UserRewards = () => {
       }, {});
 
     return Object.entries(rs).map(([assetSymbol, { amount }]) => {
-      const _amountInUSD = ratesPerAsset[assetSymbol]
-        ? (amount * ratesPerAsset[assetSymbol]) / WEI_PER_ETHER
-        : undefined;
+      const _amountInUSD = ratesPerAsset[assetSymbol] ? (amount * ratesPerAsset[assetSymbol]) / WAD : undefined;
 
       return {
         assetSymbol,
         amount: formatNumber(formatUnits(amount, 18)),
         amountInUSD: _amountInUSD
-          ? formatNumber(formatUnits(_amountInUSD, 18), _amountInUSD < WEI_PER_ETHER ? 'USD' : 'noDecimals')
+          ? formatNumber(formatUnits(_amountInUSD, 18), _amountInUSD < WAD ? 'USD' : 'noDecimals')
           : undefined,
       };
     });

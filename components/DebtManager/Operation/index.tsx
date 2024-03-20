@@ -6,6 +6,7 @@ import { usePublicClient, useSignTypedData } from 'wagmi';
 import dayjs from 'dayjs';
 import { formatUnits, Hex, isAddress, parseUnits, parseEther, trim, pad } from 'viem';
 import { splitSignature } from '@ethersproject/bytes';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 import { ModalBox, ModalBoxRow } from 'components/common/modal/ModalBox';
 import ModalAdvancedSettings from 'components/common/modal/ModalAdvancedSettings';
@@ -31,7 +32,6 @@ import handleOperationError from 'utils/handleOperationError';
 import ModalAlert from 'components/common/modal/ModalAlert';
 import useRewards from 'hooks/useRewards';
 import LoadingTransaction from 'components/common/modal/Loading';
-import { WEI_PER_ETHER } from 'utils/const';
 import OperationSquare from 'components/common/OperationSquare';
 import Submit from '../Submit';
 import useIsContract from 'hooks/useIsContract';
@@ -196,8 +196,8 @@ function Operation() {
 
         const rewards = rates[assetSymbol];
         const fixedOptions: PositionTableRow[] = previewPools.map(({ maturity, assets }) => {
-          const rate = (assets * WEI_PER_ETHER) / initialAssets;
-          const fixedAPR = ((rate - WEI_PER_ETHER) * 31_536_000n) / (maturity - currentTimestamp);
+          const rate = (assets * WAD) / initialAssets;
+          const fixedAPR = ((rate - WAD) * 31_536_000n) / (maturity - currentTimestamp);
           const fee = assets - initialAssets;
 
           return {
@@ -252,7 +252,7 @@ function Operation() {
     }
 
     return formatNumber(
-      formatUnits((((row.balance * row.usdPrice) / WEI_PER_ETHER) * BigInt(input.percent)) / 100n || 0n, row.decimals),
+      formatUnits((((row.balance * row.usdPrice) / WAD) * BigInt(input.percent)) / 100n || 0n, row.decimals),
       'USD',
       true,
     );
@@ -268,7 +268,7 @@ function Operation() {
 
   const [maxRepayAssets, maxBorrowAssets] = useMemo(() => {
     const raw = input.slippage || '0';
-    const slippage = WEI_PER_ETHER + parseEther(raw) / 100n;
+    const slippage = WAD + parseEther(raw) / 100n;
 
     if (!fromRow || !toRow) {
       return [0n, 0n];
@@ -277,7 +277,7 @@ function Operation() {
     const fromBalance = fromRow.balance ? (fromRow.balance * BigInt(input.percent)) / 100n : 0n;
     const toBalance = toRow.balance ? toRow.balance : fromBalance;
 
-    return [(fromBalance * slippage) / WEI_PER_ETHER, (toBalance * slippage) / WEI_PER_ETHER];
+    return [(fromBalance * slippage) / WAD, (toBalance * slippage) / WAD];
   }, [input.slippage, input.percent, fromRow, toRow]);
 
   const [requiresApproval, setRequiresApproval] = useState(false);
@@ -287,7 +287,7 @@ function Operation() {
       return;
     }
 
-    const percentage = (BigInt(input.percent) * WEI_PER_ETHER) / 100n;
+    const percentage = (BigInt(input.percent) * WAD) / 100n;
 
     if (await isContract(walletAddress)) {
       if (input.from.maturity && input.to.maturity) {

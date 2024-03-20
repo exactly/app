@@ -2,12 +2,12 @@ import React, { useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { Typography, Box, useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 import useUtilizationRate, { useCurrentUtilizationRate } from 'hooks/useUtilizationRate';
 import LoadingChart from '../LoadingChart';
 import { formatEther } from 'viem';
 import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
-import { WEI_PER_ETHER } from 'utils/const';
 import { useFloatingBalances } from 'hooks/useFloatingBalances';
 import { useFixedBalances } from 'hooks/useFixedBalances';
 
@@ -45,7 +45,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
       floatingDeposits !== undefined &&
       fixedDeposits !== undefined &&
       floatingDeposits + fixedDeposits > 0n
-        ? Number(((floatingBorrows + backupBorrows) * WEI_PER_ETHER) / (floatingDeposits + fixedDeposits)) / 1e18
+        ? Number(((floatingBorrows + backupBorrows) * WAD) / (floatingDeposits + fixedDeposits)) / 1e18
         : 0;
 
     return globalUti;

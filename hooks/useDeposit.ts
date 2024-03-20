@@ -1,3 +1,5 @@
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+
 import { useOperationContext } from 'contexts/OperationContext';
 import useAccountData from 'hooks/useAccountData';
 import useApprove from 'hooks/useApprove';
@@ -13,7 +15,6 @@ import { formatUnits, parseUnits } from 'viem';
 import waitForTransaction from 'utils/waitForTransaction';
 import { gasLimit } from 'utils/gas';
 import { track } from 'utils/mixpanel';
-import { WEI_PER_ETHER } from 'utils/const';
 
 type Deposit = {
   deposit: () => void;
@@ -144,7 +145,7 @@ export default (): Deposit => {
           hash,
           symbol,
           amount: qty,
-          usdAmount: formatUnits((amount * marketAccount.usdPrice) / WEI_PER_ETHER, marketAccount.decimals),
+          usdAmount: formatUnits((amount * marketAccount.usdPrice) / WAD, marketAccount.decimals),
         });
       } else {
         const args = [amount, walletAddress] as const;
@@ -159,7 +160,7 @@ export default (): Deposit => {
           method: 'deposit',
           symbol,
           amount: qty,
-          usdAmount: formatUnits((amount * marketAccount.usdPrice) / WEI_PER_ETHER, marketAccount.decimals),
+          usdAmount: formatUnits((amount * marketAccount.usdPrice) / WAD, marketAccount.decimals),
           hash,
         });
       }
@@ -172,7 +173,7 @@ export default (): Deposit => {
         method: 'deposit',
         symbol,
         amount: qty,
-        usdAmount: formatUnits((amount * marketAccount.usdPrice) / WEI_PER_ETHER, marketAccount.decimals),
+        usdAmount: formatUnits((amount * marketAccount.usdPrice) / WAD, marketAccount.decimals),
         status,
         hash: transactionHash,
       });

@@ -1,5 +1,5 @@
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 import { useExtraFinanceLendingGetReserveStatus } from 'types/abi';
-import { WAD } from 'utils/queryRates';
 import { aprToAPY, toPercentage } from 'utils/utils';
 import { optimism } from 'wagmi/chains';
 

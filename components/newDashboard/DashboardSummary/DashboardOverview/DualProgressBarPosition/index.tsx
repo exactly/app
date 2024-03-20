@@ -3,8 +3,8 @@ import DualProgressBar from 'components/common/DualProgressBar';
 import { Box, Typography } from '@mui/material';
 import formatNumber from 'utils/formatNumber';
 import { useTranslation } from 'react-i18next';
-import { WEI_PER_ETHER } from 'utils/const';
 import { formatUnits } from 'viem';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 export type AssetPosition = {
   symbol: string;
@@ -31,8 +31,7 @@ const DualProgressBarPosition: FC<AssetPosition> = ({
     () =>
       totalValueUSD === 0n
         ? 0
-        : Number(((((fixedValueUSD * WEI_PER_ETHER) / totalValueUSD) * percentageOfTotal) / WEI_PER_ETHER) * 100n) /
-          1e18,
+        : Number(((((fixedValueUSD * WAD) / totalValueUSD) * percentageOfTotal) / WAD) * 100n) / 1e18,
     [fixedValueUSD, percentageOfTotal, totalValueUSD],
   );
 
@@ -40,8 +39,7 @@ const DualProgressBarPosition: FC<AssetPosition> = ({
     () =>
       totalValueUSD === 0n
         ? 0
-        : Number(((((floatingValueUSD * WEI_PER_ETHER) / totalValueUSD) * percentageOfTotal) / WEI_PER_ETHER) * 100n) /
-          1e18,
+        : Number(((((floatingValueUSD * WAD) / totalValueUSD) * percentageOfTotal) / WAD) * 100n) / 1e18,
     [floatingValueUSD, percentageOfTotal, totalValueUSD],
   );
 

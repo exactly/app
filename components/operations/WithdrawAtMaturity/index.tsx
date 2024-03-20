@@ -1,4 +1,5 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 import ModalTxCost from 'components/OperationsModal/ModalTxCost';
 import ModalGif from 'components/OperationsModal/ModalGif';
@@ -26,7 +27,6 @@ import ModalInfoMaturityStatus from 'components/OperationsModal/Info/ModalInfoMa
 import useHandleOperationError from 'hooks/useHandleOperationError';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
-import { WEI_PER_ETHER } from 'utils/const';
 import useEstimateGas from 'hooks/useEstimateGas';
 import { formatUnits, parseUnits, zeroAddress } from 'viem';
 import waitForTransaction from 'utils/waitForTransaction';
@@ -121,7 +121,7 @@ const WithdrawAtMaturity: FC = () => {
 
     setErrorData(undefined);
     setAmountToWithdraw(amount);
-    setMinAmountToWithdraw(isEarlyWithdraw ? (amount * slippage) / WEI_PER_ETHER : amount);
+    setMinAmountToWithdraw(isEarlyWithdraw ? (amount * slippage) / WAD : amount);
   }, [
     setErrorData,
     marketAccount,

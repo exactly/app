@@ -1,6 +1,8 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { CircularProgress, Tooltip, Typography } from '@mui/material';
 import { useNetwork } from 'wagmi';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+
 import waitForTransaction from 'utils/waitForTransaction';
 
 import StyledSwitch from 'components/Switch';
@@ -11,7 +13,6 @@ import useHealthFactor from 'hooks/useHealthFactor';
 import useAccountData from 'hooks/useAccountData';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useTranslation } from 'react-i18next';
-import { WEI_PER_ETHER } from 'utils/const';
 import { track } from 'utils/mixpanel';
 
 type Props = {
@@ -56,7 +57,7 @@ function SwitchCollateral({ symbol }: Props) {
 
     const collateralUsd = (floatingDepositAssets * usdPrice) / 10n ** BigInt(marketAccount.decimals);
     const newHF = parseFloat(
-      parseHealthFactor(healthFactor.debt, healthFactor.collateral - (collateralUsd * adjustFactor) / WEI_PER_ETHER),
+      parseHealthFactor(healthFactor.debt, healthFactor.collateral - (collateralUsd * adjustFactor) / WAD),
     );
 
     if (isCollateral && newHF < 1) {

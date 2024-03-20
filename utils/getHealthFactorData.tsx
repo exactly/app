@@ -1,9 +1,9 @@
 import { MarketAccount } from 'hooks/useAccountData';
 import { parseUnits } from 'viem';
 import dayjs from 'dayjs';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 import { HealthFactor } from 'types/HealthFactor';
-import { WEI_PER_ETHER } from './const';
 
 function getHealthFactorData(accountData: readonly MarketAccount[]): HealthFactor {
   let collateral = 0n;
@@ -26,7 +26,7 @@ function getHealthFactorData(accountData: readonly MarketAccount[]): HealthFacto
         fixedLenderCollateral = fixedLenderCollateral + (assets * oracle) / decimalWAD;
       }
 
-      collateral = collateral + (fixedLenderCollateral * adjustFactor) / WEI_PER_ETHER;
+      collateral = collateral + (fixedLenderCollateral * adjustFactor) / WAD;
 
       //Floating Debt
       if (fixedLender.floatingBorrowAssets) {
@@ -48,13 +48,13 @@ function getHealthFactorData(accountData: readonly MarketAccount[]): HealthFacto
         fixedLenderDebt =
           fixedLenderDebt +
           ((currentTimestamp > maturityTimestamp
-            ? position + (position * ((currentTimestamp - maturityTimestamp) * penaltyRate)) / WEI_PER_ETHER
+            ? position + (position * ((currentTimestamp - maturityTimestamp) * penaltyRate)) / WAD
             : position) *
             oracle) /
             decimalWAD;
       });
 
-      debt = debt + (fixedLenderDebt * WEI_PER_ETHER) / adjustFactor;
+      debt = debt + (fixedLenderDebt * WAD) / adjustFactor;
     });
 
     return { collateral, debt };

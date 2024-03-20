@@ -1,5 +1,5 @@
 import { formatUnits } from 'viem';
-import { WEI_PER_ETHER } from './const';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 function parseHealthFactor(debt: bigint, collateral: bigint) {
   //TODO => check case when the user doesn't have any collateral or debt
@@ -7,7 +7,7 @@ function parseHealthFactor(debt: bigint, collateral: bigint) {
   if (collateral === 0n && debt === 0n) {
     return '∞';
   } else if (debt !== 0n) {
-    const healthFactor = (collateral * WEI_PER_ETHER) / debt;
+    const healthFactor = (collateral * WAD) / debt;
 
     const formatedHealthFactor = Number(formatUnits(healthFactor, 18));
 

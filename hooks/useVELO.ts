@@ -6,7 +6,7 @@ import { useEXAGaugeBalanceOf, useEXAGaugeRewardRate } from './useEXAGauge';
 import { useEXAPoolGetReserves, useEXAPoolTotalSupply } from './useEXAPool';
 import { parseEther } from 'viem';
 import { toPercentage } from 'utils/utils';
-import { WEI_PER_ETHER } from 'utils/const';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 import { veloABI } from 'types/abi';
 import useContract from './useContract';
@@ -36,7 +36,7 @@ export const useVELOPoolAPR = () => {
     const veloPrice = parseEther(String(asset.tokenPrice));
 
     return toPercentage(
-      Number((rewardRate * 86_400n * 365n * veloPrice) / ((2n * reserves[1] * weth.usdPrice) / WEI_PER_ETHER)) / 1e18,
+      Number((rewardRate * 86_400n * 365n * veloPrice) / ((2n * reserves[1] * weth.usdPrice) / WAD)) / 1e18,
     );
   }, [asset, weth, rewardRate, reserves]);
 
@@ -67,7 +67,7 @@ export default (): VELOAccountStatus => {
     const veloPrice = parseEther(String(asset.tokenPrice));
 
     return toPercentage(
-      Number((rewardRate * 86_400n * 365n * veloPrice) / ((2n * reserves[1] * weth.usdPrice) / WEI_PER_ETHER)) / 1e18,
+      Number((rewardRate * 86_400n * 365n * veloPrice) / ((2n * reserves[1] * weth.usdPrice) / WAD)) / 1e18,
     );
   }, [asset, weth, rewardRate, reserves]);
 
@@ -77,7 +77,7 @@ export default (): VELOAccountStatus => {
     const balanceEXA = (reserves[0] * balance) / totalSupply;
     const balanceWETH = (reserves[1] * balance) / totalSupply;
 
-    return (balanceEXA * exa + balanceWETH * weth.usdPrice) / WEI_PER_ETHER;
+    return (balanceEXA * exa + balanceWETH * weth.usdPrice) / WAD;
   }, [balance, exa, reserves, totalSupply, weth]);
 
   return {

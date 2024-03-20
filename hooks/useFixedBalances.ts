@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import useAccountData from './useAccountData';
-import { WEI_PER_ETHER } from 'utils/const';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 export function useFixedBalances(symbol: string) {
   const { marketAccount } = useAccountData(symbol);
@@ -17,8 +17,8 @@ export function useFixedBalances(symbol: string) {
       tempTotalFixedBorrowed = tempTotalFixedBorrowed + borrowed;
     });
 
-    const totalDepositedUSD = (tempTotalFixedDeposited * exchangeRate) / WEI_PER_ETHER;
-    const totalBorrowedUSD = (tempTotalFixedBorrowed * exchangeRate) / WEI_PER_ETHER;
+    const totalDepositedUSD = (tempTotalFixedDeposited * exchangeRate) / WAD;
+    const totalBorrowedUSD = (tempTotalFixedBorrowed * exchangeRate) / WAD;
 
     return { fixedDeposits: totalDepositedUSD, fixedBorrows: totalBorrowedUSD };
   }, [marketAccount]);

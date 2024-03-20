@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { formatUnits } from 'viem';
-import { WEI_PER_ETHER } from 'utils/const';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 import formatNumber from 'utils/formatNumber';
 
@@ -33,8 +33,8 @@ export default function useMaturityPools(symbol: string): TableRow[] {
     return fixedPools.map(({ maturity, borrowed, supplied }) => {
       const maturityKey = maturity.toString();
 
-      const totalDeposited = formatNumber(formatUnits((supplied * usdPrice) / WEI_PER_ETHER, decimals));
-      const totalBorrowed = formatNumber(formatUnits((borrowed * usdPrice) / WEI_PER_ETHER, decimals));
+      const totalDeposited = formatNumber(formatUnits((supplied * usdPrice) / WAD, decimals));
+      const totalBorrowed = formatNumber(formatUnits((borrowed * usdPrice) / WAD, decimals));
 
       return {
         maturity,

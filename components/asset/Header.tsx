@@ -1,5 +1,7 @@
 import React, { type FC, useMemo, useCallback, useEffect, useState } from 'react';
 import Grid from '@mui/material/Grid';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+
 import ItemInfo, { ItemInfoProps } from 'components/common/ItemInfo';
 import formatNumber from 'utils/formatNumber';
 import useAccountData from 'hooks/useAccountData';
@@ -9,7 +11,6 @@ import DropdownMenu from 'components/DropdownMenu';
 import useAssets from 'hooks/useAssets';
 import AssetOption from './AssetOption';
 import useRouter from 'hooks/useRouter';
-import { WEI_PER_ETHER } from 'utils/const';
 import { Address, formatEther, formatUnits } from 'viem';
 import useStETHNativeAPR from 'hooks/useStETHNativeAPR';
 import { toPercentage } from 'utils/utils';
@@ -71,7 +72,7 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
       fixedDeposits !== undefined &&
       floatingDeposits + fixedDeposits > 0n &&
       decimals
-        ? Number(((floatingBorrows + backupBorrows) * WEI_PER_ETHER) / (floatingDeposits + fixedDeposits)) / 1e18
+        ? Number(((floatingBorrows + backupBorrows) * WAD) / (floatingDeposits + fixedDeposits)) / 1e18
         : undefined;
 
     const items = [
@@ -153,7 +154,7 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
 
   const borrowableUtilization = useMemo(() => {
     if (!marketAccount) return;
-    return Number(WEI_PER_ETHER - marketAccount.reserveFactor) / 1e18;
+    return Number(WAD - marketAccount.reserveFactor) / 1e18;
   }, [marketAccount]);
 
   return (

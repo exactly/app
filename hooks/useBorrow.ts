@@ -1,5 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+
 import waitForTransaction from 'utils/waitForTransaction';
 
 import { useOperationContext } from 'contexts/OperationContext';
@@ -10,7 +12,6 @@ import { useWeb3 } from 'hooks/useWeb3';
 import { OperationHook } from 'types/OperationHook';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 import useHealthFactor from './useHealthFactor';
-import { WEI_PER_ETHER } from 'utils/const';
 import useEstimateGas from './useEstimateGas';
 import { parseUnits, formatUnits } from 'viem';
 import { gasLimit } from 'utils/gas';
@@ -112,20 +113,14 @@ export default (): Borrow => {
     const hasDepositedToFloatingPool = floatingDepositAssets > 0n;
 
     if (!isCollateral && hasDepositedToFloatingPool) {
-      col = col + (floatingDepositAssets * adjustFactor) / WEI_PER_ETHER;
+      col = col + (floatingDepositAssets * adjustFactor) / WAD;
     }
 
     const debt = healthFactor.debt;
 
     return Math.max(
       0,
-      Number(
-        formatUnits(
-          ((((((col - (hf * debt) / WEI_PER_ETHER) * WEI_PER_ETHER) / hf) * WEI_PER_ETHER) / usdPrice) * adjustFactor) /
-            WEI_PER_ETHER,
-          18,
-        ),
-      ),
+      Number(formatUnits(((((((col - (hf * debt) / WAD) * WAD) / hf) * WAD) / usdPrice) * adjustFactor) / WAD, 18)),
     ).toFixed(decimals);
   }, [marketAccount, healthFactor]);
 
@@ -158,7 +153,7 @@ export default (): Borrow => {
         });
       }
 
-      if (borrowLimit < (parseUnits(value || '0', decimals) * usdPrice) / WEI_PER_ETHER) {
+      if (borrowLimit < (parseUnits(value || '0', decimals) * usdPrice) / WAD) {
         return setErrorData({
           status: true,
           message: t("You can't borrow more than your borrow limit"),
@@ -177,7 +172,7 @@ export default (): Borrow => {
 
       setQty(value);
 
-      if (borrowLimit < (parseUnits(value || '0', decimals) * usdPrice) / WEI_PER_ETHER) {
+      if (borrowLimit < (parseUnits(value || '0', decimals) * usdPrice) / WAD) {
         return setErrorData({
           status: true,
           message: t("You can't borrow more than your borrow limit"),
@@ -209,7 +204,7 @@ export default (): Borrow => {
           symbol,
           hash,
           amount: qty,
-          usdAmount: formatUnits((amount * marketAccount.usdPrice) / WEI_PER_ETHER, marketAccount.decimals),
+          usdAmount: formatUnits((amount * marketAccount.usdPrice) / WAD, marketAccount.decimals),
         });
       } else {
         if (!marketContract) return;
@@ -226,7 +221,7 @@ export default (): Borrow => {
           method: 'borrow',
           symbol,
           amount: qty,
-          usdAmount: formatUnits((amount * marketAccount.usdPrice) / WEI_PER_ETHER, marketAccount.decimals),
+          usdAmount: formatUnits((amount * marketAccount.usdPrice) / WAD, marketAccount.decimals),
           hash,
         });
       }
@@ -239,7 +234,7 @@ export default (): Borrow => {
         method: 'borrow',
         symbol,
         amount: qty,
-        usdAmount: formatUnits((amount * marketAccount.usdPrice) / WEI_PER_ETHER, marketAccount.decimals),
+        usdAmount: formatUnits((amount * marketAccount.usdPrice) / WAD, marketAccount.decimals),
         status,
         hash: transactionHash,
       });
