@@ -39,7 +39,7 @@ An environment file is required to be created as `.env` in the root of the
 project with the following content
 
 ```bash
-NEXT_PUBLIC_NETWORK=5  # Network to use by default
+NEXT_PUBLIC_NETWORK=11155420  # Network to use by default
 ```
 
 A development server can be started at `http://localhost:3000` with

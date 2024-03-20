@@ -14,7 +14,7 @@ jobs:
       SENTRY_ORG: exactly
       SENTRY_PROJECT: webapp
       SENTRY_ENVIRONMENT: development
-      NEXT_PUBLIC_NETWORK: 5
+      NEXT_PUBLIC_NETWORK: 11155420
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
