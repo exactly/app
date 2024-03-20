@@ -52,7 +52,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
   }, [backupBorrows, fixedDeposits, floatingBorrows, floatingDeposits]);
 
   return (
-    <Box display="flex" flexDirection="column" width="100%" height="100%" gap={2}>
+    <Box display="flex" flexDirection="column" width="100%" height="100%">
       <Box display="flex" justifyContent="space-between">
         <Typography variant="h6" fontSize="16px">
           {type === 'floating'
@@ -60,7 +60,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
             : t('Utilization Rates (Fixed Rate Pools)')}
         </Typography>
       </Box>
-      <Box ref={ref} display="flex" alignSelf="center" width="100%" sx={{ height: 700 }}>
+      <Box ref={ref} display="flex" alignSelf="center" width="100%" sx={{ height: 500 }}>
         {loading || !data || !borrowAPR || !currentUtilization ? (
           <LoadingChart />
         ) : (
@@ -128,10 +128,12 @@ function UtilizationRateChart({ type, symbol }: Props) {
                   tickfont: { family: 'Inter, sans-serif', size: 11, color: palette.text.primary },
                 },
                 camera: {
-                  eye: { x: 1, y: -1, z: 1 },
+                  eye: { x: 1, y: -1, z: 0.7 },
                   // @ts-expect-error -- missing in types
                   projection: { type: 'orthographic' },
                 },
+                aspectmode: 'manual',
+                aspectratio: { x: 1.25, y: 1.25, z: 1.25 },
               },
               autosize: true,
               width: ref.current?.clientWidth ?? 500,
