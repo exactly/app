@@ -21,6 +21,7 @@ const config: PlaywrightTestConfig = {
     headless: true,
     actionTimeout: 0,
     baseURL: 'http://localhost:3000',
+    screenshot: 'only-on-failure',
     trace: 'on-first-retry',
   },
   projects: [
