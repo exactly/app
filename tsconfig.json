@@ -19,6 +19,7 @@
       "config/*": ["config/*"],
       "contexts/*": ["contexts/*"],
       "hooks/*": ["hooks/*"],
+      "i18n/*": ["i18n/*"],
       "pages/*": ["pages/*"],
       "queries/*": ["queries/*"],
       "styles/*": ["styles/*"],
