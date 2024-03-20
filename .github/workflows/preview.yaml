@@ -22,9 +22,9 @@ jobs:
           node-version: 20
       - uses: oven-sh/setup-bun@v1
       - run: bun install
-      - run: bun lint
+      - run: bun run lint
       - run: bun run build
-      - run: bun unimported
+      - run: bun run deps
 
   e2e:
     needs: [check]
@@ -56,7 +56,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
       - run: bun install
-      - run: bun build:e2e
+      - run: bun run build:e2e
       - run: bun playwright install chromium --with-deps
       - run: bun playwright test --project=chromium --shard ${{ matrix.shard }}
       - if: always()
