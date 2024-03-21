@@ -21,19 +21,20 @@ import { isAddress, zeroAddress } from 'viem';
 import { formatWallet } from 'utils/utils';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useDelegateRegistryClearDelegate, useDelegateRegistrySetDelegate } from 'types/abi';
-import { mainnet, useEnsAvatar, useEnsName, useNetwork, useSwitchNetwork } from 'wagmi';
+import { mainnet, useEnsAvatar, useEnsName } from 'wagmi';
 import useWaitForTransaction from 'hooks/useWaitForTransaction';
 import * as blockies from 'blockies-ts';
 import { useDelegation, usePrepareClearDelegate, usePrepareDelegate } from 'hooks/useDelegateRegistry';
 import formatNumber from 'utils/formatNumber';
 import useGovernance from 'hooks/useGovernance';
 import { track } from 'utils/mixpanel';
+import MainActionButton from 'components/common/MainActionButton';
 
 const Delegation = () => {
   const { votingPower: yourVotes } = useGovernance(false);
   const { votingPower, fetchVotingPower } = useGovernance();
   const { t } = useTranslation();
-  const { chain: displayNetwork, walletAddress, impersonateActive, exitImpersonate } = useWeb3();
+  const { walletAddress, impersonateActive, exitImpersonate } = useWeb3();
   const [open, setOpen] = useState<boolean>(false);
   const [input, setInput] = useState<string>('');
   const { data: delegate, isLoading: isLoadingDelegate, refetch: refetchDelegate } = useDelegation();
@@ -68,9 +69,6 @@ const Delegation = () => {
     name: delegateENS,
     chainId: mainnet.id,
   });
-
-  const { chain } = useNetwork();
-  const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
 
   const delegateAvatar = useMemo(() => {
     if (!delegate) return '';
@@ -173,34 +171,25 @@ const Delegation = () => {
         <Button fullWidth onClick={exitImpersonate} variant="contained">
           {t('Exit Read-Only Mode')}
         </Button>
-      ) : chain && chain.id !== displayNetwork.id ? (
-        <LoadingButton
-          variant="contained"
-          fullWidth
-          onClick={() => switchNetwork?.(displayNetwork.id)}
-          loading={switchIsLoading}
-        >
-          {t('Please switch to {{network}} network', { network: displayNetwork.name })}
-        </LoadingButton>
       ) : (
         <Box display="flex" gap={1}>
-          <LoadingButton
+          <MainActionButton
             variant="contained"
             fullWidth
-            onClick={handleDelegateClick}
+            mainAction={handleDelegateClick}
             loading={submitLoading || waitingDelegate}
           >
             {t('Delegate votes')}
-          </LoadingButton>
+          </MainActionButton>
           {delegate !== zeroAddress && (
-            <LoadingButton
+            <MainActionButton
               fullWidth
               variant="outlined"
-              onClick={writeClearDelegate}
+              mainAction={writeClearDelegate}
               loading={clearDelegateLoading || waitingClearDelegate || waitingDelegate}
             >
               {t('Revoke delegation')}
-            </LoadingButton>
+            </MainActionButton>
           )}
         </Box>
       )}

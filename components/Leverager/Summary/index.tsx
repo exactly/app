@@ -1,7 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Box, Button, Checkbox, Divider, Grid, Skeleton, Typography } from '@mui/material';
-import { LoadingButton } from '@mui/lab';
-import { useNetwork, useSwitchNetwork } from 'wagmi';
 import { ModalBox } from 'components/common/modal/ModalBox';
 import ModalAlert from 'components/common/modal/ModalAlert';
 import LoadingTransaction from 'components/common/modal/Loading';
@@ -17,12 +15,11 @@ import formatNumber from 'utils/formatNumber';
 import useAccountData from 'hooks/useAccountData';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useModal } from 'contexts/ModalContext';
+import MainActionButton from 'components/common/MainActionButton';
 
 const Summary = () => {
   const { t } = useTranslation();
-  const { chain: displayNetwork, impersonateActive, exitImpersonate } = useWeb3();
-  const { chain } = useNetwork();
-  const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
+  const { impersonateActive, exitImpersonate } = useWeb3();
 
   const {
     input,
@@ -246,19 +243,10 @@ const Summary = () => {
               <Button fullWidth onClick={exitAndClose} variant="contained">
                 {t('Exit Read-Only Mode')}
               </Button>
-            ) : chain?.id !== displayNetwork.id ? (
-              <LoadingButton
-                fullWidth
-                onClick={() => switchNetwork?.(displayNetwork.id)}
-                variant="contained"
-                loading={switchIsLoading}
-              >
-                {t('Please switch to {{network}} network', { network: displayNetwork.name })}
-              </LoadingButton>
             ) : (
-              <LoadingButton
+              <MainActionButton
                 loading={isLoading || summaryLoading}
-                onClick={requiresApproval ? approveLeverage : submit}
+                mainAction={requiresApproval ? approveLeverage : submit}
                 fullWidth
                 variant="contained"
                 disabled={disabledConfirm || summaryLoading}
@@ -269,7 +257,7 @@ const Summary = () => {
                   : input.secondaryOperation === 'deposit'
                     ? t('Confirm Leverage')
                     : t('Confirm Deleverage')}
-              </LoadingButton>
+              </MainActionButton>
             )}
           </Grid>
         </Grid>

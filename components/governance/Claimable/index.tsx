@@ -1,12 +1,12 @@
 import React, { FC, useCallback, useMemo } from 'react';
 import { Hex, formatEther, parseEther } from 'viem';
 import Image from 'next/image';
-import { useNetwork, useSwitchNetwork } from 'wagmi';
 import useWaitForTransaction from 'hooks/useWaitForTransaction';
 import { Box, Button, Divider, Skeleton, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { LoadingButton } from '@mui/lab';
 import { usePrepareAirdropClaim, useAirdropClaimed, useAirdropStreams } from 'hooks/useAirdrop';
+import MainActionButton from 'components/common/MainActionButton';
 import { useWeb3 } from 'hooks/useWeb3';
 import {
   useSablierV2LockupLinearWithdrawableAmountOf,
@@ -24,13 +24,10 @@ type ClaimableProps = {
 
 const Claimable: FC<ClaimableProps> = ({ amount, proof }) => {
   const { t } = useTranslation();
-  const { chain: displayNetwork, impersonateActive, exitImpersonate } = useWeb3();
+  const { impersonateActive, exitImpersonate } = useWeb3();
   const parsedAmount = useMemo(() => (amount ? formatNumber(formatEther(amount)) : '0'), [amount]);
 
   const { data: claimed, isLoading: isLoadingClaimed, refetch } = useAirdropClaimed();
-
-  const { chain } = useNetwork();
-  const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
 
   return (
     <Box display="flex" flexDirection="column" gap={4}>
@@ -58,15 +55,6 @@ const Claimable: FC<ClaimableProps> = ({ amount, proof }) => {
         <Button fullWidth onClick={exitImpersonate} variant="contained">
           {t('Exit Read-Only Mode')}
         </Button>
-      ) : chain && chain.id !== displayNetwork.id ? (
-        <LoadingButton
-          variant="contained"
-          fullWidth
-          onClick={() => switchNetwork?.(displayNetwork.id)}
-          loading={switchIsLoading}
-        >
-          {t('Please switch to {{network}} network', { network: displayNetwork.name })}
-        </LoadingButton>
       ) : claimed ? (
         <NFT />
       ) : (
@@ -97,15 +85,15 @@ const Claim: FC<ClaimableProps & { refresh: () => void }> = ({ amount, proof, re
   }, [amount, claim]);
 
   return (
-    <LoadingButton
+    <MainActionButton
       variant="contained"
       fullWidth
-      onClick={handleClick}
+      mainAction={handleClick}
       disabled={claimLoading || waitingClaim}
       loading={claimLoading || waitingClaim}
     >
       {t('Claim EXA Stream')}
-    </LoadingButton>
+    </MainActionButton>
   );
 };
 

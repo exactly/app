@@ -21,18 +21,17 @@ import {
 import React, { FC, useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import waitForTransaction from 'utils/waitForTransaction';
-import { LoadingButton } from '@mui/lab';
 import Image from 'next/image';
 import formatNumber from 'utils/formatNumber';
 import { toPercentage } from 'utils/utils';
 import { useWeb3 } from 'hooks/useWeb3';
-import { useNetwork, useSwitchNetwork } from 'wagmi';
 import { useEscrowedEXA, useEscrowedEXAReserves } from 'hooks/useEscrowedEXA';
 import { useSablierV2LockupLinearWithdrawableAmountOf, useSablierV2NftDescriptorTokenUri } from 'hooks/useSablier';
 import Draggable from 'react-draggable';
 import CloseIcon from '@mui/icons-material/Close';
 import { TransitionProps } from '@mui/material/transitions';
 import { track } from 'utils/mixpanel';
+import MainActionButton from 'components/common/MainActionButton';
 
 const StyledLinearProgress = styled(LinearProgress, {
   shouldForwardProp: (prop) => prop !== 'barColor',
@@ -174,9 +173,7 @@ const WithdrawAndCancel: React.FC<{
   loading: boolean;
 }> = ({ tokenId, open, onClose, cancel, loading }) => {
   const { spacing } = useTheme();
-  const { chain } = useNetwork();
-  const { impersonateActive, chain: displayNetwork } = useWeb3();
-  const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
+  const { impersonateActive } = useWeb3();
   const { t } = useTranslation();
 
   const { breakpoints } = useTheme();
@@ -251,26 +248,17 @@ const WithdrawAndCancel: React.FC<{
               <Button fullWidth variant="contained">
                 {t('Exit Read-Only Mode')}
               </Button>
-            ) : chain && chain.id !== displayNetwork.id ? (
-              <LoadingButton
-                fullWidth
-                onClick={() => switchNetwork?.(displayNetwork.id)}
-                variant="contained"
-                loading={switchIsLoading}
-              >
-                {t('Please switch to {{network}} network', { network: displayNetwork.name })}
-              </LoadingButton>
             ) : (
-              <LoadingButton
+              <MainActionButton
                 fullWidth
                 variant="contained"
                 color="error"
-                onClick={cancel}
+                mainAction={cancel}
                 loading={loading}
                 data-testid={`vesting-stream-${tokenId}-cancel-submit`}
               >
                 {t('Withdraw and Cancel Stream')}
-              </LoadingButton>
+              </MainActionButton>
             )}
           </Box>
         </DialogContent>
@@ -299,9 +287,7 @@ const ActiveStream: FC<ActiveStreamProps> = ({
   refetch,
 }) => {
   const { t } = useTranslation();
-  const { impersonateActive, chain: displayNetwork, opts } = useWeb3();
-  const { chain } = useNetwork();
-  const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
+  const { impersonateActive, opts } = useWeb3();
   const { data: reserve, isLoading: reserveIsLoading } = useEscrowedEXAReserves(BigInt(tokenId));
   const { data: withdrawable, isLoading: withdrawableIsLoading } = useSablierV2LockupLinearWithdrawableAmountOf(
     BigInt(tokenId),
@@ -522,26 +508,17 @@ const ActiveStream: FC<ActiveStreamProps> = ({
             <Button fullWidth variant="contained">
               {t('Exit Read-Only Mode')}
             </Button>
-          ) : chain && chain.id !== displayNetwork.id ? (
-            <LoadingButton
-              fullWidth
-              onClick={() => switchNetwork?.(displayNetwork.id)}
-              variant="contained"
-              loading={switchIsLoading}
-            >
-              {t('Please switch to {{network}} network', { network: displayNetwork.name })}
-            </LoadingButton>
           ) : (
             <>
-              <LoadingButton
+              <MainActionButton
                 fullWidth
                 variant="contained"
-                onClick={handleWithdrawClick}
+                mainAction={handleWithdrawClick}
                 loading={loading}
                 data-testid={`vesting-stream-${tokenId}-claim`}
               >
                 {t('Claim EXA')}
-              </LoadingButton>
+              </MainActionButton>
             </>
           )}
         </Box>

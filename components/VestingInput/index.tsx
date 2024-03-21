@@ -28,9 +28,9 @@ import { ModalBox } from 'components/common/modal/ModalBox';
 
 import ModalInput from 'components/OperationsModal/ModalInput';
 import { useWeb3 } from 'hooks/useWeb3';
-import { useNetwork, useSignTypedData, useSwitchNetwork } from 'wagmi';
+import { useSignTypedData } from 'wagmi';
 import { useTranslation, Trans } from 'react-i18next';
-import { LoadingButton } from '@mui/lab';
+import MainActionButton from 'components/common/MainActionButton';
 import Image from 'next/image';
 import { useEXA, useEXABalance, useEXAPrice } from 'hooks/useEXA';
 import {
@@ -146,7 +146,6 @@ type Props = {
 function VestingInput({ refetch }: Props) {
   const { t } = useTranslation();
 
-  const { chain } = useNetwork();
   const exa = useEXA();
   const escrowedEXA = useEscrowedEXA();
   const { data: balance, isLoading: balanceIsLoading } = useEscrowedEXABalance();
@@ -155,7 +154,6 @@ function VestingInput({ refetch }: Props) {
   const { data: vestingPeriod } = useEscrowedEXAVestingPeriod();
   const EXAPrice = useEXAPrice();
   const { impersonateActive, chain: displayNetwork, isConnected, opts, walletAddress } = useWeb3();
-  const { isLoading: switchIsLoading, switchNetwork } = useSwitchNetwork();
   const isContract = useIsContract();
   const { signTypedDataAsync } = useSignTypedData();
   const [isLoading, setIsLoading] = useState(false);
@@ -465,28 +463,12 @@ function VestingInput({ refetch }: Props) {
           >
             {t('Exit Read-Only Mode')}
           </Button>
-        ) : displayNetwork.id !== chain?.id ? (
-          <LoadingButton
-            fullWidth
-            variant="contained"
-            loading={switchIsLoading}
-            onClick={() => {
-              switchNetwork?.(displayNetwork.id);
-              track('Button Clicked', {
-                location: 'Vesting',
-                name: 'switch network',
-                value: displayNetwork.name,
-              });
-            }}
-          >
-            {t('Please switch to {{network}} network', { network: displayNetwork.name })}
-          </LoadingButton>
         ) : (
-          <LoadingButton
+          <MainActionButton
             fullWidth
             variant="contained"
             loading={isLoading}
-            onClick={() => {
+            mainAction={() => {
               submit();
               track('Button Clicked', {
                 location: 'Vesting',
@@ -499,7 +481,7 @@ function VestingInput({ refetch }: Props) {
             disabled={insufficientFunds}
           >
             {insufficientFunds && parseEther(qty) > 0n ? t('Insufficient esEXA balance') : t('Vest esEXA')}
-          </LoadingButton>
+          </MainActionButton>
         )}
       </Box>
     </Box>

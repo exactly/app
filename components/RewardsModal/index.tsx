@@ -34,12 +34,11 @@ import { Transaction } from 'types/Transaction';
 import Loading from 'components/common/modal/Loading';
 import useRewards from 'hooks/useRewards';
 import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
-import { LoadingButton } from '@mui/lab';
 import { useWeb3 } from 'hooks/useWeb3';
-import { useNetwork, useSwitchNetwork } from 'wagmi';
 import RewardsTooltip from 'components/RewardsTooltip';
 import { useModal } from 'contexts/ModalContext';
 import { track } from 'utils/mixpanel';
+import MainActionButton from 'components/common/MainActionButton';
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
@@ -69,9 +68,7 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, close }) => {
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
 
-  const { walletAddress, chain: displayNetwork, impersonateActive, exitImpersonate } = useWeb3();
-  const { chain } = useNetwork();
-  const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
+  const { walletAddress, impersonateActive, exitImpersonate } = useWeb3();
 
   const { rewards: rs, claim } = useRewards();
 
@@ -292,26 +289,17 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, close }) => {
                   <Button fullWidth onClick={exitAndClose} variant="contained">
                     {t('Exit Read-Only Mode')}
                   </Button>
-                ) : chain && chain.id !== displayNetwork.id ? (
-                  <LoadingButton
-                    fullWidth
-                    onClick={() => switchNetwork?.(displayNetwork.id)}
-                    variant="contained"
-                    loading={switchIsLoading}
-                  >
-                    {t('Please switch to {{network}} network', { network: displayNetwork.name })}
-                  </LoadingButton>
                 ) : (
                   <>
-                    <LoadingButton
+                    <MainActionButton
                       fullWidth
                       variant="contained"
                       disabled={disableSubmit}
-                      onClick={submit}
+                      mainAction={submit}
                       loading={loading}
                     >
                       {showInput ? `${t('Claim to')} ${differentAddress}` : t('Claim to connected wallet')}
-                    </LoadingButton>
+                    </MainActionButton>
                     <ButtonBase onClick={handleSecondaryClaim} disableRipple>
                       <Typography fontSize={12} color="grey.500" sx={{ cursor: 'pointer' }}>
                         {t('or')}{' '}
