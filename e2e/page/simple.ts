@@ -48,7 +48,7 @@ export default function (page: Page) {
         );
       },
       null,
-      { timeout: 30_000, polling: 1_000 },
+      { polling: 1_000 },
     );
   };
 
