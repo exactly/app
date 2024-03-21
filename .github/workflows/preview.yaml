@@ -39,7 +39,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [1/4, 2/4, 3/4, 4/4]
+        shardIndex: [1, 2, 3, 4]
+        shardTotal: [4]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -56,17 +57,17 @@ jobs:
       - run: bun install
       - run: bun run build:e2e
       - run: bun playwright install chromium --with-deps
-      - run: bun playwright test --project=chromium --shard ${{ matrix.shard }}
-      - if: always()
-        uses: actions/upload-artifact@v3
+      - run: bun playwright test --project=chromium --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+      - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: blob-reports
+          name: blob-report-${{ matrix.shardIndex }}
           path: blob-report
           retention-days: 1
 
   e2e-report:
     needs: [e2e]
-    if: ${{ !github.event.pull_request.draft }}
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -75,12 +76,13 @@ jobs:
           node-version: 20
       - uses: oven-sh/setup-bun@v1
       - run: bun install
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
-          name: blob-reports
-          path: blob-reports
-      - run: bun playwright merge-reports --reporter html ./blob-reports
-      - uses: actions/upload-artifact@v3
+          path: all-blob-reports
+          pattern: blob-report-*
+          merge-multiple: true
+      - run: bun playwright merge-reports --reporter html ./all-blob-reports
+      - uses: actions/upload-artifact@v4
         with:
           name: html-report
           path: playwright-report
@@ -91,7 +93,7 @@ jobs:
     if: ${{ always() && needs.e2e-report.result == 'success' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: html-report
           path: html-report
