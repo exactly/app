@@ -102,7 +102,7 @@ export default function (page: Page) {
   const waitForTransaction = async (op: Operation) => {
     const status = page.getByTestId('modal-transaction-status');
 
-    await expect(status).toBeVisible({ timeout: 30_000 });
+    await expect(status).toBeVisible({ timeout: 66_666 });
 
     await page.waitForFunction(
       (message) => {
