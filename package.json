@@ -14,8 +14,10 @@
     "start:e2e": "bun run build:e2e && NODE_ENV=production next start",
     "export": "NODE_ENV=production next export",
     "prepare": "wagmi generate",
-    "lint": "eslint --max-warnings=0 .",
-    "deps": "knip --include dependencies,binaries,unresolved,files",
+    "check": "concurrently 'npm:check:*' --group -c auto",
+    "check:build": "next build --no-mangling",
+    "check:lint": "eslint --max-warnings=0 .",
+    "check:deps": "knip --include dependencies,binaries,unresolved,files",
     "i18n:scan": "i18next-scanner --config i18next-scanner.config.cjs"
   },
   "engines": {

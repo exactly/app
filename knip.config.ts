@@ -2,7 +2,7 @@ import type { KnipConfig } from 'knip';
 
 const config: KnipConfig = {
   project: ['**/*.{ts,tsx,js,jsx,json}'],
-  ignoreDependencies: ['@sentry/cli', 'concurrently', 'sharp', 'ts-node'],
+  ignoreDependencies: ['@sentry/cli', 'sharp', 'ts-node'],
   entry: ['wagmi.config.ts'],
 };
 

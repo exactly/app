@@ -22,9 +22,7 @@ jobs:
           node-version: 20
       - uses: oven-sh/setup-bun@v1
       - run: bun install
-      - run: bun run lint
-      - run: bun run build
-      - run: bun run deps
+      - run: bun run check
 
   e2e:
     needs: [check]

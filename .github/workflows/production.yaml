@@ -20,9 +20,7 @@ jobs:
           node-version: 20
       - uses: oven-sh/setup-bun@v1
       - run: bun install
-      - run: bun run lint
       - run: bun run build
-      - run: bun run deps
       - uses: getsentry/action-release@v1
         with:
           environment: ${{ env.SENTRY_ENVIRONMENT }}
