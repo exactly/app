@@ -3,7 +3,6 @@ import { Page, expect } from '@playwright/test';
 export default function (page: Page) {
   const waitForPageToBeReady = async () => {
     await page.waitForFunction(() => document.querySelectorAll('.MuiSkeleton-root').length === 0, null, {
-      timeout: 30_000,
       polling: 1_000,
     });
   };
@@ -37,10 +36,7 @@ export default function (page: Page) {
         return !button.classList.contains('MuiLoadingButton-loading');
       },
       null,
-      {
-        timeout: 30_000,
-        polling: 1_000,
-      },
+      { polling: 1_000 },
     );
   };
 
@@ -55,7 +51,7 @@ export default function (page: Page) {
     await expect(modal).toBeVisible();
 
     const status = page.getByTestId('transaction-status');
-    await expect(status).toBeVisible({ timeout: 30_000 });
+    await expect(status).toBeVisible();
 
     await page.waitForFunction(
       (message) => {
@@ -64,7 +60,7 @@ export default function (page: Page) {
         return text.textContent !== message;
       },
       'Processing transaction...',
-      { timeout: 30_000, polling: 1_000 },
+      { polling: 1_000 },
     );
   };
 
@@ -116,10 +112,7 @@ export default function (page: Page) {
         return !button.classList.contains('MuiLoadingButton-loading');
       },
       streamId,
-      {
-        timeout: 30_000,
-        polling: 1_000,
-      },
+      { polling: 1_000 },
     );
   };
 
@@ -137,10 +130,7 @@ export default function (page: Page) {
         return !button.classList.contains('MuiLoadingButton-loading');
       },
       null,
-      {
-        timeout: 30_000,
-        polling: 1_000,
-      },
+      { polling: 1_000 },
     );
   };
 
@@ -162,10 +152,7 @@ export default function (page: Page) {
         return !button.classList.contains('MuiLoadingButton-loading');
       },
       streamId,
-      {
-        timeout: 30_000,
-        polling: 1_000,
-      },
+      { polling: 1_000 },
     );
   };
 

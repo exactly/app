@@ -19,10 +19,7 @@ export default function (page: Page) {
         });
       },
       null,
-      {
-        timeout: 30_000,
-        polling: 1_000,
-      },
+      { polling: 1_000 },
     );
   };
 
@@ -59,7 +56,7 @@ export default function (page: Page) {
 
   const waitForApprove = async () => {
     const approve = page.getByTestId('modal-approve');
-    await expect(approve).toBeVisible({ timeout: 30_000 });
+    await expect(approve).toBeVisible();
 
     await page.waitForFunction(
       () => {
@@ -68,7 +65,7 @@ export default function (page: Page) {
         return !button.classList.contains('MuiLoadingButton-loading');
       },
       null,
-      { timeout: 30_000, polling: 1_000 },
+      { polling: 1_000 },
     );
   };
 
@@ -87,7 +84,7 @@ export default function (page: Page) {
         return !button.classList.contains('MuiLoadingButton-loading');
       },
       null,
-      { timeout: 30_000, polling: 1_000 },
+      { polling: 1_000 },
     );
   };
 
@@ -102,7 +99,7 @@ export default function (page: Page) {
   const waitForTransaction = async (op: Operation) => {
     const status = page.getByTestId('modal-transaction-status');
 
-    await expect(status).toBeVisible({ timeout: 66_666 });
+    await expect(status).toBeVisible();
 
     await page.waitForFunction(
       (message) => {
@@ -111,7 +108,7 @@ export default function (page: Page) {
         return text.textContent !== message;
       },
       `Sending ${op}...`,
-      { timeout: 30_000, polling: 1_000 },
+      { polling: 1_000 },
     );
   };
 

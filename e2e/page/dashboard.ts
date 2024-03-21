@@ -71,7 +71,7 @@ export default function (page: Page) {
     await page.waitForFunction(
       (selector) => document.querySelector(selector) === null,
       `[data-testid="switch-collateral-${symbol}-loading"]`,
-      { timeout: 66_666, polling: 1_000 },
+      { polling: 1_000 },
     );
   };
 
