@@ -15,7 +15,7 @@ import { Address, formatEther, formatUnits } from 'viem';
 import useStETHNativeAPR from 'hooks/useStETHNativeAPR';
 import { toPercentage } from 'utils/utils';
 import { track } from 'utils/mixpanel';
-import { Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import getSymbolDescription from 'utils/getSymbolDescription';
 import useContractAddress from 'hooks/useContractAddress';
 import { useWeb3 } from 'hooks/useWeb3';
@@ -92,7 +92,7 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
             : undefined,
       },
       {
-        label: t('Available for Withdrawal'),
+        label: t('Available'),
         value:
           floatingBorrows !== undefined &&
           fixedBorrows !== undefined &&
@@ -103,7 +103,22 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
                 formatUnits(floatingDeposits + fixedDeposits - (floatingBorrows + fixedBorrows), decimals),
               )}`
             : undefined,
-        sx: { textAlign: 'center' },
+        tooltipTitle: (
+          <Box display="flex" flexDirection="column" gap={0.5}>
+            <Typography fontSize={12} fontWeight={500}>
+              {t('Available for Withdrawal')}
+            </Typography>
+            <Typography fontSize={12} color="blue" sx={{ textDecoration: 'underline' }}>
+              <a
+                target="_blank"
+                rel="noreferrer noopener"
+                href="https://docs.exact.ly/guides/parameters#a.-reserve-factor"
+              >
+                {t('Learn more about reserve factor.')}
+              </a>
+            </Typography>
+          </Box>
+        ),
       },
       {
         label: t('Global Utilization'),
@@ -128,12 +143,12 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
     return { itemsInfo: items, totalUtilization: totalUti };
   }, [
     marketAccount,
-    t,
+    backupBorrows,
+    floatingBorrows,
     floatingDeposits,
     fixedDeposits,
-    floatingBorrows,
+    t,
     fixedBorrows,
-    backupBorrows,
     symbol,
     nativeAPR,
   ]);

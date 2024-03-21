@@ -9,6 +9,7 @@ import { ItemInfoProps } from 'components/common/ItemInfo';
 import formatNumber from 'utils/formatNumber';
 import useAccountData from 'hooks/useAccountData';
 import { toPercentage } from 'utils/utils';
+import { Box, Typography } from '@mui/material';
 
 const MarketsHeader: FC = () => {
   const { t } = useTranslation();
@@ -73,9 +74,24 @@ const MarketsHeader: FC = () => {
       value: totalBorrowed ? `$${formatNumber(formatUnits(totalBorrowed, 18))}` : undefined,
     },
     {
-      label: t('Available for Withdrawal'),
+      label: t('Available'),
       value: totalAvailable ? `$${formatNumber(formatUnits(totalAvailable, 18))}` : undefined,
-      sx: { textAlign: 'center' },
+      tooltipTitle: (
+        <Box display="flex" flexDirection="column" gap={0.5}>
+          <Typography fontSize={12} fontWeight={500}>
+            {t('Available for Withdrawal')}
+          </Typography>
+          <Typography fontSize={12} color="blue" sx={{ textDecoration: 'underline' }}>
+            <a
+              target="_blank"
+              rel="noreferrer noopener"
+              href="https://docs.exact.ly/guides/parameters#a.-reserve-factor"
+            >
+              {t('Learn more about reserve factor.')}
+            </a>
+          </Typography>
+        </Box>
+      ),
     },
     {
       label: t('Global Utilization'),

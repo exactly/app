@@ -10,7 +10,7 @@ export type ItemInfoProps = {
   label: string;
   value?: string | React.ReactNode;
   underLabel?: string;
-  tooltipTitle?: string;
+  tooltipTitle?: string | React.ReactNode;
   xs?: number;
   sx?: BoxProps['sx'];
 };
