@@ -129,13 +129,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows }) => {
               depositedAssets,
               borrowedAssets,
             }) => (
-              <Link
-                href={{ pathname: `/${symbol}`, query }}
-                key={symbol}
-                rel="noopener noreferrer"
-                legacyBehavior
-                onClick={() => trackRowClick(symbol)}
-              >
+              <Link href={{ pathname: `/${symbol}`, query }} key={symbol} rel="noopener noreferrer" legacyBehavior>
                 <TableRow
                   key={symbol}
                   sx={{
@@ -143,6 +137,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows }) => {
                     cursor: 'pointer',
                   }}
                   hover
+                  onClick={() => trackRowClick(symbol)}
                   data-testid={`markets-pool-row-${symbol}`}
                 >
                   <TableCell component="th" scope="row" sx={{ pr: 3, pl: 1.5 }}>

@@ -208,18 +208,17 @@ function Wallet() {
           </Box>
           <List disablePadding sx={{ borderTop: 1, borderColor: 'grey.300', pt: 1, px: 1 }}>
             {!impersonateActive && (
-              <Link
-                href={{ pathname: 'revoke', query }}
-                legacyBehavior
-                onClick={() =>
-                  track('Button Clicked', {
-                    href: '/revoke',
-                    location: 'Wallet',
-                    name: 'manage allowances',
-                  })
-                }
-              >
-                <ListItem disablePadding>
+              <Link href={{ pathname: 'revoke', query }} legacyBehavior>
+                <ListItem
+                  disablePadding
+                  onClick={() =>
+                    track('Button Clicked', {
+                      href: '/revoke',
+                      location: 'Wallet',
+                      name: 'manage allowances',
+                    })
+                  }
+                >
                   <ListItemButton sx={{ borderRadius: 1, p: 1 }}>
                     <SettingsIcon sx={{ width: '16px', height: '16px' }} />
                     <Typography fontSize={14} fontWeight={700} marginLeft={0.5}>

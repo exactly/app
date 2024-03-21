@@ -117,8 +117,8 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
       hover
       data-testid={`dashboard-floating-${type}-row-${symbol}`}
     >
-      <Link href={{ pathname: `/${symbol}`, query }} onClick={handleClick} legacyBehavior>
-        <TableCell component="th" align="left" sx={{ cursor: 'pointer', pl: 1.5 }} width={240}>
+      <Link href={{ pathname: `/${symbol}`, query }} legacyBehavior>
+        <TableCell component="th" align="left" sx={{ cursor: 'pointer', pl: 1.5 }} width={240} onClick={handleClick}>
           <Stack direction="row" spacing={1}>
             <Image
               src={`/img/assets/${symbol}.svg`}

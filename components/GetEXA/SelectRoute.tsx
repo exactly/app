@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import ChainSelector from './ChainSelector';
 import Image from 'next/image';
 import { Screen, TXStep, useGetEXA } from 'contexts/GetEXAContext';
-import { useNetwork, useSwitchNetwork } from 'wagmi';
+import { useNetwork } from 'wagmi';
 import { useWeb3 } from 'hooks/useWeb3';
 import RouteStepsWrapper from './RouteSteps';
 import Routes from './Routes';
@@ -15,9 +15,9 @@ import { optimism } from 'wagmi/chains';
 import { useEXABalance, useEXAPrice } from 'hooks/useEXA';
 import { formatEther, formatUnits } from 'viem';
 import formatNumber from 'utils/formatNumber';
-import { LoadingButton } from '@mui/lab';
 import { track } from 'utils/mixpanel';
 import { AssetBalance } from 'types/Bridge';
+import MainActionButton from 'components/common/MainActionButton';
 
 const SelectRoute = () => {
   const {
@@ -46,7 +46,6 @@ const SelectRoute = () => {
   const nativeSwap = asset?.symbol === 'ETH' && chain?.chainId === optimism.id;
   const { data: exaBalance } = useEXABalance({ watch: true });
   const insufficientBalance = Boolean(asset && qtyIn && Number(qtyIn) > asset.amount);
-  const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
 
   const handleSubmit = useCallback(
     ({ currentTarget }: MouseEvent<HTMLButtonElement>) => {
@@ -89,14 +88,7 @@ const SelectRoute = () => {
     () => track('Input Unfocused', { location: 'Get EXA', name: 'amount in', value: qtyIn }),
     [qtyIn],
   );
-  const handleSwitchNetworkClick = useCallback(() => {
-    switchNetwork?.(chain?.chainId);
-    track('Button Clicked', {
-      location: 'Get EXA',
-      name: 'switch network',
-      value: chain?.name,
-    });
-  }, [chain?.chainId, chain?.name, switchNetwork]);
+
   const handleConnectWallet = useCallback(() => {
     connect();
     track('Button Clicked', {
@@ -267,23 +259,17 @@ const SelectRoute = () => {
       {txError?.status && <Alert severity="error">{txError.message}</Alert>}
 
       {isConnected ? (
-        walletChain?.id !== chain?.chainId ? (
-          <LoadingButton fullWidth onClick={handleSwitchNetworkClick} variant="contained" loading={switchIsLoading}>
-            {t('Please switch to {{network}} network', { network: chain?.name })}
-          </LoadingButton>
-        ) : (
-          <LoadingButton
-            disabled={(!route && !nativeSwap) || insufficientBalance}
-            variant="contained"
-            onClick={handleSubmit}
-            loading={txStep === TXStep.CONFIRM_PENDING}
-            data-testid={nativeSwap ? 'get-exa-submit' : 'get-exa-review'}
-          >
-            {insufficientBalance
-              ? t('Insufficient {{symbol}} balance', { symbol: asset?.symbol })
-              : `${t('Get')} ${qtyOut ? `${formatNumber(formatUnits(qtyOut, 18))} ` : ''}EXA`}
-          </LoadingButton>
-        )
+        <MainActionButton
+          disabled={(!route && !nativeSwap) || insufficientBalance}
+          variant="contained"
+          mainAction={handleSubmit}
+          loading={txStep === TXStep.CONFIRM_PENDING}
+          data-testid={nativeSwap ? 'get-exa-submit' : 'get-exa-review'}
+        >
+          {insufficientBalance
+            ? t('Insufficient {{symbol}} balance', { symbol: asset?.symbol })
+            : `${t('Get')} ${qtyOut ? `${formatNumber(formatUnits(qtyOut, 18))} ` : ''}EXA`}
+        </MainActionButton>
       ) : (
         <Button fullWidth onClick={handleConnectWallet} variant="contained">
           {t('Connect wallet')}

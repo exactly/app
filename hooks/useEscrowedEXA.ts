@@ -126,7 +126,8 @@ export const useEscrowedEXAVestingPeriod = () => {
   });
 };
 
-export function useEscrowEXATotals(streams: number[]) {
+export const useEscrowEXATotals = (streams: number[]) => {
+  const { chain } = useWeb3();
   const sablier = useSablierV2LockupLinear();
   const esEXA = useEscrowedEXA();
 
@@ -138,6 +139,7 @@ export function useEscrowEXATotals(streams: number[]) {
       address: esEXA && getAddress(esEXA.address),
       functionName: 'reserves',
       args: [BigInt(stream)],
+      chainId: chain.id,
     })),
   });
 
@@ -149,6 +151,7 @@ export function useEscrowEXATotals(streams: number[]) {
       address: sablier && getAddress(sablier.address),
       functionName: 'withdrawableAmountOf',
       args: [BigInt(stream)],
+      chainId: chain.id,
     })),
   });
 
@@ -163,4 +166,4 @@ export function useEscrowEXATotals(streams: number[]) {
   const totalWithdrawable = useMemo(() => sum(withdrawables), [withdrawables, sum]);
 
   return { totalReserve, reserveIsLoading, totalWithdrawable, withdrawableIsLoading };
-}
+};
