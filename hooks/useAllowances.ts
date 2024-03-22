@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Address, erc20ABI, erc4626ABI, usePublicClient } from 'wagmi';
-import MAX_UINT256 from '@exactly/lib/esm/fixed-point-math/MAX_UINT256';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 import useDebtManager from './useDebtManager';
 import useAccountData from './useAccountData';
 import useETHRouter from './useETHRouter';
 import { useWeb3 } from './useWeb3';
 import useAssets from './useAssets';
+import useContract from './useContract';
+import { MAX_UINT256, WEI_PER_ETHER } from 'utils/const';
+import { installmentsRouterABI } from 'types/abi';
 
 export type Allowance = {
   allowance: bigint;
@@ -48,6 +49,7 @@ export const useAllowances = (): AllowancesState => {
   const assetSymbols = useAssets();
   const debtManager = useDebtManager();
   const ethRouter = useETHRouter();
+  const installmentsRouter = useContract('InstallmentsRouter', installmentsRouterABI);
 
   const allowanceDescriptors: AllowanceDescriptor[] = useMemo(() => {
     const debtManagerDescriptor = (asset: string) =>
@@ -67,8 +69,22 @@ export const useAllowances = (): AllowancesState => {
             },
           ] as const)
         : [];
+
+    const installmentsRouterDescriptor = (asset: string) =>
+      installmentsRouter
+        ? ([
+            {
+              symbol: asset,
+              spenderAddress: installmentsRouter.address,
+              spenderName: 'InstallmentsRouter',
+              type: 'shareAsset',
+            },
+          ] as const)
+        : [];
+
     const assetDescriptors = assetSymbols.flatMap((asset) => [
       ...debtManagerDescriptor(asset),
+      ...installmentsRouterDescriptor(asset),
       {
         symbol: asset,
         type: 'marketSpender',
