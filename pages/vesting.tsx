@@ -20,8 +20,7 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import { LoadingButton } from '@mui/lab';
-import { useNetwork, useSwitchNetwork } from 'wagmi';
+import { useSwitchNetwork } from 'wagmi';
 import { useModal } from 'contexts/ModalContext';
 import VestingInput from 'components/VestingInput';
 import ActiveStream from 'components/ActiveStream';
@@ -42,6 +41,7 @@ import Image from 'next/image';
 import Draggable from 'react-draggable';
 import { TransitionProps } from '@mui/material/transitions';
 import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import MainActionButton from 'components/common/MainActionButton';
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
@@ -70,10 +70,8 @@ const WithdrawAndCancel: React.FC<{
   const { spacing } = useTheme();
   const { breakpoints } = useTheme();
   const { t } = useTranslation();
-  const { impersonateActive, chain: displayNetwork } = useWeb3();
+  const { impersonateActive } = useWeb3();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
-  const { chain } = useNetwork();
-  const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
 
   const handleClose = useCallback(() => {
     onClose();
@@ -142,19 +140,10 @@ const WithdrawAndCancel: React.FC<{
               <Button fullWidth variant="contained">
                 {t('Exit Read-Only Mode')}
               </Button>
-            ) : chain && chain.id !== displayNetwork.id ? (
-              <LoadingButton
-                fullWidth
-                onClick={() => switchNetwork?.(displayNetwork.id)}
-                variant="contained"
-                loading={switchIsLoading}
-              >
-                {t('Please switch to {{network}} network', { network: displayNetwork.name })}
-              </LoadingButton>
             ) : (
-              <LoadingButton fullWidth variant="contained" color="error" onClick={cancel} loading={l}>
+              <MainActionButton loading={l} mainAction={cancel} color="error" variant="contained" fullWidth>
                 {t('Withdraw and Cancel Stream')}
-              </LoadingButton>
+              </MainActionButton>
             )}
           </Box>
         </DialogContent>
@@ -165,10 +154,9 @@ const WithdrawAndCancel: React.FC<{
 
 const Vesting: NextPage = () => {
   const { t } = useTranslation();
-  const { impersonateActive, chain: displayNetwork, opts } = useWeb3();
-  const { chain } = useNetwork();
+  const { impersonateActive, opts } = useWeb3();
   const { activeStreams, loading: streamsLoading, refetch } = useUpdateStreams();
-  const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
+  const { isLoading: switchIsLoading } = useSwitchNetwork();
   const { data: reserveRatio } = useEscrowedEXAReserveRatio();
   const { totalReserve, reserveIsLoading, totalWithdrawable, withdrawableIsLoading } = useEscrowEXATotals(
     activeStreams.map(({ tokenId }) => Number(tokenId)),
@@ -397,7 +385,7 @@ const Vesting: NextPage = () => {
         </Typography>
       </Box>
 
-      {streamsLoading && <Skeleton height={150} />}
+      {/* {streamsLoading && <Skeleton height={150} />} */}
 
       {activeStreams.length > 0 && (
         <Box
@@ -486,21 +474,15 @@ const Vesting: NextPage = () => {
                         <Button fullWidth variant="contained">
                           {t('Exit Read-Only Mode')}
                         </Button>
-                      ) : chain && chain.id !== displayNetwork.id ? (
-                        <LoadingButton
-                          fullWidth
-                          onClick={() => switchNetwork?.(displayNetwork.id)}
-                          variant="contained"
-                          loading={switchIsLoading}
-                        >
-                          {t('Please switch to {{network}} network', { network: displayNetwork.name })}
-                        </LoadingButton>
                       ) : (
-                        <>
-                          <LoadingButton fullWidth variant="outlined" onClick={withdrawAll} loading={loading}>
-                            {t('Withdraw All')}
-                          </LoadingButton>
-                        </>
+                        <MainActionButton
+                          loading={switchIsLoading}
+                          mainAction={withdrawAll}
+                          variant="contained"
+                          fullWidth
+                        >
+                          {t('Withdraw All')}
+                        </MainActionButton>
                       )}
                     </Box>
                     <WithdrawAndCancel
@@ -569,27 +551,16 @@ const Vesting: NextPage = () => {
                         <Button fullWidth variant="contained">
                           {t('Exit Read-Only Mode')}
                         </Button>
-                      ) : chain && chain.id !== displayNetwork.id ? (
-                        <LoadingButton
-                          fullWidth
-                          onClick={() => switchNetwork?.(displayNetwork.id)}
-                          variant="contained"
-                          loading={switchIsLoading}
-                        >
-                          {t('Please switch to {{network}} network', { network: displayNetwork.name })}
-                        </LoadingButton>
                       ) : (
-                        <>
-                          <LoadingButton
-                            fullWidth
-                            variant="contained"
-                            onClick={handleClaimAll}
-                            loading={loading}
-                            data-testid="vesting-claim-all"
-                          >
-                            {t('Claim All')}
-                          </LoadingButton>
-                        </>
+                        <MainActionButton
+                          loading={loading}
+                          mainAction={handleClaimAll}
+                          variant="contained"
+                          fullWidth
+                          data-testid="vesting-claim-all"
+                        >
+                          {t('Claim All')}
+                        </MainActionButton>
                       )}
                     </Box>
                   </Box>

@@ -12,10 +12,7 @@ export default function (page: Page) {
         return document.querySelectorAll('.MuiSkeleton-root').length === 0;
       },
       null,
-      {
-        timeout: 30_000,
-        polling: 1_000,
-      },
+      { polling: 1_000 },
     );
   };
 

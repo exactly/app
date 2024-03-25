@@ -3,12 +3,12 @@ import { LoadingButton } from '@mui/lab';
 import { Button, CircularProgress, Typography } from '@mui/material';
 import { Box } from '@mui/system';
 import { useOperationContext } from 'contexts/OperationContext';
-import { useNetwork, useSwitchNetwork } from 'wagmi';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 import useAccountData from 'hooks/useAccountData';
 import { track } from 'utils/mixpanel';
+import MainActionButton from 'components/common/MainActionButton';
 
 type Props = {
   symbol: string;
@@ -22,9 +22,7 @@ function ModalSubmit({ isLoading = false, disabled = false, submit, symbol, labe
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
   const { operation, loadingButton, isLoading: isLoadingOp, tx, errorButton, requiresApproval } = useOperationContext();
-  const { isConnected, chain: displayNetwork, connect, impersonateActive, exitImpersonate } = useWeb3();
-  const { chain } = useNetwork();
-  const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
+  const { isConnected, connect, impersonateActive, exitImpersonate } = useWeb3();
   const { refreshAccountData } = useAccountData();
 
   const handleSubmit = useCallback(async () => {
@@ -49,16 +47,6 @@ function ModalSubmit({ isLoading = false, disabled = false, submit, symbol, labe
     });
     connect();
   }, [connect]);
-
-  const handleSwitchNetwork = useCallback(() => {
-    track('Button Clicked', {
-      location: 'Operations Modal',
-      name: 'switch network',
-      prevValue: chain?.name,
-      value: displayNetwork.name,
-    });
-    switchNetwork?.(displayNetwork.id);
-  }, [chain?.name, displayNetwork.id, displayNetwork.name, switchNetwork]);
 
   const handleApproveClick = useCallback(
     (event: MouseEvent<HTMLButtonElement>) => {
@@ -102,23 +90,9 @@ function ModalSubmit({ isLoading = false, disabled = false, submit, symbol, labe
     );
   }
 
-  if (chain && chain.id !== displayNetwork.id) {
-    return (
-      <LoadingButton
-        fullWidth
-        onClick={handleSwitchNetwork}
-        variant="contained"
-        loading={switchIsLoading}
-        data-testid="modal-switch-network"
-      >
-        {t('Please switch to {{network}} network', { network: displayNetwork.name })}
-      </LoadingButton>
-    );
-  }
-
   if (requiresApproval) {
     return (
-      <LoadingButton
+      <MainActionButton
         fullWidth
         loading={isLoading}
         loadingIndicator={
@@ -127,14 +101,14 @@ function ModalSubmit({ isLoading = false, disabled = false, submit, symbol, labe
             label={loadingButton.label}
           />
         }
-        onClick={handleApproveClick}
+        mainAction={handleApproveClick}
         color="primary"
         variant="contained"
         disabled={disabled}
         data-testid="modal-approve"
       >
         {t('Approve {{symbol}}', { symbol })}
-      </LoadingButton>
+      </MainActionButton>
     );
   }
 
