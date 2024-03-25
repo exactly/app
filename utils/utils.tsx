@@ -1,6 +1,10 @@
 import { WAD } from './queryRates';
 
 const YEAR_IN_SECONDS = 60n * 60n * 24n * 365n;
+export const DAY = 60n * 60n * 24n;
+export const WEEK = DAY * 7n;
+export const MATURITY_DAYS = 28n;
+export const INTERVAL = MATURITY_DAYS * DAY;
 
 import { Hex } from 'viem';
 

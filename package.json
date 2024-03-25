@@ -24,7 +24,7 @@
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@exactly/lib": "exactly/lib#e187577",
-    "@exactly/protocol": "exactly/protocol#c62a0c5",
+    "@exactly/protocol": "exactly/protocol#6b470110ac9ee5c8f0c8f98a8e143d663e7df58a",
     "@mui/icons-material": "^5.14.3",
     "@mui/lab": "^5.0.0-alpha.138",
     "@mui/material": "^5.14.3",

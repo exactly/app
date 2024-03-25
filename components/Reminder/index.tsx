@@ -7,6 +7,8 @@ import parseTimestamp from 'utils/parseTimestamp';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 import type { Operation } from 'types/Operation';
 import { track } from 'utils/mixpanel';
+import { MATURITY_DAYS } from 'utils/utils';
+import { useOperationContext } from 'contexts/OperationContext';
 
 type Props = {
   operation: Operation;
@@ -18,6 +20,7 @@ const Reminder: FC<Props> = ({ operation, maturity }) => {
   const translateOperation = useTranslateOperation();
   const { palette } = useTheme();
   const buttonRef = useRef<HTMLInputElement>(null);
+  const { installments } = useOperationContext();
 
   const isBorrow = useMemo(() => operation?.startsWith('borrow'), [operation]);
 
@@ -33,6 +36,7 @@ const Reminder: FC<Props> = ({ operation, maturity }) => {
       options: ['Google', 'Apple', 'iCal', 'Microsoft365', 'MicrosoftTeams', 'Outlook.com', 'Yahoo'],
       timeZone: 'UTC',
       lightMode: palette.mode,
+      recurrence: `RRULE:FREQ=DAILY;INTERVAL=${MATURITY_DAYS.toString()};COUNT=${installments}`,
     };
     track('Button Clicked', {
       location: 'Reminder',
@@ -42,7 +46,7 @@ const Reminder: FC<Props> = ({ operation, maturity }) => {
     });
 
     if (buttonRef.current) atcb_action(config, buttonRef.current);
-  }, [maturity, operation, palette.mode, t, translateOperation]);
+  }, [installments, maturity, operation, palette.mode, t, translateOperation]);
 
   return (
     <Box
