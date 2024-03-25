@@ -1,8 +1,8 @@
 import { useCallback, useMemo } from 'react';
 import { parseUnits } from 'viem';
 import split from '@exactly/lib/esm/installments/split';
-import fromAmounts from '@exactly/lib/esm/installments/fromAmounts';
-import { fixedUtilization, globalUtilization } from 'utils/interestRateCurve';
+import fixedUtilization from '@exactly/lib/esm/interest-rate-model/fixedUtilization';
+import globalUtilization from '@exactly/lib/esm/interest-rate-model/globalUtilization';
 import useAccountData from 'hooks/useAccountData';
 import { INTERVAL } from 'utils/utils';
 import useIRM from 'hooks/useIRM';
@@ -39,8 +39,7 @@ export default function useInstallmentsData({
         irmParameters,
         timestamp,
       ] as const;
-      const installmentsPrincipal = split(amount, ...parameters);
-      const installmentsRepayAmount = fromAmounts(installmentsPrincipal, ...parameters);
+      const { amounts: installmentsPrincipal, installments: installmentsRepayAmount } = split(amount, ...parameters);
       const totalPrincipal = installmentsPrincipal.reduce((acc, val) => acc + val, 0n);
       const maxRepay = installmentsRepayAmount.reduce((acc, val) => acc + val, 0n);
       const averageRepay = maxRepay / installments_;
