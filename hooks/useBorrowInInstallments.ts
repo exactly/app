@@ -3,7 +3,7 @@ import { Hex, zeroAddress } from 'viem';
 import { installmentsRouterABI, useInstallmentsRouterBorrow, usePrepareInstallmentsRouterBorrow } from 'types/abi';
 import { useOperationContext } from 'contexts/OperationContext';
 import handleOperationError from 'utils/handleOperationError';
-import { WEI_PER_ETHER } from 'utils/const';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 import { Transaction } from 'types/Transaction';
 import useWaitForTransaction from 'hooks/useWaitForTransaction';
 import useMarketPermit from 'hooks/useMarketPermit';
@@ -31,7 +31,7 @@ export default function useBorrowInInstallments() {
   const installmentsRouter = useContract('InstallmentsRouter', installmentsRouterABI);
   const marketPermit = useMarketPermit(symbol);
   const isContract = useIsContract();
-  const maxRepay = installmentsDetails ? (installmentsDetails.maxRepay * slippage) / WEI_PER_ETHER : 0n;
+  const maxRepay = installmentsDetails ? (installmentsDetails.maxRepay * slippage) / WAD : 0n;
 
   const config = useMemo(() => {
     if (!marketContract || !installmentsDetails || !date || !installmentsRouter) return;
