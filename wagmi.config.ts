@@ -12,6 +12,7 @@ import EXAPool from '@exactly/protocol/deployments/optimism/EXAPool.json' assert
 import Swapper from '@exactly/protocol/deployments/optimism/Swapper.json' assert { type: 'json' };
 import EXAGauge from '@exactly/protocol/deployments/optimism/EXAGauge.json' assert { type: 'json' };
 import Previewer from '@exactly/protocol/deployments/op-sepolia/Previewer.json' assert { type: 'json' };
+import LegacyPreviewer from '@exactly/protocol/deployments/ethereum/Previewer.json' assert { type: 'json' };
 import DebtManager from '@exactly/protocol/deployments/op-sepolia/DebtManager.json' assert { type: 'json' };
 import DebtPreviewer from '@exactly/protocol/deployments/op-sepolia/DebtPreviewer.json' assert { type: 'json' };
 import MarketETHRouter from '@exactly/protocol/deployments/op-sepolia/MarketETHRouter.json' assert { type: 'json' };
@@ -41,6 +42,7 @@ export default defineConfig({
     { name: 'Swapper', abi: Swapper.abi as Abi },
     { name: 'EXAGauge', abi: EXAGauge.abi as Abi },
     { name: 'Previewer', abi: Previewer.abi as Abi },
+    { name: 'LegacyPreviewer', abi: LegacyPreviewer.abi as Abi },
     { name: 'DebtManager', abi: DebtManager.abi as Abi },
     { name: 'DebtPreviewer', abi: DebtPreviewer.abi as Abi },
     { name: 'MarketETHRouter', abi: MarketETHRouter.abi as Abi },

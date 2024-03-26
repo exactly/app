@@ -22,6 +22,7 @@ import { useWeb3 } from 'hooks/useWeb3';
 import Alert from '@mui/material/Alert';
 import { useFloatingBalances } from 'hooks/useFloatingBalances';
 import { useFixedBalances } from 'hooks/useFixedBalances';
+import { mainnet } from 'wagmi';
 
 type Props = {
   symbol: string;
@@ -154,8 +155,14 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
 
   const borrowableUtilization = useMemo(() => {
     if (!marketAccount) return;
-    return Number(WAD - marketAccount.reserveFactor) / 1e18;
-  }, [marketAccount]);
+
+    if (displayNetworkId === mainnet.id) return 0.9;
+
+    if ('reserveFactor' in marketAccount) {
+      return Number(WAD - marketAccount.reserveFactor) / 1e18;
+    }
+    return;
+  }, [displayNetworkId, marketAccount]);
 
   return (
     <>

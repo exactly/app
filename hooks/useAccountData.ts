@@ -3,11 +3,17 @@ import { AbiParametersToPrimitiveTypes, ExtractAbiFunction } from 'abitype';
 
 import AccountDataContext from 'contexts/AccountDataContext';
 import usePreviewerExactly from 'hooks/usePreviewerExactly';
-import { previewerABI } from 'types/abi';
+import { previewerABI, legacyPreviewerABI } from 'types/abi';
 
-export type MarketAccount = AbiParametersToPrimitiveTypes<
+type NewMarketAccount = AbiParametersToPrimitiveTypes<
   ExtractAbiFunction<typeof previewerABI, 'exactly'>['outputs']
 >[number][number];
+
+export type LegacyMarketAccount = AbiParametersToPrimitiveTypes<
+  ExtractAbiFunction<typeof legacyPreviewerABI, 'exactly'>['outputs']
+>[number][number];
+
+export type MarketAccount = NewMarketAccount | LegacyMarketAccount;
 
 type AccountDataHook = {
   marketAccount?: MarketAccount;

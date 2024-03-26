@@ -10,6 +10,7 @@ import {
   marketABI,
   marketEthRouterABI,
   previewerABI,
+  legacyPreviewerABI,
   rewardsControllerABI,
   permit2ABI,
   sablierV2LockupLinearABI,
@@ -23,6 +24,7 @@ export type ReadContractType<T extends Abi> = ReturnType<typeof getContract<T, u
 export type ERC20 = ContractType<typeof erc20ABI>;
 export type Auditor = ContractType<typeof auditorABI>;
 export type Previewer = ReadContractType<typeof previewerABI>;
+export type LegacyPreviewer = ReadContractType<typeof legacyPreviewerABI>;
 export type Market = ContractType<typeof marketABI>;
 export type MarketETHRouter = ContractType<typeof marketEthRouterABI>;
 export type InterestRateModel = ContractType<typeof interestRateModelABI>;

@@ -2,7 +2,7 @@
   "1": {
     "etherscan": "https://etherscan.io",
     "subgraph": {
-      "exactly": "https://gateway.thegraph.com/api/3bd03f49a36caaa5ed4efc5a27c5425d/subgraphs/id/As6Xz6GCvbW8B9Xb7Rx2LqQeJcL3FcUyD8Tk95L8rG5d",
+      "exactly": "https://api.thegraph.com/subgraphs/name/itofarina/exa-op-sandbox",
       "sablier": "https://api.thegraph.com/subgraphs/name/sablier-labs/sablier-v2"
     }
   },

@@ -10,6 +10,8 @@ import MaturityPoolsMobile from './MaturityPoolsMobile';
 import useAccountData from 'hooks/useAccountData';
 import { formatUnits } from 'viem';
 import SpreadModelChart from 'components/charts/SpreadModelChart';
+import { mainnet } from 'wagmi';
+import { useWeb3 } from 'hooks/useWeb3';
 
 type Rate = {
   maturity: bigint;
@@ -24,6 +26,7 @@ const AssetMaturityPools: FC<Props> = ({ symbol }) => {
   const { marketAccount } = useAccountData(symbol);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const { chain } = useWeb3();
 
   const { totalDeposited, totalBorrowed, bestDeposit, bestBorrow } = useMemo<{
     totalDeposited?: number;
@@ -94,15 +97,17 @@ const AssetMaturityPools: FC<Props> = ({ symbol }) => {
           </Grid>
         )}
       </Grid>
-      <Box
-        boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : '')}
-        borderRadius="0px 0px 6px 6px"
-        bgcolor="components.bg"
-        p="16px"
-        height={480}
-      >
-        <SpreadModelChart symbol={symbol} />
-      </Box>
+      {chain.id !== mainnet.id && (
+        <Box
+          boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : '')}
+          borderRadius="0px 0px 6px 6px"
+          bgcolor="components.bg"
+          p="16px"
+          height={480}
+        >
+          <SpreadModelChart symbol={symbol} />
+        </Box>
+      )}
     </Box>
   );
 };
