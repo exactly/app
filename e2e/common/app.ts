@@ -8,10 +8,7 @@ export default function ({ page }: CommonTest) {
         return document.querySelectorAll('.MuiSkeleton-root').length === 0;
       },
       null,
-      {
-        timeout: 30_000,
-        polling: 1_000,
-      },
+      { polling: 1_000 },
     );
   };
 

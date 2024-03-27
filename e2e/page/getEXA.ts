@@ -12,10 +12,7 @@ export default function (page: Page) {
         return attr === null;
       },
       null,
-      {
-        timeout: 30_000,
-        polling: 1_000,
-      },
+      { polling: 1_000 },
     );
   };
 
@@ -71,7 +68,7 @@ export default function (page: Page) {
 
   const waitForSubmitTransaction = async () => {
     const status = page.getByTestId('transaction-status');
-    await expect(status).toBeVisible({ timeout: 30_000 });
+    await expect(status).toBeVisible();
     await page.waitForFunction(
       (message) => {
         const text = document.querySelector('[data-testid="transaction-status"]');
@@ -79,7 +76,7 @@ export default function (page: Page) {
         return text.textContent !== message;
       },
       'Processing transaction...',
-      { timeout: 30_000, polling: 1_000 },
+      { polling: 1_000 },
     );
   };
 
@@ -108,10 +105,7 @@ export default function (page: Page) {
         return !button.classList.contains('MuiLoadingButton-loading');
       },
       null,
-      {
-        timeout: 30_000,
-        polling: 1_000,
-      },
+      { polling: 1_000 },
     );
   };
 

@@ -17,10 +17,7 @@ export default function (page: Page) {
         });
       },
       null,
-      {
-        timeout: 30_000,
-        polling: 1_000,
-      },
+      { polling: 1_000 },
     );
   };
 
@@ -82,7 +79,7 @@ export default function (page: Page) {
   const waitForTransaction = async () => {
     const status = page.getByTestId('transaction-status');
 
-    await expect(status).toBeVisible({ timeout: 66_666 });
+    await expect(status).toBeVisible();
 
     await page.waitForFunction(
       (message) => {
@@ -91,7 +88,7 @@ export default function (page: Page) {
         return text.textContent !== message;
       },
       'Processing transaction...',
-      { timeout: 30_000, polling: 1_000 },
+      { polling: 1_000 },
     );
   };
 

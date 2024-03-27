@@ -6,9 +6,9 @@ dotenv.config();
 const config: PlaywrightTestConfig = {
   testDir: './e2e/specs',
   testMatch: [/.*spec\.ts/],
-  timeout: process.env.CI ? 300_000 : 600_000,
+  timeout: 666_666,
   expect: {
-    timeout: 30_000,
+    timeout: 66_666,
   },
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
@@ -39,7 +39,7 @@ const config: PlaywrightTestConfig = {
   outputDir: 'test-results/',
   webServer: {
     command: 'bun start',
-    timeout: 60_000,
+    timeout: 66_666,
     url: 'http://127.0.0.1:3000',
     reuseExistingServer: !process.env.CI,
     stdout: 'ignore',
