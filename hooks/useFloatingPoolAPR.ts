@@ -13,6 +13,9 @@ import useDelayedEffect from './useDelayedEffect';
 import { useWeb3 } from './useWeb3';
 import { useGlobalError } from 'contexts/GlobalErrorContext';
 import useIRM from './useIRM';
+import { floatingInterestRateCurve } from 'utils/interestRateCurve';
+import { mainnet } from 'wagmi';
+import { useMarketFloatingBackupBorrowed } from 'types/abi';
 
 type FloatingPoolAPR = {
   depositAPR: number | undefined;
@@ -34,26 +37,65 @@ export default (
   const [loading, setLoading] = useState<boolean>(true);
   const { setIndexerError } = useGlobalError();
 
+  const { data: _floatingBackupBorrowed } = useMarketFloatingBackupBorrowed({
+    address: marketAccount?.market,
+    chainId: chain.id,
+  });
+
   const borrowAPR = useMemo((): number | undefined => {
-    if (!marketAccount || !irm || operation === 'deposit') {
-      return undefined;
+    if (chain.id === mainnet.id) {
+      if (!marketAccount || _floatingBackupBorrowed === undefined) {
+        return undefined;
+      }
+
+      const { interestRateModel, totalFloatingDepositAssets, totalFloatingBorrowAssets, decimals } = marketAccount;
+      const delta = parseUnits(qty || '0', decimals);
+
+      const debt = totalFloatingBorrowAssets + delta;
+
+      const { A, B, uMax } = {
+        A: 'floatingCurveA' in interestRateModel && interestRateModel.floatingCurveA,
+        B: 'floatingCurveB' in interestRateModel && interestRateModel.floatingCurveB,
+        uMax: 'floatingMaxUtilization' in interestRateModel && interestRateModel.floatingMaxUtilization,
+      };
+
+      if (!A || !B || !uMax) return undefined;
+
+      const curve = floatingInterestRateCurve({
+        A,
+        B,
+        maxUtilization: uMax,
+        naturalUtilization: 700000000000000000n,
+        sigmoidSpeed: 2500000000000000000n,
+        growthSpeed: 1000000000000000000n,
+        maxRate: 150000000000000000000n,
+      });
+
+      const uF = floatingUtilization(totalFloatingDepositAssets, debt);
+      const uG = globalUtilization(totalFloatingDepositAssets, debt, _floatingBackupBorrowed);
+
+      return Number(curve(uF, uG)) / 1e18;
+    } else {
+      if (!marketAccount || !irm || operation === 'deposit') {
+        return undefined;
+      }
+
+      const { totalFloatingDepositAssets, totalFloatingBorrowAssets, decimals, floatingBackupBorrowed } = marketAccount;
+      const delta = parseUnits(qty || '0', decimals);
+
+      const debt = totalFloatingBorrowAssets + delta;
+
+      return (
+        Number(
+          floatingRate(
+            floatingUtilization(totalFloatingDepositAssets, debt),
+            globalUtilization(totalFloatingDepositAssets, debt, floatingBackupBorrowed),
+            irm,
+          ),
+        ) / 1e18
+      );
     }
-
-    const { totalFloatingDepositAssets, totalFloatingBorrowAssets, decimals, floatingBackupBorrowed } = marketAccount;
-    const delta = parseUnits(qty || '0', decimals);
-
-    const debt = totalFloatingBorrowAssets + delta;
-
-    return (
-      Number(
-        floatingRate(
-          floatingUtilization(totalFloatingDepositAssets, debt),
-          globalUtilization(totalFloatingDepositAssets, debt, floatingBackupBorrowed),
-          irm,
-        ),
-      ) / 1e18
-    );
-  }, [marketAccount, irm, operation, qty]);
+  }, [chain.id, marketAccount, _floatingBackupBorrowed, qty, irm, operation]);
 
   const fetchAPRs = useCallback(
     async (cancelled: () => boolean) => {
