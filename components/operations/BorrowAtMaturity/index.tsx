@@ -45,8 +45,11 @@ const BorrowAtMaturity: FC<PropsWithChildren> = ({ children }) => {
     previewGasCost,
   } = useBorrowAtMaturity();
 
-  const { handleSubmitAction: borrowInInstallments, isLoading: borrowInInstallmentsLoading } =
-    useBorrowInInstallments();
+  const {
+    handleSubmitAction: borrowInInstallments,
+    isLoading: borrowInInstallmentsLoading,
+    needsApproval: borrowInInstallmentsNeedsApproval,
+  } = useBorrowInInstallments();
 
   const { marketAccount } = useAccountData(symbol);
   const container = useRef<HTMLDivElement>(null);
@@ -131,22 +134,28 @@ const BorrowAtMaturity: FC<PropsWithChildren> = ({ children }) => {
 
       <Grid item mt={{ xs: 2, sm: 3 }}>
         <ModalSubmit
-          label={translateOperation('borrowAtMaturity', { capitalize: true })}
+          label={
+            borrowInInstallmentsNeedsApproval
+              ? t('Approve')
+              : translateOperation('borrowAtMaturity', { capitalize: true })
+          }
           symbol={symbol === 'WETH' && marketAccount ? marketAccount.symbol : symbol}
           submit={installments > 1 ? borrowInInstallments : borrowAtMaturity}
           isLoading={loading}
           disabled={!qty || parseFloat(qty) <= 0 || loading || previewIsLoading || errorData?.status}
         />
       </Grid>
-      <ModalSheet
-        container={container.current}
-        ref={breakdownSheetRef}
-        open={breakdownSheetOpen}
-        title={t('Payment schedule')}
-        onClose={handleBreakdownSheetClose}
-      >
-        <InstallmentsBreakdown onClose={handleBreakdownSheetClose} />
-      </ModalSheet>
+      {breakdownSheetOpen && (
+        <ModalSheet
+          container={container.current}
+          ref={breakdownSheetRef}
+          open={breakdownSheetOpen}
+          title={t('Payment schedule')}
+          onClose={handleBreakdownSheetClose}
+        >
+          <InstallmentsBreakdown onClose={handleBreakdownSheetClose} />
+        </ModalSheet>
+      )}
     </Grid>
   );
 };
