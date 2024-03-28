@@ -1,18 +1,24 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Hex, zeroAddress } from 'viem';
-import { installmentsRouterABI, useInstallmentsRouterBorrow, usePrepareInstallmentsRouterBorrow } from 'types/abi';
+import { useCallback, useMemo, useState } from 'react';
+import { Hex, TransactionReceipt, zeroAddress } from 'viem';
+import {
+  installmentsRouterABI,
+  useErc20Allowance,
+  useInstallmentsRouterBorrow,
+  useInstallmentsRouterBorrowEth,
+  usePrepareInstallmentsRouterBorrow,
+  usePrepareInstallmentsRouterBorrowEth,
+} from 'types/abi';
 import { useOperationContext } from 'contexts/OperationContext';
 import handleOperationError from 'utils/handleOperationError';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
-import { Transaction } from 'types/Transaction';
 import useWaitForTransaction from 'hooks/useWaitForTransaction';
 import useMarketPermit from 'hooks/useMarketPermit';
 import useContract from 'hooks/useContract';
 import { useWeb3 } from 'hooks/useWeb3';
-import useIsContract from './useIsContract';
-import { track } from '../utils/mixpanel';
-import waitForTransaction from '../utils/waitForTransaction';
-import formatNumber from '../utils/formatNumber';
+import useIsContract from 'hooks/useIsContract';
+import { track } from 'utils/mixpanel';
+import waitForTransaction from 'utils/waitForTransaction';
+import formatNumber from 'utils/formatNumber';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 type Permit = {
   value: bigint;
@@ -32,10 +38,16 @@ export default function useBorrowInInstallments() {
   const marketPermit = useMarketPermit(symbol);
   const isContract = useIsContract();
   const maxRepay = installmentsDetails ? (installmentsDetails.maxRepay * slippage) / WAD : 0n;
+  const isBorrowETH = symbol === 'WETH';
+
+  const commonArgs = useMemo(() => {
+    if (!date || !installmentsDetails || !installmentsRouter) return;
+    return [date, installmentsDetails.installmentsPrincipal, maxRepay] as const;
+  }, [date, installmentsDetails, installmentsRouter, maxRepay]);
 
   const config = useMemo(() => {
-    if (!marketContract || !installmentsDetails || !date || !installmentsRouter) return;
-    const args = [marketContract.address, date, installmentsDetails.installmentsPrincipal, maxRepay] as const;
+    if (!marketContract || !commonArgs || !installmentsRouter) return;
+    const args = [marketContract.address, ...commonArgs] as const;
     return {
       ...opts,
       chainId: chain.id,
@@ -44,25 +56,57 @@ export default function useBorrowInInstallments() {
       account: walletAddress ?? zeroAddress,
       args: permit ? ([...args, permit] as const) : args,
     };
-  }, [chain.id, date, installmentsDetails, installmentsRouter, marketContract, maxRepay, opts, permit, walletAddress]);
+  }, [chain.id, commonArgs, installmentsRouter, marketContract, opts, permit, walletAddress]);
+
+  const ethConfig = useMemo(() => {
+    if (!commonArgs) return;
+    const args = permit ? ([...commonArgs, permit] as const) : commonArgs;
+    return { ...config, args };
+  }, [commonArgs, config, permit]);
 
   const prepare = usePrepareInstallmentsRouterBorrow(config);
+  const prepareETH = usePrepareInstallmentsRouterBorrowEth(ethConfig);
   const installmentsBorrow = useInstallmentsRouterBorrow(prepare.config);
+  const installmentsBorrowETH = useInstallmentsRouterBorrowEth(prepareETH.config);
+
+  const handleSettled = useCallback(
+    (tx?: TransactionReceipt) => {
+      if (!tx) return;
+      setTx({
+        status: tx.status === 'reverted' ? 'error' : tx.status,
+        hash: tx.transactionHash,
+      });
+    },
+    [setTx],
+  );
 
   const { isLoading: waitingInstallmentsBorrow } = useWaitForTransaction({
     hash: installmentsBorrow.data?.hash,
-    onSettled: (tx) => setTx(tx as Transaction),
+    onSettled: handleSettled,
   });
 
-  const signInstallmentsPermit = useCallback(async () => {
+  const { isLoading: waitingInstallmentsBorrowETH } = useWaitForTransaction({
+    hash: installmentsBorrowETH.data?.hash,
+    onSettled: handleSettled,
+  });
+
+  const allowance = useErc20Allowance(
+    walletAddress && installmentsRouter && marketContract
+      ? {
+          address: marketContract.address,
+          args: [walletAddress, installmentsRouter.address],
+        }
+      : undefined,
+  );
+
+  const signPermit = useCallback(async () => {
     if (!installmentsRouter || !marketContract) return;
     setSigningPermit(true);
     try {
-      const shares = await marketContract.read.previewWithdraw([maxRepay], opts);
       setPermit(
         await marketPermit({
           spender: installmentsRouter.address,
-          value: shares,
+          value: maxRepay,
           duration: 3_600, // TODO check if correct
         }),
       );
@@ -74,57 +118,36 @@ export default function useBorrowInInstallments() {
     } finally {
       setSigningPermit(false);
     }
-  }, [installmentsRouter, marketContract, marketPermit, maxRepay, opts, setErrorData]);
-
-  const borrow = useCallback(async () => {
-    if (!installmentsBorrow.writeAsync) return;
-    setPermit(undefined);
-    try {
-      const { hash } = await installmentsBorrow.writeAsync();
-      if (hash)
-        setTx({
-          status: 'processing',
-          hash,
-        });
-    } catch (error) {
-      setErrorData({
-        status: true,
-        message: handleOperationError(error),
-      });
-    }
-  }, [installmentsBorrow, setErrorData, setTx]);
+  }, [installmentsRouter, marketContract, marketPermit, maxRepay, setErrorData]);
 
   const approve = useCallback(async () => {
     if (!marketContract || !installmentsRouter || !walletAddress || !opts) return;
     setApproveStatus('pending');
     try {
-      const shares = await marketContract.read.previewWithdraw([maxRepay], opts);
-      const allowance = await marketContract.read.allowance([walletAddress, installmentsRouter.address]);
-      if (allowance < shares) {
-        const args = [installmentsRouter.address, shares] as const;
-        const gas = await marketContract.estimateGas.approve(args, opts);
-        const hash = await marketContract.write.approve(args, {
-          ...opts,
-          gasLimit: gas,
-        });
+      const args = [installmentsRouter.address, maxRepay] as const;
+      const gas = await marketContract.estimateGas.approve(args, opts);
+      const hash = await marketContract.write.approve(args, {
+        ...opts,
+        gasLimit: gas,
+      });
 
-        const amount = formatNumber(shares, symbol);
-        track('TX Signed', {
-          contractName: 'Market',
-          method: 'approve',
-          amount,
-          hash,
-        });
-        const { status } = await waitForTransaction({ hash });
-        track('TX Completed', {
-          contractName: 'Market',
-          method: 'approve',
-          amount,
-          hash,
-          status,
-          symbol,
-        });
-      }
+      const amount = formatNumber(maxRepay, symbol);
+      track('TX Signed', {
+        contractName: 'Market',
+        method: 'approve',
+        amount,
+        hash,
+      });
+      const { status } = await waitForTransaction({ hash });
+      track('TX Completed', {
+        contractName: 'Market',
+        method: 'approve',
+        amount,
+        hash,
+        status,
+        symbol,
+      });
+      allowance.refetch();
       setApproveStatus('success');
     } catch (error) {
       setErrorData({
@@ -133,32 +156,47 @@ export default function useBorrowInInstallments() {
       });
       setApproveStatus('idle');
     }
-  }, [installmentsRouter, marketContract, maxRepay, opts, setErrorData, symbol, walletAddress]);
+  }, [allowance, installmentsRouter, marketContract, maxRepay, opts, setErrorData, symbol, walletAddress]);
+
+  const borrow = useCallback(() => {
+    if (isBorrowETH) {
+      if (!installmentsBorrowETH.write) return;
+      installmentsBorrowETH.write();
+    } else {
+      if (!installmentsBorrow.write) return;
+      installmentsBorrow.write();
+    }
+  }, [installmentsBorrow, installmentsBorrowETH, isBorrowETH]);
+
+  const needsApproval = useMemo(() => {
+    if (!allowance.data) return false;
+    const approved = allowance.data >= maxRepay;
+    return !permit && !approved;
+  }, [allowance.data, maxRepay, permit]);
 
   const handleSubmitAction = useCallback(async () => {
     if (!walletAddress) return;
-    const isMultiSig = await isContract(walletAddress);
-    if (isMultiSig) {
-      await approve();
-    } else {
-      await signInstallmentsPermit();
+    if (needsApproval) {
+      if (await isContract(walletAddress)) {
+        await approve();
+      } else {
+        await signPermit();
+      }
+      return;
     }
-  }, [approve, isContract, signInstallmentsPermit, walletAddress]);
-
-  useEffect(() => {
-    if (permit) borrow();
-  }, [borrow, permit]);
-
-  useEffect(() => {
-    if (approveStatus === 'success') {
-      setApproveStatus('idle');
-      borrow();
-    }
-  }, [approveStatus, borrow]);
+    borrow();
+  }, [approve, borrow, isContract, needsApproval, signPermit, walletAddress]);
 
   return {
     handleSubmitAction,
+    needsApproval,
     isLoading:
-      installmentsBorrow.isLoading || waitingInstallmentsBorrow || signingPermit || approveStatus === 'pending',
+      installmentsBorrow.isLoading ||
+      installmentsBorrowETH.isLoading ||
+      waitingInstallmentsBorrow ||
+      waitingInstallmentsBorrowETH ||
+      signingPermit ||
+      approveStatus === 'pending' ||
+      allowance.isLoading,
   };
 }
