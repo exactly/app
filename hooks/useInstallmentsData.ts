@@ -24,18 +24,24 @@ export default function useInstallmentsData({
   const getDetails = useCallback(
     (amount: bigint, installments_: bigint, firstMaturity: bigint) => {
       if (amount === 0n || irmParameters === undefined || marketAccount === undefined) return;
-      const { floatingUtilization, floatingAssets, floatingDebt, floatingBackupBorrowed, fixedPools } = marketAccount;
+      const {
+        floatingUtilization,
+        totalFloatingBorrowAssets,
+        totalFloatingDepositAssets,
+        floatingBackupBorrowed,
+        fixedPools,
+      } = marketAccount;
       const fixedPoolsUtilizations = fixedPools
         .filter(({ maturity }) => maturity >= firstMaturity && maturity < firstMaturity + installments_ * INTERVAL)
-        .map(({ supplied, borrowed }) => fixedUtilization(supplied, borrowed, floatingAssets));
+        .map(({ supplied, borrowed }) => fixedUtilization(supplied, borrowed, totalFloatingDepositAssets));
       const timestamp = Math.round(Date.now() / 1000);
       const parameters = [
-        floatingAssets,
+        totalFloatingDepositAssets,
         Number(firstMaturity),
         Number(installments_),
         fixedPoolsUtilizations,
         floatingUtilization,
-        globalUtilization(floatingAssets, floatingDebt, floatingBackupBorrowed),
+        globalUtilization(totalFloatingDepositAssets, totalFloatingBorrowAssets, floatingBackupBorrowed),
         irmParameters,
         timestamp,
       ] as const;
