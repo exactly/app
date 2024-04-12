@@ -29,7 +29,20 @@ function useAccountData(): Omit<AccountDataHook, 'marketAccount'>;
 function useAccountData(
   symbol?: string,
 ): Omit<AccountDataHook, 'getMarketAccount'> | Omit<AccountDataHook, 'marketAccount'> {
-  const { isLoading, isFetching, data, refetch } = usePreviewerExactly();
+  const { isLoading, isFetching, data: _data, refetch } = usePreviewerExactly();
+
+  const data = useMemo(() => {
+    if (!_data) return undefined;
+    return _data.map((dataItem) => {
+      if ('symbol' in dataItem && dataItem.symbol.startsWith('exa')) {
+        return {
+          ...dataItem,
+          assetSymbol: dataItem.symbol.slice(3),
+        };
+      }
+      return dataItem;
+    });
+  }, [_data]);
 
   const ctx = useContext(AccountDataContext);
 
