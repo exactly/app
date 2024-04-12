@@ -7,7 +7,6 @@ import getSymbolDescription from 'utils/getSymbolDescription';
 import useAccountData from 'hooks/useAccountData';
 import useRouter from 'hooks/useRouter';
 import { useTranslation } from 'react-i18next';
-import { useWeb3 } from 'hooks/useWeb3';
 
 type Props = PropsWithChildren<{
   symbol: string;
@@ -21,16 +20,13 @@ const MobileAssetCard: FC<Props> = ({ symbol, isFloating, children, isMarkets = 
   const { query } = useRouter();
   const { marketAccount } = useAccountData(symbol);
   const { palette } = useTheme();
-  const {
-    chain: { id: displayNetworkId },
-  } = useWeb3();
 
   const assetDescription = useCallback(
     (s: string) => {
       if (!marketAccount) return '';
-      return getSymbolDescription(marketAccount, s, displayNetworkId);
+      return getSymbolDescription(marketAccount, s);
     },
-    [displayNetworkId, marketAccount],
+    [marketAccount],
   );
 
   return (

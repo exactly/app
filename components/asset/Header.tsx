@@ -46,9 +46,9 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
   const assetDescription = useCallback(
     (s: string) => {
       if (!marketAccount) return '';
-      return getSymbolDescription(marketAccount, s, displayNetworkId);
+      return getSymbolDescription(marketAccount, s);
     },
-    [displayNetworkId, marketAccount],
+    [marketAccount],
   );
 
   useEffect(() => {
