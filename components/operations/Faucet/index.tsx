@@ -1,61 +1,21 @@
-import React, { useCallback, useState } from 'react';
-import { useAccount, useContractWrite } from 'wagmi';
-import useWaitForTransaction from 'hooks/useWaitForTransaction';
+import React, { useCallback } from 'react';
+import { useAccount } from 'wagmi';
 import Image from 'next/image';
 import imageToBase64 from 'utils/imageToBase64';
 import { useTranslation } from 'react-i18next';
-import { parseUnits } from 'viem';
 
 import useAssets from 'hooks/useAssets';
 
 import { Box, Button, Divider, Typography } from '@mui/material';
 import formatSymbol from 'utils/formatSymbol';
-import { LoadingButton } from '@mui/lab';
 import useAccountData from 'hooks/useAccountData';
-import { abi } from './abi';
+import AssetMinter from './AssetMinter';
 
 function Faucet() {
   const { t } = useTranslation();
   const { connector } = useAccount();
-  const { accountData, getMarketAccount, refreshAccountData } = useAccountData();
-  const [loading, setLoading] = useState<string | undefined>(undefined);
+  const { accountData } = useAccountData();
   const assets = useAssets();
-
-  const { data, write } = useContractWrite({
-    address: '0x1ca525Cd5Cb77DB5Fa9cBbA02A0824e283469DBe',
-    abi,
-    functionName: 'mint',
-  });
-
-  const { isLoading } = useWaitForTransaction({
-    hash: data?.hash,
-    onSettled: async () => {
-      await refreshAccountData();
-      setLoading(undefined);
-    },
-  });
-
-  const mint = useCallback(
-    async (symbol: string) => {
-      const marketAccount = getMarketAccount(symbol);
-      if (!marketAccount) return;
-      try {
-        const { asset, decimals } = marketAccount;
-
-        setLoading(symbol);
-        const amounts: Record<string, string> = {
-          DAI: '50000',
-          USDC: '50000',
-          WBTC: '2',
-        };
-
-        write({ args: [asset, parseUnits(amounts[symbol], decimals)] });
-      } catch {
-        setLoading(undefined);
-      }
-    },
-    [getMarketAccount, write],
-  );
 
   const addTokens = useCallback(async () => {
     if (!accountData) return;
@@ -106,18 +66,12 @@ function Faucet() {
                 {formatSymbol(asset)}
               </Typography>
             </Box>
-            {asset === 'WETH' || asset === 'wstETH' ? (
-              <a
-                href={asset === 'wstETH' ? 'https://stake.testnet.fi/' : 'https://goerlifaucet.com/'}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+            {asset === 'WETH' ? (
+              <a href={'https://www.alchemy.com/faucets/optimism-sepolia'} target="_blank" rel="noopener noreferrer">
                 <Button variant="contained">{t('Mint')}</Button>
               </a>
             ) : (
-              <LoadingButton variant="contained" onClick={() => mint(asset)} loading={isLoading && asset === loading}>
-                {t('Mint')}
-              </LoadingButton>
+              <AssetMinter symbol={asset} />
             )}
           </Box>
         ))}
