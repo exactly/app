@@ -16,7 +16,7 @@ const Governance: NextPage = () => {
   const { t } = useTranslation();
   const { isConnected, walletAddress, impersonateActive } = useWeb3();
   const mTree = useMerkleTree(walletAddress);
-  const { open: openGetEXA } = useModal('get-exa');
+  const { open: openGetEXA } = useModal('exa');
 
   return (
     <Box display="flex" flexDirection="column" mx="auto" gap={5} my={5} maxWidth={480}>

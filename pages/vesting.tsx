@@ -183,7 +183,7 @@ const Vesting: NextPage = () => {
 
   const { rewards } = useRewards();
   const { open: openRewards } = useModal('rewards');
-  const { open: openGetEXA } = useModal('get-exa');
+  const { open: openGetEXA } = useModal('exa');
 
   const { usdPrice, unclaimedTokens } = {
     usdPrice: rewards['esEXA']?.usdPrice || 0n,

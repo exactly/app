@@ -1,11 +1,13 @@
 import React, { createContext, useContext, useState, useMemo, useCallback, useEffect } from 'react';
 import type { FC, PropsWithChildren } from 'react';
 
+import qs from 'query-string';
+
 import type { Operation } from 'types/Operation';
 import type { Position } from 'components/DebtManager/types';
 import { useRouter } from 'next/router';
 
-const IDENTIFIERS = ['operation', 'rewards', 'rollover', 'leverager', 'proto-staker', 'faucet', 'get-exa'] as const;
+const IDENTIFIERS = ['operation', 'rewards', 'rollover', 'leverager', 'proto-staker', 'faucet', 'exa'] as const;
 type Identifier = (typeof IDENTIFIERS)[number];
 
 function isModalIdentifier(value: string): value is Identifier {
@@ -39,7 +41,7 @@ export const ModalContextProvider: FC<PropsWithChildren> = ({ children }) => {
       setCurrent(identifier);
       router.replace({
         pathname: router.pathname,
-        query: { ...router.query, [identifier]: null },
+        query: qs.stringify({ ...router.query, [identifier]: null }),
       });
     },
     [router],
@@ -51,7 +53,7 @@ export const ModalContextProvider: FC<PropsWithChildren> = ({ children }) => {
     if (!current) return;
     const { query } = router;
     const { [current]: _, ...rest } = query;
-    router.push({ pathname: router.pathname, query: rest }, undefined, { shallow: true });
+    router.push({ pathname: router.pathname, query: qs.stringify(rest) }, undefined, { shallow: true });
   }, [current, router]);
 
   useEffect(() => {

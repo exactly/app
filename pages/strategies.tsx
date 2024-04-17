@@ -30,7 +30,7 @@ const Strategies: NextPage = () => {
   const { query } = useRouter();
   const { startLeverager } = useStartLeverager();
   const { startDebtManager } = useStartDebtManagerButton();
-  const { open: openGetEXA } = useModal('get-exa');
+  const { open: openGetEXA } = useModal('exa');
 
   const { chain } = useWeb3();
 

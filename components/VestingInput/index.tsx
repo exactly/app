@@ -160,7 +160,7 @@ function VestingInput({ refetch }: Props) {
   const { signTypedDataAsync } = useSignTypedData();
   const [isLoading, setIsLoading] = useState(false);
   const [tx, setTx] = useState<Transaction>();
-  const { open: openGetEXA } = useModal('get-exa');
+  const { open: openGetEXA } = useModal('exa');
 
   const [qty, setQty] = useState<string>('');
 

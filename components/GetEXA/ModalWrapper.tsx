@@ -11,7 +11,7 @@ import { GetEXAProvider } from 'contexts/GetEXAContext';
 import { track } from 'utils/mixpanel';
 
 export default function ModalWrapper() {
-  const { isOpen, close } = useModal('get-exa');
+  const { isOpen, close } = useModal('exa');
   const { t } = useTranslation();
   if (!isOpen) return null;
   return (
