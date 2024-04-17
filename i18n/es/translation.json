@@ -619,7 +619,6 @@
   "Min": "Mín",
   "Variable APR, Utilization and Global Utilization": "TNA Variable, Utilización y Utilización Global",
   "Learn more about reserve factor.": "Aprende más sobre el factor de reserva.",
-  "The Total Utilization is above 90%, and the remaining liquidity is established as a Liquidity Reserve that can't be borrowed and is only available for withdrawals.": "La Utilización Total está por encima del 90%, y la liquidez restante se establece como una Reserva de Liquidez que no se puede pedir prestada y solo está disponible para retiros.",
   "New!": "Nuevo!",
   "Installments": "Cuotas",
   "Each installment is due every {{interval}} days.": "Cada cuota vence cada {{interval}} días.",
@@ -630,5 +629,6 @@
   "Dues in {{daysToMaturity}} days.": "Vence en {{daysToMaturity}} días.",
   "For optimal benefits, consider selecting a pool with a longer remaining duration.": "Para obtener beneficios óptimos, considera seleccionar un pool con una duración restante más larga.",
   "Total": "Total",
-  " In {{installments}} installments": "En {{installments}} cuotas"
+  " In {{installments}} installments": "En {{installments}} cuotas",
+  "Repay Amount": "Monto a Pagar"
 }

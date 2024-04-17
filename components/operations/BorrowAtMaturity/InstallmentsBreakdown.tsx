@@ -5,6 +5,9 @@ import { useOperationContext } from 'contexts/OperationContext';
 import TableHeadCell from 'components/common/TableHeadCell';
 import parseTimestamp from 'utils/parseTimestamp';
 import useAccountData from 'hooks/useAccountData';
+import { formatUnits } from 'viem';
+import Image from 'next/image';
+import formatNumber from 'utils/formatNumber';
 
 export default function InstallmentsBreakdown({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation();
@@ -31,6 +34,7 @@ export default function InstallmentsBreakdown({ onClose }: { onClose: () => void
             <TableRow>
               <TableHeadCell title={''} />
               <TableHeadCell title={t('Maturity')} />
+              <TableHeadCell title={t('Repay Amount')} />
             </TableRow>
           </TableHead>
           <TableBody>
@@ -43,6 +47,25 @@ export default function InstallmentsBreakdown({ onClose }: { onClose: () => void
                 </TableCell>
                 <TableCell>
                   <Typography fontWeight={'bold'}>{parseTimestamp(installmentsDetails.maturities[index])}</Typography>
+                </TableCell>
+                <TableCell>
+                  <Box display="flex" gap={1}>
+                    <Image
+                      src={`/img/assets/${symbol}.svg`}
+                      alt={symbol}
+                      width={24}
+                      height={24}
+                      style={{
+                        maxWidth: '100%',
+                        height: 'auto',
+                      }}
+                    />
+                    <Typography fontWeight={'bold'}>
+                      {formatNumber(
+                        formatUnits(installmentsDetails.installmentsRepayAmount[index], marketAccount.decimals),
+                      )}
+                    </Typography>
+                  </Box>
                 </TableCell>
               </TableRow>
             ))}
