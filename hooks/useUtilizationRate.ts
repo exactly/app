@@ -15,7 +15,8 @@ export function useCurrentUtilizationRate(type: 'floating' | 'fixed', symbol: st
     if (!marketAccount) return undefined;
 
     const { floatingUtilization: utilization, fixedPools } = marketAccount;
-    if (!utilization || fixedPools === undefined) {
+
+    if (utilization === undefined || fixedPools === undefined) {
       return undefined;
     }
 

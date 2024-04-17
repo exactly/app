@@ -222,33 +222,35 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
           ))}
         </Grid>
       </Grid>
-      {totalUtilization && borrowableUtilization && totalUtilization > borrowableUtilization && (
-        <Alert sx={{ width: '100%' }} severity="info">
-          <Typography variant="body2">
-            {t(
-              "The Global Utilization is above {{borrowableUtilization}}, and the remaining liquidity is established as a Liquidity Reserve that can't be borrowed and is only available for withdrawals.",
-              {
-                borrowableUtilization: toPercentage(borrowableUtilization, 0),
-              },
-            )}
-          </Typography>
-          <Typography variant="body2">
-            <Trans
-              i18nKey="More info here: <1>reserve-factor</1>."
-              components={{
-                1: (
-                  <a
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    href="https://docs.exact.ly/guides/parameters#a.-reserve-factor"
-                    style={{ textDecoration: 'underline' }}
-                  ></a>
-                ),
-              }}
-            />
-          </Typography>
-        </Alert>
-      )}
+      {totalUtilization !== undefined &&
+        borrowableUtilization !== undefined &&
+        totalUtilization > borrowableUtilization && (
+          <Alert sx={{ width: '100%' }} severity="info">
+            <Typography variant="body2">
+              {t(
+                "The Global Utilization is above {{borrowableUtilization}}, and the remaining liquidity is established as a Liquidity Reserve that can't be borrowed and is only available for withdrawals.",
+                {
+                  borrowableUtilization: toPercentage(borrowableUtilization, 0),
+                },
+              )}
+            </Typography>
+            <Typography variant="body2">
+              <Trans
+                i18nKey="More info here: <1>reserve-factor</1>."
+                components={{
+                  1: (
+                    <a
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      href="https://docs.exact.ly/guides/parameters#a.-reserve-factor"
+                      style={{ textDecoration: 'underline' }}
+                    ></a>
+                  ),
+                }}
+              />
+            </Typography>
+          </Alert>
+        )}
     </>
   );
 };
