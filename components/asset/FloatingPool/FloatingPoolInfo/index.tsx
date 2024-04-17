@@ -21,15 +21,17 @@ type FloatingPoolInfoProps = {
 
 const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
   const { t } = useTranslation();
-  const { depositAPR, borrowAPR } = useFloatingPoolAPR(symbol);
+  const { depositAPR } = useFloatingPoolAPR(symbol);
   const { marketAccount } = useAccountData(symbol);
 
   const { rates } = useRewards();
-  const { deposited, borrowed } = useMemo(() => {
+  const { deposited, borrowed, borrowAPR } = useMemo(() => {
     if (!marketAccount) return {};
+
     const {
       totalFloatingDepositAssets: totalDeposited,
       totalFloatingBorrowAssets: totalBorrowed,
+      floatingBorrowRate,
       decimals,
       usdPrice,
     } = marketAccount;
@@ -37,6 +39,7 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
     return {
       deposited: Number((totalDeposited * usdPrice) / WAD) / 10 ** decimals,
       borrowed: Number((totalBorrowed * usdPrice) / WAD) / 10 ** decimals,
+      borrowAPR: floatingBorrowRate,
     };
   }, [marketAccount]);
 
@@ -74,7 +77,7 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
         label: t('Borrow APR'),
         value:
           borrowAPR !== undefined && marketAccount?.assetSymbol ? (
-            <ItemCell key={symbol} value={toPercentage(borrowAPR)} symbol={marketAccount.assetSymbol} />
+            <ItemCell key={symbol} value={toPercentage(Number(borrowAPR) / 1e18)} symbol={marketAccount.assetSymbol} />
           ) : undefined,
         tooltipTitle: t(
           'The borrowing interest APR related to the current utilization rate in the Variable Rate Pool.',
