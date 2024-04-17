@@ -14,9 +14,10 @@ type Props = {
   decimals: number;
   onChange: (value: string) => void;
   tooltip?: string;
+  disabled?: boolean;
 } & AAProps;
 
-function AssetInput({ qty, onChange, symbol, decimals, amount, label, onMax, tooltip }: Props) {
+function AssetInput({ qty, onChange, symbol, decimals, amount, label, onMax, tooltip, disabled }: Props) {
   const { isConnected } = useWeb3();
 
   const handleBlur = useCallback(() => {
@@ -33,7 +34,7 @@ function AssetInput({ qty, onChange, symbol, decimals, amount, label, onMax, too
     <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <AssetSelector />
-        <ModalInput value={qty} decimals={decimals} onValueChange={onChange} onBlur={handleBlur} />
+        <ModalInput value={qty} decimals={decimals} onValueChange={onChange} onBlur={handleBlur} disabled={disabled} />
       </Box>
       <Box
         sx={{

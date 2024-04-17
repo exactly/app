@@ -1,4 +1,4 @@
-import React, { FC, PropsWithChildren, useCallback, useEffect, useRef, useState } from 'react';
+import React, { FC, PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ModalTxCost from 'components/OperationsModal/ModalTxCost';
 import ModalGif from 'components/OperationsModal/ModalGif';
 import { toPercentage } from 'utils/utils';
@@ -103,6 +103,7 @@ const BorrowAtMaturity: FC<PropsWithChildren> = ({ children }) => {
               label={t('Safe borrow limit')}
               amount={safeMaximumBorrow}
               tooltip={t('The maximum amount you can borrow without putting your health factor at risk')}
+              disabled={marketAccount?.totalFloatingDepositAssets === 0n}
             />
           </ModalBoxRow>
           <ModalBoxRow>
