@@ -91,18 +91,11 @@ export const useAllowances = (): AllowancesState => {
       } as const,
     ]);
     const ethRouterDescriptor = ethRouter
-      ? ([
-          {
-            symbol: 'WETH',
-            spenderAddress: ethRouter.address,
-            spenderName: 'ETHRouter',
-            type: 'shareAsset',
-          },
-        ] as const)
+      ? ([{ symbol: 'WETH', spenderAddress: ethRouter.address, spenderName: 'ETHRouter', type: 'shareAsset' }] as const)
       : [];
 
     return [...assetDescriptors, ...ethRouterDescriptor];
-  }, [assetSymbols, debtManager, ethRouter]);
+  }, [assetSymbols, debtManager, ethRouter, installmentsRouter]);
 
   const descriptorToAllowance = useCallback(
     async (descriptor: AllowanceDescriptor, owner: Address) => {
