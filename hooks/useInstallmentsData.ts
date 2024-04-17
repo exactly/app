@@ -45,7 +45,13 @@ export default function useInstallmentsData({
         irmParameters,
         timestamp,
       ] as const;
-      const { amounts: installmentsPrincipal, installments: installmentsRepayAmount } = split(amount, ...parameters);
+      const {
+        amounts: installmentsPrincipal,
+        installments: installmentsRepayAmount,
+        effectiveRate,
+      } = split(amount, ...parameters, {
+        rateTolerance: 10n ** 15n,
+      });
       const totalPrincipal = installmentsPrincipal.reduce((acc, val) => acc + val, 0n);
       const maxRepay = installmentsRepayAmount.reduce((acc, val) => acc + val, 0n);
       const averageRepay = maxRepay / installments_;
@@ -57,6 +63,7 @@ export default function useInstallmentsData({
         totalPrincipal,
         maxRepay,
         averageRepay,
+        effectiveRate,
       };
     },
     [irmParameters, marketAccount],

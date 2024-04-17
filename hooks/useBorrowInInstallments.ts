@@ -2,7 +2,6 @@ import { useCallback, useMemo, useState } from 'react';
 import { Hex, TransactionReceipt, zeroAddress } from 'viem';
 import {
   installmentsRouterABI,
-  useErc20Allowance,
   useInstallmentsRouterBorrow,
   useInstallmentsRouterBorrowEth,
   usePrepareInstallmentsRouterBorrow,
@@ -19,6 +18,7 @@ import { track } from 'utils/mixpanel';
 import waitForTransaction from 'utils/waitForTransaction';
 import formatNumber from 'utils/formatNumber';
 import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { erc20ABI, useContractRead } from 'wagmi';
 
 type Permit = {
   value: bigint;
@@ -90,9 +90,11 @@ export default function useBorrowInInstallments() {
     onSettled: handleSettled,
   });
 
-  const allowance = useErc20Allowance(
+  const allowance = useContractRead(
     walletAddress && installmentsRouter && marketContract
       ? {
+          abi: erc20ABI,
+          functionName: 'allowance',
           address: marketContract.address,
           args: [walletAddress, installmentsRouter.address],
         }

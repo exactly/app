@@ -28,7 +28,8 @@ import Installments from './Installments';
 const BorrowAtMaturity: FC<PropsWithChildren> = ({ children }) => {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
-  const { symbol, errorData, setErrorData, qty, gasCost, tx, installments } = useOperationContext();
+  const { symbol, errorData, setErrorData, qty, gasCost, tx, installments, installmentsDetails } =
+    useOperationContext();
   const {
     isLoading: borrowAtMaturityLoading,
     onMax,
@@ -75,6 +76,12 @@ const BorrowAtMaturity: FC<PropsWithChildren> = ({ children }) => {
   }, []);
   const loading = installments > 1 ? borrowInInstallmentsLoading : borrowAtMaturityLoading || previewIsLoading;
 
+  const apr = useMemo(() => {
+    if (installments === 1) return toPercentage(Number(fixedRate) / 1e18);
+    if (!installmentsDetails) return 'N/A';
+    return toPercentage(Number(installmentsDetails.effectiveRate) / 1e18);
+  }, [fixedRate, installments, installmentsDetails]);
+
   if (tx) return <ModalGif tx={tx} tryAgain={borrow} />;
 
   return (
@@ -109,7 +116,7 @@ const BorrowAtMaturity: FC<PropsWithChildren> = ({ children }) => {
               <ModalInfoHealthFactor qty={qty} symbol={symbol} operation="borrowAtMaturity" />
             </ModalBoxCell>
             <ModalBoxCell divisor>
-              <ModalInfoAPR withIcon apr={toPercentage(Number(fixedRate) / 1e18)} symbol={symbol} />
+              <ModalInfoAPR withIcon apr={apr} symbol={symbol} />
             </ModalBoxCell>
           </ModalBoxRow>
         </ModalBox>
