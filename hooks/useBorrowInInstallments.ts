@@ -29,7 +29,8 @@ type Permit = {
 };
 
 export default function useBorrowInInstallments() {
-  const { installmentsDetails, marketContract, date, symbol, slippage, setTx, setErrorData } = useOperationContext();
+  const { installmentsDetails, installments, marketContract, date, symbol, slippage, setTx, setErrorData } =
+    useOperationContext();
   const { walletAddress, opts, chain } = useWeb3();
   const [permit, setPermit] = useState<Permit>();
   const [signingPermit, setSigningPermit] = useState(false);
@@ -46,7 +47,7 @@ export default function useBorrowInInstallments() {
   }, [date, installmentsDetails, installmentsRouter, maxRepay]);
 
   const config = useMemo(() => {
-    if (!marketContract || !commonArgs || !installmentsRouter) return;
+    if (!marketContract || !commonArgs || !installmentsRouter || installments === 1) return;
     const args = [marketContract.address, ...commonArgs] as const;
     return {
       ...opts,
@@ -56,16 +57,16 @@ export default function useBorrowInInstallments() {
       account: walletAddress ?? zeroAddress,
       args: permit ? ([...args, permit] as const) : args,
     };
-  }, [chain.id, commonArgs, installmentsRouter, marketContract, opts, permit, walletAddress]);
+  }, [chain.id, commonArgs, installments, installmentsRouter, marketContract, opts, permit, walletAddress]);
 
   const ethConfig = useMemo(() => {
-    if (!commonArgs) return;
+    if (!commonArgs || config === undefined) return;
     const args = permit ? ([...commonArgs, permit] as const) : commonArgs;
     return { ...config, args };
   }, [commonArgs, config, permit]);
 
-  const prepare = usePrepareInstallmentsRouterBorrow(config);
-  const prepareETH = usePrepareInstallmentsRouterBorrowEth(ethConfig);
+  const prepare = usePrepareInstallmentsRouterBorrow(isBorrowETH ? undefined : config);
+  const prepareETH = usePrepareInstallmentsRouterBorrowEth(isBorrowETH ? ethConfig : undefined);
   const installmentsBorrow = useInstallmentsRouterBorrow(prepare.config);
   const installmentsBorrowETH = useInstallmentsRouterBorrowEth(prepareETH.config);
 
@@ -171,7 +172,7 @@ export default function useBorrowInInstallments() {
   }, [installmentsBorrow, installmentsBorrowETH, isBorrowETH]);
 
   const needsApproval = useMemo(() => {
-    if (!allowance.data) return false;
+    if (allowance.data === undefined) return true;
     const approved = allowance.data >= maxRepay;
     return !permit && !approved;
   }, [allowance.data, maxRepay, permit]);
