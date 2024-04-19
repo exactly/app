@@ -147,7 +147,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows }) => {
                   hover
                   data-testid={`markets-pool-row-${symbol}`}
                 >
-                  <TableCell component="th" scope="row" sx={{ pr: 3, pl: 1.5 }}>
+                  <TableCell component="th" scope="row" sx={{ pr: 3, pl: 3 }}>
                     <Grid container alignItems="center">
                       {isLoading ? (
                         <Skeleton variant="circular" width={24} height={24} />
@@ -168,7 +168,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows }) => {
                       </Typography>
                     </Grid>
                   </TableCell>
-                  <TableCell align="left" sx={{ width: '170px', py: 3, pl: 3, pr: 1.5 }}>
+                  <TableCell align="left" sx={{ width: '170px', py: '20px', pl: 3, pr: 1.5 }}>
                     <Typography fontWeight={700}>
                       {isLoading ? <Skeleton width={80} /> : `$${totalDeposited}`}
                     </Typography>
@@ -176,9 +176,9 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows }) => {
                       {isLoading ? <Skeleton width={80} /> : `${depositedAssets} ${formatSymbol(symbol)}`}
                     </Typography>
                   </TableCell>
-                  <TableCell align="left" sx={{ width: '170px', py: 3, px: 1.5 }}>
+                  <TableCell align="left" sx={{ width: '170px', py: '20px', px: 1.5 }}>
                     {isLoading || depositAPR === undefined ? (
-                      <Skeleton width={110} height={50} />
+                      <Skeleton width={110} height={30} />
                     ) : (
                       <Box display="flex" flexDirection="column">
                         <Grid container alignItems="center" gap={1}>
@@ -237,7 +237,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows }) => {
                       </Tooltip>
                     )}
                   </TableCell>
-                  <TableCell align="left" sx={{ width: '170px', py: 3, pl: 3, pr: 1.5 }}>
+                  <TableCell align="left" sx={{ width: '170px', py: '20px', pl: 3, pr: 1.5 }}>
                     <Typography fontWeight={700}>
                       {isLoading ? <Skeleton width={80} /> : `$${totalBorrowed}`}
                     </Typography>
@@ -245,7 +245,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows }) => {
                       {isLoading ? <Skeleton width={80} /> : `${borrowedAssets} ${formatSymbol(symbol)}`}
                     </Typography>
                   </TableCell>
-                  <TableCell align="left" sx={{ width: '170px', py: 3, px: 1.5 }}>
+                  <TableCell align="left" sx={{ width: '170px', py: '20px', px: 1.5 }}>
                     {isLoading || borrowAPR === undefined ? (
                       <Skeleton width={80} />
                     ) : (
@@ -274,12 +274,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows }) => {
                     sx={{ cursor: 'default', pl: 1.5, pr: 3, width: 'fit-content' }}
                   >
                     {isLoading ? (
-                      <Skeleton
-                        sx={{ margin: 'auto', borderRadius: '32px' }}
-                        variant="rounded"
-                        height={34}
-                        width={80}
-                      />
+                      <Skeleton sx={{ borderRadius: '32px' }} variant="rounded" height={34} width={80} />
                     ) : (
                       <Tooltip
                         title={t(

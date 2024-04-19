@@ -49,7 +49,7 @@ const MarketTables: FC = () => {
       title: t('Asset'),
       width: '130px',
       sortKey: 'symbol',
-      sx: { pl: 1.5, pr: 3, pt: 1, pb: 1 },
+      sx: { pl: 3, pr: 3, pt: 1, pb: 1 },
     },
     {
       key: 'Total Deposits',
@@ -232,8 +232,6 @@ const MarketTables: FC = () => {
     <>
       <Grid
         my={2}
-        px={1.5}
-        pb={1}
         boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : '')}
         borderRadius="8px 8px 0px 0px"
         bgcolor="components.bg"
