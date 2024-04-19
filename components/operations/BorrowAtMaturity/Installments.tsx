@@ -5,6 +5,7 @@ import { Box, Typography } from '@mui/material';
 import { MATURITY_DAYS } from 'utils/utils';
 import ModalAlert from 'components/common/modal/ModalAlert';
 import InstallmentsOptions from './InstallmentsOptions';
+import { track } from 'utils/mixpanel';
 
 export default function Installments({ setBreakdownSheetOpen }: { setBreakdownSheetOpen: (open: boolean) => void }) {
   const { t } = useTranslation();
@@ -12,6 +13,10 @@ export default function Installments({ setBreakdownSheetOpen }: { setBreakdownSh
 
   const viewBreakdown = useCallback(() => {
     setBreakdownSheetOpen(true);
+    track('Button Clicked', {
+      name: 'Payment Schedule',
+      location: 'Operations Modal',
+    });
   }, [setBreakdownSheetOpen]);
 
   return (

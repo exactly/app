@@ -169,7 +169,22 @@ export default function useBorrowInInstallments() {
       if (!installmentsBorrow.write) return;
       installmentsBorrow.write();
     }
-  }, [installmentsBorrow, installmentsBorrowETH, isBorrowETH]);
+    track('TX Signed', {
+      contractName: 'InstallmentsRouter',
+      method: 'borrow',
+      symbol,
+      amount: installmentsDetails?.installmentsPrincipal.map(String).join(','),
+      hash: installmentsBorrowETH.data?.hash || '0x',
+      maturity: Number(date),
+    });
+  }, [
+    date,
+    installmentsBorrow,
+    installmentsBorrowETH,
+    installmentsDetails?.installmentsPrincipal,
+    isBorrowETH,
+    symbol,
+  ]);
 
   const needsApproval = useMemo(() => {
     if (allowance.data === undefined) return true;

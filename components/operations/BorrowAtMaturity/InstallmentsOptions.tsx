@@ -6,6 +6,7 @@ import useAccountData from 'hooks/useAccountData';
 import { formatUnits } from 'viem';
 import { Box, Skeleton, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { track } from 'utils/mixpanel';
 
 type OptionProps = {
   installments: number;
@@ -45,9 +46,15 @@ export default function InstallmentsOptions() {
 
   const handleChange = useCallback(
     (option: { installments: number }) => {
+      track('Option Selected', {
+        name: 'Installments',
+        location: 'Operations Modal',
+        value: option.installments,
+        prevValue: installments,
+      });
       onInstallmentsChange(option.installments);
     },
-    [onInstallmentsChange],
+    [installments, onInstallmentsChange],
   );
 
   const option = useMemo(() => {
