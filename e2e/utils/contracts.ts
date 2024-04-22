@@ -30,7 +30,7 @@ import {
   swapperABI,
 } from '../../types/abi';
 
-const ERC20TokenSymbols = ['WETH', 'USDC', 'OP', 'esEXA', 'EXA'] as const;
+const ERC20TokenSymbols = ['WETH', 'USDC', 'USDC.e', 'OP', 'esEXA', 'EXA'] as const;
 export type ERC20TokenSymbol = (typeof ERC20TokenSymbols)[number];
 export type Coin = ERC20TokenSymbol | 'ETH';
 

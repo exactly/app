@@ -49,12 +49,12 @@ const Strategies: NextPage = () => {
     return toPercentage(Number(lowestAPR) / 1e18);
   }, [accountData]);
 
-  const { depositAPR: usdcDepositAPR } = useFloatingPoolAPR('USDC', undefined, 'deposit');
+  const { depositAPR: usdcDepositAPR } = useFloatingPoolAPR('USDC.e', undefined, 'deposit');
 
   const { rates } = useRewards();
 
   const maxYield = useMemo(() => {
-    const usdc = getMarketAccount('USDC');
+    const usdc = getMarketAccount('USDC.e');
     if (!usdc || !usdcDepositAPR) return '0%';
     const ratio = (WAD * WAD) / (WAD - (usdc.adjustFactor * usdc.adjustFactor) / WAD);
 
@@ -62,10 +62,10 @@ const Strategies: NextPage = () => {
       (parseEther(String(usdcDepositAPR)) * ratio) / WAD - (usdc.floatingBorrowRate * (ratio - WAD)) / WAD;
 
     const collateralRewardsAPR =
-      rates['USDC']?.map((r) => (r.floatingDeposit * ratio) / WAD).reduce((acc, curr) => acc + curr, 0n) ?? 0n;
+      rates['USDC.e']?.map((r) => (r.floatingDeposit * ratio) / WAD).reduce((acc, curr) => acc + curr, 0n) ?? 0n;
 
     const borrowRewardsAPR =
-      rates['USDC']?.map((r) => (r.borrow * (ratio - WAD)) / WAD).reduce((acc, curr) => acc + curr, 0n) ?? 0n;
+      rates['USDC.e']?.map((r) => (r.borrow * (ratio - WAD)) / WAD).reduce((acc, curr) => acc + curr, 0n) ?? 0n;
 
     return toPercentage(Number(marketAPR + collateralRewardsAPR + borrowRewardsAPR) / 1e18);
   }, [getMarketAccount, rates, usdcDepositAPR]);
