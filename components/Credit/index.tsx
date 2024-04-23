@@ -301,7 +301,7 @@ const CreditWrapper = () => {
       <OperationContextProvider
         args={{
           operation: 'borrowAtMaturity',
-          symbol: 'USDC',
+          symbol: 'USDC.e',
         }}
       >
         <Credit />

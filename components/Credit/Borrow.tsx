@@ -23,13 +23,13 @@ const Borrow = ({ onDeposit, direct, receiver, depositConfig, onNextStep }: Prop
   const { setSymbol, setQty, setReceiver, setOperation, symbol, tx } = useOperationContext();
   const { route } = useSocketSwap();
 
-  const { marketAccount } = useAccountData('USDC');
+  const { marketAccount } = useAccountData('USDC.e');
   const { t } = useTranslation();
   const { chain } = useWeb3();
 
   useEffect(() => {
     setOperation('borrowAtMaturity');
-    setSymbol('USDC');
+    setSymbol('USDC.e');
     if (!marketAccount) return;
     if (direct && receiver) setReceiver(receiver);
   }, [chain.id, marketAccount, receiver, setQty, setReceiver, setSymbol, direct, setOperation]);
@@ -65,7 +65,7 @@ const Borrow = ({ onDeposit, direct, receiver, depositConfig, onNextStep }: Prop
           message={t(
             'This borrowing process will include a token swap from {{from}} to {{to}}; you will find the swap details below.',
             {
-              from: symbol === 'USDC' ? 'USDC.e' : symbol,
+              from: symbol,
               to: depositConfig.tokenSymbol,
             },
           )}
