@@ -30,6 +30,7 @@ import NewsModal from 'components/NewsModal';
 import GetEXAModal from 'components/GetEXA/ModalWrapper';
 import MaturityDateReminder from '../components/MaturityDateReminder';
 import NewIRMBanner from '../components/NewIRMBanner';
+import EXACard from 'components/ExaCard';
 
 dayjs.extend(isToday);
 const { maxWidth } = globals;
@@ -108,6 +109,7 @@ export default function App({ Component, pageProps, router }: AppProps) {
                 </Box>
                 <Modals />
                 <MaturityDateReminder />
+                <EXACard />
               </AccountDataProvider>
             </GlobalErrorProvider>
           </ModalContextProvider>
