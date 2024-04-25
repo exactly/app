@@ -26,8 +26,8 @@
   "dependencies": {
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.0",
-    "@exactly/lib": "exactly/lib#a1f8ef485159cba9378e829dacd25de47ecce88c",
-    "@exactly/protocol": "exactly/protocol#eb0a9f70fa9e4cdb99847ce5f0587611e8f4c077",
+    "@exactly/lib": "exactly/lib#90a6d1121e3350bd2a77c474bd59bfe1b0b8dd1e",
+    "@exactly/protocol": "exactly/protocol#d4246fb9c7e8425e32d1bee91766dc188d4c4e73",
     "@mui/icons-material": "^5.15.14",
     "@mui/lab": "^5.0.0-alpha.169",
     "@mui/material": "^5.15.14",
