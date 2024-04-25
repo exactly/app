@@ -57,6 +57,7 @@ export default (): BorrowAtMaturity => {
   const { accountData, marketAccount } = useAccountData(symbol);
 
   const [fixedRate, setFixedRate] = useState<bigint | undefined>();
+  const [fixedFee, setFixedFee] = useState<bigint | undefined>();
 
   const healthFactor = useHealthFactor();
   const minBorrowRate = useMemo<bigint | undefined>(() => {
@@ -88,7 +89,16 @@ export default (): BorrowAtMaturity => {
 
   const previewGasCost = useCallback(
     async (quantity: string): Promise<bigint | undefined> => {
-      if (!marketAccount || !walletAddress || !marketContract || !ETHRouterContract || !date || !quantity || !opts)
+      if (
+        !marketAccount ||
+        !walletAddress ||
+        !marketContract ||
+        !ETHRouterContract ||
+        !date ||
+        !quantity ||
+        !opts ||
+        !fixedFee
+      )
         return;
 
       if (await needsApproval(quantity)) {
@@ -96,7 +106,8 @@ export default (): BorrowAtMaturity => {
       }
 
       const amount = parseUnits(quantity, marketAccount.decimals);
-      const maxAmount = (amount * slippage) / WAD;
+      const maxAmount = ((amount + fixedFee) * slippage) / WAD;
+
       if (marketAccount.assetSymbol === 'WETH') {
         const sim = await ETHRouterContract.simulate.borrowAtMaturity([date, amount, maxAmount], opts);
         return estimate(sim.request);
@@ -116,6 +127,7 @@ export default (): BorrowAtMaturity => {
       date,
       opts,
       needsApproval,
+      fixedFee,
       slippage,
       estimate,
       approveEstimateGas,
@@ -190,10 +202,10 @@ export default (): BorrowAtMaturity => {
       });
     }
 
-    if (!marketAccount || !date || !qty || !walletAddress || !opts) return;
+    if (!marketAccount || !date || !qty || !walletAddress || !opts || !fixedFee) return;
 
     const amount = parseUnits(qty, marketAccount.decimals);
-    const maxAmount = (amount * slippage) / WAD;
+    const maxAmount = ((amount + fixedFee) * slippage) / WAD;
 
     let hash;
     try {
@@ -267,14 +279,15 @@ export default (): BorrowAtMaturity => {
     qty,
     walletAddress,
     opts,
+    fixedFee,
+    setErrorData,
     t,
+    setTx,
+    symbol,
     ETHRouterContract,
     marketContract,
     receiver,
-    setErrorData,
-    setTx,
     handleOperationError,
-    symbol,
   ]);
 
   const updateAPR = useCallback(async () => {
@@ -296,8 +309,10 @@ export default (): BorrowAtMaturity => {
         const fixedAPR = ((rate - WAD) * 31_536_000n) / (date - currentTimestamp);
 
         setFixedRate(fixedAPR);
+        setFixedFee(finalAssets - initialAssets);
       } catch (error) {
         setFixedRate(undefined);
+        setFixedFee(undefined);
       }
     } else {
       setFixedRate(minBorrowRate);

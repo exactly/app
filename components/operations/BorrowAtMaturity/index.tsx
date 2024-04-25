@@ -143,7 +143,7 @@ const BorrowAtMaturity: FC<PropsWithChildren> = ({ children }) => {
       <Grid item mt={{ xs: 2, sm: 3 }}>
         <ModalSubmit
           label={
-            borrowInInstallmentsNeedsApproval
+            borrowInInstallmentsNeedsApproval && installments > 1
               ? t('Approve')
               : translateOperation('borrowAtMaturity', { capitalize: true })
           }

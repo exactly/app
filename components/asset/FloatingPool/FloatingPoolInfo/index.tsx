@@ -105,9 +105,11 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
                   ))}
                 </>
               ),
-              tooltipTitle: t(
-                'This APR assumes a constant price for the EXA token during the vesting period of the esEXA reward',
-              ),
+              ...(depositRewards.some((r) => r.assetSymbol === 'esEXA') && {
+                tooltipTitle: t(
+                  'This APR assumes a constant price for the EXA token during the vesting period of the esEXA reward',
+                ),
+              }),
             },
           ]
         : []),
@@ -122,9 +124,11 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
                   ))}
                 </>
               ),
-              tooltipTitle: t(
-                'This APR assumes a constant price for the EXA token during the vesting period of the esEXA reward',
-              ),
+              ...(borrowRewards.some((r) => r.assetSymbol === 'esEXA') && {
+                tooltipTitle: t(
+                  'This APR assumes a constant price for the EXA token during the vesting period of the esEXA reward',
+                ),
+              }),
             },
           ]
         : []),
