@@ -55,6 +55,7 @@ import { debtManagerABI } from 'types/abi';
 import useStETHNativeAPR from 'hooks/useStETHNativeAPR';
 import useIsPermit from 'hooks/useIsPermit';
 import { gasLimit } from 'utils/gas';
+import useContractVersion from 'hooks/useContractVersion';
 
 type Params<T extends ExtractAbiFunctionNames<typeof debtManagerABI>> = AbiParametersToPrimitiveTypes<
   ExtractAbiFunction<typeof debtManagerABI, T>['inputs']
@@ -198,6 +199,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
   const stETHNativeAPR = useStETHNativeAPR();
 
   const minLeverageRatio = 1;
+  const contractVersion = useContractVersion();
 
   const [leverageStatus, setLeverageStatus] = useState<LeverageStatus>();
 
@@ -798,7 +800,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
         primaryType: 'Permit',
         domain: {
           name: who.startsWith('market') ? '' : await assetIn.read.name(opts),
-          version: '1',
+          version: await contractVersion(verifyingContract),
           chainId: chain.id,
           verifyingContract,
         },
