@@ -632,5 +632,6 @@
   " In {{installments}} installments": "En {{installments}} cuotas",
   "Repay Amount": "Monto a Pagar",
   "Join the waitlist": "Únete a la lista de espera",
-  "The first onchain debit & credit card.": "La primer tarjeta de débito y crédito onchain."
+  "The first onchain debit & credit card.": "La primer tarjeta de débito y crédito onchain.",
+  "Please set this asset as collateral in your dashboard": "Por favor, establece este activo como colateral en tu panel de control"
 }

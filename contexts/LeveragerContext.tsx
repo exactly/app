@@ -393,8 +393,14 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
   );
 
   const setCollateralSymbol = useCallback(
-    (collateralSymbol: string) => setBorrowSymbol(collateralSymbol),
-    [setBorrowSymbol],
+    (collateralSymbol: string) => {
+      const marketAccount = getMarketAccount(collateralSymbol);
+      setBorrowSymbol(collateralSymbol);
+      if (marketAccount && !marketAccount.isCollateral) {
+        return setErrorData({ status: true, message: t('Please set this asset as collateral in your dashboard') });
+      }
+    },
+    [getMarketAccount, setBorrowSymbol, t],
   );
 
   const setSecondaryOperation = useCallback((secondaryOperation: 'deposit' | 'withdraw') => {
@@ -834,6 +840,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     [
       assetIn,
       chain.id,
+      contractVersion,
       debtManager,
       isPermit,
       maIn,
