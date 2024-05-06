@@ -6,13 +6,16 @@ import globalUtilization from '@exactly/lib/esm/interest-rate-model/globalUtiliz
 import useAccountData from 'hooks/useAccountData';
 import { INTERVAL } from 'utils/utils';
 import useIRM from 'hooks/useIRM';
+import { Operation } from 'types/Operation';
 
 export default function useInstallmentsData({
+  operation,
   qty,
   date,
   symbol,
   installments,
 }: {
+  operation: Operation;
   qty: string;
   date?: bigint;
   symbol: string;
@@ -23,7 +26,13 @@ export default function useInstallmentsData({
 
   const getDetails = useCallback(
     (amount: bigint, installments_: bigint, firstMaturity: bigint) => {
-      if (amount === 0n || irmParameters === undefined || marketAccount === undefined) return;
+      if (
+        amount === 0n ||
+        irmParameters === undefined ||
+        marketAccount === undefined ||
+        operation !== 'borrowAtMaturity'
+      )
+        return;
       const {
         floatingUtilization,
         totalFloatingBorrowAssets,
@@ -66,7 +75,7 @@ export default function useInstallmentsData({
         effectiveRate,
       };
     },
-    [irmParameters, marketAccount],
+    [irmParameters, marketAccount, operation],
   );
 
   const installmentsOptions = useMemo(() => {

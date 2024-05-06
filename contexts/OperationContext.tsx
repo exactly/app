@@ -122,6 +122,7 @@ export const OperationContextProvider: FC<PropsWithChildren<Props>> = ({ args, c
   const marketContract = useMarket(marketAccount?.market);
   const ETHRouterContract = useETHRouter();
   const { installmentsOptions, installmentsDetails } = useInstallmentsData({
+    operation,
     qty,
     date,
     symbol: marketSymbol,
