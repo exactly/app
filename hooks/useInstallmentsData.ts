@@ -54,16 +54,12 @@ export default function useInstallmentsData({
         irmParameters,
         timestamp,
       ] as const;
-      // Pevents division by zero error in @exactly/lib/esm/installments/split function if there are no fixed pools
       if (fixedPoolsUtilizations.length === 0) return;
-      // Check for already matured pools, @exactly/lib/esm/installments/split will throw an error if the pool is already matured
-      if (
-        fixedPoolsUtilizations.some((_, index) => {
-          const maturity = BigInt(firstMaturity) + BigInt(index) * BigInt(INTERVAL);
-          return timestamp >= maturity;
-        })
-      )
-        return;
+      const alreadyMatured = fixedPoolsUtilizations.some((_, index) => {
+        const maturity = firstMaturity + BigInt(index) * INTERVAL;
+        return timestamp >= maturity;
+      });
+      if (alreadyMatured) return;
       const {
         amounts: installmentsPrincipal,
         installments: installmentsRepayAmount,
