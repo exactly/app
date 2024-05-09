@@ -23,13 +23,12 @@ type Props = {
 
 const SocketPlugIn = ({ updateRoutes }: Props) => {
   const { chain } = useNetwork();
-  const { palette } = useTheme();
+  const { palette, breakpoints } = useTheme();
   const { t } = useTranslation();
   const provider = useEthersProvider();
   const [destinationNetwork, setDestinationNetwork] = useState<Network | undefined>();
   const [sourceNetwork, setSourceNetwork] = useState<Network | undefined>();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isMobile = useMediaQuery(breakpoints.down('sm'));
   const assets = useAssetAddresses();
 
   const [tokens, setTokens] = useState<Asset[]>();
@@ -123,7 +122,7 @@ const SocketPlugIn = ({ updateRoutes }: Props) => {
           secondaryText: hexToRgb(palette.text.primary),
           interactive: hexToRgb(palette.grey[200]),
           outline: hexToRgb(palette.text.primary),
-          accent: hexToRgb(palette.text.primary),
+          accent: palette.mode === 'dark' ? hexToRgb(palette.text.primary) : hexToRgb(palette.grey[900]),
           onInteractive: hexToRgb(palette.text.primary),
           onAccent: hexToRgb(palette.components.bg),
           width: isMobile ? 348 : 448,
