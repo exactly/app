@@ -253,7 +253,7 @@ const WithdrawAndCancel: React.FC<{
                 fullWidth
                 variant="contained"
                 color="error"
-                mainAction={cancel}
+                onClick={cancel}
                 loading={loading}
                 data-testid={`vesting-stream-${tokenId}-cancel-submit`}
               >
@@ -513,7 +513,7 @@ const ActiveStream: FC<ActiveStreamProps> = ({
               <MainActionButton
                 fullWidth
                 variant="contained"
-                mainAction={handleWithdrawClick}
+                onClick={handleWithdrawClick}
                 loading={loading}
                 data-testid={`vesting-stream-${tokenId}-claim`}
               >

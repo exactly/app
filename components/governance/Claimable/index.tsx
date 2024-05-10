@@ -88,7 +88,7 @@ const Claim: FC<ClaimableProps & { refresh: () => void }> = ({ amount, proof, re
     <MainActionButton
       variant="contained"
       fullWidth
-      mainAction={handleClick}
+      onClick={handleClick}
       disabled={claimLoading || waitingClaim}
       loading={claimLoading || waitingClaim}
     >

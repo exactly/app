@@ -141,7 +141,7 @@ const WithdrawAndCancel: React.FC<{
                 {t('Exit Read-Only Mode')}
               </Button>
             ) : (
-              <MainActionButton loading={l} mainAction={cancel} color="error" variant="contained" fullWidth>
+              <MainActionButton loading={l} onClick={cancel} color="error" variant="contained" fullWidth>
                 {t('Withdraw and Cancel Stream')}
               </MainActionButton>
             )}
@@ -475,12 +475,7 @@ const Vesting: NextPage = () => {
                           {t('Exit Read-Only Mode')}
                         </Button>
                       ) : (
-                        <MainActionButton
-                          loading={switchIsLoading}
-                          mainAction={withdrawAll}
-                          variant="contained"
-                          fullWidth
-                        >
+                        <MainActionButton loading={switchIsLoading} onClick={withdrawAll} variant="contained" fullWidth>
                           {t('Withdraw All')}
                         </MainActionButton>
                       )}
@@ -554,7 +549,7 @@ const Vesting: NextPage = () => {
                       ) : (
                         <MainActionButton
                           loading={loading}
-                          mainAction={handleClaimAll}
+                          onClick={handleClaimAll}
                           variant="contained"
                           fullWidth
                           data-testid="vesting-claim-all"

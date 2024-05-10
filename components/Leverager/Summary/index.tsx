@@ -246,7 +246,7 @@ const Summary = () => {
             ) : (
               <MainActionButton
                 loading={isLoading || summaryLoading}
-                mainAction={requiresApproval ? approveLeverage : submit}
+                onClick={requiresApproval ? approveLeverage : submit}
                 fullWidth
                 variant="contained"
                 disabled={disabledConfirm || summaryLoading}

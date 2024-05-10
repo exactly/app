@@ -1,5 +1,4 @@
 import React, { FC, MouseEvent, useCallback } from 'react';
-import { LoadingButton } from '@mui/lab';
 import { Button, CircularProgress, Typography } from '@mui/material';
 import { Box } from '@mui/system';
 import { useOperationContext } from 'contexts/OperationContext';
@@ -50,11 +49,12 @@ function ModalSubmit({ isLoading = false, disabled = false, submit, symbol, labe
 
   const handleApproveClick = useCallback(
     (event: MouseEvent<HTMLButtonElement>) => {
+      const text = (event.target as HTMLButtonElement).innerText;
       track('Button Clicked', {
         location: 'Operations Modal',
         name: 'approve',
         symbol,
-        text: event.currentTarget.innerText,
+        text,
       });
       handleSubmit();
     },
@@ -63,11 +63,12 @@ function ModalSubmit({ isLoading = false, disabled = false, submit, symbol, labe
 
   const handleSubmitClick = useCallback(
     (event: MouseEvent<HTMLButtonElement>) => {
+      const text = (event.target as HTMLButtonElement).innerText;
       track('Button Clicked', {
         location: 'Operations Modal',
         name: 'submit',
         symbol,
-        text: event.currentTarget.innerText,
+        text,
       });
       handleSubmit();
     },
@@ -101,7 +102,7 @@ function ModalSubmit({ isLoading = false, disabled = false, submit, symbol, labe
             label={loadingButton.label}
           />
         }
-        mainAction={handleApproveClick}
+        onClick={handleApproveClick}
         color="primary"
         variant="contained"
         disabled={disabled}
@@ -113,7 +114,7 @@ function ModalSubmit({ isLoading = false, disabled = false, submit, symbol, labe
   }
 
   return (
-    <LoadingButton
+    <MainActionButton
       fullWidth
       loading={isLoading}
       loadingIndicator={
@@ -134,7 +135,7 @@ function ModalSubmit({ isLoading = false, disabled = false, submit, symbol, labe
       data-testid="modal-submit"
     >
       {errorButton ? errorButton : label}
-    </LoadingButton>
+    </MainActionButton>
   );
 }
 

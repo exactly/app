@@ -262,7 +262,7 @@ const SelectRoute = () => {
         <MainActionButton
           disabled={(!route && !nativeSwap) || insufficientBalance}
           variant="contained"
-          mainAction={handleSubmit}
+          onClick={handleSubmit}
           loading={txStep === TXStep.CONFIRM_PENDING}
           data-testid={nativeSwap ? 'get-exa-submit' : 'get-exa-review'}
         >

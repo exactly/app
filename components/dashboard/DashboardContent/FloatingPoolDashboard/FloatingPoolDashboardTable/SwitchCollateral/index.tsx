@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { CircularProgress, Tooltip, Typography } from '@mui/material';
-import { useNetwork } from 'wagmi';
+import { useNetwork, useSwitchNetwork } from 'wagmi';
 import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 import waitForTransaction from 'utils/waitForTransaction';
@@ -24,12 +24,10 @@ function SwitchCollateral({ symbol }: Props) {
   const { marketAccount, refreshAccountData } = useAccountData(symbol);
   const auditor = useAuditor();
   const { chain } = useNetwork();
-  const {
-    chain: { id: displayNetworkId },
-    opts,
-  } = useWeb3();
+  const { chain: displayNetwork, opts } = useWeb3();
 
   const healthFactor = useHealthFactor();
+  const { switchNetworkAsync } = useSwitchNetwork();
 
   const [optimistic, setOptimistic] = useState<boolean | undefined>();
   const checked = useMemo<boolean>(() => {
@@ -40,10 +38,6 @@ function SwitchCollateral({ symbol }: Props) {
 
   const { disabled, disabledText } = useMemo<{ disabled: boolean; disabledText?: string }>(() => {
     if (!marketAccount || !healthFactor) return { disabled: true };
-
-    if (chain && displayNetworkId !== chain.id) {
-      return { disabled: true, disabledText: t('You are connected to a different network') };
-    }
 
     const { floatingBorrowAssets, fixedBorrowPositions, isCollateral, usdPrice, floatingDepositAssets, adjustFactor } =
       marketAccount;
@@ -65,7 +59,7 @@ function SwitchCollateral({ symbol }: Props) {
     }
 
     return { disabled: false };
-  }, [marketAccount, healthFactor, chain, displayNetworkId, t]);
+  }, [marketAccount, healthFactor, t]);
 
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -97,6 +91,22 @@ function SwitchCollateral({ symbol }: Props) {
       setLoading(false);
     }
   }, [marketAccount, auditor, opts, checked, symbol, refreshAccountData]);
+
+  const siwtchNetworkAndToggle = useCallback(async () => {
+    if (chain && chain.id !== displayNetwork.id && switchNetworkAsync) {
+      try {
+        const result = await switchNetworkAsync(displayNetwork.id);
+
+        if (result.id === displayNetwork.id) {
+          onToggle();
+        }
+      } catch (error) {
+        return;
+      }
+    } else {
+      onToggle();
+    }
+  }, [chain, displayNetwork.id, onToggle, switchNetworkAsync]);
 
   if (loading) {
     return (
@@ -130,7 +140,7 @@ function SwitchCollateral({ symbol }: Props) {
       <span data-testid={`switch-collateral-${symbol}-wrapper`}>
         <StyledSwitch
           checked={checked}
-          onChange={onToggle}
+          onChange={siwtchNetworkAndToggle}
           inputProps={{
             'aria-label': t('Use this asset as collateral'),
             'data-testid': `switch-collateral-${symbol}`,

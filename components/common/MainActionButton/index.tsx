@@ -9,10 +9,10 @@ import { useModal } from 'contexts/ModalContext';
 
 interface MainActionButtonProps extends LoadingButtonProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  mainAction?: (event?: any) => void;
+  onClick?: (event?: any) => void;
 }
 
-function MainActionButton({ mainAction, ...props }: MainActionButtonProps) {
+function MainActionButton({ onClick, ...props }: MainActionButtonProps) {
   const { t } = useTranslation();
   const { isConnected, chain: displayNetwork, connect, impersonateActive, exitImpersonate } = useWeb3();
   const { chain } = useNetwork();
@@ -25,22 +25,22 @@ function MainActionButton({ mainAction, ...props }: MainActionButtonProps) {
   }, [close, exitImpersonate]);
 
   const handleSwitchNetworkAndExecuteMainAction = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async (event?: any) => {
+    async (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
       if (chain && chain.id !== displayNetwork.id && switchNetworkAsync) {
         try {
           const result = await switchNetworkAsync(displayNetwork.id);
-          if (result.id === displayNetwork.id) {
-            mainAction?.(event);
+
+          if (result.id === displayNetwork.id && onClick && event) {
+            onClick(event);
           }
         } catch (error) {
           return;
         }
-      } else {
-        mainAction?.(event);
+      } else if (onClick && event) {
+        onClick(event);
       }
     },
-    [chain, displayNetwork.id, switchNetworkAsync, mainAction],
+    [chain, displayNetwork.id, switchNetworkAsync, onClick],
   );
 
   if (impersonateActive) {

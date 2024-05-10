@@ -468,7 +468,7 @@ function VestingInput({ refetch }: Props) {
             fullWidth
             variant="contained"
             loading={isLoading}
-            mainAction={() => {
+            onClick={() => {
               submit();
               track('Button Clicked', {
                 location: 'Vesting',

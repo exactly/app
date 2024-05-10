@@ -35,7 +35,7 @@ const RevokeButton = ({
   }, [erc20, opts, spenderAddress, update]);
 
   return (
-    <MainActionButton variant="contained" loading={loading} fullWidth={fullWidth} mainAction={handleClick}>
+    <MainActionButton variant="contained" loading={loading} fullWidth={fullWidth} onClick={handleClick}>
       {t('Revoke')}
     </MainActionButton>
   );

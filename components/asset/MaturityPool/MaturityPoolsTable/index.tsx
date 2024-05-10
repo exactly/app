@@ -15,7 +15,6 @@ import { toPercentage } from 'utils/utils';
 import numbers from 'config/numbers.json';
 import useActionButton from 'hooks/useActionButton';
 import useMaturityPools from 'hooks/useMaturityPools';
-import { useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import getHourUTC2Local from 'utils/getHourUTC2Local';
 import { track } from 'utils/mixpanel';
@@ -38,7 +37,6 @@ const HeadCell: FC<{ title: string; tooltipTitle?: string }> = ({ title, tooltip
 
 const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
   const { t } = useTranslation();
-  const { palette } = useTheme();
   const { handleActionClick } = useActionButton();
   const { minAPRValue } = numbers;
   const rows = useMaturityPools(symbol);
@@ -75,14 +73,7 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
               hover
             >
               <TableCell component="th" scope="row" width={120} sx={{ pl: 1.5 }}>
-                <Typography
-                  variant="body1"
-                  color={palette.mode === 'light' ? 'black' : 'white'}
-                  fontWeight={600}
-                  whiteSpace="nowrap"
-                >
-                  {parseTimestamp(maturity)}
-                </Typography>
+                {parseTimestamp(maturity, "MMM DD, 'YY")}
               </TableCell>
               <TableCell align="left" width={80}>
                 ${totalDeposited}
@@ -96,7 +87,7 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
               <TableCell align="left" width={50}>
                 {toPercentage(borrowAPR > minAPRValue ? borrowAPR : undefined)}
               </TableCell>
-              <TableCell align="right" size="small" sx={{ cursor: 'default', pr: 1.5 }}>
+              <TableCell align="right" size="small" sx={{ cursor: 'default' }}>
                 <Button
                   data-testid={`fixed-${maturity}-deposit-${symbol}`}
                   disabled={depositAPR < minAPRValue}

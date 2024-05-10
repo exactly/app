@@ -90,6 +90,7 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, close }) => {
   const submit = useCallback(
     (event: MouseEvent<HTMLButtonElement>) => {
       const to = showInput && isAddress(input) ? input : undefined;
+      const text = (event.target as HTMLButtonElement).innerText;
       const assets = Object.entries(selected)
         .filter(([, v]) => v)
         .map(([symbol]) => symbol);
@@ -99,7 +100,7 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, close }) => {
         name: 'claim',
         location: 'Rewards',
         to,
-        text: event.currentTarget.innerText,
+        text,
       });
     },
     [claim, input, selected, showInput],
@@ -138,12 +139,13 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, close }) => {
 
   const handleSecondaryClaim = useCallback(
     (event: MouseEvent<HTMLButtonElement>) => {
+      const text = (event.target as HTMLButtonElement).innerText;
       setShowInput(!showInput);
       track('Button Clicked', {
         href: '',
         location: 'Rewards',
         name: showInput ? 'claim to connected wallet' : 'claim to a different address',
-        text: event.currentTarget.innerText,
+        text,
       });
     },
     [showInput],
@@ -295,7 +297,7 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, close }) => {
                       fullWidth
                       variant="contained"
                       disabled={disableSubmit}
-                      mainAction={submit}
+                      onClick={submit}
                       loading={loading}
                     >
                       {showInput ? `${t('Claim to')} ${differentAddress}` : t('Claim to connected wallet')}

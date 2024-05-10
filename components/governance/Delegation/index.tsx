@@ -176,7 +176,7 @@ const Delegation = () => {
           <MainActionButton
             variant="contained"
             fullWidth
-            mainAction={handleDelegateClick}
+            onClick={handleDelegateClick}
             loading={submitLoading || waitingDelegate}
           >
             {t('Delegate votes')}
@@ -185,7 +185,7 @@ const Delegation = () => {
             <MainActionButton
               fullWidth
               variant="outlined"
-              mainAction={writeClearDelegate}
+              onClick={writeClearDelegate}
               loading={clearDelegateLoading || waitingClearDelegate || waitingDelegate}
             >
               {t('Revoke delegation')}
