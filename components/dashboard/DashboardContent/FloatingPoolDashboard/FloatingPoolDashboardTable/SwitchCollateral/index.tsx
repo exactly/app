@@ -92,19 +92,18 @@ function SwitchCollateral({ symbol }: Props) {
     }
   }, [marketAccount, auditor, opts, checked, symbol, refreshAccountData]);
 
-  const siwtchNetworkAndToggle = useCallback(async () => {
-    if (chain && chain.id !== displayNetwork.id && switchNetworkAsync) {
-      try {
-        const result = await switchNetworkAsync(displayNetwork.id);
+  const switchNetworkAndToggle = useCallback(async () => {
+    if (!(chain && chain.id !== displayNetwork.id && switchNetworkAsync)) {
+      return onToggle();
+    }
+    try {
+      const result = await switchNetworkAsync(displayNetwork.id);
 
-        if (result.id === displayNetwork.id) {
-          onToggle();
-        }
-      } catch (error) {
-        return;
+      if (result.id === displayNetwork.id) {
+        onToggle();
       }
-    } else {
-      onToggle();
+    } catch (error) {
+      return;
     }
   }, [chain, displayNetwork.id, onToggle, switchNetworkAsync]);
 
@@ -140,7 +139,7 @@ function SwitchCollateral({ symbol }: Props) {
       <span data-testid={`switch-collateral-${symbol}-wrapper`}>
         <StyledSwitch
           checked={checked}
-          onChange={siwtchNetworkAndToggle}
+          onChange={switchNetworkAndToggle}
           inputProps={{
             'aria-label': t('Use this asset as collateral'),
             'data-testid': `switch-collateral-${symbol}`,

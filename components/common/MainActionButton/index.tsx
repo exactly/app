@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { MouseEvent, useCallback } from 'react';
 import { useNetwork, useSwitchNetwork } from 'wagmi';
 import { useTranslation } from 'react-i18next';
 import { LoadingButton, type LoadingButtonProps } from '@mui/lab';
@@ -7,12 +7,7 @@ import { Button } from '@mui/material';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useModal } from 'contexts/ModalContext';
 
-interface MainActionButtonProps extends LoadingButtonProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onClick?: (event?: any) => void;
-}
-
-function MainActionButton({ onClick, ...props }: MainActionButtonProps) {
+function MainActionButton({ onClick, ...props }: LoadingButtonProps) {
   const { t } = useTranslation();
   const { isConnected, chain: displayNetwork, connect, impersonateActive, exitImpersonate } = useWeb3();
   const { chain } = useNetwork();
@@ -24,8 +19,8 @@ function MainActionButton({ onClick, ...props }: MainActionButtonProps) {
     close();
   }, [close, exitImpersonate]);
 
-  const handleSwitchNetworkAndExecuteMainAction = useCallback(
-    async (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleClick = useCallback(
+    async (event: MouseEvent<HTMLButtonElement>) => {
       if (chain && chain.id !== displayNetwork.id && switchNetworkAsync) {
         try {
           const result = await switchNetworkAsync(displayNetwork.id);
@@ -59,7 +54,7 @@ function MainActionButton({ onClick, ...props }: MainActionButtonProps) {
     );
   }
 
-  return <LoadingButton {...props} loading={isLoading} onClick={handleSwitchNetworkAndExecuteMainAction} />;
+  return <LoadingButton {...props} loading={isLoading} onClick={handleClick} />;
 }
 
 export default React.memo(MainActionButton);
