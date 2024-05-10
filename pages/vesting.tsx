@@ -385,8 +385,6 @@ const Vesting: NextPage = () => {
         </Typography>
       </Box>
 
-      {/* {streamsLoading && <Skeleton height={150} />} */}
-
       {activeStreams.length > 0 && (
         <Box
           borderRadius="8px"
