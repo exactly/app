@@ -690,7 +690,8 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
           break;
         }
         case 'MARKET-OUT': {
-          const _slippage = (leverageStatus.borrow * ((maIn.floatingBorrowRate * 5000n) / 31_536_000n)) / WAD;
+          const _slippage = (leverageStatus.borrow * ((maIn.floatingBorrowRate * 3_600n * 12n) / 31_536_000n)) / WAD;
+
           const borrowShares = await marketIn.read.previewWithdraw(
             [limit.borrow - leverageStatus.borrow + _slippage],
             opts,
