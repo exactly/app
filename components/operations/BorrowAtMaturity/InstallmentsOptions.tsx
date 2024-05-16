@@ -72,6 +72,7 @@ export default function InstallmentsOptions() {
         onChange={handleChange}
         renderValue={option ? <Option {...option} /> : null}
         renderOption={(o: OptionProps) => <Option option {...o} />}
+        disabled
       />
       {option ? (
         <Typography
