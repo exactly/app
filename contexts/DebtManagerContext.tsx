@@ -17,7 +17,7 @@ import useDebtManager from 'hooks/useDebtManager';
 import useAccountData from 'hooks/useAccountData';
 import useMarket from 'hooks/useMarket';
 import { useWeb3 } from 'hooks/useWeb3';
-import type { DebtManager, Market } from 'types/contracts';
+import type { Market } from 'types/contracts';
 import handleOperationError from 'utils/handleOperationError';
 import useIsContract from 'hooks/useIsContract';
 import { gasLimit } from 'utils/gas';
@@ -61,7 +61,7 @@ type ContextValues = {
   setPercent: (to: number) => void;
   setSlippage: (slippage: string) => void;
 
-  debtManager?: DebtManager;
+  debtManager?: ReturnType<typeof useDebtManager>;
   market?: Market;
 
   errorData?: ErrorData;

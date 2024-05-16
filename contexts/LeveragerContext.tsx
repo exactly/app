@@ -34,7 +34,7 @@ import useDebtManager from 'hooks/useDebtManager';
 import useAccountData, { type MarketAccount } from 'hooks/useAccountData';
 import useMarket from 'hooks/useMarket';
 import { useWeb3 } from 'hooks/useWeb3';
-import type { DebtManager, Market } from 'types/contracts';
+import type { Market } from 'types/contracts';
 import handleOperationError from 'utils/handleOperationError';
 import useIsContract from 'hooks/useIsContract';
 import useBalance from 'hooks/useBalance';
@@ -125,7 +125,7 @@ type ContextValues = {
 
   getHealthFactorColor: (healthFactor?: string) => { color: string; bg: string };
 
-  debtManager?: DebtManager;
+  debtManager?: ReturnType<typeof useDebtManager>;
   market?: Market;
 
   errorData?: ErrorData;
