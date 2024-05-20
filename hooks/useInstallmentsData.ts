@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { parseUnits } from 'viem';
-import split from '@exactly/lib/esm/installments/split';
+import splitInstallments from '@exactly/lib/esm/installments/split';
 import fixedUtilization from '@exactly/lib/esm/interest-rate-model/fixedUtilization';
 import globalUtilization from '@exactly/lib/esm/interest-rate-model/globalUtilization';
 import useAccountData from 'hooks/useAccountData';
@@ -40,27 +40,25 @@ export default function useInstallmentsData({
         floatingBackupBorrowed,
         fixedPools,
       } = marketAccount;
-      const fixedPoolsUtilizations = fixedPools
-        .filter(({ maturity }) => maturity >= firstMaturity && maturity < firstMaturity + installments_ * INTERVAL)
-        .map(({ supplied, borrowed }) => fixedUtilization(supplied, borrowed, totalFloatingDepositAssets));
       const timestamp = Math.round(Date.now() / 1000);
-      const parameters = [
-        totalFloatingDepositAssets,
-        Number(firstMaturity),
-        Number(installments_),
-        fixedPoolsUtilizations,
-        floatingUtilization,
-        globalUtilization(totalFloatingDepositAssets, totalFloatingBorrowAssets, floatingBackupBorrowed),
-        irmParameters,
-        timestamp,
-      ] as const;
       const {
         amounts: installmentsPrincipal,
         installments: installmentsRepayAmount,
         effectiveRate,
-      } = split(amount, ...parameters, {
-        rateTolerance: 10n ** 15n,
-      });
+      } = splitInstallments(
+        amount,
+        totalFloatingDepositAssets,
+        Number(firstMaturity),
+        fixedPools.length,
+        fixedPools
+          .filter(({ maturity }) => maturity >= firstMaturity && maturity < firstMaturity + installments_ * INTERVAL)
+          .map(({ supplied, borrowed }) => fixedUtilization(supplied, borrowed, totalFloatingDepositAssets)),
+        floatingUtilization,
+        globalUtilization(totalFloatingDepositAssets, totalFloatingBorrowAssets, floatingBackupBorrowed),
+        irmParameters,
+        timestamp,
+        { rateTolerance: 10n ** 15n },
+      );
       const totalPrincipal = installmentsPrincipal.reduce((acc, val) => acc + val, 0n);
       const maxRepay = installmentsRepayAmount.reduce((acc, val) => acc + val, 0n);
       const averageRepay = maxRepay / installments_;
