@@ -40,6 +40,8 @@ import { useModal } from 'contexts/ModalContext';
 import { track } from 'utils/mixpanel';
 import MainActionButton from 'components/common/MainActionButton';
 
+const CENTS = 100n;
+
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
   return (
@@ -76,7 +78,9 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, close }) => {
   const [input, setInput] = useState<string>('');
   const [showInput, setShowInput] = useState<boolean>(false);
   const [selected, setSelected] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(Object.keys(rs).map((k) => [k, true])),
+    Object.fromEntries(
+      Object.entries(rs).map(([key, { amount, usdPrice }]) => [key, (amount * usdPrice) / WAD > WAD / CENTS]),
+    ),
   );
   const [loading, setLoading] = useState<boolean>(false);
 
