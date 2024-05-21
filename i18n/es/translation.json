@@ -73,7 +73,6 @@
   "Amount of tokens {{action}} in the pool": "Monto de tokens {{action}} en el pool",
   "Value": "Valor",
   "Collateral": "Colateral",
-  "You are connected to a different network": "Estás conectado a una red diferente",
   "You can't disable collateral on this asset because you have an active borrow": "No puedes deshabilitar el colateral en este activo porque tienes un préstamo pendiente",
   "Disabling this collateral will make your health factor less than 1": "Desactivar este colateral hara que su factor de salud sea menor a 1",
   "Disabling this asset as collateral affects your borrowing power and Health Factor": "Desactivar este activo como colateral afectará su poder de prestamo y factor de salud",
@@ -633,5 +632,7 @@
   "Repay Amount": "Monto a Pagar",
   "Join the waitlist": "Únete a la lista de espera",
   "The first onchain debit & credit card.": "La primer tarjeta de débito y crédito onchain.",
-  "Please set this asset as collateral in your dashboard": "Por favor, establece este activo como colateral en tu panel de control"
+  "Please set this asset as collateral in your dashboard": "Por favor, establece este activo como colateral en tu panel de control",
+  "Total deposited: ": "Total depositado",
+  "Total borrowed: ": "Total prestado"
 }

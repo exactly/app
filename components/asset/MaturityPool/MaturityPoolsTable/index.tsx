@@ -50,12 +50,11 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
               title={t('Maturity')}
               tooltipTitle={t('All fixed pools are due at {{hour}}.', { hour: getHourUTC2Local() })}
             />
-            <HeadCell title={t('Deposits')} />
-            <HeadCell title={t('Borrows')} />
             <HeadCell
               title={t('Deposit APR')}
               tooltipTitle={t('The fixed interest APR for a deposit up to the optimal deposit size.')}
             />
+            <TableCell />
             <HeadCell
               title={t('Borrow APR')}
               tooltipTitle={t('The fixed borrowing interest APR at current utilization level.')}
@@ -75,19 +74,17 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
               <TableCell component="th" scope="row" width={120} sx={{ pl: 1.5 }}>
                 {parseTimestamp(maturity, "MMM DD, 'YY")}
               </TableCell>
-              <TableCell align="left" width={80}>
-                ${totalDeposited}
+              <TableCell>
+                <Tooltip
+                  title={`${t('Total deposited: ')}${totalDeposited}`}
+                  sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}
+                  placement="top"
+                  arrow
+                >
+                  <Typography>{toPercentage(depositAPR > minAPRValue ? depositAPR : undefined)}</Typography>
+                </Tooltip>
               </TableCell>
-              <TableCell align="left" width={75}>
-                ${totalBorrowed}
-              </TableCell>
-              <TableCell align="left" width={65}>
-                {toPercentage(depositAPR > minAPRValue ? depositAPR : undefined)}
-              </TableCell>
-              <TableCell align="left" width={50}>
-                {toPercentage(borrowAPR > minAPRValue ? borrowAPR : undefined)}
-              </TableCell>
-              <TableCell align="right" size="small" sx={{ cursor: 'default' }}>
+              <TableCell>
                 <Button
                   data-testid={`fixed-${maturity}-deposit-${symbol}`}
                   disabled={depositAPR < minAPRValue}
@@ -105,6 +102,18 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
                 >
                   {t('Deposit')}
                 </Button>
+              </TableCell>
+              <TableCell>
+                <Tooltip
+                  title={`${t('Total borrowed: ')}${totalBorrowed}`}
+                  sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}
+                  placement="top"
+                  arrow
+                >
+                  <Typography>{toPercentage(borrowAPR > minAPRValue ? borrowAPR : undefined)}</Typography>
+                </Tooltip>
+              </TableCell>
+              <TableCell size="small" sx={{ cursor: 'default' }}>
                 <Button
                   data-testid={`fixed-${maturity}-borrow-${symbol}`}
                   disabled={borrowAPR < minAPRValue}
