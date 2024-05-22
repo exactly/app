@@ -72,16 +72,18 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
               hover
             >
               <TableCell component="th" scope="row" width={120} sx={{ pl: 1.5 }}>
-                {parseTimestamp(maturity, "MMM DD, 'YY")}
+                {parseTimestamp(maturity)}
               </TableCell>
               <TableCell>
                 <Tooltip
-                  title={`${t('Total deposited: ')}${totalDeposited}`}
+                  title={`${t('Total deposited: ')}$${totalDeposited}`}
                   sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}
                   placement="top"
                   arrow
                 >
-                  <Typography>{toPercentage(depositAPR > minAPRValue ? depositAPR : undefined)}</Typography>
+                  <Typography width="fit-content">
+                    {toPercentage(depositAPR > minAPRValue ? depositAPR : undefined)}
+                  </Typography>
                 </Tooltip>
               </TableCell>
               <TableCell>
@@ -105,12 +107,14 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
               </TableCell>
               <TableCell>
                 <Tooltip
-                  title={`${t('Total borrowed: ')}${totalBorrowed}`}
+                  title={`${t('Total borrowed: ')}$${totalBorrowed}`}
                   sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}
                   placement="top"
                   arrow
                 >
-                  <Typography>{toPercentage(borrowAPR > minAPRValue ? borrowAPR : undefined)}</Typography>
+                  <Typography width="fit-content">
+                    {toPercentage(borrowAPR > minAPRValue ? borrowAPR : undefined)}
+                  </Typography>
                 </Tooltip>
               </TableCell>
               <TableCell size="small" sx={{ cursor: 'default' }}>
