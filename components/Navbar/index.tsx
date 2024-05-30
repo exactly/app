@@ -1,7 +1,7 @@
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { setContext, setUser } from '@sentry/nextjs';
 import { mainnet, useConfig } from 'wagmi';
-import { optimismSepolia } from 'wagmi/chains';
+import { optimism, optimismSepolia } from 'wagmi/chains';
 import Image from 'next/image';
 import useRouter from 'hooks/useRouter';
 
@@ -32,6 +32,7 @@ import Settings from 'components/Settings';
 import { identify, track } from '../../utils/mixpanel';
 import useReadOnly from 'hooks/useReadOnly';
 import { AccountInput } from 'components/AccountInput';
+import ExtraFinance from 'components/ExtraFinance';
 
 const { onlyMobile, onlyDesktopFlex } = globals;
 
@@ -80,6 +81,7 @@ function Navbar() {
       : setBodyColor(palette.markets.advanced);
   }, [currentPathname, view, palette.markets.advanced, palette.markets.simple]);
 
+  const isOPMainnet = chain.id === optimism.id;
   const isEthereum = chain.id === mainnet.id;
 
   const routes: {
@@ -225,6 +227,7 @@ function Navbar() {
               <Chip label="OP Sepolia Faucet" onClick={openFaucet} sx={{ my: 'auto', display: onlyDesktopFlex }} />
             )}
             <Box display="flex" gap={0.5}>
+              {isOPMainnet && <ExtraFinance />}
               {!isMobile && !isEthereum && <RewardsButton />}
               {isReadOnly && !impersonateActive ? <AccountInput /> : <Wallet />}
               {!isMobile && <Settings />}

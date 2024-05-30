@@ -442,13 +442,12 @@ const Strategies: NextPage = () => {
           ),
           imgPath: '/img/assets/VELO.svg',
         },
-
         {
           chainId: optimism.id,
           title: t('Deposit EXA on Extra Finance'),
           description: t('Deposit EXA on Extra Finance and earn interest on it.'),
           tags: [
-            ...(extraRate && extraRate > 10n ** 18n
+            ...(extraRate && extraRate > 10n ** 16n
               ? [{ prefix: t('up to'), text: `${toPercentage(Number(extraRate ?? 0) / 1e18)} APR` }]
               : []),
             { text: t('Basic'), size: 'small' as const },
