@@ -51,10 +51,28 @@ export function useUpdateStreams() {
       let data;
 
       try {
-        data = await request<{ streams: Stream[] }>(
-          getStreams(EXA.address.toLowerCase(), walletAddress || zeroAddress, esEXA.address.toLowerCase(), false),
-          'sablier',
-        );
+        const streams: Stream[] = [];
+        let skip = 0;
+        let current;
+        do {
+          const response = await request<{ streams: Stream[] }>(
+            getStreams(
+              EXA.address.toLowerCase(),
+              walletAddress || zeroAddress,
+              esEXA.address.toLowerCase(),
+              false,
+              skip,
+            ),
+            'sablier',
+          );
+
+          skip += 100;
+          if (!response) break;
+          current = response.streams;
+          streams.push(...response.streams);
+        } while (current.length !== 0);
+
+        data = { streams };
       } catch (error) {
         data = null;
         setLoading(false);
