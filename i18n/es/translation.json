@@ -636,5 +636,20 @@
   "Total deposited: ": "Total depositado",
   "Total borrowed: ": "Total prestado",
   "Deposit EXA": "Depositar EXA",
-  "Deposit EXA on Extra Finance and get up to {{apy}} APY": "Deposita EXA en Extra Finance y obtén hasta {{apy}} APY"
+  "Deposit EXA on Extra Finance and get up to {{apy}} APY": "Deposita EXA en Extra Finance y obtén hasta {{apy}} APY",
+  "Total Exa Staked": "Total de Exa Stakeados",
+  "Estmated APR": "TNA Estimada",
+  "Total Fees Shared": "Total de Comisiones Compartidas",
+  "Stake amount": "Monto a Stakear",
+  "Withdraw amount": "Monto a Retirar",
+  "Your Staked EXA": "Tu EXA Stakeado",
+  "Early Withdraw": "Retiro Anticipado",
+  "You don’t have any staked EXA yet. Here you’ll see information about your staked assets.": "Aún no tienes ningún EXA stakeado. Aquí verás información sobre tus activos stakeados.",
+  "Start staking now": "Comienza a stakear ahora",
+  "Staked": "Stakeado",
+  "Insufficient EXA balance": "Saldo de EXA insuficiente",
+  "EXA Staking": "Staking de EXA",
+  "EXA holders can now stake their assets and receive rewards. You have the flexibility to withdraw your assets anytime, but for optimal rewards, we recommend keeping your assets staked for six months. Early withdrawals are subject to penalties, and you will receive just a portion of the rewards earned so far.": "Los titulares de EXA ahora pueden stakear sus activos y recibir recompensas. Tienes la flexibilidad de retirar tus activos en cualquier momento, pero para obtener recompensas óptimas, recomendamos mantener tus activos stakeados durante seis meses. Los retiros anticipados están sujetos a penalizaciones, y solo recibirás una parte de las recompensas ganadas hasta ahora.",
+  "For further details on our staking program, ": "Para más detalles sobre nuestro programa de stakeo, ",
+  "please check our documentation.": "por favor revisa nuestra documentación."
 }
