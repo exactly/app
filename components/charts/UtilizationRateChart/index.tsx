@@ -24,13 +24,14 @@ const colorscale = [...Array(60)].map(
       `hsl(${360 * (1 - (i === length - 1 ? 1 : i / (length - 1)))} 100% 50%)`,
     ] satisfies [number, string],
 );
+const max = (a: bigint, b?: bigint) => (b == null || a > b ? a : b);
 
 function UtilizationRateChart({ type, symbol }: Props) {
   const { t } = useTranslation();
   const { palette } = useTheme();
 
   const globalUtilization = useGlobalUtilization(symbol);
-  const { data, loading } = useUtilizationRate(symbol, 0n, 95n * 10n ** 16n);
+  const { data, loading } = useUtilizationRate(symbol, 0n, max(95n * 10n ** 16n, globalUtilization));
   const { borrowAPR } = useFloatingPoolAPR(symbol);
   const currentUtilization = useCurrentUtilizationRate('floating', symbol);
   const ref = useRef<HTMLDivElement>(null);
