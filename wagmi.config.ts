@@ -25,6 +25,7 @@ import EscrowedEXA from '@exactly/protocol/deployments/optimism/esEXA.json' asse
 import SablierV2LockupLinear from '@exactly/protocol/deployments/optimism/SablierV2LockupLinear.json' assert { type: 'json' };
 import SablierV2NFTDescriptor from '@exactly/protocol/deployments/optimism/SablierV2NFTDescriptor.json' assert { type: 'json' };
 import InstallmentsRouter from '@exactly/protocol/deployments/op-sepolia/InstallmentsRouter.json' assert { type: 'json' };
+import StakedEXA from '@exactly/protocol/deployments/op-sepolia/stEXA.json' assert { type: 'json' };
 
 import { Abi } from 'viem';
 
@@ -55,6 +56,7 @@ export default defineConfig({
     { name: 'EscrowedEXA', abi: EscrowedEXA.abi as Abi },
     { name: 'L1GasPriceOracle', abi: GasPriceOracle as Abi },
     { name: 'InstallmentsRouter', abi: InstallmentsRouter.abi as Abi },
+    { name: 'StakedEXA', abi: StakedEXA.abi as Abi },
   ],
   plugins: [
     react({
