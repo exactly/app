@@ -22,6 +22,7 @@ import { useWeb3 } from 'hooks/useWeb3';
 import Alert from '@mui/material/Alert';
 import { useFloatingBalances } from 'hooks/useFloatingBalances';
 import { useFixedBalances } from 'hooks/useFixedBalances';
+import useGlobalUtilization from 'hooks/useGlobalUtilization';
 import { mainnet } from 'wagmi';
 
 type Props = {
@@ -34,7 +35,8 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
   const options = useAssets();
   const { push, query } = useRouter();
   const getContractAddress = useContractAddress();
-  const { floatingDeposits, floatingBorrows, backupBorrows } = useFloatingBalances(symbol);
+  const globalUtilization = useGlobalUtilization(symbol);
+  const { floatingDeposits, floatingBorrows } = useFloatingBalances(symbol);
   const { fixedDeposits, fixedBorrows } = useFixedBalances(symbol);
   const [priceFeedAddress, setPriceFeedAddress] = useState<Address | undefined>(undefined);
   const {
@@ -60,23 +62,10 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
     fetchPriceFeedAddress();
   }, [getContractAddress, symbol]);
 
-  const { itemsInfo, totalUtilization } = useMemo((): {
-    itemsInfo: ItemInfoProps[];
-    totalUtilization: number | undefined;
-  } => {
+  const itemsInfo = useMemo(() => {
     const { decimals, usdPrice } = marketAccount ?? {};
 
-    const totalUti =
-      backupBorrows !== undefined &&
-      floatingBorrows !== undefined &&
-      floatingDeposits !== undefined &&
-      fixedDeposits !== undefined &&
-      floatingDeposits + fixedDeposits > 0n &&
-      decimals
-        ? Number(((floatingBorrows + backupBorrows) * WAD) / (floatingDeposits + fixedDeposits)) / 1e18
-        : undefined;
-
-    const items = [
+    const items: ItemInfoProps[] = [
       {
         label: t('Total Deposits'),
         value:
@@ -122,7 +111,7 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
       },
       {
         label: t('Global Utilization'),
-        value: toPercentage(totalUti),
+        value: toPercentage(Number(globalUtilization) / 1e18),
       },
       {
         label: t('Oracle Price'),
@@ -140,15 +129,15 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
         : []),
     ];
 
-    return { itemsInfo: items, totalUtilization: totalUti };
+    return items;
   }, [
     marketAccount,
-    backupBorrows,
     floatingBorrows,
     floatingDeposits,
     fixedDeposits,
     t,
     fixedBorrows,
+    globalUtilization,
     symbol,
     nativeAPR,
   ]);
@@ -222,9 +211,9 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
           ))}
         </Grid>
       </Grid>
-      {totalUtilization !== undefined &&
+      {globalUtilization !== undefined &&
         borrowableUtilization !== undefined &&
-        totalUtilization > borrowableUtilization && (
+        globalUtilization > borrowableUtilization && (
           <Alert sx={{ width: '100%' }} severity="info">
             <Typography variant="body2">
               {t(

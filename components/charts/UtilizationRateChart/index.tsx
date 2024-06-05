@@ -1,15 +1,13 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { Typography, Box, useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 import useUtilizationRate, { useCurrentUtilizationRate } from 'hooks/useUtilizationRate';
 import LoadingChart from '../LoadingChart';
 import { formatEther } from 'viem';
 import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
-import { useFloatingBalances } from 'hooks/useFloatingBalances';
-import { useFixedBalances } from 'hooks/useFixedBalances';
+import useGlobalUtilization from 'hooks/useGlobalUtilization';
 
 const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
 type Props = {
@@ -31,25 +29,11 @@ function UtilizationRateChart({ type, symbol }: Props) {
   const { t } = useTranslation();
   const { palette } = useTheme();
 
+  const globalUtilization = useGlobalUtilization(symbol);
   const { data, loading } = useUtilizationRate(symbol, 0n, 95n * 10n ** 16n);
   const { borrowAPR } = useFloatingPoolAPR(symbol);
   const currentUtilization = useCurrentUtilizationRate('floating', symbol);
-  const { floatingDeposits, floatingBorrows, backupBorrows } = useFloatingBalances(symbol);
-  const { fixedDeposits } = useFixedBalances(symbol);
   const ref = useRef<HTMLDivElement>(null);
-
-  const globalUtilization = useCallback(() => {
-    const globalUti =
-      backupBorrows !== undefined &&
-      floatingBorrows !== undefined &&
-      floatingDeposits !== undefined &&
-      fixedDeposits !== undefined &&
-      floatingDeposits + fixedDeposits > 0n
-        ? Number(((floatingBorrows + backupBorrows) * WAD) / (floatingDeposits + fixedDeposits)) / 1e18
-        : 0;
-
-    return globalUti;
-  }, [backupBorrows, fixedDeposits, floatingBorrows, floatingDeposits]);
 
   return (
     <Box display="flex" flexDirection="column" width="100%" height="100%">
@@ -61,7 +45,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
         </Typography>
       </Box>
       <Box ref={ref} display="flex" alignSelf="center" width="100%" sx={{ height: 500 }}>
-        {loading || !data || !borrowAPR || !currentUtilization ? (
+        {loading || !data || !borrowAPR || currentUtilization === undefined || globalUtilization === undefined ? (
           <LoadingChart />
         ) : (
           <Plot
@@ -98,7 +82,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
                 type: 'scatter3d',
                 mode: 'markers',
                 x: [formatEther(currentUtilization[0].utilization)],
-                y: [globalUtilization()],
+                y: [formatEther(globalUtilization)],
                 z: [borrowAPR],
                 marker: { symbol: 'cross', size: 8, color: palette.text.primary },
                 hovertemplate:
