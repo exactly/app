@@ -20,7 +20,7 @@ const ItemInfo: FC<ItemInfoProps> = ({ label, value, underLabel, tooltipTitle, x
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   return (
-    <Grid xs={isMobile ? 6 : xs ? xs : 0} pl={4} pt={3}>
+    <Grid item xs={isMobile ? 6 : xs ? xs : 0} pl={4} pt={3}>
       <Tooltip title={tooltipTitle} arrow placement="top" sx={{ cursor: tooltipTitle ? 'pointer' : '' }}>
         <Box display="flex" gap={0.5}>
           <Typography variant="subtitle1" fontSize="10px" color="grey.500" textTransform="uppercase">

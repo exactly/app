@@ -432,7 +432,7 @@ const Strategies: NextPage = () => {
                     location: 'Strategies',
                     name: 'velodrome',
                     isNew: false,
-                    href: 'https://velodrome.finance/deposit?token0=0x1e925de1c68ef83bd98ee3e130ef14a50309c01b&token1=eth',
+                    href: 'https://velodrome.finance/deposit?token0=0x1e925De1c68ef83bD98eE3E130eF14a50309C01B&token1=0x4200000000000000000000000000000000000006&type=-1',
                   })
                 }
               >

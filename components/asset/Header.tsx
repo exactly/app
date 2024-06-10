@@ -160,10 +160,9 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
   const borrowableUtilization = useMemo(() => {
     if (!marketAccount) return;
 
-    if (displayNetworkId === mainnet.id) return 0.9;
-
+    if (displayNetworkId === mainnet.id) return BigInt(9 * 1e17);
     if ('reserveFactor' in marketAccount) {
-      return Number(WAD - marketAccount.reserveFactor) / 1e18;
+      return WAD - marketAccount.reserveFactor;
     }
     return;
   }, [displayNetworkId, marketAccount]);
@@ -219,7 +218,7 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
               {t(
                 "The Global Utilization is above {{borrowableUtilization}}, and the remaining liquidity is established as a Liquidity Reserve that can't be borrowed and is only available for withdrawals.",
                 {
-                  borrowableUtilization: toPercentage(borrowableUtilization, 0),
+                  borrowableUtilization: toPercentage(Number(borrowableUtilization) / 1e18, 0),
                 },
               )}
             </Typography>
