@@ -49,7 +49,12 @@ async function withdrawableFromCategory(category: 'LockupLinear' | 'LockupDynami
 
   do {
     const query = getStreamsByCategory(exa.address.toLowerCase(), last, category);
-    const { streams } = await request<{ streams: Stream[] }>(subgraphUrl, query);
+    const { streams } = await request<{ streams: Stream[] }>(
+      subgraphUrl,
+      query,
+      {},
+      { origin: 'https://app.exact.ly' },
+    );
     if (category === 'LockupLinear') {
       totalWithdrawable += (
         await client.multicall({
