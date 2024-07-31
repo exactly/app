@@ -54,7 +54,7 @@ function MainActionButton({ onClick, ...props }: LoadingButtonProps) {
     );
   }
 
-  return <LoadingButton {...props} loading={isLoading} onClick={handleClick} />;
+  return <LoadingButton {...props} loading={isLoading || props.loading} onClick={handleClick} />;
 }
 
 export default React.memo(MainActionButton);

@@ -1,5 +1,7 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
+  Avatar,
+  AvatarGroup,
   Box,
   Button,
   Dialog,
@@ -36,6 +38,7 @@ import { gasLimit } from 'utils/gas';
 import { Transaction } from 'types/Transaction';
 import LoadingTransaction from 'components/common/modal/Loading';
 import { track } from 'utils/mixpanel';
+import { useStakeEXA } from 'contexts/StakeEXAContext';
 
 type Params<T extends ExtractAbiFunctionNames<typeof stakedExaABI>> = AbiParametersToPrimitiveTypes<
   ExtractAbiFunction<typeof stakedExaABI, T>['inputs']
@@ -75,7 +78,6 @@ function LoadingModal({ tx, onClose }: { tx: Transaction; onClose: () => void })
 
   return (
     <Dialog
-      data-testid="staking-modal"
       open={!!tx}
       onClose={handleClose}
       PaperComponent={isMobile ? undefined : PaperComponent}
@@ -140,13 +142,14 @@ function StakingEXAInput({ refetch, operation }: Props) {
   const stakedEXA = useStakedEXA();
   const { data: balance, isLoading: balanceIsLoading } = useStakedEXABalance();
   const { data: exaBalance, isLoading: exaBalanceIsLoading } = useEXABalance();
+  const { rewardsTokens } = useStakeEXA();
   const EXAPrice = useEXAPrice();
-  const { impersonateActive, isConnected, opts, walletAddress } = useWeb3();
+  const { isConnected, opts, walletAddress } = useWeb3();
   const [isLoading, setIsLoading] = useState(false);
   const [tx, setTx] = useState<Transaction>();
 
   const [qty, setQty] = useState<string>('');
-
+  const theme = useTheme();
   const usdValue = useMemo(() => {
     if (!qty || !EXAPrice) return;
 
@@ -170,35 +173,47 @@ function StakingEXAInput({ refetch, operation }: Props) {
 
     let hash;
     try {
-      const args: Params<'deposit'> = [amount, walletAddress] as const;
+      if (operation === 'deposit') {
+        const args: Params<'deposit'> = [amount, walletAddress] as const;
 
-      const allowance = await exa.read.allowance([walletAddress, stakedEXA.address]);
+        const allowance = await exa.read.allowance([walletAddress, stakedEXA.address]);
 
-      if (allowance < amount) {
-        const approve = [stakedEXA.address, amount] as const;
-        const gas = await exa.estimateGas.approve(approve, opts);
-        const approveHash = await exa.write.approve(approve, { ...opts, gasLimit: gasLimit(gas) });
-        await waitForTransaction({ hash: approveHash });
+        if (allowance < amount) {
+          const approve = [stakedEXA.address, amount] as const;
+          const gas = await exa.estimateGas.approve(approve, opts);
+          const approveHash = await exa.write.approve(approve, { ...opts, gasLimit: gasLimit(gas) });
+          await waitForTransaction({ hash: approveHash });
+        }
+
+        const gas = await stakedEXA.estimateGas.deposit(args, opts);
+        hash = await stakedEXA.write.deposit(args, { ...opts, gasLimit: gasLimit(gas) });
+
+        setTx({ status: 'processing', hash });
+
+        const { status, transactionHash } = await waitForTransaction({ hash });
+
+        setTx({ status: status === 'success' ? 'success' : 'error', hash: transactionHash });
+      } else {
+        const args: Params<'withdraw'> = [amount, walletAddress, walletAddress] as const;
+
+        const gas = await stakedEXA.estimateGas.withdraw(args, opts);
+        hash = await stakedEXA.write.withdraw(args, { ...opts, gasLimit: gasLimit(gas) });
+        setTx({ status: 'processing', hash });
+
+        const { status, transactionHash } = await waitForTransaction({ hash });
+
+        setTx({ status: status === 'success' ? 'success' : 'error', hash: transactionHash });
       }
-
-      const gas = await stakedEXA.estimateGas.deposit(args, opts);
-      hash = await stakedEXA.write.deposit(args, { ...opts, gasLimit: gasLimit(gas) });
-
-      setTx({ status: 'processing', hash });
-
-      const { status, transactionHash } = await waitForTransaction({ hash });
-
-      setTx({ status: status === 'success' ? 'success' : 'error', hash: transactionHash });
     } catch (e) {
       if (hash) setTx({ status: 'error', hash });
     } finally {
+      refetch();
       setIsLoading(false);
     }
-  }, [walletAddress, stakedEXA, exa, opts, qty]);
+  }, [walletAddress, stakedEXA, exa, opts, qty, operation, refetch]);
 
   const handleMaxClick = useCallback(() => {
     operation === 'deposit' ? setQty(formatEther(exaBalance || 0n)) : setQty(formatEther(balance || 0n));
-
     track('Button Clicked', {
       location: 'Staking',
       name: `max ${operation}`,
@@ -213,13 +228,12 @@ function StakingEXAInput({ refetch, operation }: Props) {
   }, [refetch]);
 
   return (
-    <Box display="flex" flexDirection="column" gap={2}>
+    <Box display="flex" flexDirection="column" gap={9}>
       {tx && <LoadingModal tx={tx} onClose={onClose} />}
       <Box>
         <ModalBox
           sx={{
             display: 'flex',
-            flexDirection: 'row',
             p: 1,
             px: 2,
             alignItems: 'center',
@@ -296,42 +310,67 @@ function StakingEXAInput({ refetch, operation }: Props) {
             </Box>
           </Box>
         </ModalBox>
+        {operation === 'withdraw' && (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              backgroundColor: `${theme.palette.grey[100]}`,
+              padding: '13px 16px 8px 16px',
+              borderBottomLeftRadius: '8px',
+              borderBottomRightRadius: '8px',
+              border: `1px solid ${theme.palette.grey[300]}`,
+              borderTop: 'none',
+              marginTop: '-5px',
+            }}
+          >
+            <Typography variant="body2" color={`${theme.palette.grey[400]}`} sx={{ fontWeight: 'bold' }}>
+              REWARDS
+            </Typography>
+            <Box display="flex" alignItems="center" gap={1}>
+              <Typography color="figma.grey.500" fontWeight={500} fontSize={13} fontFamily="fontFamilyMonospaced">
+                ~${formatNumber(usdValue || '0', 'USD')}
+              </Typography>
+              <AvatarGroup
+                max={6}
+                sx={{
+                  '& .MuiAvatar-root': { width: 24, height: 24, borderColor: 'transparent' },
+                  alignItems: 'center',
+                }}
+              >
+                {rewardsTokens.map((symbol) => (
+                  <Avatar key={symbol} alt={symbol} src={`/img/assets/${symbol}.svg`} />
+                ))}
+              </AvatarGroup>
+            </Box>
+          </Box>
+        )}
       </Box>
 
-      <Box mt={0} display="flex" flexDirection="column" gap={1}>
-        {impersonateActive ? (
-          <Button
-            fullWidth
-            variant="contained"
-            onClick={() =>
-              track('Button Clicked', {
-                location: 'Staking',
-                name: 'exit read-only mode',
-              })
-            }
-          >
-            {t('Exit Read-Only Mode')}
-          </Button>
-        ) : (
-          <MainActionButton
-            fullWidth
-            variant="contained"
-            loading={isLoading}
-            onClick={() => {
-              submit();
-              track('Button Clicked', {
-                location: 'Staking',
-                name: `${operation}`,
-                value: qty,
-                text: insufficientFunds ? t('Insufficient EXA balance') : t('Stake EXA'),
-              });
-            }}
-            data-testid="staking-submit"
-            disabled={insufficientFunds}
-          >
-            {insufficientFunds && parseEther(qty) > 0n ? t('Insufficient EXA balance') : t('Stake EXA')}
-          </MainActionButton>
-        )}
+      <Box display="flex" flexDirection="column" gap={1}>
+        <MainActionButton
+          fullWidth
+          variant="contained"
+          loading={isLoading}
+          onClick={() => {
+            submit();
+            track('Button Clicked', {
+              location: 'Staking',
+              name: `${operation}`,
+              value: qty,
+              text: operation === 'deposit' ? t('Stake EXA') : t('Withdraw'),
+            });
+          }}
+          data-testid="staking-submit"
+          disabled={insufficientFunds}
+        >
+          {insufficientFunds && parseEther(qty) > 0n
+            ? t('Insufficient EXA balance')
+            : operation === 'deposit'
+              ? t('Stake EXA')
+              : t('Withdraw')}
+        </MainActionButton>
       </Box>
     </Box>
   );

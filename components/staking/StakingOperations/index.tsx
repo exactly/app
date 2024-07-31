@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   Box,
   Button,
@@ -22,8 +22,11 @@ import { TransitionProps } from 'react-transition-group/Transition';
 import CloseIcon from '@mui/icons-material/Close';
 import StakingEXAInput from '../StakingEXAInput';
 import { useWeb3 } from 'hooks/useWeb3';
-import { useStakedEXABalance } from 'hooks/useStakedEXA';
 import formatNumber from 'utils/formatNumber';
+import { useEXAPrice } from 'hooks/useEXA';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { formatEther } from 'viem';
+import { useStakeEXA } from 'contexts/StakeEXAContext';
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
@@ -53,22 +56,14 @@ const StakeEXAModal: React.FC<{
 }> = ({ operation, open, onClose }) => {
   const { spacing, breakpoints } = useTheme();
   const { t } = useTranslation();
+  const { refetch } = useStakeEXA();
 
   const isMobile = useMediaQuery(breakpoints.down('sm'));
-
-  const handleClose = useCallback(() => {
-    onClose();
-    // track('Modal Closed', {
-    //   name: 'Stake EXA Modal',
-    //   location: 'Staking Page',
-    // });
-  }, [onClose]);
 
   return (
     <Dialog
       data-testid="staking-modal"
       open={open}
-      onClose={handleClose}
       PaperComponent={PaperComponent}
       PaperProps={{
         sx: {
@@ -114,26 +109,42 @@ const StakeEXAModal: React.FC<{
         }}
       >
         <DialogContent sx={{ p: 1, overflow: 'hidden' }}>
-          <StakingEXAInput refetch={() => {}} operation={operation} />
+          <StakingEXAInput refetch={() => refetch()} operation={operation} />
         </DialogContent>
       </Box>
     </Dialog>
   );
 };
 
-function StakeEXABoard() {
+function StakingProgress() {
   const { t } = useTranslation();
   const [stakingModal, setStakingModal] = useState(false);
   const [operation, setOperation] = useState<'deposit' | 'withdraw'>('deposit');
-  const { connect, isConnected } = useWeb3();
-  const { data: balance, isLoading: balanceIsLoading } = useStakedEXABalance();
+  const { connect, isConnected, impersonateActive } = useWeb3();
+
+  const {
+    start: stakingStart,
+    balance,
+    parameters: { refTime },
+    refetch,
+  } = useStakeEXA();
+
+  const EXAPrice = useEXAPrice();
+
+  const EXAUsdValue = useMemo(() => {
+    if (!balance || !EXAPrice) return;
+
+    const usd = (balance * EXAPrice) / WAD;
+
+    return formatEther(usd);
+  }, [EXAPrice, balance]);
 
   const closeStakingModal = useCallback(() => {
     setStakingModal(false);
   }, []);
 
   const handleClickOperation = (_operation: 'deposit' | 'withdraw') => {
-    if (isConnected) {
+    if (isConnected || impersonateActive) {
       setOperation(_operation);
       setStakingModal(true);
     } else {
@@ -141,12 +152,23 @@ function StakeEXABoard() {
     }
   };
 
+  const stakedProgress = useMemo(() => {
+    if (!stakingStart || !refTime) return;
+
+    const now = Math.floor(Date.now() / 1000);
+    const start = Math.floor(Number(stakingStart) / 1e18);
+    const end = start + Number(refTime);
+    const progress = (now - start) / (end - start);
+
+    return Math.min(Math.max(progress, 0), 1);
+  }, [stakingStart, refTime]);
+
   return (
     <Box display="flex" flexDirection={{ xs: 'column', md: 'row' }} gap={2}>
       <Box
         p={4}
-        gap={2}
-        flex="0 1 40%"
+        gap={8}
+        flex="0 1 50%"
         borderRadius="16px"
         bgcolor="components.bg"
         boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 6px 10px 0px rgba(97, 102, 107, 0.20)' : '')}
@@ -154,15 +176,39 @@ function StakeEXABoard() {
         flexDirection="column"
         justifyContent="space-between"
       >
-        <Typography fontSize={19} fontWeight={700}>
-          {t('Your Staked EXA')}
-        </Typography>
         <Box display="flex" flexDirection="column">
+          <Typography fontSize={19} fontWeight={700}>
+            {t('Stake Amount')}
+          </Typography>
           <Box display="flex" gap={1}>
-            {balanceIsLoading || !balance ? (
-              <Skeleton width={80} height={60} />
+            <StakingEXAInput refetch={() => refetch()} operation={'deposit'} />
+          </Box>
+        </Box>
+      </Box>
+      <Box
+        p={4}
+        gap={8}
+        flex="0 1 50%"
+        borderRadius="16px"
+        bgcolor="components.bg"
+        boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 6px 10px 0px rgba(97, 102, 107, 0.20)' : '')}
+        display="flex"
+        flexDirection="column"
+        justifyContent="space-between"
+      >
+        <Box display="flex" flexDirection="column">
+          <Typography fontSize={19} fontWeight={700}>
+            {t('Your Staked EXA')}
+          </Typography>
+          <Box display="flex" gap={1}>
+            {isConnected || impersonateActive ? (
+              balance === undefined ? (
+                <Skeleton width={80} height={60} />
+              ) : (
+                <Typography fontSize={38}>{formatNumber(Number(balance) / 1e18)}</Typography>
+              )
             ) : (
-              <Typography fontSize={38}>{formatNumber(Number(balance) / 1e18)}</Typography>
+              <Typography fontSize={38}>{'0'}</Typography>
             )}
             <Image
               src={`/img/assets/EXA.svg`}
@@ -175,31 +221,20 @@ function StakeEXABoard() {
               }}
             />
           </Box>
-          {/* <Box>
-            <Typography color={'grey.400'} fontWeight={600} fontSize={19}>
-              {'$0.00'}
-            </Typography>
-          </Box> */}
+          <Typography color={'grey.400'} fontWeight={600} fontSize={19}>
+            ${formatNumber(EXAUsdValue || '0', 'USD')}
+          </Typography>
         </Box>
         <Box display="flex" flexDirection="column" gap={1}>
           <Button
-            variant="contained"
-            onClick={() => {
-              handleClickOperation('deposit');
-            }}
-            fullWidth
-          >
-            {t('Stake EXA')}
-          </Button>
-          <Button
-            disabled
             variant="outlined"
+            disabled={!isConnected && !impersonateActive}
             onClick={() => {
               handleClickOperation('withdraw');
             }}
             fullWidth
           >
-            {t('Early Withdraw')}
+            {stakedProgress && stakedProgress < 1 ? t('Early Withdraw') : t('Withdraw')}
           </Button>
           <StakeEXAModal
             operation={operation}
@@ -211,34 +246,7 @@ function StakeEXABoard() {
           />
         </Box>
       </Box>
-      <Box
-        p={2}
-        flex={1}
-        borderRadius="24px"
-        bgcolor="components.bg"
-        boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 6px 10px 0px rgba(97, 102, 107, 0.20)' : '')}
-        display="flex"
-      >
-        <Box
-          bgcolor={'grey.100'}
-          flex={1}
-          borderRadius="16px"
-          display="flex"
-          flexDirection="column"
-          alignItems="center"
-          justifyContent="center"
-          textAlign="center"
-          padding={9}
-        >
-          <Typography fontSize={14}>
-            {t('You don’t have any staked EXA yet. Here you’ll see information about your staked assets.')}
-          </Typography>
-          <Button fullWidth sx={{ mt: 2 }}>
-            {t('Start staking now')}
-          </Button>
-        </Box>
-      </Box>
     </Box>
   );
 }
-export default React.memo(StakeEXABoard);
+export default React.memo(StakingProgress);

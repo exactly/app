@@ -1,41 +1,49 @@
 import React from 'react';
-import { Box, Typography } from '@mui/material';
+import { AvatarGroup, Avatar, Box, Skeleton, Typography } from '@mui/material';
 
 import { useTranslation } from 'react-i18next';
-import Image from 'next/image';
+import formatNumber from 'utils/formatNumber';
+import { useStakeEXA } from 'contexts/StakeEXAContext';
 
 function StakedEXASummary() {
   const { t } = useTranslation();
+  const { totalAssets, rewardsTokens } = useStakeEXA();
 
   return (
     <Box display="flex" flexDirection={{ xs: 'column', md: 'row' }} gap={7}>
       <Box>
         <Typography variant="h6">{t('Total Exa Staked')}</Typography>
         <Box display="flex" gap={1}>
-          <Typography fontSize={32} fontWeight={500}>
-            {t('$0.00')}
-          </Typography>
+          {totalAssets === undefined ? (
+            <Skeleton variant="text" width={80} />
+          ) : (
+            <Typography fontSize={32} fontWeight={500}>
+              {formatNumber(Number(totalAssets) / 1e18)}
+            </Typography>
+          )}
           <Typography fontSize={32} fontWeight={500} color="#B4BABF">
             {t('EXA')}
           </Typography>
         </Box>
       </Box>
       <Box>
-        <Typography variant="h6">{t('Estmated APR')}</Typography>
+        <Typography variant="h6">{t('Estimated APR')}</Typography>
         <Box display="flex" gap={1}>
           <Typography fontSize={32} fontWeight={500}>
             {t('0.00%')}
           </Typography>
-          <Image
-            src={`/img/assets/EXA.svg`}
-            alt={'EXA'}
-            width={32}
-            height={32}
-            style={{
-              maxWidth: '100%',
-              height: 'auto',
-            }}
-          />
+          {rewardsTokens === undefined ? (
+            <Skeleton variant="text" width={80} />
+          ) : (
+            <AvatarGroup
+              max={6}
+              sx={{ '& .MuiAvatar-root': { width: 32, height: 32, borderColor: 'transparent' }, alignItems: 'center' }}
+            >
+              {rewardsTokens.map((symbol) => (
+                <Avatar key={symbol} alt={symbol} src={`/img/assets/${symbol}.svg`} />
+              ))}
+            </AvatarGroup>
+          )}
         </Box>
       </Box>
       <Box>
