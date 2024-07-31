@@ -26,6 +26,7 @@ import SablierV2LockupLinear from '@exactly/protocol/deployments/optimism/Sablie
 import SablierV2NFTDescriptor from '@exactly/protocol/deployments/optimism/SablierV2NFTDescriptor.json' assert { type: 'json' };
 import InstallmentsRouter from '@exactly/protocol/deployments/op-sepolia/InstallmentsRouter.json' assert { type: 'json' };
 import StakedEXA from '@exactly/protocol/deployments/op-sepolia/stEXA.json' assert { type: 'json' };
+import StakingPreviewer from '@exactly/protocol/deployments/op-sepolia/StakingPreviewer.json' assert { type: 'json' };
 
 import { Abi } from 'viem';
 
@@ -57,6 +58,7 @@ export default defineConfig({
     { name: 'L1GasPriceOracle', abi: GasPriceOracle as Abi },
     { name: 'InstallmentsRouter', abi: InstallmentsRouter.abi as Abi },
     { name: 'StakedEXA', abi: StakedEXA.abi as Abi },
+    { name: 'StakingPreviewer', abi: StakingPreviewer.abi as Abi },
   ],
   plugins: [
     react({
