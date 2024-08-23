@@ -26,16 +26,7 @@ export const useStakedEXABalance = () => {
 };
 
 export const useStakedEXAChart = () => {
-  const {
-    start,
-    parameters: {
-      refTime: _refTime,
-      penaltyGrowth: _penaltyGrowth,
-      minTime: _minTime,
-      excessFactor: _excessFactor,
-      penaltyThreshold: _penaltyThreshold,
-    },
-  } = useStakeEXA();
+  const { start, parameters } = useStakeEXA();
 
   const calculateValue = useCallback(
     (
@@ -61,19 +52,12 @@ export const useStakedEXAChart = () => {
   );
 
   const points = useMemo(() => {
-    if (
-      _minTime !== undefined &&
-      _refTime !== undefined &&
-      start !== undefined &&
-      _excessFactor !== undefined &&
-      _penaltyGrowth !== undefined &&
-      _penaltyThreshold !== undefined
-    ) {
+    if (parameters !== undefined && start !== undefined) {
       const now = parseEther(Math.floor(Date.now() / 1000).toString());
-      const minTime = _minTime * WAD;
+      const minTime = parameters.minTime * WAD;
       const avgStart = start > 0n ? start : now;
       const cliff = avgStart + minTime;
-      const refTime = _refTime * WAD;
+      const refTime = parameters.refTime * WAD;
       const optimalStakeTime = avgStart + refTime;
       const extra = now > optimalStakeTime ? now - optimalStakeTime + 172_800n * WAD : 172_800n * WAD;
       const endTime = optimalStakeTime + extra;
@@ -99,10 +83,17 @@ export const useStakedEXAChart = () => {
 
         const time = timestamp - avgStart;
 
-        const value = calculateValue(time, minTime, refTime, _penaltyGrowth, _excessFactor, _penaltyThreshold);
+        const value = calculateValue(
+          time,
+          minTime,
+          refTime,
+          parameters.penaltyGrowth,
+          parameters.excessFactor,
+          parameters.penaltyThreshold,
+        );
 
         dataPoints.push({
-          date: Number(formatEther(timestamp)),
+          timestamp: Number(formatEther(timestamp)),
           value: Number(formatEther(value)),
         });
       }
@@ -111,18 +102,25 @@ export const useStakedEXAChart = () => {
         const timestamp = mainPoints[i];
         const time = timestamp - avgStart;
 
-        const value = calculateValue(time, minTime, refTime, _penaltyGrowth, _excessFactor, _penaltyThreshold);
+        const value = calculateValue(
+          time,
+          minTime,
+          refTime,
+          parameters.penaltyGrowth,
+          parameters.excessFactor,
+          parameters.penaltyThreshold,
+        );
 
         dataPoints.push({
-          date: Number(formatEther(timestamp)),
+          timestamp: Number(formatEther(timestamp)),
           value: Number(value) / 1e18,
         });
       }
 
-      return dataPoints.sort((a, b) => a.date - b.date);
+      return dataPoints.sort((a, b) => a.timestamp - b.timestamp);
     }
     return [];
-  }, [_minTime, _refTime, start, _excessFactor, _penaltyGrowth, _penaltyThreshold, calculateValue]);
+  }, [parameters, start, calculateValue]);
 
   return points;
 };

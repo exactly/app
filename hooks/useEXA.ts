@@ -88,11 +88,12 @@ export const useEXAPrice = () => {
   const { accountData } = useAccountData();
 
   return useMemo(() => {
-    if (!accountData) return;
+    if (!accountData) return 0n;
 
     return accountData.flatMap((marketAccount) => {
       const x = marketAccount.rewardRates.find((reward) => reward.assetSymbol === 'EXA');
-      return x ? [x.usdPrice] : [];
+
+      return x ? [x.usdPrice] : [1000000000000000000n];
     })[0];
   }, [accountData]);
 };

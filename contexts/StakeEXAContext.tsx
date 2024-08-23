@@ -4,6 +4,7 @@ import { usePreviewerStaking } from 'hooks/useStakingPreviewer';
 import useAccountData from 'hooks/useAccountData';
 import { useEXAPrice } from 'hooks/useEXA';
 import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import getVouchersPrice from 'utils/getVouchersPrice';
 
 type Parameters = {
   asset: `0x${string}`;
@@ -30,18 +31,21 @@ type Rewards = {
 };
 
 type ContextValues = {
-  balance: bigint;
-  parameters: Parameters;
-  rewards: readonly Rewards[];
-  start: bigint;
-  time: bigint;
-  totalAssets: bigint;
+  balance: bigint | undefined;
+  parameters: Parameters | undefined;
+  rewards: readonly Rewards[] | undefined;
+  start: bigint | undefined;
+  time: bigint | undefined;
+  totalAssets: bigint | undefined;
   isLoading: boolean;
   isFetching: boolean;
   refetch: () => void;
   totalClaimable: bigint;
   totalClaimed: bigint;
   totalEarned: bigint;
+  claimableTokens: Record<string, bigint>;
+  claimedTokens: Record<string, bigint>;
+  earnedTokens: Record<string, bigint>;
   rewardsTokens: string[];
   penalty: bigint;
   calculateRewards: (rewards: Rewards[]) => {
@@ -72,6 +76,9 @@ export const StakeEXAProvider: FC<PropsWithChildren> = ({ children }) => {
         | 'totalEarned'
         | 'rewardsTokens'
         | 'penalty'
+        | 'claimableTokens'
+        | 'claimedTokens'
+        | 'earnedTokens'
         | 'calculateRewards'
       >
     | undefined
@@ -95,33 +102,54 @@ export const StakeEXAProvider: FC<PropsWithChildren> = ({ children }) => {
           totalClaimed: 0n,
           totalEarned: 0n,
           rewardsTokens: [] as string[],
+          claimableTokens: {} as Record<string, bigint>,
+          claimedTokens: {} as Record<string, bigint>,
+          earnedTokens: {} as Record<string, bigint>,
           penalty: 0n,
         };
       }
 
       const result = rewards.reduce(
         (acc, item) => {
+          let amountClaimable,
+            amountClaimed,
+            amountEarned = 0n;
           if (item.symbol === 'EXA') {
-            acc.totalClaimable += (item.claimable * (exaPrice || 1n * WAD)) / WAD;
-            acc.totalClaimed += (item.claimed * (exaPrice || 1n * WAD)) / WAD;
-            acc.totalEarned += (item.earned * (exaPrice || 1n * WAD)) / WAD;
+            amountClaimable = (item.claimable * (exaPrice || 1n * WAD)) / WAD;
+            amountClaimed = (item.claimed * (exaPrice || 1n * WAD)) / WAD;
+            amountEarned = (item.earned * (exaPrice || 1n * WAD)) / WAD;
           } else {
+            if (!accountData) return acc;
             const r = accountData?.find((a) => a.asset === item.reward);
-            const usdPrice = r?.usdPrice || 0n;
+
+            const usdPrice = getVouchersPrice(accountData, item.symbol);
             const decimals = r?.decimals || 18;
             const decimalWAD = 10n ** BigInt(decimals);
 
-            acc.totalClaimable += (item.claimable * usdPrice) / decimalWAD;
-            acc.totalClaimed += (item.claimed * usdPrice) / decimalWAD;
-            acc.totalEarned += (item.earned * usdPrice) / decimalWAD;
+            amountClaimable = (item.claimable * usdPrice) / decimalWAD;
+            amountClaimed = (item.claimed * usdPrice) / decimalWAD;
+            amountEarned = (item.earned * usdPrice) / decimalWAD;
           }
-          if (item.rate > 0n) acc.rewardsTokens.push(item.symbol);
+
+          const symbol = item.symbol;
+          acc.claimableTokens[symbol] = (acc.claimableTokens[symbol] || 0n) + amountClaimable;
+          acc.claimedTokens[symbol] = (acc.claimedTokens[symbol] || 0n) + amountClaimed;
+          acc.earnedTokens[symbol] = (acc.earnedTokens[symbol] || 0n) + amountEarned;
+
+          acc.totalClaimable += amountClaimable;
+          acc.totalClaimed += amountClaimed;
+          acc.totalEarned += amountEarned;
+
+          if (item.rate > 0n) acc.rewardsTokens.push(symbol);
           return acc;
         },
         {
           totalClaimable: 0n,
           totalClaimed: 0n,
           totalEarned: 0n,
+          claimableTokens: {} as Record<string, bigint>,
+          claimedTokens: {} as Record<string, bigint>,
+          earnedTokens: {} as Record<string, bigint>,
           rewardsTokens: [] as string[],
         },
       );
@@ -136,23 +164,35 @@ export const StakeEXAProvider: FC<PropsWithChildren> = ({ children }) => {
         totalClaimed: result.totalClaimed,
         totalEarned: result.totalEarned,
         rewardsTokens: result.rewardsTokens,
+        claimableTokens: result.claimableTokens,
+        claimedTokens: result.claimedTokens,
+        earnedTokens: result.earnedTokens,
         penalty,
       };
     },
     [accountData, exaPrice, state],
   );
 
-  const { totalClaimable, totalClaimed, totalEarned, rewardsTokens, penalty } = useMemo(
-    () => calculateRewards([...(state?.rewards || [])]),
-    [calculateRewards, state?.rewards],
-  );
+  const {
+    totalClaimable,
+    totalClaimed,
+    totalEarned,
+    rewardsTokens,
+    penalty,
+    claimableTokens,
+    claimedTokens,
+    earnedTokens,
+  } = useMemo(() => calculateRewards([...(state?.rewards || [])]), [calculateRewards, state?.rewards]);
 
   const value = useMemo(() => {
-    if (!state) {
-      return null;
-    }
+    const { balance, parameters, rewards, start, time, totalAssets } = state || {};
     return {
-      ...state,
+      balance,
+      parameters,
+      rewards,
+      start,
+      time,
+      totalAssets,
       isLoading,
       isFetching,
       refetch,
@@ -161,6 +201,9 @@ export const StakeEXAProvider: FC<PropsWithChildren> = ({ children }) => {
       totalEarned,
       rewardsTokens,
       penalty,
+      claimableTokens,
+      claimedTokens,
+      earnedTokens,
       calculateRewards,
     };
   }, [
@@ -173,12 +216,11 @@ export const StakeEXAProvider: FC<PropsWithChildren> = ({ children }) => {
     totalEarned,
     rewardsTokens,
     penalty,
+    claimableTokens,
+    claimedTokens,
+    earnedTokens,
     calculateRewards,
   ]);
-
-  if (isLoading || !value) {
-    return <div>Loading...</div>;
-  }
 
   return <StakeEXAContext.Provider value={value}>{children}</StakeEXAContext.Provider>;
 };
