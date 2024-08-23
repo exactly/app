@@ -1,16 +1,30 @@
 import { Box, Typography, useTheme } from '@mui/material';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import {
+  Area,
+  CartesianGrid,
+  ComposedChart,
+  Line,
+  ReferenceLine,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 import { toPercentage } from 'utils/utils';
 import { useStakedEXAChart } from 'hooks/useStakedEXA';
 
 import LoadingChart from 'components/charts/LoadingChart';
 import TooltipChart from 'components/charts/TooltipChart';
+import { useStakeEXA } from 'contexts/StakeEXAContext';
+import { parseEther } from 'viem';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 const StakeChart = () => {
   const { t } = useTranslation();
   const { palette } = useTheme();
+  const { totalClaimable, totalClaimed, totalEarned, start, parameters } = useStakeEXA();
   const data = useStakedEXAChart();
 
   const loading = false;
@@ -20,6 +34,26 @@ const StakeChart = () => {
   }, []);
 
   const now = Math.floor(Date.now() / 1000);
+
+  const claimedPercentage = totalEarned > 0n ? Number(totalClaimed) / Number(totalEarned) : 0;
+  const claimablePercentage = totalEarned > 0n ? Number(totalClaimable) / Number(totalEarned) : 0;
+  const restValue = Math.max(0, 1 - claimedPercentage - claimablePercentage);
+
+  const processedData = useMemo(() => {
+    return data.map((item) => {
+      if (item.timestamp <= now) {
+        return { ...item, claimedPercentage, claimablePercentage, restValue }; // 'newKey' es el nombre de la clave que deseas agregar
+      }
+      return item;
+    });
+  }, [claimablePercentage, claimedPercentage, data, now, restValue]);
+
+  const isEnded = useMemo(() => {
+    if (!start || !parameters) return false;
+    const avgStart = start === 0n ? parseEther(now.toString()) : start;
+    const endTime = Number(avgStart / WAD + parameters.refTime);
+    return now > endTime;
+  }, [now, parameters, start]);
 
   return (
     <Box
@@ -40,11 +74,27 @@ const StakeChart = () => {
           {loading ? (
             <LoadingChart />
           ) : (
-            <LineChart data={data} margin={{ top: 5, bottom: 5 }}>
+            <ComposedChart data={processedData} margin={{ top: 5, bottom: 5 }}>
+              <defs>
+                <pattern
+                  id="claimable"
+                  patternUnits="userSpaceOnUse"
+                  width="6"
+                  height="6"
+                  patternTransform="rotate(25)"
+                >
+                  <rect width="3" height="6" fill={palette.figma.green['500']} />
+                  <rect x="3" width="3" height="6" fill="#ffffff" />
+                </pattern>
+                <pattern id="rest" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(25)">
+                  <rect width="3" height="6" fill="red" />
+                  <rect x="3" width="3" height="6" fill="#ffffff" />
+                </pattern>
+              </defs>
               <CartesianGrid horizontal vertical={false} stroke={palette.grey[300]} />
               <XAxis
                 xAxisId="date"
-                dataKey="date"
+                dataKey="timestamp"
                 type="number"
                 domain={['dataMin', 'dataMax']}
                 minTickGap={50}
@@ -56,7 +106,7 @@ const StakeChart = () => {
               />
               <YAxis
                 yAxisId="left"
-                tickFormatter={(tick) => toPercentage(tick)}
+                tickFormatter={(tick) => toPercentage(tick, 0)}
                 axisLine={false}
                 tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 11 }}
                 tickLine={false}
@@ -66,6 +116,42 @@ const StakeChart = () => {
                 labelFormatter={(value) => formatDate(new Date((value * 1000) as number))}
                 formatter={(value) => toPercentage(value as number)}
                 content={<TooltipChart itemSorter={(a, b) => (a.value > b.value ? -1 : 1)} />}
+              />
+              <Area
+                yAxisId="left"
+                xAxisId="date"
+                type="monotone"
+                dataKey="claimedPercentage"
+                name={t('Claimed')}
+                stroke="none"
+                fill={palette.figma.green['500']}
+                fillOpacity={1}
+                dot={false}
+                stackId="1"
+              />
+              <Area
+                yAxisId="left"
+                xAxisId="date"
+                type="monotone"
+                dataKey="claimablePercentage"
+                name={t('Claimable')}
+                stroke="none"
+                fill="url(#claimable)"
+                fillOpacity={1}
+                dot={false}
+                stackId="1"
+              />
+              <Area
+                yAxisId="left"
+                xAxisId="date"
+                type="monotone"
+                dataKey="restValue"
+                name={t('Rest')}
+                stroke="none"
+                fill={isEnded ? 'url(#rest)' : palette.figma.green['50']}
+                fillOpacity={1}
+                dot={false}
+                stackId="1"
               />
               <Line
                 yAxisId="left"
@@ -77,8 +163,15 @@ const StakeChart = () => {
                 dot={false}
                 strokeWidth={2}
               />
-              <ReferenceLine xAxisId="date" yAxisId="left" x={now} stroke="red" strokeDasharray="3 3" />
-            </LineChart>
+              <ReferenceLine
+                xAxisId="date"
+                yAxisId="left"
+                x={now}
+                stroke={palette.blue}
+                strokeDasharray="13 13"
+                strokeWidth="3"
+              />
+            </ComposedChart>
           )}
         </ResponsiveContainer>
       </Box>
