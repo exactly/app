@@ -13,6 +13,7 @@ declare module '@mui/material/styles' {
   interface Palette {
     figma: {
       grey: Partial<Palette['grey']>;
+      green: Partial<Record<string, string>>;
     };
 
     blue: string;
@@ -49,6 +50,7 @@ declare module '@mui/material/styles' {
   interface PaletteOptions {
     figma: {
       grey: Partial<Palette['grey']>;
+      green: Partial<Record<string, string>>;
     };
 
     blue: string;
@@ -155,6 +157,11 @@ export const lightTheme = createTheme({
         '500': '#989FA6',
         '600': '#757A80',
         '700': '#6F737B',
+      },
+      green: {
+        '50': '#F0FFF4',
+        '100': '#D1FADB',
+        '500': '#33CC59',
       },
     },
     blue: '#0095FF',
@@ -402,6 +409,11 @@ export const darkTheme = createTheme({
         '300': '#757A80',
         '100': '#6F737B',
         '50': '#303336',
+      },
+      green: {
+        '500': '#33CC59',
+        '100': '#D1FADB',
+        '50': '#F0FFF4',
       },
     },
     blue: '#0095FF',
