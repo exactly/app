@@ -115,23 +115,15 @@ function LoadingModal({ tx, onClose }: { tx: Transaction; onClose: () => void })
   );
 }
 
-function StakingOperations() {
+function StakingProgress() {
   const { t } = useTranslation();
   const stakedEXA = useStakedEXA();
   const { opts } = useWeb3();
   const [tx, setTx] = useState<Transaction>();
   const [isLoading, setIsLoading] = useState(false);
 
-  const {
-    refetch,
-    start,
-    rewardsTokens,
-    totalClaimable,
-    totalClaimed,
-    totalEarned,
-    penalty,
-    parameters: { refTime },
-  } = useStakeEXA();
+  const { refetch, start, rewardsTokens, totalClaimable, totalClaimed, totalEarned, penalty, parameters } =
+    useStakeEXA();
 
   const claimAll = useCallback(async () => {
     if (!stakedEXA || !opts) return;
@@ -156,15 +148,16 @@ function StakingOperations() {
   }, [stakedEXA, opts, refetch]);
 
   const progress = useMemo(() => {
+    if (!start || !parameters) return 0;
     const now = Math.floor(Date.now() / 1000);
     const avgStart = start === 0n ? parseEther(now.toString()) : start;
     const startTime = Number(avgStart / WAD);
-    const endTime = Number(avgStart / WAD + refTime);
+    const endTime = Number(avgStart / WAD + parameters.refTime);
     const elapsedTime = now - startTime;
     const percentage = elapsedTime / (endTime - startTime);
 
     return Math.min(percentage, 100);
-  }, [refTime, start]);
+  }, [parameters, start]);
 
   const onClose = useCallback(() => {
     setTx(undefined);
@@ -201,7 +194,7 @@ function StakingOperations() {
           <Typography fontSize={32} fontWeight={500}>
             {toPercentage(progress)}
           </Typography>
-          {progress > 0 && (
+          {progress > 0 && start !== undefined && (
             <Typography color={'grey.400'} fontWeight={500} fontSize={16}>
               {t('Started on')} {parseTimestamp(formatEther(start))}
             </Typography>
@@ -303,9 +296,9 @@ function StakingOperations() {
               ))}
             </AvatarGroup>
           </Box>
-          {totalEarned > 0n && (
+          {totalEarned > 0n && start !== undefined && parameters && (
             <Typography color={'grey.400'} fontWeight={500} fontSize={16}>
-              {t('By staking end on ')} {parseTimestamp(start / WAD + refTime)}
+              {t('By staking end on ')} {parseTimestamp(start / WAD + parameters.refTime)}
             </Typography>
           )}
         </Box>
@@ -313,4 +306,4 @@ function StakingOperations() {
     </Box>
   );
 }
-export default React.memo(StakingOperations);
+export default React.memo(StakingProgress);

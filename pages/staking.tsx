@@ -8,7 +8,7 @@ import { useModal } from 'contexts/ModalContext';
 import StakedEXASummary from 'components/staking/StakedEXASummary';
 import StakingOperations from 'components/staking/StakingOperations';
 import StakeChart from 'components/charts/StakeChart';
-import StakingProgress from 'components/staking/StakingProgress';
+import Progress from 'components/staking/Progress';
 
 const Staking: NextPage = () => {
   const { open: openGetEXA } = useModal('get-exa');
@@ -61,8 +61,8 @@ const Staking: NextPage = () => {
         </Box>
         <StakedEXASummary />
         <StakingOperations />
+        <Progress />
         <StakeChart />
-        <StakingProgress />
       </Box>
     </StakeEXAProvider>
   );

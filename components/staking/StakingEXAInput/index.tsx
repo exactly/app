@@ -16,7 +16,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
-import { formatEther, parseEther } from 'viem';
+import { type Hex, formatEther, parseEther } from 'viem';
 import waitForTransaction from 'utils/waitForTransaction';
 import { stakedExaABI } from 'types/abi';
 import { AbiParametersToPrimitiveTypes, ExtractAbiFunction, ExtractAbiFunctionNames } from 'abitype';
@@ -39,6 +39,10 @@ import { Transaction } from 'types/Transaction';
 import LoadingTransaction from 'components/common/modal/Loading';
 import { track } from 'utils/mixpanel';
 import { useStakeEXA } from 'contexts/StakeEXAContext';
+import dayjs from 'dayjs';
+import { useSignTypedData } from 'wagmi';
+import { splitSignature } from '@ethersproject/bytes';
+import useIsContract from 'hooks/useIsContract';
 
 type Params<T extends ExtractAbiFunctionNames<typeof stakedExaABI>> = AbiParametersToPrimitiveTypes<
   ExtractAbiFunction<typeof stakedExaABI, T>['inputs']
@@ -144,9 +148,11 @@ function StakingEXAInput({ refetch, operation }: Props) {
   const { data: exaBalance, isLoading: exaBalanceIsLoading } = useEXABalance();
   const { rewardsTokens } = useStakeEXA();
   const EXAPrice = useEXAPrice();
-  const { isConnected, opts, walletAddress } = useWeb3();
+  const { isConnected, opts, walletAddress, chain: displayNetwork } = useWeb3();
   const [isLoading, setIsLoading] = useState(false);
   const [tx, setTx] = useState<Transaction>();
+  const { signTypedDataAsync } = useSignTypedData();
+  const isContract = useIsContract();
 
   const [qty, setQty] = useState<string>('');
   const theme = useTheme();
@@ -165,6 +171,49 @@ function StakingEXAInput({ refetch, operation }: Props) {
       : parseEther(qty) > (balance || 0n) || !qty;
   }, [balance, exaBalance, operation, qty]);
 
+  const sign = useCallback(async () => {
+    if (!walletAddress || !exa || !stakedEXA) return;
+
+    const deadline = BigInt(dayjs().unix() + 3_600);
+    const _qty = parseEther(qty);
+    const value = _qty + 1n;
+
+    const nonce = await exa.read.nonces([walletAddress], opts);
+    const name = await exa.read.name(opts);
+
+    const { v, r, s } = await signTypedDataAsync({
+      primaryType: 'Permit',
+      domain: {
+        name,
+        version: '1',
+        chainId: displayNetwork.id,
+        verifyingContract: exa.address,
+      },
+      types: {
+        Permit: [
+          { name: 'owner', type: 'address' },
+          { name: 'spender', type: 'address' },
+          { name: 'value', type: 'uint256' },
+          { name: 'nonce', type: 'uint256' },
+          { name: 'deadline', type: 'uint256' },
+        ],
+      },
+      message: {
+        owner: walletAddress,
+        spender: stakedEXA.address,
+        value,
+        nonce,
+        deadline,
+      },
+    }).then(splitSignature);
+
+    return {
+      value,
+      deadline,
+      ...{ v, r: r as Hex, s: s as Hex },
+    } as const;
+  }, [displayNetwork.id, exa, opts, qty, signTypedDataAsync, stakedEXA, walletAddress]);
+
   const submit = useCallback(async () => {
     if (!walletAddress || !stakedEXA || !exa || !opts || !qty) return;
 
@@ -174,19 +223,26 @@ function StakingEXAInput({ refetch, operation }: Props) {
     let hash;
     try {
       if (operation === 'deposit') {
-        const args: Params<'deposit'> = [amount, walletAddress] as const;
+        if (await isContract(walletAddress)) {
+          const args: Params<'deposit'> = [amount, walletAddress] as const;
+          const allowance = await exa.read.allowance([walletAddress, stakedEXA.address]);
 
-        const allowance = await exa.read.allowance([walletAddress, stakedEXA.address]);
+          if (allowance < amount) {
+            const approve = [stakedEXA.address, amount] as const;
+            const gas = await exa.estimateGas.approve(approve, opts);
+            const approveHash = await exa.write.approve(approve, { ...opts, gasLimit: gasLimit(gas) });
+            await waitForTransaction({ hash: approveHash });
+          }
 
-        if (allowance < amount) {
-          const approve = [stakedEXA.address, amount] as const;
-          const gas = await exa.estimateGas.approve(approve, opts);
-          const approveHash = await exa.write.approve(approve, { ...opts, gasLimit: gasLimit(gas) });
-          await waitForTransaction({ hash: approveHash });
+          const gas = await stakedEXA.estimateGas.deposit(args, opts);
+          hash = await stakedEXA.write.deposit(args, { ...opts, gasLimit: gasLimit(gas) });
+        } else {
+          const p = await sign();
+          if (!p) return;
+          const args: Params<'permitAndDeposit'> = [amount, walletAddress, p] as const;
+          const gas = await stakedEXA.estimateGas.permitAndDeposit(args, opts);
+          hash = await stakedEXA.write.permitAndDeposit(args, { ...opts, gasLimit: gasLimit(gas) });
         }
-
-        const gas = await stakedEXA.estimateGas.deposit(args, opts);
-        hash = await stakedEXA.write.deposit(args, { ...opts, gasLimit: gasLimit(gas) });
 
         setTx({ status: 'processing', hash });
 
@@ -210,7 +266,7 @@ function StakingEXAInput({ refetch, operation }: Props) {
       refetch();
       setIsLoading(false);
     }
-  }, [walletAddress, stakedEXA, exa, opts, qty, operation, refetch]);
+  }, [walletAddress, stakedEXA, exa, opts, qty, operation, isContract, sign, refetch]);
 
   const handleMaxClick = useCallback(() => {
     operation === 'deposit' ? setQty(formatEther(exaBalance || 0n)) : setQty(formatEther(balance || 0n));
@@ -330,7 +386,7 @@ function StakingEXAInput({ refetch, operation }: Props) {
             </Typography>
             <Box display="flex" alignItems="center" gap={1}>
               <Typography color="figma.grey.500" fontWeight={500} fontSize={13} fontFamily="fontFamilyMonospaced">
-                ~${formatNumber(usdValue || '0', 'USD')}
+                ~${formatNumber('0' || '0', 'USD')}
               </Typography>
               <AvatarGroup
                 max={6}
@@ -339,9 +395,12 @@ function StakingEXAInput({ refetch, operation }: Props) {
                   alignItems: 'center',
                 }}
               >
-                {rewardsTokens.map((symbol) => (
-                  <Avatar key={symbol} alt={symbol} src={`/img/assets/${symbol}.svg`} />
-                ))}
+                {rewardsTokens.map((symbol) => {
+                  const isExaToken = symbol.length > 3 && symbol.startsWith('exa');
+                  const imagePath = isExaToken ? `/img/exaTokens/${symbol}.svg` : `/img/assets/${symbol}.svg`;
+
+                  return <Avatar key={symbol} alt={symbol} src={imagePath} />;
+                })}
               </AvatarGroup>
             </Box>
           </Box>
