@@ -46,11 +46,11 @@ const Staking: NextPage = () => {
           <Box display="flex" flexDirection="column" gap={1}>
             <Typography>
               {t(
-                'EXA holders can now stake their assets and receive rewards. You have the flexibility to withdraw your assets anytime, but for optimal rewards, we recommend keeping your assets staked for six months. Early withdrawals are subject to penalties, and you will receive just a portion of the rewards earned so far.',
+                'The staking period is twelve months. You can add more EXA, claim fees, or unstake anytime. Keep your EXA staked for the entire period to receive the full fees. Early or late withdrawal will reduce your eligible rewards.',
               )}
             </Typography>
             <Typography>
-              {t('For further details on our staking program, ')}
+              {t('For further details, ')}
               <Typography sx={{ textDecoration: 'underline' }} component="span">
                 <a target="_blank" rel="noreferrer noopener" href="https://docs.exact.ly/">
                   {t('please check our documentation.')}
