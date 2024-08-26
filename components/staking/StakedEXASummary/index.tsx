@@ -2,12 +2,12 @@ import React, { FC, useMemo } from 'react';
 import { AvatarGroup, Avatar, Box, Skeleton, Typography, Tooltip } from '@mui/material';
 
 import { useTranslation } from 'react-i18next';
-import formatNumber from 'utils/formatNumber';
+import Image from 'next/image';
 import { useStakeEXA } from 'contexts/StakeEXAContext';
 import { useEXAPrice } from 'hooks/useEXA';
 import useAccountData from 'hooks/useAccountData';
+import formatNumber from 'utils/formatNumber';
 import getVouchersPrice from 'utils/getVouchersPrice';
-import Image from 'next/image';
 
 function StakedEXASummary() {
   const { t } = useTranslation();
@@ -17,22 +17,22 @@ function StakedEXASummary() {
 
   const rewardsAPR = useMemo(() => {
     if (!totalAssets || !rewards || !accountData) return;
-    return rewards.map((reward) => {
+    return rewards.map(({ symbol, rate }) => {
       const yearInSeconds = 31_536_000n;
 
-      const rewardPrice = reward.symbol === 'EXA' ? exaPrice : getVouchersPrice(accountData, reward.symbol);
-      const decimals = accountData.find((token) => token.symbol.includes(reward.symbol))?.decimals || 18;
+      const rewardPrice = symbol === 'EXA' ? exaPrice : getVouchersPrice(accountData, symbol);
+      const decimals = accountData.find((token) => token.symbol.includes(symbol))?.decimals || 18;
       const decimalWAD = 10n ** BigInt(decimals);
 
-      const apr = (((reward.rate * yearInSeconds * rewardPrice) / (totalAssets * exaPrice)) * 100n) / decimalWAD;
+      const apr = (((rate * yearInSeconds * rewardPrice) / (totalAssets * exaPrice)) * 100n) / decimalWAD;
 
-      return { symbol: reward.symbol, apr };
+      return { symbol, apr };
     });
   }, [totalAssets, rewards, accountData, exaPrice]);
 
   const totalRewardsAPR = useMemo(() => {
     if (!rewardsAPR) return;
-    return rewardsAPR.reduce((acc, reward) => acc + reward.apr, 0n);
+    return rewardsAPR.reduce((acc, { apr }) => acc + apr, 0n);
   }, [rewardsAPR]);
 
   return (
