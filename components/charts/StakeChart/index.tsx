@@ -66,9 +66,7 @@ const StakeChart = () => {
     >
       <Box display="flex" flexDirection="column" width="100%" height="100%" gap={2}>
         <Box display="flex" justifyContent="space-between">
-          <Typography variant="h6" fontSize="16px">
-            {t('Staking')}
-          </Typography>
+          <Typography variant="h6">{t('Staking status')}</Typography>
         </Box>
         <ResponsiveContainer width="100%" height="100%">
           {loading ? (

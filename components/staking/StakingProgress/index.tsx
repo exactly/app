@@ -282,9 +282,7 @@ function StakingProgress() {
         justifyContent="space-between"
       >
         <Box display="flex" flexDirection="column" gap={2}>
-          <Typography fontSize={19} fontWeight={700}>
-            {t('Total rewards')}
-          </Typography>
+          <Typography variant="h6">{t('Total rewards')}</Typography>
           <Box display="flex" gap={1}>
             <Typography fontSize={32}>${formatNumber(formatEther(totalEarned), 'USD')}</Typography>
             <AvatarGroup

@@ -649,6 +649,7 @@
   "Staked": "Stakeado",
   "Insufficient EXA balance": "Saldo de EXA insuficiente",
   "EXA Staking": "Staking de EXA",
+  "Staking status": "Estado de Staking",
   "EXA holders can now stake their assets and receive rewards. You have the flexibility to withdraw your assets anytime, but for optimal rewards, we recommend keeping your assets staked for six months. Early withdrawals are subject to penalties, and you will receive just a portion of the rewards earned so far.": "Los titulares de EXA ahora pueden stakear sus activos y recibir recompensas. Tienes la flexibilidad de retirar tus activos en cualquier momento, pero para obtener recompensas óptimas, recomendamos mantener tus activos stakeados durante seis meses. Los retiros anticipados están sujetos a penalizaciones, y solo recibirás una parte de las recompensas ganadas hasta ahora.",
   "For further details on our staking program, ": "Para más detalles sobre nuestro programa de stakeo, ",
   "please check our documentation.": "por favor revisa nuestra documentación."
