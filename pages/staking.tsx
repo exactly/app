@@ -46,14 +46,15 @@ const Staking: NextPage = () => {
           <Box display="flex" flexDirection="column" gap={1}>
             <Typography>
               {t(
-                'The staking period is twelve months. You can add more EXA, claim fees, or unstake anytime. Keep your EXA staked for the entire period to receive the full fees. Early or late withdrawal will reduce your eligible rewards.',
+                'The EXA staking period is twelve months. You can add more EXA, claim fees, or unstake anytime. Early or late withdrawal will reduce your eligible rewards. Keep your EXA staked for the entire period to receive the full treasury fees. For more information, please check ',
               )}
-            </Typography>
-            <Typography>
-              {t('For further details, ')}
               <Typography sx={{ textDecoration: 'underline' }} component="span">
-                <a target="_blank" rel="noreferrer noopener" href="https://docs.exact.ly/">
-                  {t('please check our documentation.')}
+                <a
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  href="https://docs.exact.ly/governance/exactly-token-exa/exa-staking-program-stexa"
+                >
+                  {t('our docs.')}
                 </a>
               </Typography>
             </Typography>

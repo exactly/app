@@ -107,6 +107,34 @@ const Strategies: NextPage = () => {
           chainId: optimism.id,
         },
         {
+          title: t('Staking Program'),
+          description: t(
+            'Earn a portion of the Protocol’s treasury fees by staking your EXA over a twelve-month period.',
+          ),
+          tags: [{ text: t('Advanced'), size: 'small' as const }],
+          button: (
+            <Link href={{ pathname: '/staking' }} style={{ width: '100%' }}>
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={() =>
+                  track('Button Clicked', {
+                    location: 'Strategies',
+                    name: 'staking',
+                    href: '/staking',
+                    isNew: true,
+                  })
+                }
+              >
+                {t('Stake EXA')}
+              </Button>
+            </Link>
+          ),
+          isNew: true,
+          source: 'exactly' as const,
+          imgPath: '/img/strategies/featured_staking.svg',
+        },
+        {
           title: t('Debit to Credit'),
           description: t(
             'Easily turn your current crypto-funded debit card into a credit card by getting a USDC borrow at a fixed rate.',

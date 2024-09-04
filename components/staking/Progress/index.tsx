@@ -1,25 +1,26 @@
 import React, { useMemo } from 'react';
-import { Box, Typography, useTheme } from '@mui/material';
+import { Box, Tooltip, Typography, useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useStakeEXA } from 'contexts/StakeEXAContext';
 import { parseEther } from 'viem';
 import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 import StakingProgressBar from '../StakingProgress/stakingProgressBar';
+import { InfoOutlined } from '@mui/icons-material';
 
 function Progress() {
   const { t } = useTranslation();
   const { palette } = useTheme();
 
-  const { start, totalClaimable, totalClaimed, totalEarned, parameters } = useStakeEXA();
+  const { start, totalClaimable, totalClaimed, totalEarned, parameters, balance } = useStakeEXA();
 
   const isEnded = useMemo(() => {
-    if (!start || !parameters) return false;
+    if (!start || !parameters || !balance || balance === 0n) return false;
     const now = Math.floor(Date.now() / 1000);
     const avgStart = start === 0n ? parseEther(now.toString()) : start;
     const endTime = Number(avgStart / WAD + parameters.refTime);
 
     return now > endTime;
-  }, [parameters, start]);
+  }, [balance, parameters, start]);
 
   return (
     <Box>
@@ -36,9 +37,14 @@ function Progress() {
         overflow="hidden"
       >
         <Box display="flex" flexDirection="column" position="relative" zIndex={2} gap={2}>
-          <Typography fontSize={19} fontWeight={700}>
-            {t('Rewards')}
-          </Typography>
+          <Box display="flex" gap={1}>
+            <Typography fontSize={19} fontWeight={700}>
+              {t('Your Rewards')}
+            </Typography>
+            <Tooltip title={t('Your rewards are earnings from the protocol treasury fees.')} placement="top" arrow>
+              <InfoOutlined sx={{ fontSize: '19px', my: 'auto', color: 'figma.grey.500', cursor: 'pointer' }} />
+            </Tooltip>
+          </Box>
           {start !== undefined && (
             <StakingProgressBar claimed={totalClaimed} claimable={totalClaimable} total={totalEarned} ended={isEnded} />
           )}

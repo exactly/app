@@ -42,7 +42,7 @@ const StakeChart = () => {
   const processedData = useMemo(() => {
     return data.map((item) => {
       if (item.timestamp <= now) {
-        return { ...item, claimedPercentage, claimablePercentage, restValue }; // 'newKey' es el nombre de la clave que deseas agregar
+        return { ...item, claimedPercentage, claimablePercentage, restValue };
       }
       return item;
     });
@@ -85,8 +85,12 @@ const StakeChart = () => {
                   <rect x="3" width="3" height="6" fill="#ffffff" />
                 </pattern>
                 <pattern id="rest" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(25)">
-                  <rect width="3" height="6" fill="red" />
-                  <rect x="3" width="3" height="6" fill="#ffffff" />
+                  <rect width="3" height="6" fill={isEnded ? 'red' : palette.figma.green['50']} />
+                  <rect x="3" width="3" height="6" fill={isEnded ? '#ffffff' : palette.figma.green['50']} />
+                </pattern>
+                <pattern id="claimed" patternUnits="userSpaceOnUse" width="6" height="6">
+                  <rect width="3" height="6" fill={palette.figma.green['500']} />
+                  <rect x="3" width="3" height="6" fill={palette.figma.green['500']} />
                 </pattern>
               </defs>
               <CartesianGrid horizontal vertical={false} stroke={palette.grey[300]} />
@@ -122,7 +126,7 @@ const StakeChart = () => {
                 dataKey="claimedPercentage"
                 name={t('Claimed')}
                 stroke="none"
-                fill={palette.figma.green['500']}
+                fill="url(#claimed)"
                 fillOpacity={1}
                 dot={false}
                 stackId="1"
@@ -144,9 +148,9 @@ const StakeChart = () => {
                 xAxisId="date"
                 type="monotone"
                 dataKey="restValue"
-                name={t('Rest')}
+                name={isEnded ? t('Not available to claim') : t('Projected Remainder')}
                 stroke="none"
-                fill={isEnded ? 'url(#rest)' : palette.figma.green['50']}
+                fill="url(#rest)"
                 fillOpacity={1}
                 dot={false}
                 stackId="1"
@@ -156,7 +160,7 @@ const StakeChart = () => {
                 xAxisId="date"
                 type="monotone"
                 dataKey="value"
-                name={t('Discount Factor')}
+                name={t('Growth Factor')}
                 stroke={palette.mode === 'light' ? 'black' : 'white'}
                 dot={false}
                 strokeWidth={2}

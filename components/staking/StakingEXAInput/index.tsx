@@ -385,9 +385,9 @@ function StakingEXAInput({ refetch, operation }: Props) {
               REWARDS
             </Typography>
             <Box display="flex" alignItems="center" gap={1}>
-              <Typography color="figma.grey.500" fontWeight={500} fontSize={13} fontFamily="fontFamilyMonospaced">
+              {/* <Typography color="figma.grey.500" fontWeight={500} fontSize={13} fontFamily="fontFamilyMonospaced">
                 ~${formatNumber('0' || '0', 'USD')}
-              </Typography>
+              </Typography> */}
               <AvatarGroup
                 max={6}
                 sx={{

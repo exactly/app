@@ -26,7 +26,7 @@ export const useStakedEXABalance = () => {
 };
 
 export const useStakedEXAChart = () => {
-  const { start, parameters } = useStakeEXA();
+  const { start, balance, parameters } = useStakeEXA();
 
   const calculateValue = useCallback(
     (
@@ -52,14 +52,15 @@ export const useStakedEXAChart = () => {
   );
 
   const points = useMemo(() => {
-    if (parameters !== undefined && start !== undefined) {
+    if (parameters !== undefined && start !== undefined && balance !== undefined) {
       const now = parseEther(Math.floor(Date.now() / 1000).toString());
       const minTime = parameters.minTime * WAD;
       const avgStart = start > 0n ? start : now;
       const cliff = avgStart + minTime;
       const refTime = parameters.refTime * WAD;
       const optimalStakeTime = avgStart + refTime;
-      const extra = now > optimalStakeTime ? now - optimalStakeTime + 172_800n * WAD : 172_800n * WAD;
+      const tailTime = (refTime * 25n) / 100n; //25% of refTime
+      const extra = now > optimalStakeTime ? now - optimalStakeTime + tailTime : tailTime;
       const endTime = optimalStakeTime + extra;
       const numberOfTicks = 100n * WAD;
       const interval = ((endTime - avgStart) * WAD) / numberOfTicks;
@@ -120,7 +121,7 @@ export const useStakedEXAChart = () => {
       return dataPoints.sort((a, b) => a.timestamp - b.timestamp);
     }
     return [];
-  }, [parameters, start, calculateValue]);
+  }, [parameters, start, balance, calculateValue]);
 
   return points;
 };

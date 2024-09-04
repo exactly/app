@@ -258,7 +258,7 @@ function StakingProgress() {
               ${formatNumber(EXAUsdValue || '0', 'USD')}
             </Typography>
           </Box>
-          {stakedProgress > 0 && (
+          {stakedProgress > 0 && balance !== undefined && balance > 0n && (
             <Box>
               <Grid container>
                 <Grid item xs={6}>

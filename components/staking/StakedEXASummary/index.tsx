@@ -24,7 +24,7 @@ function StakedEXASummary() {
       const decimals = accountData.find((token) => token.symbol.includes(symbol))?.decimals || 18;
       const decimalWAD = 10n ** BigInt(decimals);
 
-      const apr = (((rate * yearInSeconds * rewardPrice) / (totalAssets * exaPrice)) * 100n) / decimalWAD;
+      const apr = (rate * yearInSeconds * rewardPrice * 100n) / (totalAssets * exaPrice) / decimalWAD;
 
       return { symbol, apr };
     });
@@ -55,9 +55,13 @@ function StakedEXASummary() {
       <Box>
         <Typography variant="h6">{t('Estimated APR')}</Typography>
         <Box display="flex" gap={1}>
-          <Typography fontSize={32} fontWeight={500}>
-            {formatNumber(Number(totalRewardsAPR))}%
-          </Typography>
+          {totalRewardsAPR === undefined ? (
+            <Skeleton variant="text" width={100} height={45} />
+          ) : (
+            <Typography fontSize={32} fontWeight={500}>
+              {formatNumber(Number(totalRewardsAPR))}%
+            </Typography>
+          )}
           {rewardsTokens === undefined ? (
             <Skeleton variant="text" width={80} />
           ) : (

@@ -6,6 +6,7 @@ import formatNumber from 'utils/formatNumber';
 import { formatEther } from 'viem';
 import { useStakeEXA } from 'contexts/StakeEXAContext';
 import Image from 'next/image';
+import { useTranslation } from 'react-i18next';
 
 const ProgressBar = styled('div')<{ ended: boolean }>(({ ended, theme }) => ({
   display: 'flex',
@@ -114,6 +115,7 @@ const StakingProgressBar: FC<DualProgressBarProps> = ({
   ended = false,
 }) => {
   const { palette } = useTheme();
+  const { t } = useTranslation();
   const { rewardsTokens, claimableTokens, claimedTokens, earnedTokens } = useStakeEXA();
 
   const claimedPercentage = total > 0n ? Number((claimed * 100n) / total) : 0;
@@ -241,7 +243,7 @@ const StakingProgressBar: FC<DualProgressBarProps> = ({
               }}
             />
             <Typography fontSize={16} fontWeight={700}>
-              {ended ? 'Not Available to claim' : 'Estimated Total'}
+              {ended ? t('Not available to claim') : t('Projected Remainder')}
             </Typography>
           </Box>
           <Box display="flex" gap={1}>
