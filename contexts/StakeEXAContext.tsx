@@ -20,7 +20,7 @@ type Parameters = {
   savings: `0x${string}`;
 };
 
-type Rewards = {
+export type Rewards = {
   claimable: bigint;
   claimed: bigint;
   earned: bigint;

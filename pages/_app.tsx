@@ -31,6 +31,7 @@ import GetEXAModal from 'components/GetEXA/ModalWrapper';
 import MaturityDateReminder from '../components/MaturityDateReminder';
 import NewIRMBanner from '../components/NewIRMBanner';
 import EXACard from 'components/ExaCard';
+import { StakeEXAProvider } from 'contexts/StakeEXAContext';
 
 dayjs.extend(isToday);
 const { maxWidth } = globals;
@@ -88,28 +89,30 @@ export default function App({ Component, pageProps, router }: AppProps) {
           <ModalContextProvider>
             <GlobalErrorProvider>
               <AccountDataProvider>
-                <NewIRMBanner />
-                <Box display="flex" flexDirection="column" px={2} height="100%">
-                  <Navbar />
-                  {router.pathname === '/strategies' && (
-                    <Box position="relative" zIndex={-1} mx={-2}>
-                      <Box
-                        position="absolute"
-                        left={0}
-                        bgcolor={({ palette }) => (palette.mode === 'dark' ? 'grey.100' : 'figma.grey.100')}
-                        width="100vw"
-                        height={{ xs: 1400, sm: 440 }}
-                      />
-                    </Box>
-                  )}
-                  <main style={{ flexGrow: 1, maxWidth, margin: '0 auto', width: '100%' }}>
-                    <Component {...pageProps} />
-                  </main>
-                  <Footer />
-                </Box>
-                <Modals />
-                <MaturityDateReminder />
-                <EXACard />
+                <StakeEXAProvider>
+                  <NewIRMBanner />
+                  <Box display="flex" flexDirection="column" px={2} height="100%">
+                    <Navbar />
+                    {router.pathname === '/strategies' && (
+                      <Box position="relative" zIndex={-1} mx={-2}>
+                        <Box
+                          position="absolute"
+                          left={0}
+                          bgcolor={({ palette }) => (palette.mode === 'dark' ? 'grey.100' : 'figma.grey.100')}
+                          width="100vw"
+                          height={{ xs: 1400, sm: 440 }}
+                        />
+                      </Box>
+                    )}
+                    <main style={{ flexGrow: 1, maxWidth, margin: '0 auto', width: '100%' }}>
+                      <Component {...pageProps} />
+                    </main>
+                    <Footer />
+                  </Box>
+                  <Modals />
+                  <MaturityDateReminder />
+                  <EXACard />
+                </StakeEXAProvider>
               </AccountDataProvider>
             </GlobalErrorProvider>
           </ModalContextProvider>

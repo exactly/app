@@ -7,7 +7,7 @@ import { useStakeEXA } from 'contexts/StakeEXAContext';
 import { useEXAPrice } from 'hooks/useEXA';
 import useAccountData from 'hooks/useAccountData';
 import formatNumber from 'utils/formatNumber';
-import getVouchersPrice from 'utils/getVouchersPrice';
+import { calculateStakingRewardsAPR, calculateTotalStakingRewardsAPR } from 'utils/calculateStakingAPR';
 
 function StakedEXASummary() {
   const { t } = useTranslation();
@@ -16,23 +16,11 @@ function StakedEXASummary() {
   const { accountData } = useAccountData();
 
   const rewardsAPR = useMemo(() => {
-    if (!totalAssets || !rewards || !accountData) return;
-    return rewards.map(({ symbol, rate }) => {
-      const yearInSeconds = 31_536_000n;
-
-      const rewardPrice = symbol === 'EXA' ? exaPrice : getVouchersPrice(accountData, symbol);
-      const decimals = accountData.find((token) => token.symbol.includes(symbol))?.decimals || 18;
-      const decimalWAD = 10n ** BigInt(decimals);
-
-      const apr = (rate * yearInSeconds * rewardPrice * 100n) / (totalAssets * exaPrice) / decimalWAD;
-
-      return { symbol, apr };
-    });
+    return calculateStakingRewardsAPR(totalAssets, rewards, accountData, exaPrice);
   }, [totalAssets, rewards, accountData, exaPrice]);
 
   const totalRewardsAPR = useMemo(() => {
-    if (!rewardsAPR) return;
-    return rewardsAPR.reduce((acc, { apr }) => acc + apr, 0n);
+    return calculateTotalStakingRewardsAPR(rewardsAPR);
   }, [rewardsAPR]);
 
   return (
@@ -101,7 +89,10 @@ const TooltipContent: FC<{ rewardsData?: RewardData[] }> = ({ rewardsData }) => 
         const isExaToken = symbol.length > 3 && symbol.startsWith('exa');
         const imagePath = isExaToken ? `/img/exaTokens/${symbol}.svg` : `/img/assets/${symbol}.svg`;
         return (
-          <Box key={symbol} sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box key={symbol} sx={{ display: 'flex', alignItems: 'center' }} gap={1} justifyContent="flex-end">
+            <Typography fontWeight={400} fontSize={14} ml={0.5} color="grey.900">
+              {symbol}
+            </Typography>
             <Image src={imagePath} alt={symbol} width="24" height="24" />
             <Typography fontWeight={400} fontSize={14} ml={0.5} color="grey.900">
               {formatNumber(Number(apr))}%
