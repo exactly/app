@@ -635,8 +635,6 @@
   "Please set this asset as collateral in your dashboard": "Por favor, establece este activo como colateral en tu panel de control",
   "Total deposited: ": "Total depositado",
   "Total borrowed: ": "Total prestado",
-  "Deposit EXA": "Depositar EXA",
-  "Deposit EXA on Extra Finance and get up to {{apy}} APY": "Deposita EXA en Extra Finance y obtén hasta {{apy}} APY",
   "Stake amount": "Monto a Stakear",
   "Withdraw amount": "Monto a Retirar",
   "Your Staked EXA": "Tu EXA Stakeado",
@@ -671,5 +669,6 @@
   "Your Rewards": "Tus Recompensas",
   "Your rewards are earnings from the protocol treasury fees.": "Tus recompensas son ganancias de las tarifas del tesoro del protocolo.",
   "The EXA staking period is twelve months. You can add more EXA, claim fees, or unstake anytime. Early or late withdrawal will reduce your eligible rewards. Keep your EXA staked for the entire period to receive the full treasury fees. For more information, please check ": "El período de staking de EXA es de doce meses. Puedes agregar más EXA, reclamar tarifas o deshacer el staking en cualquier momento. El retiro anticipado o tardío reducirá tus recompensas elegibles. Mantén tu EXA stakeado durante todo el período para recibir todas las tarifas del tesoro. Para obtener más información, consulta ",
-  "our docs.": "nuestra documentación."
+  "our docs.": "nuestra documentación.",
+  "Stake": "Stakear"
 }
