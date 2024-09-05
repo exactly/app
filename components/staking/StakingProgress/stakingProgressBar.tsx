@@ -162,7 +162,7 @@ const StakingProgressBar: FC<DualProgressBarProps> = ({
               sx={{ bgcolor: palette.figma.green[500], cursor: 'pointer' }}
             />
             <Typography fontSize={16} fontWeight={700}>
-              Claimed
+              {t('Claimed')}
             </Typography>
           </Box>
           <Box display="flex" gap={1}>
@@ -283,7 +283,10 @@ const TooltipContent: FC<TooltipContentProps> = ({ tokensData }) => {
         const isExaToken = symbol.length > 3 && symbol.startsWith('exa');
         const imagePath = isExaToken ? `/img/exaTokens/${symbol}.svg` : `/img/assets/${symbol}.svg`;
         return (
-          <Box key={symbol} sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box key={symbol} sx={{ display: 'flex', alignItems: 'center' }} gap={1} justifyContent="flex-end">
+            <Typography fontWeight={400} fontSize={14} ml={0.5} color="grey.900">
+              {symbol}
+            </Typography>
             <Image src={imagePath} alt={symbol} width="24" height="24" />
             <Typography fontWeight={400} fontSize={14} ml={0.5} color="grey.900">
               ${formatNumber(formatEther(valueUSD), 'USD')}

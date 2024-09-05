@@ -120,7 +120,7 @@ export const StakeEXAProvider: FC<PropsWithChildren> = ({ children }) => {
             amountEarned = (item.earned * (exaPrice || 1n * WAD)) / WAD;
           } else {
             if (!accountData) return acc;
-            const r = accountData?.find((a) => a.asset === item.reward);
+            const r = accountData?.find((a) => a.asset === item.reward || a.market === item.reward);
 
             const usdPrice = getVouchersPrice(accountData, item.symbol);
             const decimals = r?.decimals || 18;
