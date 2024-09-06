@@ -6,6 +6,8 @@ import Link from 'next/link';
 import useRouter from 'hooks/useRouter';
 import { useTranslation } from 'react-i18next';
 import { track } from 'utils/mixpanel';
+import { useWeb3 } from 'hooks/useWeb3';
+import { mainnet } from 'wagmi';
 
 const NEWS_READ_KEY = 'news_read';
 
@@ -20,9 +22,24 @@ const isNewsRead = (id: string) => {
 };
 
 const NewsModal = () => {
+  const { chain } = useWeb3();
+  const isEthereum = chain.id === mainnet.id;
   const { t } = useTranslation();
   const news = useMemo(
     () => [
+      {
+        id: 'Staking',
+        title: t('Staking EXA program'),
+        description: [
+          t('Step 1: Stake your EXA'),
+          t('Step 2: Start receiving rewards from the protocol’s treasury fees.'),
+        ],
+        image: 'img/news/stakingProgram.svg',
+        buttonTitle: t('Start staking now'),
+        pathname: `${isEthereum ? 'https://app.exact.ly/staking' : '/staking'}`,
+        isExternal: isEthereum,
+        until: '2024-11-30T23:59:59.000Z',
+      },
       {
         id: 'esEXA Vesting',
         title: t('esEXA Vesting'),
@@ -33,6 +50,7 @@ const NewsModal = () => {
         image: 'img/news/4.png',
         buttonTitle: t('Start vesting now'),
         pathname: '/vesting',
+        isExternal: false,
         until: '2023-11-30T23:59:59.000Z',
       },
       {
@@ -45,6 +63,7 @@ const NewsModal = () => {
         image: 'img/news/1.png',
         buttonTitle: t('Check it now'),
         pathname: '/security',
+        isExternal: false,
         until: '2023-10-31T23:59:59.000Z',
       },
       {
@@ -57,6 +76,7 @@ const NewsModal = () => {
         image: 'img/news/2.png',
         buttonTitle: t('Check transactions'),
         pathname: '/activity',
+        isExternal: false,
         until: '2023-10-31T23:59:59.000Z',
       },
       {
@@ -69,10 +89,11 @@ const NewsModal = () => {
         image: 'img/news/3.png',
         buttonTitle: 'Manage allowances',
         pathname: '/revoke',
+        isExternal: false,
         until: '2023-10-31T23:59:59.000Z',
       },
     ],
-    [t],
+    [isEthereum, t],
   );
 
   const { pathname: currentPathname, query } = useRouter();
@@ -156,11 +177,19 @@ const NewsModal = () => {
                 ))}
               </Box>
             </Box>
-            <Link href={{ pathname: selectedNews.pathname, query }} legacyBehavior>
-              <Button variant="contained" sx={{ width: 'fit-content' }}>
-                {selectedNews.buttonTitle}
-              </Button>
-            </Link>
+            {selectedNews.isExternal ? (
+              <a href={selectedNews.pathname} target="_blank" rel="noopener noreferrer">
+                <Button variant="contained" sx={{ width: 'fit-content' }}>
+                  {selectedNews.buttonTitle}
+                </Button>
+              </a>
+            ) : (
+              <Link href={{ pathname: selectedNews.pathname, query }} legacyBehavior>
+                <Button variant="contained" sx={{ width: 'fit-content' }}>
+                  {selectedNews.buttonTitle}
+                </Button>
+              </Link>
+            )}
           </Grid>
           {!isMobile && (
             <Grid item xs={12} md={6}>
