@@ -670,5 +670,10 @@
   "Your rewards are earnings from the protocol treasury fees.": "Tus recompensas son ganancias de las tarifas del tesoro del protocolo.",
   "The EXA staking period is twelve months. You can add more EXA, claim fees, or unstake anytime. Early or late withdrawal will reduce your eligible rewards. Keep your EXA staked for the entire period to receive the full treasury fees. For more information, please check ": "El período de staking de EXA es de doce meses. Puedes agregar más EXA, reclamar tarifas o deshacer el staking en cualquier momento. El retiro anticipado o tardío reducirá tus recompensas elegibles. Mantén tu EXA stakeado durante todo el período para recibir todas las tarifas del tesoro. Para obtener más información, consulta ",
   "our docs.": "nuestra documentación.",
-  "Stake": "Stakear"
+  "Stake": "Stakear",
+  "Staking EXA program": "Programa de Staking de EXA",
+  "Step 1: Stake your EXA": "Paso 1: Stakea tu EXA",
+  "Step 2: Start receiving rewards from the protocol’s treasury fees.": "Paso 2: Comienza a recibir recompensas de las tarifas del tesoro del protocolo.",
+  "Start staking now": "Comienza a stakear ahora",
+  "Stake EXA and Claim rewards": "Stakea EXA y Reclama recompensas"
 }
