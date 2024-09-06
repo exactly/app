@@ -427,7 +427,9 @@ function StakingEXAInput({ refetch, operation }: Props) {
           {insufficientFunds && parseEther(qty) > 0n
             ? t('Insufficient EXA balance')
             : operation === 'deposit'
-              ? t('Stake EXA')
+              ? balance && balance > 0
+                ? t('Stake EXA and Claim rewards')
+                : t('Stake EXA')
               : t('Withdraw')}
         </MainActionButton>
       </Box>
