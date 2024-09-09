@@ -8,6 +8,7 @@ import { useEXAPrice } from 'hooks/useEXA';
 import useAccountData from 'hooks/useAccountData';
 import formatNumber from 'utils/formatNumber';
 import { calculateStakingRewardsAPR, calculateTotalStakingRewardsAPR } from 'utils/calculateStakingAPR';
+import { InfoOutlined } from '@mui/icons-material';
 
 function StakedEXASummary() {
   const { t } = useTranslation();
@@ -41,7 +42,22 @@ function StakedEXASummary() {
         </Box>
       </Box>
       <Box>
-        <Typography variant="h6">{t('Estimated APR')}</Typography>
+        <Box display="flex" gap={1}>
+          <Typography variant="h6">{t('Estimated APR')}</Typography>
+          <Tooltip
+            title={
+              <Typography sx={{ fontSize: '11.5px', fontWeight: '400' }}>
+                {t(
+                  "The 'Estimated APR' is equal to 50% of last week's treasury fees from the USDC market (annualized) divided by the total EXA Staked (in $).",
+                )}
+              </Typography>
+            }
+            placement="top"
+            arrow
+          >
+            <InfoOutlined sx={{ fontSize: '19px', my: 'auto', color: 'figma.grey.500', cursor: 'pointer' }} />
+          </Tooltip>
+        </Box>
         <Box display="flex" gap={1}>
           {totalRewardsAPR === undefined ? (
             <Skeleton variant="text" width={100} height={45} />

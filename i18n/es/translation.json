@@ -657,13 +657,6 @@
   "Started": "Iniciado",
   "Ends": "Finaliza",
   "Claim rewards to date": "Reclamar recompensas hasta la fecha",
-  "Staking progress": "Progreso de Staking",
-  "Started on": "Iniciado el",
-  "Rewards to date": "Recompensas hasta la fecha",
-  "Claimed: ": "Reclamado: ",
-  "penalty": "penalización",
-  "Total rewards": "Recompensas totales",
-  "By staking end on ": "Al finalizar el staking el ",
   "Staking Program": "Programa de Staking",
   "Earn a portion of the Protocol’s treasury fees by staking your EXA over a twelve-month period.": "Gana una parte de las tarifas del tesoro del Protocolo stakeando tu EXA durante un período de doce meses.",
   "Your Rewards": "Tus Recompensas",
@@ -675,5 +668,7 @@
   "Step 1: Stake your EXA": "Paso 1: Stakea tu EXA",
   "Step 2: Start receiving rewards from the protocol’s treasury fees.": "Paso 2: Comienza a recibir recompensas de las tarifas del tesoro del protocolo.",
   "Start staking now": "Comienza a stakear ahora",
-  "Stake EXA and Claim rewards": "Stakea EXA y Reclama recompensas"
+  "Stake EXA and Claim rewards": "Stakea EXA y Reclama recompensas",
+  "The 'Estimated APR' is equal to 50% of last week's treasury fees from the USDC market (annualized) divided by the total EXA Staked (in $).": "La 'TNA Estimada' es igual al 50% de las tarifas del tesoro de la semana pasada del mercado USDC (anualizado) dividido por el total de EXA Stakeado (en $).",
+  "Available to claim": "Disponible para reclamar"
 }
