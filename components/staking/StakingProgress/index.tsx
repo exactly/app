@@ -1,7 +1,7 @@
 import React, { FC, ReactNode } from 'react';
 import Tooltip from '@mui/material/Tooltip';
 import { styled } from '@mui/system';
-import { Avatar, AvatarGroup, Box, Typography, useTheme } from '@mui/material';
+import { Avatar, AvatarGroup, Box, Grid, Typography, useTheme } from '@mui/material';
 import formatNumber from 'utils/formatNumber';
 import { formatEther } from 'viem';
 import { useStakeEXA } from 'contexts/StakeEXAContext';
@@ -150,122 +150,150 @@ const StakingProgressBar: FC<DualProgressBarProps> = ({
           <RestProgressBar width={restValue} ended={ended} />
         </Tooltip>
       </ProgressBar>
-      <Box display="flex" gap={5}>
-        <Box textAlign="center">
-          <Box display="flex" gap={1} alignItems="center">
-            <Box
-              minWidth={16}
-              minHeight={16}
-              width={16}
-              height={16}
-              borderRadius={'4px'}
-              sx={{ bgcolor: palette.figma.green[500], cursor: 'pointer' }}
-            />
-            <Typography fontSize={16} fontWeight={700}>
-              {t('Claimed')}
-            </Typography>
-          </Box>
-          <Box display="flex" gap={1}>
-            <Typography fontSize={32}>${formatNumber(formatEther(claimed), 'USD')}</Typography>
-            <Tooltip title={<TooltipContent tokensData={claimedTokens} />} placement="top" arrow>
-              <AvatarGroup
-                max={6}
+      <Grid container spacing={5} justifyContent="center">
+        <Grid item xs={12} sm={4} textAlign="center">
+          <Grid container justifyContent="center" alignItems="center" spacing={1}>
+            <Grid item>
+              <Box
+                minWidth={16}
+                minHeight={16}
+                width={16}
+                height={16}
+                borderRadius="4px"
+                sx={{ bgcolor: palette.figma.green[500], cursor: 'pointer' }}
+              />
+            </Grid>
+            <Grid item>
+              <Typography fontSize={16} fontWeight={700}>
+                {t('Claimed')}
+              </Typography>
+            </Grid>
+          </Grid>
+          <Grid
+            container
+            justifyContent="center"
+            spacing={1}
+            sx={{
+              paddingLeft: '0px',
+            }}
+          >
+            <Grid item>
+              <Typography fontSize={32}>${formatNumber(formatEther(claimed), 'USD')}</Typography>
+            </Grid>
+            <Grid item>
+              <Tooltip title={<TooltipContent tokensData={claimedTokens} />} placement="top" arrow>
+                <AvatarGroup
+                  max={6}
+                  sx={{
+                    '& .MuiAvatar-root': { width: 32, height: 32, borderColor: 'transparent' },
+                  }}
+                >
+                  {Object.entries(claimedTokens).map(([symbol]) => {
+                    const isExaToken = symbol.length > 3 && symbol.startsWith('exa');
+                    const imagePath = isExaToken ? `/img/exaTokens/${symbol}.svg` : `/img/assets/${symbol}.svg`;
+                    return <Avatar key={symbol} alt={symbol} src={imagePath} />;
+                  })}
+                </AvatarGroup>
+              </Tooltip>
+            </Grid>
+          </Grid>
+        </Grid>
+        <Grid item xs={12} sm={4} textAlign="center">
+          <Grid container justifyContent="center" alignItems="center" spacing={1}>
+            <Grid item>
+              <Box
+                minWidth={16}
+                minHeight={16}
+                width={16}
+                height={16}
+                borderRadius="4px"
                 sx={{
-                  '& .MuiAvatar-root': { width: 32, height: 32, borderColor: 'transparent' },
-                  alignItems: 'center',
+                  backgroundImage: `repeating-linear-gradient(
+                  -70deg,
+                  ${palette.figma.green[500]},
+                  ${palette.figma.green[500]} 3px,
+                  #ffffff 3px,
+                  #ffffff 6px
+                )`,
+                  cursor: 'pointer',
                 }}
-              >
-                {Object.entries(claimedTokens).map(([symbol]) => {
-                  const isExaToken = symbol.length > 3 && symbol.startsWith('exa');
-                  const imagePath = isExaToken ? `/img/exaTokens/${symbol}.svg` : `/img/assets/${symbol}.svg`;
-                  return <Avatar key={symbol} alt={symbol} src={imagePath} />;
-                })}
-              </AvatarGroup>
-            </Tooltip>
-          </Box>
-        </Box>
-        <Box textAlign="center">
-          <Box display="flex" gap={1} alignItems="center">
-            <Box
-              minWidth={16}
-              minHeight={16}
-              width={16}
-              height={16}
-              borderRadius={'4px'}
-              sx={{
-                backgroundImage: `repeating-linear-gradient(
-                -70deg,
-                ${palette.figma.green[500]},
-                ${palette.figma.green[500]} 3px,
-                #ffffff 3px,
-                #ffffff 6px
-              )`,
-                cursor: 'pointer',
-              }}
-            />
-            <Typography fontSize={16} fontWeight={700}>
-              Available to claim
-            </Typography>
-          </Box>
-          <Box display="flex" gap={1}>
-            <Typography fontSize={32}>${formatNumber(formatEther(claimable), 'USD')}</Typography>
-            <Tooltip title={<TooltipContent tokensData={claimableTokens} />} placement="top" arrow>
-              <AvatarGroup
-                max={6}
+              />
+            </Grid>
+            <Grid item>
+              <Typography fontSize={16} fontWeight={700}>
+                {t('Available to claim')}
+              </Typography>
+            </Grid>
+          </Grid>
+          <Grid container justifyContent="center" spacing={1}>
+            <Grid item>
+              <Typography fontSize={32}>${formatNumber(formatEther(claimable), 'USD')}</Typography>
+            </Grid>
+            <Grid item>
+              <Tooltip title={<TooltipContent tokensData={claimableTokens} />} placement="top" arrow>
+                <AvatarGroup
+                  max={6}
+                  sx={{
+                    '& .MuiAvatar-root': { width: 32, height: 32, borderColor: 'transparent' },
+                  }}
+                >
+                  {Object.entries(claimableTokens).map(([symbol]) => {
+                    const isExaToken = symbol.length > 3 && symbol.startsWith('exa');
+                    const imagePath = isExaToken ? `/img/exaTokens/${symbol}.svg` : `/img/assets/${symbol}.svg`;
+                    return <Avatar key={symbol} alt={symbol} src={imagePath} />;
+                  })}
+                </AvatarGroup>
+              </Tooltip>
+            </Grid>
+          </Grid>
+        </Grid>
+        <Grid item xs={12} sm={4} textAlign="center">
+          <Grid container justifyContent="center" alignItems="center" spacing={1}>
+            <Grid item>
+              <Box
+                minWidth={16}
+                minHeight={16}
+                width={16}
+                height={16}
+                borderRadius="4px"
                 sx={{
-                  '& .MuiAvatar-root': { width: 32, height: 32, borderColor: 'transparent' },
-                  alignItems: 'center',
+                  backgroundImage: ended
+                    ? `repeating-linear-gradient( -70deg,red,red 3px,#ffffff 3px,#ffffff 6px)`
+                    : 'none',
+                  backgroundColor: !ended ? palette.figma.green[50] : 'transparent',
+                  cursor: 'pointer',
                 }}
-              >
-                {Object.entries(claimableTokens).map(([symbol]) => {
-                  const isExaToken = symbol.length > 3 && symbol.startsWith('exa');
-                  const imagePath = isExaToken ? `/img/exaTokens/${symbol}.svg` : `/img/assets/${symbol}.svg`;
-                  return <Avatar key={symbol} alt={symbol} src={imagePath} />;
-                })}
-              </AvatarGroup>
-            </Tooltip>
-          </Box>
-        </Box>
-        <Box textAlign="center">
-          <Box display="flex" gap={1} alignItems="center">
-            <Box
-              minWidth={16}
-              minHeight={16}
-              width={16}
-              height={16}
-              borderRadius={'4px'}
-              sx={{
-                backgroundImage: ended
-                  ? `repeating-linear-gradient( -70deg,red,red 3px,#ffffff 3px,#ffffff 6px)`
-                  : 'none',
-                backgroundColor: !ended ? palette.figma.green[50] : 'transparent',
-                cursor: 'pointer',
-              }}
-            />
-            <Typography fontSize={16} fontWeight={700}>
-              {ended ? t('Not available to claim') : t('Projected Remainder')}
-            </Typography>
-          </Box>
-          <Box display="flex" gap={1}>
-            <Typography fontSize={32}>${formatNumber(formatEther(total - claimable - claimed), 'USD')}</Typography>
-            <Tooltip title={<TooltipContent tokensData={remainingTokens} />} placement="top" arrow>
-              <AvatarGroup
-                max={6}
-                sx={{
-                  '& .MuiAvatar-root': { width: 32, height: 32, borderColor: 'transparent' },
-                  alignItems: 'center',
-                }}
-              >
-                {rewardsTokens.map((symbol) => {
-                  const isExaToken = symbol.length > 3 && symbol.startsWith('exa');
-                  const imagePath = isExaToken ? `/img/exaTokens/${symbol}.svg` : `/img/assets/${symbol}.svg`;
-                  return <Avatar key={symbol} alt={symbol} src={imagePath} />;
-                })}
-              </AvatarGroup>
-            </Tooltip>
-          </Box>
-        </Box>
-      </Box>
+              />
+            </Grid>
+            <Grid item>
+              <Typography fontSize={16} fontWeight={700}>
+                {ended ? t('Not available to claim') : t('Projected Remainder')}
+              </Typography>
+            </Grid>
+          </Grid>
+          <Grid container justifyContent="center" spacing={1}>
+            <Grid item>
+              <Typography fontSize={32}>${formatNumber(formatEther(total - claimable - claimed), 'USD')}</Typography>
+            </Grid>
+            <Grid item>
+              <Tooltip title={<TooltipContent tokensData={remainingTokens} />} placement="top" arrow>
+                <AvatarGroup
+                  max={6}
+                  sx={{
+                    '& .MuiAvatar-root': { width: 32, height: 32, borderColor: 'transparent' },
+                  }}
+                >
+                  {rewardsTokens.map((symbol) => {
+                    const isExaToken = symbol.length > 3 && symbol.startsWith('exa');
+                    const imagePath = isExaToken ? `/img/exaTokens/${symbol}.svg` : `/img/assets/${symbol}.svg`;
+                    return <Avatar key={symbol} alt={symbol} src={imagePath} />;
+                  })}
+                </AvatarGroup>
+              </Tooltip>
+            </Grid>
+          </Grid>
+        </Grid>
+      </Grid>
     </Box>
   );
 };
