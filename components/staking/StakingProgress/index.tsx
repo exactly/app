@@ -1,307 +1,301 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
-import {
-  Avatar,
-  AvatarGroup,
-  Box,
-  Dialog,
-  DialogContent,
-  IconButton,
-  Paper,
-  PaperProps,
-  Slide,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material';
-import { useTranslation } from 'react-i18next';
+import React, { FC, ReactNode } from 'react';
+import Tooltip from '@mui/material/Tooltip';
+import { styled } from '@mui/system';
+import { Avatar, AvatarGroup, Box, Typography, useTheme } from '@mui/material';
 import formatNumber from 'utils/formatNumber';
+import { formatEther } from 'viem';
 import { useStakeEXA } from 'contexts/StakeEXAContext';
-import { formatEther, parseEther } from 'viem';
-import { Transaction } from 'types/Transaction';
-import { toPercentage } from 'utils/utils';
-import parseTimestamp from 'utils/parseTimestamp';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
-import waitForTransaction from 'utils/waitForTransaction';
-import { useStakedEXA } from 'hooks/useStakedEXA';
-import { useWeb3 } from 'hooks/useWeb3';
-import { gasLimit } from 'utils/gas';
-import Draggable from 'react-draggable';
-import { TransitionProps } from 'react-transition-group/Transition';
-import CloseIcon from '@mui/icons-material/Close';
-import LoadingTransaction from 'components/common/modal/Loading';
-import { LoadingButton } from '@mui/lab';
+import Image from 'next/image';
+import { useTranslation } from 'react-i18next';
 
-function PaperComponent(props: PaperProps | undefined) {
-  const ref = useRef<HTMLDivElement>(null);
-  return (
-    <Draggable nodeRef={ref} cancel={'[class*="MuiDialogContent-root"]'}>
-      <Paper {...props} ref={ref} />
-    </Draggable>
-  );
-}
+const ProgressBar = styled('div')<{ ended: boolean }>(({ ended, theme }) => ({
+  display: 'flex',
+  height: 24,
+  borderRadius: 999,
+  width: '100%',
+  position: 'relative',
+  overflow: 'hidden',
+  ...(!ended && { border: `1px solid ${theme.palette.figma.green[100]}` }),
+}));
 
-const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement;
+const ClaimedProgressBar = styled('div')<{ width: number }>(({ width, theme }) => ({
+  width: `${width}%`,
+  borderRadius: '0px 0 0 0px',
+  backgroundColor: theme.palette.figma.green[500],
+  transition: 'background-color 0.3s',
+  position: 'relative',
+  overflow: 'visible',
+  '&:hover': {
+    cursor: 'pointer',
   },
-  ref: React.Ref<unknown>,
-) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    right: -4,
+    top: 0,
+    bottom: 0,
+    width: 10,
+    backgroundColor: theme.palette.figma.green[500],
+    transform: 'scaleX(0.6)',
+    transition: 'background-color 0.3s',
+  },
+}));
 
-function LoadingModal({ tx, onClose }: { tx: Transaction; onClose: () => void }) {
-  const { t } = useTranslation();
-  const { breakpoints, spacing, palette } = useTheme();
-  const isMobile = useMediaQuery(breakpoints.down('sm'));
-  const loadingTx = useMemo(() => tx && (tx.status === 'loading' || tx.status === 'processing'), [tx]);
+const RestProgressBar = styled('div')<{ width: number; ended?: boolean }>(({ width, ended, theme }) => ({
+  width: `${width}%`,
+  borderRadius: '0 4px 4px 0',
+  backgroundColor: ended ? 'transparent' : theme.palette.figma.green[50],
+  transition: 'background-color 0.3s',
+  position: 'relative',
+  '&:hover': {
+    cursor: 'pointer',
+  },
+  ...(ended && {
+    backgroundImage: `repeating-linear-gradient(
+      -70deg,
+      red,
+      red 3px,
+      #ffffff 3px,
+      #ffffff 6px
+    )`,
+  }),
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    right: -4,
+    top: 0,
+    bottom: 0,
+    width: 10,
+    backgroundColor: ended ? 'transparent' : theme.palette.figma.green[50],
+    backgroundImage: ended
+      ? `repeating-linear-gradient(
+      -70deg,
+      #ffffff ,
+      #ffffff 3px
+      red 3px,
+      red 6px,
+    )`
+      : 'none',
+  },
+}));
 
-  const handleClose = useCallback(() => {
-    if (loadingTx) return;
-    onClose();
-  }, [loadingTx, onClose]);
+const ClaimableProgressBar = styled('div')<{ width: number }>(({ width, theme }) => ({
+  width: `${width}%`,
+  backgroundColor: theme.palette.figma.green[50],
+  transition: 'background-color 0.3s',
+  '&:hover': {
+    cursor: 'pointer',
+  },
+  backgroundImage: `repeating-linear-gradient(
+      -70deg,
+      ${theme.palette.figma.green[500]},
+      ${theme.palette.figma.green[500]} 3px,
+      #ffffff 3px,
+      #ffffff 6px
+    )`,
+}));
 
-  return (
-    <Dialog
-      data-testid="staking-modal"
-      open={!!tx}
-      onClose={handleClose}
-      PaperComponent={isMobile ? undefined : PaperComponent}
-      PaperProps={{
-        sx: {
-          borderRadius: 1,
-          minWidth: '375px',
-          maxWidth: '488px !important',
-          width: '100%',
-          overflowY: 'hidden !important',
-        },
-      }}
-      TransitionComponent={isMobile ? Transition : undefined}
-      fullScreen={isMobile}
-      sx={isMobile ? { top: 'auto' } : { backdropFilter: tx ? 'blur(1.5px)' : '' }}
-      disableEscapeKeyDown={loadingTx}
-    >
-      <IconButton
-        aria-label="close"
-        onClick={onClose}
-        sx={{
-          position: 'absolute',
-          right: 4,
-          top: 8,
-          color: 'grey.500',
-        }}
-        data-testid="staking-modal-close"
-      >
-        <CloseIcon sx={{ fontSize: 19 }} />
-      </IconButton>
-      <Box
-        sx={{
-          padding: { xs: spacing(3, 2, 2), sm: spacing(5, 4, 4) },
-          borderTop: tx ? '' : `4px ${palette.mode === 'light' ? 'black' : 'white'} solid`,
-          overflowY: 'auto',
-        }}
-      >
-        <DialogContent sx={{ p: 0, overflow: 'hidden' }}>
-          <LoadingTransaction
-            tx={tx}
-            messages={{
-              pending: t('pending'),
-              success: t('success'),
-              error: t('error'),
-            }}
-          />
-        </DialogContent>
-      </Box>
-    </Dialog>
-  );
+interface DualProgressBarProps {
+  claimed: bigint;
+  claimable: bigint;
+  total: bigint;
+  tooltip1?: ReactNode;
+  tooltip2?: ReactNode;
+  tooltip3?: ReactNode;
+  ended: boolean;
 }
 
-function StakingProgress() {
+const StakingProgressBar: FC<DualProgressBarProps> = ({
+  claimed = 0n,
+  claimable = 0n,
+  total = 0n,
+  tooltip1 = `$${formatNumber(formatEther(claimed), 'USD')}`,
+  tooltip2 = `$${formatNumber(formatEther(claimable), 'USD')}`,
+  tooltip3 = `$${formatNumber(formatEther(total - claimable - claimed), 'USD')}`,
+  ended = false,
+}) => {
+  const { palette } = useTheme();
   const { t } = useTranslation();
-  const stakedEXA = useStakedEXA();
-  const { opts } = useWeb3();
-  const [tx, setTx] = useState<Transaction>();
-  const [isLoading, setIsLoading] = useState(false);
+  const { rewardsTokens, claimableTokens, claimedTokens, earnedTokens } = useStakeEXA();
 
-  const { refetch, start, rewardsTokens, totalClaimable, totalClaimed, totalEarned, penalty, parameters } =
-    useStakeEXA();
+  const claimedPercentage = total > 0n ? Number((claimed * 100n) / total) : 0;
+  const claimablePercentage = total > 0n ? Number((claimable * 100n) / total) : 0;
+  const restValue = Math.max(0, 100 - claimedPercentage - claimablePercentage);
 
-  const claimAll = useCallback(async () => {
-    if (!stakedEXA || !opts) return;
+  const remainingTokens = Object.keys(claimableTokens).reduce(
+    (acc, symbol) => {
+      const claimableValue = claimableTokens[symbol] || 0n;
+      const claimedValue = claimedTokens[symbol] || 0n;
+      const totalValue = earnedTokens[symbol] || 0n;
 
-    setIsLoading(true);
-    let hash;
-    try {
-      const gas = await stakedEXA.estimateGas.claimAll(opts);
-      hash = await stakedEXA.write.claimAll({ ...opts, gasLimit: gasLimit(gas) });
+      const remainingValue = totalValue - claimableValue - claimedValue;
 
-      setTx({ status: 'processing', hash });
+      acc[symbol] = remainingValue;
 
-      const { status, transactionHash } = await waitForTransaction({ hash });
-
-      setTx({ status: status === 'success' ? 'success' : 'error', hash: transactionHash });
-    } catch (e) {
-      if (hash) setTx({ status: 'error', hash });
-    } finally {
-      refetch();
-      setIsLoading(false);
-    }
-  }, [stakedEXA, opts, refetch]);
-
-  const progress = useMemo(() => {
-    if (!start || !parameters) return 0;
-    const now = Math.floor(Date.now() / 1000);
-    const avgStart = start === 0n ? parseEther(now.toString()) : start;
-    const startTime = Number(avgStart / WAD);
-    const endTime = Number(avgStart / WAD + parameters.refTime);
-    const elapsedTime = now - startTime;
-    const percentage = elapsedTime / (endTime - startTime);
-
-    return Math.min(percentage, 100);
-  }, [parameters, start]);
-
-  const onClose = useCallback(() => {
-    setTx(undefined);
-  }, []);
+      return acc;
+    },
+    {} as Record<string, bigint>,
+  );
 
   return (
-    <Box display="flex" flexDirection={{ xs: 'column', md: 'row' }} gap={2}>
-      <Box
-        p={4}
-        gap={8}
-        flex="0 1 33%"
-        borderRadius="16px"
-        bgcolor="components.bg"
-        boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 6px 10px 0px rgba(97, 102, 107, 0.20)' : '')}
-        display="flex"
-        flexDirection="column"
-        justifyContent="space-between"
-        position="relative"
-        overflow="hidden"
-      >
-        <Box
-          position="absolute"
-          top={0}
-          left={0}
-          height="100%"
-          width={toPercentage(progress)}
-          bgcolor="figma.grey.100"
-          zIndex={1}
-        />
-        <Box display="flex" flexDirection="column" position="relative" zIndex={2} gap={2}>
-          <Typography fontSize={19} fontWeight={700}>
-            {t('Staking progress')}
-          </Typography>
-          <Typography fontSize={32} fontWeight={500}>
-            {toPercentage(progress)}
-          </Typography>
-          {progress > 0 && start !== undefined && (
-            <Typography color={'grey.400'} fontWeight={500} fontSize={16}>
-              {t('Started on')} {parseTimestamp(formatEther(start))}
-            </Typography>
-          )}
-        </Box>
-      </Box>
-
-      <Box
-        p={4}
-        gap={7}
-        flex="0 1 33%"
-        borderRadius="16px"
-        bgcolor="components.bg"
-        boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 6px 10px 0px rgba(97, 102, 107, 0.20)' : '')}
-        display="flex"
-        flexDirection="column"
-        justifyContent="space-between"
-      >
-        <Box display="flex" flexDirection="column" gap={2}>
-          <Typography fontSize={19} fontWeight={700}>
-            {t('Rewards to date')}
-          </Typography>
-          <Box display="flex" gap={1}>
-            <Typography fontSize={32}>${formatNumber(formatEther(totalClaimable), 'USD')}</Typography>
-            <AvatarGroup
-              max={6}
-              sx={{ '& .MuiAvatar-root': { width: 32, height: 32, borderColor: 'transparent' }, alignItems: 'center' }}
-            >
-              {rewardsTokens.map((symbol) => (
-                <Avatar key={symbol} alt={symbol} src={`/img/assets/${symbol}.svg`} />
-              ))}
-            </AvatarGroup>
-          </Box>
+    <Box display="flex" flexDirection="column" gap={2}>
+      <ProgressBar ended={ended}>
+        <Tooltip title={tooltip1} placement="top" arrow enterTouchDelay={0}>
+          <ClaimedProgressBar width={claimedPercentage} />
+        </Tooltip>
+        <Tooltip title={tooltip2} placement="top" arrow enterTouchDelay={0}>
+          <ClaimableProgressBar width={claimablePercentage} />
+        </Tooltip>
+        <Tooltip title={tooltip3} placement="top" arrow enterTouchDelay={0}>
+          <RestProgressBar width={restValue} ended={ended} />
+        </Tooltip>
+      </ProgressBar>
+      <Box display="flex" gap={5}>
+        <Box textAlign="center">
           <Box display="flex" gap={1} alignItems="center">
-            <Typography color={'grey.400'} fontWeight={500} fontSize={16}>
-              {t('Claimed: ')}
-            </Typography>
-            <Typography color={'grey.400'} fontWeight={500} fontSize={16}>
-              ${formatNumber(formatEther(totalClaimed), 'USD')}
+            <Box
+              minWidth={16}
+              minHeight={16}
+              width={16}
+              height={16}
+              borderRadius={'4px'}
+              sx={{ bgcolor: palette.figma.green[500], cursor: 'pointer' }}
+            />
+            <Typography fontSize={16} fontWeight={700}>
+              {t('Claimed')}
             </Typography>
           </Box>
-
-          {totalEarned > 0n && (
-            <Box display="flex" gap={1} alignItems="center">
-              <Typography color={'grey.400'} fontWeight={500} fontSize={16} style={{ textDecoration: 'line-through' }}>
-                ${formatNumber(formatEther(totalEarned), 'USD')}
-              </Typography>
-              <Typography
-                color={'white'}
-                fontWeight={700}
-                bgcolor={'#D92626'}
-                fontSize={12}
-                style={{ textTransform: 'uppercase', borderRadius: '4px', padding: '3px' }}
-              >
-                {toPercentage(Number(formatEther(penalty)), 1)} {t('penalty')}
-              </Typography>
-            </Box>
-          )}
-        </Box>
-        {tx && <LoadingModal tx={tx} onClose={onClose} />}
-        <Box display="flex" flexDirection="column" gap={1}>
-          <LoadingButton
-            variant="outlined"
-            disabled={totalClaimable === 0n}
-            loading={isLoading}
-            onClick={() => {
-              claimAll();
-            }}
-            fullWidth
-          >
-            {t('Claim rewards to date')}
-          </LoadingButton>
-        </Box>
-      </Box>
-
-      <Box
-        p={4}
-        gap={8}
-        flex="0 1 33%"
-        borderRadius="16px"
-        bgcolor="components.bg"
-        boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 6px 10px 0px rgba(97, 102, 107, 0.20)' : '')}
-        display="flex"
-        flexDirection="column"
-        justifyContent="space-between"
-      >
-        <Box display="flex" flexDirection="column" gap={2}>
-          <Typography variant="h6">{t('Total rewards')}</Typography>
           <Box display="flex" gap={1}>
-            <Typography fontSize={32}>${formatNumber(formatEther(totalEarned), 'USD')}</Typography>
-            <AvatarGroup
-              max={6}
-              sx={{ '& .MuiAvatar-root': { width: 32, height: 32, borderColor: 'transparent' }, alignItems: 'center' }}
-            >
-              {rewardsTokens.map((symbol) => (
-                <Avatar key={symbol} alt={symbol} src={`/img/assets/${symbol}.svg`} />
-              ))}
-            </AvatarGroup>
+            <Typography fontSize={32}>${formatNumber(formatEther(claimed), 'USD')}</Typography>
+            <Tooltip title={<TooltipContent tokensData={claimedTokens} />} placement="top" arrow>
+              <AvatarGroup
+                max={6}
+                sx={{
+                  '& .MuiAvatar-root': { width: 32, height: 32, borderColor: 'transparent' },
+                  alignItems: 'center',
+                }}
+              >
+                {Object.entries(claimedTokens).map(([symbol]) => {
+                  const isExaToken = symbol.length > 3 && symbol.startsWith('exa');
+                  const imagePath = isExaToken ? `/img/exaTokens/${symbol}.svg` : `/img/assets/${symbol}.svg`;
+                  return <Avatar key={symbol} alt={symbol} src={imagePath} />;
+                })}
+              </AvatarGroup>
+            </Tooltip>
           </Box>
-          {totalEarned > 0n && start !== undefined && parameters && (
-            <Typography color={'grey.400'} fontWeight={500} fontSize={16}>
-              {t('By staking end on ')} {parseTimestamp(start / WAD + parameters.refTime)}
+        </Box>
+        <Box textAlign="center">
+          <Box display="flex" gap={1} alignItems="center">
+            <Box
+              minWidth={16}
+              minHeight={16}
+              width={16}
+              height={16}
+              borderRadius={'4px'}
+              sx={{
+                backgroundImage: `repeating-linear-gradient(
+                -70deg,
+                ${palette.figma.green[500]},
+                ${palette.figma.green[500]} 3px,
+                #ffffff 3px,
+                #ffffff 6px
+              )`,
+                cursor: 'pointer',
+              }}
+            />
+            <Typography fontSize={16} fontWeight={700}>
+              Available to claim
             </Typography>
-          )}
+          </Box>
+          <Box display="flex" gap={1}>
+            <Typography fontSize={32}>${formatNumber(formatEther(claimable), 'USD')}</Typography>
+            <Tooltip title={<TooltipContent tokensData={claimableTokens} />} placement="top" arrow>
+              <AvatarGroup
+                max={6}
+                sx={{
+                  '& .MuiAvatar-root': { width: 32, height: 32, borderColor: 'transparent' },
+                  alignItems: 'center',
+                }}
+              >
+                {Object.entries(claimableTokens).map(([symbol]) => {
+                  const isExaToken = symbol.length > 3 && symbol.startsWith('exa');
+                  const imagePath = isExaToken ? `/img/exaTokens/${symbol}.svg` : `/img/assets/${symbol}.svg`;
+                  return <Avatar key={symbol} alt={symbol} src={imagePath} />;
+                })}
+              </AvatarGroup>
+            </Tooltip>
+          </Box>
+        </Box>
+        <Box textAlign="center">
+          <Box display="flex" gap={1} alignItems="center">
+            <Box
+              minWidth={16}
+              minHeight={16}
+              width={16}
+              height={16}
+              borderRadius={'4px'}
+              sx={{
+                backgroundImage: ended
+                  ? `repeating-linear-gradient( -70deg,red,red 3px,#ffffff 3px,#ffffff 6px)`
+                  : 'none',
+                backgroundColor: !ended ? palette.figma.green[50] : 'transparent',
+                cursor: 'pointer',
+              }}
+            />
+            <Typography fontSize={16} fontWeight={700}>
+              {ended ? t('Not available to claim') : t('Projected Remainder')}
+            </Typography>
+          </Box>
+          <Box display="flex" gap={1}>
+            <Typography fontSize={32}>${formatNumber(formatEther(total - claimable - claimed), 'USD')}</Typography>
+            <Tooltip title={<TooltipContent tokensData={remainingTokens} />} placement="top" arrow>
+              <AvatarGroup
+                max={6}
+                sx={{
+                  '& .MuiAvatar-root': { width: 32, height: 32, borderColor: 'transparent' },
+                  alignItems: 'center',
+                }}
+              >
+                {rewardsTokens.map((symbol) => {
+                  const isExaToken = symbol.length > 3 && symbol.startsWith('exa');
+                  const imagePath = isExaToken ? `/img/exaTokens/${symbol}.svg` : `/img/assets/${symbol}.svg`;
+                  return <Avatar key={symbol} alt={symbol} src={imagePath} />;
+                })}
+              </AvatarGroup>
+            </Tooltip>
+          </Box>
         </Box>
       </Box>
     </Box>
   );
-}
-export default React.memo(StakingProgress);
+};
+
+type TooltipContentProps = {
+  tokensData?: Record<string, bigint>;
+};
+
+const TooltipContent: FC<TooltipContentProps> = ({ tokensData }) => {
+  if (!tokensData) return null;
+
+  return (
+    <Box display="flex" flexDirection="column" gap={0.5}>
+      {Object.entries(tokensData).map(([symbol, valueUSD]) => {
+        const isExaToken = symbol.length > 3 && symbol.startsWith('exa');
+        const imagePath = isExaToken ? `/img/exaTokens/${symbol}.svg` : `/img/assets/${symbol}.svg`;
+        return (
+          <Box key={symbol} sx={{ display: 'flex', alignItems: 'center' }} gap={1} justifyContent="flex-end">
+            <Typography fontWeight={400} fontSize={14} ml={0.5} color="grey.900">
+              {symbol}
+            </Typography>
+            <Image src={imagePath} alt={symbol} width="24" height="24" />
+            <Typography fontWeight={400} fontSize={14} ml={0.5} color="grey.900">
+              ${formatNumber(formatEther(valueUSD), 'USD')}
+            </Typography>
+          </Box>
+        );
+      })}
+    </Box>
+  );
+};
+
+export default StakingProgressBar;
