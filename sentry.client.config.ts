@@ -10,7 +10,7 @@ init({
   environment: SENTRY_ENVIRONMENT,
   tracesSampleRate: 1.0,
   replaysOnErrorSampleRate: 1.0,
-  replaysSessionSampleRate: 0.01,
+  replaysSessionSampleRate: 0.001,
   integrations: [new ExtraErrorData({ depth: 5 }), new Replay()],
   beforeSend,
 });
