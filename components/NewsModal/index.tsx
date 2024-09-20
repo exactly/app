@@ -108,7 +108,7 @@ const NewsModal = () => {
     localStorage.setItem(NEWS_READ_KEY, JSON.stringify(newReadNews));
   }, []);
 
-  const filteredNews = news.filter(({ until, title }) => new Date(until) > new Date() && !isNewsRead(title));
+  const filteredNews = news.filter(({ until, id }) => new Date(until) > new Date() && !isNewsRead(id));
   const [readIds, setReadIds] = useState<string[]>(filteredNews[0]?.id ? [filteredNews[0].id] : []);
 
   const closeModal = useCallback(() => {
