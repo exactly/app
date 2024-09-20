@@ -14,7 +14,7 @@ type Props = {
   symbol: string;
 };
 
-const formatTimestampLabel = (value: number) => (dayjs.unix(value).isToday() ? 'Now' : parseTimestamp(value, 'MMM DD'));
+const formatTimestampLabel = (value: number) => (dayjs.unix(value).isToday() ? '' : parseTimestamp(value, 'MMM DD'));
 const formatTimestamp = (value: number) => (dayjs.unix(value).isToday() ? 'Now' : parseTimestamp(value));
 const formatPercentage = (value: number) => toPercentage(value as number);
 
