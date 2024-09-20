@@ -148,7 +148,7 @@ const StakeChart = () => {
                 xAxisId="date"
                 type="monotone"
                 dataKey="restValue"
-                name={isEnded ? t('Not available to claim') : t('Projected Remainder')}
+                name={isEnded ? t('Not available to claim') : t('Claimable on completion')}
                 stroke="none"
                 fill="url(#rest)"
                 fillOpacity={1}

@@ -644,7 +644,6 @@
   "EXA Staking": "Staking de EXA",
   "Staking status": "Estado de Staking",
   "Not available to claim": "No disponible para reclamar",
-  "Projected Remainder": "Remanente Proyectado",
   "Growth Factor": "Factor de Crecimiento",
   "Total EXA Staked": "Total de EXA Stakeado",
   "EXA": "EXA",
@@ -670,5 +669,13 @@
   "Start staking now": "Comienza a stakear ahora",
   "Stake EXA and Claim rewards": "Stakea EXA y Reclama recompensas",
   "The 'Estimated APR' is equal to 50% of last week's treasury fees from the USDC market (annualized) divided by the total EXA Staked (in $).": "La 'TNA Estimada' es igual al 50% de las tarifas del tesoro de la semana pasada del mercado USDC (anualizado) dividido por el total de EXA Stakeado (en $).",
-  "Available to claim": "Disponible para reclamar"
+  "Available to claim": "Disponible para reclamar",
+  "Claimable on completion": "Reclamable al completar",
+  "USD": "USD",
+  "days overdue": "días pasados",
+  "days left": "días restantes",
+  "Your current APR": "Tu TNA actual",
+  "{{exaVouchers}} holders have the capability of redeeming and receiving the underlying assets plus their interests at any time, subject to available liquidity in the Variable Rate Pool.": "los titulares de {{exaVouchers}} tienen la capacidad de canjear y recibir los activos subyacentes más sus intereses en cualquier momento, sujeto a la liquidez disponible en el Pool de Tasa Variable.",
+  "Go to dashboard": "Ir al panel de control",
+  "completion on: ": "completado el: "
 }

@@ -29,13 +29,15 @@ import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 import { formatEther, parseEther } from 'viem';
 import { Transaction } from 'types/Transaction';
 import { useStakeEXA } from 'contexts/StakeEXAContext';
-import { toPercentage } from 'utils/utils';
 import parseTimestamp from 'utils/parseTimestamp';
 import { LoadingButton } from '@mui/lab';
 import { useStakedEXA } from 'hooks/useStakedEXA';
 import { gasLimit } from 'utils/gas';
 import waitForTransaction from 'utils/waitForTransaction';
 import LoadingTransaction from 'components/common/modal/Loading';
+import { toPercentage } from 'utils/utils';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
@@ -132,7 +134,7 @@ function StakingProgress() {
   const stakedEXA = useStakedEXA();
   const { connect, isConnected, impersonateActive, opts } = useWeb3();
 
-  const { start: stakingStart, balance, totalClaimable, parameters, refetch } = useStakeEXA();
+  const { start: stakingStart, balance, totalClaimable, totalEarned, parameters, refetch } = useStakeEXA();
   const [tx, setTx] = useState<Transaction>();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -158,17 +160,36 @@ function StakingProgress() {
     }
   };
 
-  const stakedProgress = useMemo(() => {
-    if (!stakingStart || !parameters) return 0;
+  const { daysLeft, hasStakingEnded } = useMemo(() => {
+    if (!stakingStart || !parameters) {
+      return { daysLeft: 0, hasStakingEnded: false };
+    }
     const now = Math.floor(Date.now() / 1000);
     const avgStart = stakingStart === 0n ? parseEther(now.toString()) : stakingStart;
     const startTime = Number(avgStart / WAD);
-    const endTime = Number(avgStart / WAD + parameters.refTime);
     const elapsedTime = now - startTime;
-    const percentage = elapsedTime / (endTime - startTime);
+    const secondsLeft = Number(parameters.refTime) - elapsedTime;
+    const remainingDays = Math.floor(secondsLeft / 86_400);
 
-    return Math.min(percentage, 100);
+    return {
+      daysLeft: remainingDays,
+      hasStakingEnded: secondsLeft <= 0,
+      elapsedTime,
+    };
   }, [parameters, stakingStart]);
+
+  const currentAPR = useMemo(() => {
+    if (!EXAUsdValue || !stakingStart || !totalEarned) return undefined;
+    const now = Math.floor(Date.now() / 1000);
+    const principal = Number(EXAUsdValue);
+    const interestEarned = Number(formatEther(totalEarned));
+    const startTime = Number(stakingStart / WAD);
+    const secondsElapsed = now - startTime;
+    const SECONDS_IN_YEAR = 31_556_926;
+    if (principal <= 0 || secondsElapsed <= 0) return undefined;
+
+    return (interestEarned / Number(EXAUsdValue)) * (SECONDS_IN_YEAR / secondsElapsed);
+  }, [EXAUsdValue, stakingStart, totalEarned]);
 
   const onClose = useCallback(() => {
     setTx(undefined);
@@ -258,18 +279,25 @@ function StakingProgress() {
               ${formatNumber(EXAUsdValue || '0', 'USD')}
             </Typography>
           </Box>
-          {stakedProgress > 0 && balance !== undefined && balance > 0n && (
+          {balance !== undefined && balance > 0n && (
             <Box>
               <Grid container>
                 <Grid item xs={6}>
                   <Typography fontSize={16}>{t('Progress')}</Typography>
                 </Grid>
                 <Grid item xs={6}>
-                  <Typography align="right" fontSize={19} fontWeight={700} color={stakedProgress > 1 ? 'error' : ''}>
-                    {toPercentage(stakedProgress)}
+                  <Typography align="right" fontSize={18} fontWeight={700} color={hasStakingEnded ? 'error' : ''}>
+                    {hasStakingEnded ? `${Math.abs(daysLeft)} ${t('days overdue')}` : `${daysLeft} ${t('days left')}`}
                   </Typography>
                 </Grid>
-
+                <Grid item xs={6}>
+                  <Typography fontSize={16}>{t('Your current APR')}</Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography align="right" fontSize={18} fontWeight={700}>
+                    {toPercentage(currentAPR)}
+                  </Typography>
+                </Grid>
                 <Grid item xs={6}>
                   <Typography fontSize={16}>{t('Started')}</Typography>
                 </Grid>
@@ -279,7 +307,7 @@ function StakingProgress() {
                       <Skeleton width={90} height={20} />
                     </Box>
                   ) : (
-                    <Typography align="right" fontSize={19} fontWeight={700}>
+                    <Typography align="right" fontSize={18} fontWeight={700}>
                       {parseTimestamp(formatEther(stakingStart))}
                     </Typography>
                   )}
@@ -294,7 +322,7 @@ function StakingProgress() {
                       <Skeleton width={90} height={20} />
                     </Box>
                   ) : (
-                    <Typography align="right" fontSize={19} fontWeight={700}>
+                    <Typography align="right" fontSize={18} fontWeight={700}>
                       {parseTimestamp(stakingStart / WAD + parameters.refTime)}
                     </Typography>
                   )}
@@ -328,7 +356,7 @@ function StakingProgress() {
             }}
             style={{ flexGrow: 1 }}
           >
-            {stakedProgress && stakedProgress < 1 ? t('Early Withdraw') : t('Withdraw')}
+            {hasStakingEnded ? t('Withdraw') : t('Early Withdraw')}
           </Button>
           <StakeEXAModal
             operation={operation}
@@ -344,6 +372,35 @@ function StakingProgress() {
   );
 }
 export default React.memo(StakingProgress);
+
+function SuccesMessage() {
+  const { query } = useRouter();
+  const { t } = useTranslation();
+  const { claimableTokens } = useStakeEXA();
+
+  const ct = Object.keys(claimableTokens).filter((key) => {
+    return key.startsWith('exa') && key.length > 3;
+  });
+
+  return ct.length === 0 ? (
+    'success'
+  ) : (
+    <Box display="flex" flexDirection="column" gap={1}>
+      <Typography color="figma.grey.500" fontWeight={500} fontSize={13} textAlign="center">
+        {t(
+          `{{exaVouchers}} holders have the capability of redeeming and receiving the underlying assets plus their interests at any time, subject to available liquidity in the Variable Rate Pool.`,
+          {
+            exaVouchers: ct.join(', '),
+          },
+        )}
+      </Typography>
+
+      <Link href={{ pathname: '/dashboard', query }} style={{ width: '100%', textAlign: 'center' }}>
+        <Button variant="contained">{t('Go to dashboard')}</Button>
+      </Link>
+    </Box>
+  );
+}
 
 function LoadingModal({ tx, onClose }: { tx: Transaction; onClose: () => void }) {
   const { t } = useTranslation();
@@ -401,7 +458,7 @@ function LoadingModal({ tx, onClose }: { tx: Transaction; onClose: () => void })
             tx={tx}
             messages={{
               pending: t('pending'),
-              success: t('success'),
+              success: <SuccesMessage />,
               error: t('error'),
             }}
           />

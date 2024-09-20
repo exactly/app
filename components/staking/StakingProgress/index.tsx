@@ -7,6 +7,8 @@ import { formatEther } from 'viem';
 import { useStakeEXA } from 'contexts/StakeEXAContext';
 import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
+import parseTimestamp from 'utils/parseTimestamp';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 
 const ProgressBar = styled('div')<{ ended: boolean }>(({ ended, theme }) => ({
   display: 'flex',
@@ -116,7 +118,7 @@ const StakingProgressBar: FC<DualProgressBarProps> = ({
 }) => {
   const { palette } = useTheme();
   const { t } = useTranslation();
-  const { rewardsTokens, claimableTokens, claimedTokens, earnedTokens } = useStakeEXA();
+  const { rewardsTokens, claimableTokens, claimedTokens, earnedTokens, start, parameters } = useStakeEXA();
 
   const claimedPercentage = total > 0n ? Number((claimed * 100n) / total) : 0;
   const claimablePercentage = total > 0n ? Number((claimable * 100n) / total) : 0;
@@ -180,7 +182,7 @@ const StakingProgressBar: FC<DualProgressBarProps> = ({
             <Grid item>
               <Typography fontSize={32}>${formatNumber(formatEther(claimed), 'USD')}</Typography>
             </Grid>
-            <Grid item>
+            <Grid item alignContent="center">
               <Tooltip title={<TooltipContent tokensData={claimedTokens} />} placement="top" arrow>
                 <AvatarGroup
                   max={6}
@@ -199,7 +201,7 @@ const StakingProgressBar: FC<DualProgressBarProps> = ({
           </Grid>
         </Grid>
         <Grid item xs={12} sm={4} textAlign="center">
-          <Grid container justifyContent="center" alignItems="center" spacing={1}>
+          <Grid container justifyContent="center" alignItems="center" spacing={0.5}>
             <Grid item>
               <Box
                 minWidth={16}
@@ -229,7 +231,7 @@ const StakingProgressBar: FC<DualProgressBarProps> = ({
             <Grid item>
               <Typography fontSize={32}>${formatNumber(formatEther(claimable), 'USD')}</Typography>
             </Grid>
-            <Grid item>
+            <Grid item alignContent="center">
               <Tooltip title={<TooltipContent tokensData={claimableTokens} />} placement="top" arrow>
                 <AvatarGroup
                   max={6}
@@ -247,7 +249,7 @@ const StakingProgressBar: FC<DualProgressBarProps> = ({
             </Grid>
           </Grid>
         </Grid>
-        <Grid item xs={12} sm={4} textAlign="center">
+        <Grid xs={12} sm={4} textAlign="center" sx={{ pt: 5 }}>
           <Grid container justifyContent="center" alignItems="center" spacing={1}>
             <Grid item>
               <Box
@@ -266,16 +268,26 @@ const StakingProgressBar: FC<DualProgressBarProps> = ({
               />
             </Grid>
             <Grid item>
-              <Typography fontSize={16} fontWeight={700}>
-                {ended ? t('Not available to claim') : t('Projected Remainder')}
-              </Typography>
+              <Tooltip
+                title={
+                  start && parameters
+                    ? `${t('completion on: ')} ${parseTimestamp(start / WAD + parameters.refTime)}`
+                    : null
+                }
+                placement="top"
+                arrow
+              >
+                <Typography fontSize={16} fontWeight={700}>
+                  {ended ? t('Not available to claim') : t('Claimable on completion')}
+                </Typography>
+              </Tooltip>
             </Grid>
           </Grid>
           <Grid container justifyContent="center" spacing={1}>
             <Grid item>
               <Typography fontSize={32}>${formatNumber(formatEther(total - claimable - claimed), 'USD')}</Typography>
             </Grid>
-            <Grid item>
+            <Grid item alignContent="center">
               <Tooltip title={<TooltipContent tokensData={remainingTokens} />} placement="top" arrow>
                 <AvatarGroup
                   max={6}
