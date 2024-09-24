@@ -249,7 +249,7 @@ const StakingProgressBar: FC<DualProgressBarProps> = ({
             </Grid>
           </Grid>
         </Grid>
-        <Grid xs={12} sm={4} textAlign="center" sx={{ pt: 5 }}>
+        <Grid item xs={12} sm={4} textAlign="center" sx={{ pt: 5 }}>
           <Grid container justifyContent="center" alignItems="center" spacing={1}>
             <Grid item>
               <Box

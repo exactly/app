@@ -1,4 +1,4 @@
-import React, { FC, useMemo } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { AvatarGroup, Avatar, Box, Skeleton, Typography, Tooltip } from '@mui/material';
 
 import { useTranslation } from 'react-i18next';
@@ -9,12 +9,17 @@ import useAccountData from 'hooks/useAccountData';
 import formatNumber from 'utils/formatNumber';
 import { calculateStakingRewardsAPR, calculateTotalStakingRewardsAPR } from 'utils/calculateStakingAPR';
 import { InfoOutlined } from '@mui/icons-material';
+import getStakingSharedFees from 'queries/getStakingSharedFees';
+import useGraphClient from 'hooks/useGraphClient';
+import { formatEther, getAddress } from 'viem';
+import getVouchersPrice from 'utils/getVouchersPrice';
 
 function StakedEXASummary() {
   const { t } = useTranslation();
   const { totalAssets, rewardsTokens, rewards } = useStakeEXA();
   const exaPrice = useEXAPrice();
   const { accountData } = useAccountData();
+  const request = useGraphClient();
 
   const rewardsAPR = useMemo(() => {
     return calculateStakingRewardsAPR(totalAssets, rewards, accountData, exaPrice);
@@ -23,6 +28,53 @@ function StakedEXASummary() {
   const totalRewardsAPR = useMemo(() => {
     return calculateTotalStakingRewardsAPR(rewardsAPR);
   }, [rewardsAPR]);
+
+  const [totalFees, setTotalFees] = useState<bigint | undefined>(undefined);
+  const [loading, setLoading] = useState<boolean>(false);
+  const fetchFees = useCallback(async () => {
+    interface StakingSharedFee {
+      id: string;
+      amount: string;
+    }
+
+    setLoading(true);
+    try {
+      const response = await request<{ stakingSharedFees: StakingSharedFee[] }>(getStakingSharedFees(), 'exactly');
+
+      if (!response) {
+        setLoading(false);
+        return;
+      }
+
+      const data = response.stakingSharedFees;
+
+      let totalUSD = 0n;
+
+      data.forEach(({ id, amount }) => {
+        if (!accountData || !rewards) return;
+        const reward = getAddress(id);
+
+        const rr = accountData.find((a) => a.asset === reward || a.market === reward);
+        const symbol = rewards.find((r) => r.reward === reward)?.symbol;
+
+        const decimals = rr?.decimals || 18;
+        const decimalWAD = 10n ** BigInt(decimals);
+        const usdPrice = getVouchersPrice(accountData, symbol || '');
+
+        const feeUSD = (BigInt(amount) * usdPrice) / decimalWAD;
+        totalUSD += feeUSD;
+      });
+      setTotalFees(totalUSD);
+    } catch (error) {
+      setTotalFees(undefined);
+    } finally {
+      setLoading(false);
+    }
+  }, [accountData, request, rewards]);
+
+  useEffect(() => {
+    fetchFees();
+  }, [fetchFees]);
 
   return (
     <Box display="flex" flexDirection={{ xs: 'column', md: 'row' }} gap={7}>
@@ -85,6 +137,21 @@ function StakedEXASummary() {
               </AvatarGroup>
             </Tooltip>
           )}
+        </Box>
+      </Box>
+      <Box>
+        <Typography variant="h6">{t('Total Fees Shared')}</Typography>
+        <Box display="flex" gap={1}>
+          {loading || totalFees === undefined ? (
+            <Skeleton variant="text" width={80} />
+          ) : (
+            <Typography fontSize={32} fontWeight={500}>
+              ${formatNumber(formatEther(totalFees), 'USD')}
+            </Typography>
+          )}
+          <Typography fontSize={32} fontWeight={500} color="#B4BABF">
+            {t('USD')}
+          </Typography>
         </Box>
       </Box>
     </Box>
