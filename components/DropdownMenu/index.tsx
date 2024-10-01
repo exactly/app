@@ -78,7 +78,7 @@ const DropdownMenu = <T,>({
         aria-haspopup="true"
         aria-expanded={open ? 'true' : undefined}
         onClick={onClick || handleClick}
-        sx={{ borderRadius: '16px', p: 1, ml: -1, ...buttonSx }}
+        sx={{ borderRadius: '16px', p: 1, ml: -1, minWidth: 'fit-content', ...buttonSx }}
         data-testid={testId}
         disabled={disabled}
       >
