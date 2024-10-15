@@ -2,15 +2,12 @@ import { createConfig, configureChains, ChainProviderFn, Chain, createStorage, A
 import { optimism } from 'wagmi/chains';
 import * as wagmiChains from 'wagmi/chains';
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
-import { alchemyProvider } from 'wagmi/providers/alchemy';
-import { publicProvider } from 'wagmi/providers/public';
 import { SafeConnector } from 'wagmi/connectors/safe';
 import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet';
 import { InjectedConnector } from 'wagmi/connectors/injected';
 import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
 
 import { createWeb3Modal } from '@web3modal/wagmi/react';
-import { walletConnectProvider } from '@web3modal/wagmi';
 
 import E2EConnector from './connectors';
 
@@ -31,16 +28,11 @@ const sortedChains = isE2E
   ? [defaultChain]
   : [defaultChain, ...Object.values(wagmiChains).filter((c) => c.id !== defaultChain.id)];
 
-const alchemyKey = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY;
-
-const providers: ChainProviderFn<Chain>[] =
-  isE2E && e2e
-    ? [jsonRpcProvider({ rpc: () => ({ http: e2e ? e2e.rpc : 'http://127.0.0.1:8545' }) })]
-    : [
-        ...(alchemyKey ? [alchemyProvider({ apiKey: alchemyKey })] : []),
-        publicProvider(),
-        walletConnectProvider({ projectId: walletConnectId }),
-      ];
+const providers: ChainProviderFn<Chain>[] = [
+  jsonRpcProvider({
+    rpc: () => ({ http: 'https://rpc.tenderly.co/fork/3b2ce27f-3cbe-482f-9e87-c21e4f185c18' }),
+  }),
+];
 
 const { chains, publicClient } = configureChains<Chain>(sortedChains, providers);
 
