@@ -1,4 +1,4 @@
-import { init, Replay } from '@sentry/nextjs';
+import { init } from '@sentry/nextjs';
 import { ExtraErrorData } from '@sentry/integrations';
 import { beforeSend } from './utils/sentry';
 
@@ -9,8 +9,6 @@ init({
   dsn: SENTRY_DSN,
   environment: SENTRY_ENVIRONMENT,
   tracesSampleRate: 1.0,
-  replaysOnErrorSampleRate: 1.0,
-  replaysSessionSampleRate: 0.001,
-  integrations: [new ExtraErrorData({ depth: 5 }), new Replay()],
+  integrations: [new ExtraErrorData({ depth: 5 })],
   beforeSend,
 });
