@@ -12,22 +12,12 @@
   }
 }
 
-body {
-  color: white;
-  background-color: black;
-}
-
 html,
 body {
   padding: 0;
   margin: 0;
-  font-family: "Inter";
-  background: conic-gradient(
-    from 190deg at 74.58% 43.66%,
-    #0d0e0f 0deg,
-    #212325 360deg
-  );
-  color: white;
+  font-family: "BDO Grotesk";
+  max-width: "1440px";
   height: 100%;
   overflow-y: auto;
 }

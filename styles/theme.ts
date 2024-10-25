@@ -1,191 +1,75 @@
-import { createTheme, Shadows } from '@mui/material/styles';
+import { createTheme, Shadows } from "@mui/material/styles";
 
 export const globals = {
   maxWidth: 1250,
-  onlyMobile: { xs: 'block', sm: 'none' },
-  smOrLess: { xs: 'block', md: 'none' },
-  onlyDesktop: { xs: 'none', sm: 'block' },
-  mdOrMore: { xs: 'none', md: 'block' },
-  onlyDesktopFlex: { xs: 'none', sm: 'flex' },
+  onlyMobile: { xs: "block", sm: "none" },
+  smOrLess: { xs: "block", md: "none" },
+  onlyDesktop: { xs: "none", sm: "block" },
+  mdOrMore: { xs: "none", md: "block" },
+  onlyDesktopFlex: { xs: "none", sm: "flex" },
 };
 
-declare module '@mui/material/styles' {
+declare module "@mui/material/styles" {
   interface Palette {
-    figma: {
-      grey: Partial<Palette['grey']>;
+    brand: {
+      default: string;
+      primary: string;
+      tertiary: string;
+      soft: string;
     };
-
-    blue: string;
-    green: string;
-    red: string;
-    orange: string;
-    operation: {
-      fixed: string;
-      variable: string;
-    };
-
-    colors: string[];
-
-    markets: {
-      simple: string;
-      advanced: string;
-    };
-
-    components: {
-      bg: string;
-    };
-
-    healthFactor: {
-      bg: {
-        safe: string;
-        warning: string;
-        danger: string;
-      };
-      safe: string;
-      warning: string;
-      danger: string;
+    neutral: {
+      secondary: string;
+      soft: string;
     };
   }
   interface PaletteOptions {
-    figma: {
-      grey: Partial<Palette['grey']>;
+    brand: {
+      default: string;
+      primary: string;
+      tertiary: string;
+      soft: string;
     };
-
-    blue: string;
-    green: string;
-    red: string;
-    orange: string;
-    operation: {
-      fixed: string;
-      variable: string;
+    neutral: {
+      secondary: string;
+      soft: string;
     };
-
-    colors: string[];
-
-    markets: {
-      simple: string;
-      advanced: string;
-    };
-
-    components: {
-      bg: string;
-    };
-
-    healthFactor: {
-      bg: {
-        safe: string;
-        warning: string;
-        danger: string;
-      };
-      safe: string;
-      warning: string;
-      danger: string;
-    };
-  }
-
-  interface TypographyVariants {
-    fontFamilyMonospaced: string;
-    modalRow: TypographyVariants['body1'];
-    modalCol: TypographyVariants['body1'];
-    cardTitle: TypographyVariants['body1'];
-    link: TypographyVariants['body1'];
-    chip: TypographyVariants['body1'];
-    dashboardTitle: TypographyVariants['body1'];
-    dashboardMainSubtitle: TypographyVariants['body1'];
-    dashboardSubtitleNumber: TypographyVariants['body1'];
-    dashboardOverviewAmount: TypographyVariants['h1'];
-    dashboardOverviewSubtitle2: TypographyVariants['subtitle2'];
-  }
-  interface TypographyVariantsOptions {
-    fontFamilyMonospaced: string;
-    modalRow: TypographyVariants['body1'];
-    modalCol: TypographyVariants['body1'];
-    cardTitle: TypographyVariants['body1'];
-    link: TypographyVariants['body1'];
-    chip: TypographyVariants['body1'];
-    dashboardTitle: TypographyVariants['body1'];
-    dashboardMainSubtitle: TypographyVariants['h6'];
-    dashboardSubtitleNumber: TypographyVariants['body1'];
-    dashboardOverviewAmount: TypographyVariants['h1'];
-    dashboardOverviewSubtitle2: TypographyVariants['subtitle2'];
-  }
-}
-
-declare module '@mui/material/Typography' {
-  interface TypographyPropsVariantOverrides {
-    modalRow: true;
-    modalCol: true;
-    cardTitle: true;
-    link: true;
-    chip: true;
-    dashboardTitle: true;
-    dashboardMainSubtitle: true;
-    dashboardSubtitleNumber: true;
-    dashboardOverviewAmount: true;
-    dashboardOverviewSubtitle2: true;
   }
 }
 
 export const lightTheme = createTheme({
   palette: {
-    mode: 'light',
+    mode: "light",
     primary: {
-      main: '#0E0E0E',
-      '50': '#d3ecff',
-      '100': '#d4d4fa',
-      '200': '#a6a6f4',
+      main: "#0E0E0E",
+      "50": "#d3ecff",
+      "100": "#d4d4fa",
+      "200": "#a6a6f4",
     },
     grey: {
-      '50': '#fafafa',
-      '100': '#F9FAFB',
-      '200': '#EDF0F2',
-      '300': '#E3E5E8',
-      '400': '#BCBFC2',
-      '500': '#9a9a9a',
-      '600': '#62666A',
-      '700': '#303336',
-      '900': '#0D0E0F',
+      "50": "#fafafa",
+      "100": "#F9FAFB",
+      "200": "#EDF0F2",
+      "300": "#E3E5E8",
+      "400": "#BCBFC2",
+      "500": "#9a9a9a",
+      "600": "#62666A",
+      "700": "#303336",
+      "900": "#0D0E0F",
     },
-    figma: {
-      grey: {
-        '50': '#F9FAFB',
-        '100': '#EDEFF2',
-        '300': '#94979E',
-        '500': '#989FA6',
-        '600': '#757A80',
-        '700': '#6F737B',
-      },
+
+    brand: {
+      default: "#12A594",
+      primary: "#FBFDFC",
+      tertiary: "#83CDC1",
+      soft: "#E0F8F3",
     },
-    blue: '#0095FF',
-    green: '#33CC59',
-    red: '#AD1F1F',
-    orange: '#FF8C1A',
-    operation: {
-      fixed: '#0095FF',
-      variable: '#33CC59',
-    },
-    colors: ['#5DADE2', '#F7DC6F', '#82E0AA', '#BB8FCE', '#F1948A'],
-    markets: {
-      simple: '#EDEFF2',
-      advanced: '#F9FAFB',
-    },
-    components: {
-      bg: '#FFFFFF',
-    },
-    healthFactor: {
-      bg: {
-        safe: '#F0FFF4',
-        warning: '#FFF7F0',
-        danger: '#FFF5F5',
-      },
-      safe: '#33CC59',
-      warning: '#FF8C1A',
-      danger: '#D92626',
+    neutral: {
+      secondary: "5F6563",
+      soft: "#E6E9E8",
     },
   },
   typography: {
-    fontFamily: 'Inter',
-    fontFamilyMonospaced: 'IBM Plex Mono',
+    fontFamily: "BDO Grotesk, Inter, sans-serif",
     h1: {
       fontSize: 34,
       fontWeight: 600,
@@ -206,72 +90,17 @@ export const lightTheme = createTheme({
     subtitle1: {
       fontWeight: 500,
       fontSize: 14,
-      color: '#9a9a9a',
-      fontFamily: 'IBM Plex Mono',
+      color: "#9a9a9a",
+      fontFamily: "IBM Plex Mono",
     },
     subtitle2: {
       fontSize: 12,
-      fontFamily: 'IBM Plex Mono',
+      fontFamily: "IBM Plex Mono",
     },
     caption: {
-      color: '#9a9a9a',
-      fontFamily: 'IBM Plex Mono',
+      color: "#9a9a9a",
+      fontFamily: "IBM Plex Mono",
       fontWeight: 500,
-    },
-    modalRow: {
-      color: '#303336',
-      fontSize: 13,
-      fontWeight: 500,
-    },
-    modalCol: {
-      color: '#0D0E0F',
-      fontSize: 19,
-      fontWeight: 600,
-    },
-    cardTitle: {
-      fontSize: 12,
-      fontWeight: 600,
-      color: '#757A80',
-    },
-    link: {
-      color: '#4193f7',
-      fontSize: 13,
-      fontWeight: 700,
-    },
-    chip: {
-      fontFamily: 'Inter',
-      fontSize: 11,
-      fontWeight: 700,
-    },
-    dashboardTitle: {
-      fontSize: 16,
-      lineHeight: '16px',
-      fontWeight: 700,
-    },
-    dashboardSubtitleNumber: {
-      fontFamily: 'IBM Plex Mono',
-      color: '#989FA6',
-      fontSize: 14,
-      lineHeight: '18.2px',
-      fontWeight: 500,
-    },
-    dashboardMainSubtitle: {
-      fontFamily: 'IBM Plex Mono',
-      color: '#989FA6',
-      fontSize: 12,
-      lineHeight: '15.6px',
-      fontWeight: 600,
-    },
-    dashboardOverviewAmount: {
-      fontSize: 34,
-      lineHeight: '41.15px',
-      fontWeight: 600,
-    },
-    dashboardOverviewSubtitle2: {
-      fontFamily: 'IBM Plex Mono',
-      fontSize: 12,
-      lineHeight: '12px',
-      fontWeight: 400,
     },
   },
   shape: {
@@ -281,145 +110,63 @@ export const lightTheme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          textTransform: 'none',
-          borderRadius: '32px',
-          fontSize: '13px',
+          textTransform: "none",
+          borderRadius: "32px",
+          fontSize: "13px",
           fontWeight: 600,
-          padding: '6px 16px',
-          height: '32px',
-        },
-        contained: {
-          '&:hover': {
-            backgroundColor: '#2B2B2B',
-          },
+          padding: "6px 16px",
+          height: "32px",
         },
       },
     },
-    MuiDialogTitle: {
-      styleOverrides: {
-        root: {
-          fontWeight: 600,
-          fontSize: 24,
-        },
-      },
-    },
-    MuiTableCell: {
-      styleOverrides: {
-        root: {
-          paddingLeft: 0,
-          paddingRight: 0,
-        },
-      },
-    },
-    MuiRadio: {
-      styleOverrides: {
-        root: {
-          paddingLeft: 0,
-          paddingRight: '8px',
-          '& .MuiSvgIcon-root': {
-            fontSize: 17,
-          },
-          '&:hover': {
-            backgroundColor: 'transparent',
-          },
-        },
-      },
-    },
-    MuiTooltip: {
-      styleOverrides: {
-        tooltip: {
-          backgroundColor: '#fff',
-          padding: '8px',
-          border: '1px solid #EDF0F2',
-          borderRadius: '8px',
-          color: '#0E0E0E',
-          fontSize: '12px',
-          filter: 'drop-shadow(0px 4px 10px rgba(97, 102, 107, 0.1))',
-        },
-        arrow: {
-          fontSize: '15px',
-          '&::before': {
-            backgroundColor: '#fff',
-            border: '1px solid #EDF0F2',
-            filter: 'drop-shadow(0px 4px 10px rgba(97, 102, 107, 0.1))',
-          },
-        },
-      },
-    },
+
     MuiLink: {
       styleOverrides: {
         root: {
-          color: '#000',
+          color: "#000",
         },
         underlineAlways: {
-          textDecorationColor: '#000',
+          textDecorationColor: "#000",
         },
       },
     },
   },
-  shadows: Array(25).fill('none') as Shadows,
+  shadows: Array(25).fill("none") as Shadows,
 });
 
 export const darkTheme = createTheme({
   palette: {
-    mode: 'dark',
+    mode: "dark",
     primary: {
-      main: '#fafafa',
-      '50': '#BCBFC2',
-      '100': '#9a9a9a',
-      '200': '#62666A',
+      main: "#fafafa",
+      "50": "#BCBFC2",
+      "100": "#9a9a9a",
+      "200": "#62666A",
     },
     grey: {
-      '900': '#fafafa',
-      '700': '#F9FAFB',
-      '600': '#EDF0F2',
-      '500': '#E3E5E8',
-      '400': '#BCBFC2',
-      '300': '#9a9a9a',
-      '200': '#62666A',
-      '100': '#303336',
-      '50': '#0D0E0F',
+      "900": "#fafafa",
+      "700": "#F9FAFB",
+      "600": "#EDF0F2",
+      "500": "#E3E5E8",
+      "400": "#BCBFC2",
+      "300": "#9a9a9a",
+      "200": "#62666A",
+      "100": "#303336",
+      "50": "#0D0E0F",
     },
-    figma: {
-      grey: {
-        '700': '#EDEFF2',
-        '600': '#94979E',
-        '500': '#989FA6',
-        '300': '#757A80',
-        '100': '#6F737B',
-        '50': '#303336',
-      },
+    brand: {
+      default: "#12A594",
+      primary: "#FBFDFC",
+      tertiary: "#83CDC1",
+      soft: "#E0F8F3",
     },
-    blue: '#0095FF',
-    green: '#33CC59',
-    red: '#AD1F1F',
-    orange: '#FF8C1A',
-    operation: {
-      fixed: '#0095FF',
-      variable: '#33CC59',
-    },
-    colors: ['#5DADE2', '#F7DC6F', '#82E0AA', '#BB8FCE', '#F1948A'],
-    markets: {
-      simple: '#222',
-      advanced: '#222',
-    },
-    components: {
-      bg: '#303336',
-    },
-    healthFactor: {
-      bg: {
-        safe: '#303336',
-        warning: '#303336',
-        danger: '#303336',
-      },
-      safe: '#33CC59',
-      warning: '#FF8C1A',
-      danger: '#D92626',
+    neutral: {
+      secondary: "5F6563",
+      soft: "#E6E9E8",
     },
   },
   typography: {
-    fontFamily: 'Inter',
-    fontFamilyMonospaced: 'IBM Plex Mono',
+    fontFamily: "BDO Grotesk, Inter, sans-serif",
     h1: {
       fontSize: 34,
       fontWeight: 600,
@@ -440,71 +187,16 @@ export const darkTheme = createTheme({
     subtitle1: {
       fontWeight: 500,
       fontSize: 14,
-      color: '#E3E5E8',
-      fontFamily: 'IBM Plex Mono',
+      color: "#E3E5E8",
+      fontFamily: "IBM Plex Mono",
     },
     subtitle2: {
       fontSize: 12,
-      fontFamily: 'IBM Plex Mono',
+      fontFamily: "IBM Plex Mono",
     },
     caption: {
-      color: '#E3E5E8',
-      fontFamily: 'IBM Plex Mono',
-    },
-    modalRow: {
-      color: '#F9FAFB',
-      fontSize: 13,
-      fontWeight: 500,
-    },
-    modalCol: {
-      color: '#fafafa',
-      fontSize: 19,
-      fontWeight: 600,
-    },
-    cardTitle: {
-      fontSize: 12,
-      fontWeight: 600,
-      color: '#EDEFF2',
-    },
-    link: {
-      color: '#4193f7',
-      fontSize: 13,
-      fontWeight: 700,
-    },
-    chip: {
-      fontFamily: 'Inter',
-      fontSize: 11,
-      fontWeight: 700,
-    },
-    dashboardTitle: {
-      fontSize: 16,
-      lineHeight: '16px',
-      fontWeight: 700,
-    },
-    dashboardSubtitleNumber: {
-      fontFamily: 'IBM Plex Mono',
-      color: '#989FA6',
-      fontSize: 14,
-      lineHeight: '18.2px',
-      fontWeight: 500,
-    },
-    dashboardMainSubtitle: {
-      fontFamily: 'IBM Plex Mono',
-      color: '#989FA6',
-      fontSize: 12,
-      lineHeight: '15.6px',
-      fontWeight: 600,
-    },
-    dashboardOverviewAmount: {
-      fontSize: 34,
-      lineHeight: '41.15px',
-      fontWeight: 600,
-    },
-    dashboardOverviewSubtitle2: {
-      fontFamily: 'IBM Plex Mono',
-      fontSize: 12,
-      lineHeight: '12px',
-      fontWeight: 400,
+      color: "#E3E5E8",
+      fontFamily: "IBM Plex Mono",
     },
   },
   shape: {
@@ -514,88 +206,30 @@ export const darkTheme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          textTransform: 'none',
-          borderRadius: '32px',
-          fontSize: '13px',
+          textTransform: "none",
+          borderRadius: "32px",
+          fontSize: "13px",
           fontWeight: 600,
-          padding: '6px 16px',
-          height: '32px',
+          padding: "6px 16px",
+          height: "32px",
         },
         outlined: {
-          color: '#E3E5E8',
-          borderColor: '#9a9a9a',
+          color: "#E3E5E8",
+          borderColor: "#9a9a9a",
         },
       },
     },
-    MuiButtonGroup: {
-      styleOverrides: {
-        outlined: {
-          borderColor: 'red',
-        },
-      },
-    },
-    MuiDialogTitle: {
-      styleOverrides: {
-        root: {
-          fontWeight: 600,
-          fontSize: 24,
-        },
-      },
-    },
-    MuiTableCell: {
-      styleOverrides: {
-        root: {
-          paddingLeft: 0,
-          paddingRight: 0,
-        },
-      },
-    },
-    MuiRadio: {
-      styleOverrides: {
-        root: {
-          paddingLeft: 0,
-          paddingRight: '8px',
-          '& .MuiSvgIcon-root': {
-            color: '#fafafa',
-            fontSize: 17,
-          },
-          '&:hover': {
-            backgroundColor: 'transparent',
-          },
-        },
-      },
-    },
-    MuiTooltip: {
-      styleOverrides: {
-        tooltip: {
-          backgroundColor: '#222',
-          padding: '8px',
-          border: '1px solid #62666A',
-          borderRadius: '8px',
-          color: '#FFFFFF',
-          fontSize: '12px',
-          filter: 'drop-shadow(0px 4px 10px rgba(97, 102, 107, 0.1))',
-        },
-        arrow: {
-          fontSize: '15px',
-          '&::before': {
-            backgroundColor: '#222',
-            border: '1px solid #62666A',
-            filter: 'drop-shadow(0px 4px 10px rgba(97, 102, 107, 0.1))',
-          },
-        },
-      },
-    },
+
     MuiLink: {
       styleOverrides: {
         root: {
-          color: '#FFF',
+          color: "#FFF",
         },
         underlineAlways: {
-          textDecorationColor: '#FFF',
+          textDecorationColor: "#FFF",
         },
       },
     },
   },
-  shadows: Array(25).fill('none') as Shadows,
+  shadows: Array(25).fill("none") as Shadows,
 });
