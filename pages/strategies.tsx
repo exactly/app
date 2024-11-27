@@ -135,35 +135,6 @@ const Strategies: NextPage = () => {
           imgPath: '/img/strategies/featured_staking.svg',
         },
         {
-          title: t('Debit to Credit'),
-          description: t(
-            'Easily turn your current crypto-funded debit card into a credit card by getting a USDC borrow at a fixed rate.',
-          ),
-          tags: [{ text: t('Advanced'), size: 'small' as const }],
-          button: (
-            <Link href={{ pathname: '/debit2credit' }} style={{ width: '100%' }}>
-              <Button
-                fullWidth
-                variant="contained"
-                onClick={() =>
-                  track('Button Clicked', {
-                    location: 'Strategies',
-                    name: 'debit to credit',
-                    href: '/debit2credit',
-                    isNew: false,
-                  })
-                }
-              >
-                {t('Get Started')}
-              </Button>
-            </Link>
-          ),
-          isNew: false,
-          source: 'exactly' as const,
-          imgPath: '/img/strategies/featured_debit2credit.svg',
-          chainId: optimism.id,
-        },
-        {
           title: t('Maximize your yield'),
           description: t(
             'Amplify gains or mitigate risk with the power of leverage and deleverage in your investments.',
@@ -191,6 +162,35 @@ const Strategies: NextPage = () => {
           ),
           source: 'exactly' as const,
           imgPath: '/img/strategies/featured_leverage.svg',
+        },
+        {
+          title: t('Debit to Credit'),
+          description: t(
+            'Easily turn your current crypto-funded debit card into a credit card by getting a USDC borrow at a fixed rate.',
+          ),
+          tags: [{ text: t('Advanced'), size: 'small' as const }],
+          button: (
+            <Link href={{ pathname: '/debit2credit' }} style={{ width: '100%' }}>
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={() =>
+                  track('Button Clicked', {
+                    location: 'Strategies',
+                    name: 'debit to credit',
+                    href: '/debit2credit',
+                    isNew: false,
+                  })
+                }
+              >
+                {t('Get Started')}
+              </Button>
+            </Link>
+          ),
+          isNew: false,
+          source: 'exactly' as const,
+          imgPath: '/img/strategies/featured_debit2credit.svg',
+          chainId: optimism.id,
         },
         {
           title: t('Refinance Loans'),
