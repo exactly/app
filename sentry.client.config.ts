@@ -8,7 +8,7 @@ const SENTRY_ENVIRONMENT = process.env.SENTRY_ENVIRONMENT || process.env.NEXT_PU
 init({
   dsn: SENTRY_DSN,
   environment: SENTRY_ENVIRONMENT,
-  tracesSampleRate: 1.0,
+  tracesSampleRate: 0,
   integrations: [new ExtraErrorData({ depth: 5 })],
   beforeSend,
 });
