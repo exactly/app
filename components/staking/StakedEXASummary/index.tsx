@@ -115,7 +115,7 @@ function StakedEXASummary() {
             <Skeleton variant="text" width={100} height={45} />
           ) : (
             <Typography fontSize={32} fontWeight={500}>
-              {formatNumber(Number(totalRewardsAPR))}%
+              {formatNumber(totalRewardsAPR)}%
             </Typography>
           )}
           {rewardsTokens === undefined ? (
@@ -160,7 +160,7 @@ function StakedEXASummary() {
 
 type RewardData = {
   symbol: string;
-  apr: bigint;
+  apr: number;
 };
 
 const TooltipContent: FC<{ rewardsData?: RewardData[] }> = ({ rewardsData }) => {
@@ -178,7 +178,7 @@ const TooltipContent: FC<{ rewardsData?: RewardData[] }> = ({ rewardsData }) => 
             </Typography>
             <Image src={imagePath} alt={symbol} width="24" height="24" />
             <Typography fontWeight={400} fontSize={14} ml={0.5} color="grey.900">
-              {formatNumber(Number(apr))}%
+              {formatNumber(apr)}%
             </Typography>
           </Box>
         );

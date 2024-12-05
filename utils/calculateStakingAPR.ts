@@ -15,15 +15,14 @@ export const calculateStakingRewardsAPR = (
 
     const rewardPrice = symbol === 'EXA' ? exaPrice : getVouchersPrice(accountData, symbol);
     const decimals = accountData.find((token) => token.symbol.includes(symbol))?.decimals || 18;
-    const decimalWAD = 10n ** BigInt(decimals);
 
-    const apr = (rate * yearInSeconds * rewardPrice * 100n) / (totalAssets * exaPrice) / decimalWAD;
+    const apr = Number((rate * yearInSeconds * rewardPrice * 100n) / (totalAssets * exaPrice)) / 10 ** decimals;
 
     return { symbol, apr };
   });
 };
 
-export const calculateTotalStakingRewardsAPR = (rewardsAPR: Array<{ symbol: string; apr: bigint }>) => {
+export const calculateTotalStakingRewardsAPR = (rewardsAPR: Array<{ symbol: string; apr: number }>) => {
   if (!rewardsAPR) return 0n;
-  return rewardsAPR.reduce((acc, { apr }) => acc + apr, 0n);
+  return rewardsAPR.reduce((acc, { apr }) => acc + apr, 0);
 };
