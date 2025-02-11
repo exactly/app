@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
 import baseRate from '@exactly/lib/esm/interest-rate-model/baseRate';
 import fixedRate from '@exactly/lib/esm/interest-rate-model/fixedRate';
@@ -9,6 +9,7 @@ import globalUtilization from '@exactly/lib/esm/interest-rate-model/globalUtiliz
 
 import useAccountData from './useAccountData';
 import useIRM from './useIRM';
+import useMarket from './useMarket';
 
 export const MAX = 1;
 export const INTERVAL = 0.005;
@@ -17,24 +18,31 @@ const levels = 8;
 
 export default function useSpreadModel(symbol: string) {
   const { marketAccount } = useAccountData(symbol);
-
+  const market = useMarket(marketAccount?.market);
   const irm = useIRM(symbol);
 
+  const [floatingAssetsAverage, setFloatingAssetsAverage] = useState<bigint | undefined>();
+
+  useEffect(() => {
+    const fetchFloatingAssets = async () => {
+      if (!market) return;
+
+      const assets = await market.read.previewFloatingAssetsAverage();
+      setFloatingAssetsAverage(assets);
+    };
+
+    fetchFloatingAssets();
+  }, [market]);
+
   const data = useMemo(() => {
-    if (!marketAccount || !irm) {
+    if (!marketAccount || !irm || !floatingAssetsAverage) {
       return [];
     }
 
-    const {
-      maxFuturePools,
-      fixedPools,
-      totalFloatingBorrowAssets,
-      totalFloatingDepositAssets,
-      floatingBackupBorrowed,
-    } = marketAccount;
+    const { maxFuturePools, fixedPools, totalFloatingBorrowAssets, floatingBackupBorrowed } = marketAccount;
 
-    const uFloating = floatingUtilization(totalFloatingDepositAssets, totalFloatingBorrowAssets);
-    const uGlobal = globalUtilization(totalFloatingDepositAssets, totalFloatingBorrowAssets, floatingBackupBorrowed);
+    const uFloating = floatingUtilization(floatingAssetsAverage, totalFloatingBorrowAssets);
+    const uGlobal = globalUtilization(floatingAssetsAverage, totalFloatingBorrowAssets, floatingBackupBorrowed);
     const pools = Object.fromEntries(fixedPools.map((pool) => [String(pool.maturity), pool]));
     const maturities = fixedPools.map(({ maturity }) => Number(maturity));
     const end = Math.max(...maturities);
@@ -56,7 +64,7 @@ export default function useSpreadModel(symbol: string) {
             fixedRate(
               date,
               maxFuturePools,
-              fixedUtilization(pools[date].supplied, pools[date].borrowed, totalFloatingDepositAssets),
+              fixedUtilization(pools[date].supplied, pools[date].borrowed, floatingAssetsAverage),
               uFloating,
               uGlobal,
               irm,
@@ -91,7 +99,7 @@ export default function useSpreadModel(symbol: string) {
     }
 
     return points;
-  }, [irm, marketAccount]);
+  }, [irm, marketAccount, floatingAssetsAverage]);
 
   return { data, levels, loading: data.length === 0 };
 }
