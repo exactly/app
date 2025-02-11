@@ -41,7 +41,9 @@ const MaturityPoolsMobile: FC<Props> = ({ symbol }) => {
               />
               <GridItem
                 title={t('Borrow APR')}
-                tooltip={t('The fixed borrowing interest APR at current utilization level.')}
+                tooltip={t(
+                  'The fixed borrowing interest APR at current utilization level. Fixed rates adjust slowly to liquidity changes.',
+                )}
                 value={`${toPercentage(borrowAPR > minAPRValue ? borrowAPR : undefined)}`}
                 isLoading={borrowAPR === undefined}
               />

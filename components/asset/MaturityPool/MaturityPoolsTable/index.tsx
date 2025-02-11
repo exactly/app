@@ -57,7 +57,9 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
             <TableCell />
             <HeadCell
               title={t('Borrow APR')}
-              tooltipTitle={t('The fixed borrowing interest APR at current utilization level.')}
+              tooltipTitle={t(
+                'The fixed borrowing interest APR at current utilization level. Fixed rates adjust slowly to liquidity changes',
+              )}
             />
             <TableCell />
           </TableRow>
