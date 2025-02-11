@@ -215,7 +215,8 @@ export function usePreviewTx({
       });
 
       const gas = await previewGasCost(qty).catch((e) => {
-        error = { status: true, message: handleOperationError(e), component: 'gas', variant: e.variant };
+        const msg = handleOperationError(e);
+        error = { status: true, message: msg, component: 'gas', variant: msg.includes('frozen') ? 'warning' : 'error' };
         return null;
       });
 

@@ -38,6 +38,8 @@ function parse(name?: string): string {
       return i18n.t('Cannot borrow 0');
     case 'UtilizationExceeded':
       return i18n.t('Utilization rate exceeded');
+    case 'MarketFrozen':
+      return i18n.t('The current market is frozen');
     default:
       return defaultErr;
   }
