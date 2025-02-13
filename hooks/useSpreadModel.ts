@@ -18,7 +18,7 @@ const levels = 8;
 
 export default function useSpreadModel(symbol: string) {
   const { marketAccount } = useAccountData(symbol);
-  const market = useMarket(marketAccount?.market);
+  const market = useMarket(marketAccount?.market, true);
   const irm = useIRM(symbol);
 
   const [floatingAssetsAverage, setFloatingAssetsAverage] = useState<bigint | undefined>();
