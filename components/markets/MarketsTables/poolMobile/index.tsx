@@ -110,7 +110,7 @@ const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows }) => {
                     variant="contained"
                     sx={sxButton}
                     onClick={(e) => handleDepositClick(e, symbol, depositMaturity)}
-                    disabled={isDisable(getRateType(depositMaturity), depositAPR)}
+                    disabled={isDisable(getRateType(depositMaturity), depositAPR) || symbol === 'USDC.e'}
                   >
                     {translateOperation('deposit', { capitalize: true })}
                   </Button>
@@ -137,6 +137,7 @@ const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows }) => {
                   fullWidth
                   sx={sxButton}
                   onClick={(e) => handleBorrowClick(e, symbol, upcomingMaturity)}
+                  disabled={symbol === 'USDC.e'}
                 >
                   {translateOperation('borrow', { capitalize: true })}
                 </Button>

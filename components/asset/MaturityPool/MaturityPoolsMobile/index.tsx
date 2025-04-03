@@ -54,6 +54,7 @@ const MaturityPoolsMobile: FC<Props> = ({ symbol }) => {
                 variant="contained"
                 sx={{ height: '34px' }}
                 onClick={(e) => handleActionClick(e, 'depositAtMaturity', symbol, maturity)}
+                disabled={symbol === 'USDC.e'}
               >
                 {t('Deposit')}
               </Button>
@@ -62,6 +63,7 @@ const MaturityPoolsMobile: FC<Props> = ({ symbol }) => {
                 fullWidth
                 sx={{ height: '34px' }}
                 onClick={(e) => handleActionClick(e, 'borrowAtMaturity', symbol, maturity)}
+                disabled={symbol === 'USDC.e'}
               >
                 {t('Borrow')}
               </Button>

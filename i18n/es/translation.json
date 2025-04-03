@@ -677,5 +677,9 @@
   "Your current APR": "Tu TNA actual",
   "{{exaVouchers}} holders have the capability of redeeming and receiving the underlying assets plus their interests at any time, subject to available liquidity in the Variable Rate Pool.": "los titulares de {{exaVouchers}} tienen la capacidad de canjear y recibir los activos subyacentes más sus intereses en cualquier momento, sujeto a la liquidez disponible en el Pool de Tasa Variable.",
   "Go to dashboard": "Ir al panel de control",
-  "completion on: ": "completado el: "
+  "completion on: ": "completado el: ",
+  "The fixed borrowing interest APR at current utilization level. Fixed rates adjust slowly to liquidity changes": "La TNA de préstamo fijo a nivel de utilización actual. Las tasas fijas se ajustan lentamente a los cambios de liquidez",
+  "The USDC.e market is frozen (EXAIP-18), you can still withdraw or repay your positions": "El mercado USDC.e está congelado (EXAIP-18), puedes retirar o pagar tus posiciones",
+  "Total Fees Shared": "Total de Tarifas Compartidas",
+  "The current market is frozen": "El mercado actual está congelado"
 }

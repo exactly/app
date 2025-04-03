@@ -88,7 +88,9 @@ const Submit: FC<SubmitProps> = ({ symbol, operation, option, qty, errorData }) 
       symbol={symbol === 'WETH' && marketAccount ? marketAccount.symbol : symbol}
       submit={handleSubmitAction}
       isLoading={isLoading || previewIsLoading}
-      disabled={!qty || parseFloat(qty) <= 0 || isLoading || previewIsLoading || errorData?.status}
+      disabled={
+        !qty || parseFloat(qty) <= 0 || isLoading || previewIsLoading || errorData?.status || symbol === 'USDC.e'
+      }
     />
   );
 };

@@ -42,7 +42,7 @@ const OrderAction: FC<Props> = ({ symbol }) => {
   return (
     <Box display="flex" gap={1}>
       <Button
-        disabled={!marketAccount}
+        disabled={!marketAccount || symbol === 'USDC.e'}
         variant="contained"
         onClick={handleDepositButtonClick}
         fullWidth
@@ -51,7 +51,7 @@ const OrderAction: FC<Props> = ({ symbol }) => {
         {t('Deposit')}
       </Button>
       <Button
-        disabled={!marketAccount}
+        disabled={!marketAccount || symbol === 'USDC.e'}
         variant="outlined"
         onClick={handleBorrowButtonClick}
         fullWidth

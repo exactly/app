@@ -11,7 +11,6 @@ import Button from '@mui/material/Button';
 import { Box, Skeleton, Tooltip, useTheme } from '@mui/material';
 import LockIcon from '@mui/icons-material/Lock';
 import ImportExportIcon from '@mui/icons-material/ImportExport';
-
 import Image from 'next/image';
 
 import parseTimestamp from 'utils/parseTimestamp';
@@ -27,6 +26,7 @@ import useRouter from 'hooks/useRouter';
 import { useTranslation } from 'react-i18next';
 import Rates from 'components/Rates';
 import { track } from 'utils/mixpanel';
+import FrozenPill from 'components/common/FrozenPill';
 
 export type PoolTableProps = {
   isLoading: boolean;
@@ -143,24 +143,27 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows }) => {
                   data-testid={`markets-pool-row-${symbol}`}
                 >
                   <TableCell component="th" scope="row" sx={{ pr: 3, pl: 3 }}>
-                    <Grid container alignItems="center">
-                      {isLoading ? (
-                        <Skeleton variant="circular" width={24} height={24} />
-                      ) : (
-                        <Image
-                          src={`/img/assets/${symbol}.svg`}
-                          alt={symbol}
-                          width="24"
-                          height="24"
-                          style={{
-                            maxWidth: '100%',
-                            height: 'auto',
-                          }}
-                        />
-                      )}
-                      <Typography fontWeight="600" ml={1}>
-                        {isLoading ? <Skeleton width={60} /> : formatSymbol(symbol)}
-                      </Typography>
+                    <Grid container alignItems="center" justifyContent="space-between">
+                      <Grid container alignItems="center" sx={{ width: 'auto' }}>
+                        {isLoading ? (
+                          <Skeleton variant="circular" width={24} height={24} />
+                        ) : (
+                          <Image
+                            src={`/img/assets/${symbol}.svg`}
+                            alt={symbol}
+                            width="24"
+                            height="24"
+                            style={{
+                              maxWidth: '100%',
+                              height: 'auto',
+                            }}
+                          />
+                        )}
+                        <Typography fontWeight="600" ml={1}>
+                          {isLoading ? <Skeleton width={60} /> : formatSymbol(symbol)}
+                        </Typography>
+                      </Grid>
+                      {symbol === 'USDC.e' && <FrozenPill />}
                     </Grid>
                   </TableCell>
                   <TableCell align="left" sx={{ width: '170px', py: '20px', pl: 3, pr: 1.5 }}>
@@ -221,7 +224,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows }) => {
                         <Button
                           variant="contained"
                           onClick={(e) => handleDepositClick(e, symbol, depositMaturity)}
-                          disabled={isDisable(getRateType(depositMaturity), depositAPR)}
+                          disabled={isDisable(getRateType(depositMaturity), depositAPR) || symbol === 'USDC.e'}
                           data-testid={`${getRateType(depositMaturity)}-${
                             depositMaturity ? Number(depositMaturity) : ''
                           }deposit-${symbol}`}
@@ -280,6 +283,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows }) => {
                       >
                         <Button
                           variant="outlined"
+                          disabled={symbol === 'USDC.e'}
                           sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap' }}
                           onClick={(e) => handleBorrowClick(e, symbol, upcomingMaturity)}
                           data-testid={`${getRateType(borrowMaturity)}-${

@@ -24,6 +24,7 @@ import { useFloatingBalances } from 'hooks/useFloatingBalances';
 import { useFixedBalances } from 'hooks/useFixedBalances';
 import useGlobalUtilization from 'hooks/useGlobalUtilization';
 import { mainnet } from 'wagmi';
+import FrozenPill from 'components/common/FrozenPill';
 
 type Props = {
   symbol: string;
@@ -175,7 +176,7 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
         p="24px"
         boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : '')}
       >
-        <Grid item container mb="24px" alignItems="center">
+        <Grid item container mb="24px" alignItems="center" gap={1}>
           <DropdownMenu
             label={t('Asset')}
             options={options}
@@ -193,6 +194,8 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
               exaToken={marketAccount.symbol}
             />
           )}
+          {symbol === 'USDC.e' && <FrozenPill />}
+
           <Typography sx={{ width: '100%' }} variant="dashboardMainSubtitle">
             {assetDescription(symbol)}
           </Typography>

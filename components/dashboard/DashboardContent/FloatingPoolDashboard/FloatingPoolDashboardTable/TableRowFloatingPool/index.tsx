@@ -16,6 +16,7 @@ import useRouter from 'hooks/useRouter';
 import { useTranslation } from 'react-i18next';
 import Rates from 'components/Rates';
 import { track } from 'utils/mixpanel';
+import FrozenPill from 'components/common/FrozenPill';
 
 type Props = {
   symbol: string;
@@ -133,6 +134,7 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
             <Typography fontWeight="600" ml={1} display="inline" alignSelf="center">
               {formatSymbol(symbol)}
             </Typography>
+            {symbol === 'USDC.e' && <FrozenPill />}
           </Stack>
         </TableCell>
       </Link>
@@ -176,6 +178,7 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
               onClick={handleOperationClick}
               sx={{ whiteSpace: 'nowrap' }}
               data-testid={`floating-${type}-${symbol}`}
+              disabled={symbol === 'USDC.e'}
             >
               {type === 'deposit' ? t('Deposit') : t('Borrow')}
             </Button>

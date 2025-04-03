@@ -23,6 +23,7 @@ import useTranslateOperation from 'hooks/useTranslateOperation';
 import { toPercentage } from 'utils/utils';
 import usePreviousValue from 'hooks/usePreviousValue';
 import Loading from './Loading';
+import FrozenPill from 'components/common/FrozenPill';
 
 const { minAPRValue } = numbers;
 
@@ -175,6 +176,7 @@ const MarketsBasic: FC = () => {
               <Typography variant="cardTitle" data-testid="simple-view-asset-action">
                 {t(`Asset to be {{action}}`, { action: translateOperation(operation, { variant: 'past' }) })}
               </Typography>
+              {symbol === 'USDC.e' && <FrozenPill />}
               <AssetInput
                 qty={qty}
                 symbol={symbol}
