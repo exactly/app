@@ -219,7 +219,12 @@ const MarketTables: FC = () => {
       ),
     );
 
-    setRows(sortByDefault(defaultRows, tempRows));
+    setRows(
+      sortByDefault(
+        defaultRows,
+        tempRows.filter((row) => row.symbol !== 'USDC.e'),
+      ),
+    );
 
     setIsLoading(false);
   }, [accountData, chain, defaultRows, rates, setIndexerError]);

@@ -26,7 +26,7 @@ const Footer = () => {
             padding: '16px 0px',
             color: 'figma.grey.300',
             fontWeight: '500',
-            mt: 8,
+            mt: 4,
           }}
         >
           <Typography fontSize="0.85em">Exactly Protocol © {date.getFullYear()}</Typography>

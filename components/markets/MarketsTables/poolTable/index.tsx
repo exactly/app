@@ -53,7 +53,10 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows }) => {
   const { handleActionClick, isDisable } = useActionButton();
   const assets = useAssets();
   const { palette } = useTheme();
-  const defaultRows = useMemo<TableRow[]>(() => assets.map((s) => ({ symbol: s })), [assets]);
+  const defaultRows = useMemo<TableRow[]>(
+    () => assets.filter((s) => s !== 'USDC.e').map((s) => ({ symbol: s })),
+    [assets],
+  );
   const { setOrderBy, sortData, direction: sortDirection, isActive: sortActive } = useSorting<TableRow>();
   const tempRows = isLoading ? defaultRows : rows;
 
