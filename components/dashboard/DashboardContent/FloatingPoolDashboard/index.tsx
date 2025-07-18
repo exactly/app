@@ -33,7 +33,14 @@ function FloatingPoolDashboard({ type }: Props) {
         </Typography>
         <AddExaTokensButton />
       </Stack>
-      <FloatingPoolDashboardTable rows={floatingRows} type={type} />
+
+      {floatingRows.length === 0 ? (
+        <Typography color="grey.500" mt={1} fontSize="14px" mx={1.5}>
+          {t('No {{operations}} found', { operations: type === 'deposit' ? t('deposits') : t('borrows') })}
+        </Typography>
+      ) : (
+        <FloatingPoolDashboardTable rows={floatingRows} type={type} />
+      )}
     </Grid>
   );
 }

@@ -1,6 +1,7 @@
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useState, useEffect, useRef } from 'react';
 import { Box, Button } from '@mui/material';
 import { track } from 'utils/mixpanel';
+import { useRouter } from 'next/router';
 
 export type MobileTab = {
   title: string;
@@ -12,11 +13,25 @@ type Props = {
 };
 
 function MobileTabs({ tabs }: Props) {
-  const [selected, setSelected] = useState<number>(0);
+  const { query } = useRouter();
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  const tabType = query.tab === 'b' ? 1 : 0;
+  const [selected, setSelected] = useState<number>(tabType);
+
+  useEffect(() => {
+    setSelected(tabType);
+  }, [tabType]);
+
+  useEffect(() => {
+    if (query.tab && tabType === 1 && contentRef.current) {
+      contentRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [query.tab, tabType]);
 
   return (
     <>
-      <Box display="flex" justifyContent="center" mb={1}>
+      <Box display="flex" justifyContent="center" mb={1} ref={contentRef}>
         {tabs.map(({ title }, i) => (
           <Button
             key={`mobile-tab-${title}`}

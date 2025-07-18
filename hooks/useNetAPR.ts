@@ -25,8 +25,7 @@ export default () => {
   }, [subgraphURL, walletAddress]);
 
   return useMemo(() => {
-    if (!accountData || !accounts || isFetching || !floatingDeposit[0].apr || !floatingBorrow[0].apr) return {};
-
+    if (!accountData || !accounts || isFetching) return {};
     const markets = Object.values(accountData);
     const now = dayjs().unix();
 
@@ -56,7 +55,7 @@ export default () => {
 
     const floatingDepositAPRs = floatingDeposit.reduce(
       (acc, { symbol, apr }) => {
-        acc[symbol] = parseEther(String(apr));
+        acc[symbol] = parseEther(String(apr ?? 0));
         return acc;
       },
       {} as Record<string, bigint>,
@@ -64,7 +63,7 @@ export default () => {
 
     const floatingBorrowAPRs = floatingBorrow.reduce(
       (acc, { symbol, apr }) => {
-        acc[symbol] = parseEther(String(apr));
+        acc[symbol] = parseEther(String(apr ?? 0));
         return acc;
       },
       {} as Record<string, bigint>,

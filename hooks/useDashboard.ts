@@ -36,9 +36,14 @@ export default function useDashboard(type: 'deposit' | 'borrow') {
   const getFloatingData = useCallback(async (): Promise<FloatingPoolItemData[] | undefined> => {
     if (!accountData) return;
 
-    const allMarkets = Object.values(accountData).sort((a: MarketAccount, b: MarketAccount) => {
-      return orderAssets.indexOf(a.assetSymbol) - orderAssets.indexOf(b.assetSymbol);
-    });
+    const allMarkets = Object.values(accountData)
+      .filter((market: MarketAccount) => {
+        const amount = isDeposit ? market.floatingDepositAssets : market.floatingBorrowAssets;
+        return amount > 0n;
+      })
+      .sort((a: MarketAccount, b: MarketAccount) => {
+        return orderAssets.indexOf(a.assetSymbol) - orderAssets.indexOf(b.assetSymbol);
+      });
 
     return await Promise.all(
       allMarkets.map(

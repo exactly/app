@@ -13,6 +13,7 @@ import DashboardMobile from './DashboardMobile';
 import ConnectYourWallet from './ConnectYourWallet';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
+import useRouter from 'hooks/useRouter';
 
 function DashboardContent() {
   const { t } = useTranslation();
@@ -34,7 +35,10 @@ function DashboardContent() {
 
   const { isConnected, impersonateActive } = useWeb3();
   const theme = useTheme();
+  const { query } = useRouter();
   const isMobileOrTablet = useMediaQuery(theme.breakpoints.down('md'));
+
+  const tabType = query.tab === 'b' ? 1 : 0;
 
   const allTabs = useMemo(
     () => [
@@ -85,7 +89,7 @@ function DashboardContent() {
 
   return (
     <Grid mt="24px">
-      <DashboardTabs initialTab={allTabs[0].value} allTabs={allTabs} />
+      <DashboardTabs initialTab={allTabs[tabType].value} allTabs={allTabs} />
     </Grid>
   );
 }
