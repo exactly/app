@@ -19,7 +19,6 @@ import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
 import useRewards from 'hooks/useRewards';
 import { parseEther } from 'viem';
 import { useVELOPoolAPR } from 'hooks/useVELO';
-import { useExtraDepositAPR } from 'hooks/useExtra';
 import { useWeb3 } from 'hooks/useWeb3';
 import FeaturedStrategies from 'components/strategies/FeaturedStrategies';
 import { useModal } from '../contexts/ModalContext';
@@ -71,7 +70,6 @@ const Strategies: NextPage = () => {
   }, [getMarketAccount, rates, usdcDepositAPR]);
 
   const veloRate = useVELOPoolAPR() ?? '0%';
-  const extraRate = useExtraDepositAPR();
 
   const featured: (Strategy & { chainId?: number })[] = useMemo(
     () =>
@@ -470,43 +468,8 @@ const Strategies: NextPage = () => {
           ),
           imgPath: '/img/assets/VELO.svg',
         },
-        {
-          chainId: optimism.id,
-          title: t('Deposit EXA on Extra Finance'),
-          description: t('Deposit EXA on Extra Finance and earn interest on it.'),
-          tags: [
-            ...(extraRate && extraRate > 10n ** 16n
-              ? [{ prefix: t('up to'), text: `${toPercentage(Number(extraRate ?? 0) / 1e18)} APR` }]
-              : []),
-            { text: t('Basic'), size: 'small' as const },
-          ],
-          button: (
-            <a
-              href="https://app.extrafi.io/lend/EXA"
-              target="_blank"
-              rel="noreferrer noopener"
-              style={{ width: '100%' }}
-            >
-              <Button
-                fullWidth
-                variant="contained"
-                onClick={() =>
-                  track('Button Clicked', {
-                    location: 'Strategies',
-                    name: 'extra finance',
-                    isNew: false,
-                    href: 'https://app.extrafi.io/lend/EXA',
-                  })
-                }
-              >
-                {t('Go to Extra Finance')}
-              </Button>
-            </a>
-          ),
-          imgPath: '/img/assets/EXTRA.svg',
-        },
       ].filter((s) => s.chainId === chain.id || s.chainId === undefined),
-    [chain.id, extraRate, query, t, veloRate],
+    [chain.id, query, t, veloRate],
   );
 
   return (
