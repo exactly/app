@@ -91,7 +91,7 @@ const Operation = () => {
       )}
       {disabledSubmit ? (
         <Button fullWidth variant="contained" disabled data-testid="leverage-modal-continue">
-          {t('Leverage')}
+          {t('Deleverage')}
         </Button>
       ) : (
         <Button

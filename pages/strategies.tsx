@@ -155,7 +155,7 @@ const Strategies: NextPage = () => {
               }}
               data-testid="leverage"
             >
-              {t('Leverage')}
+              {t('Deleverage')}
             </Button>
           ),
           source: 'exactly' as const,
@@ -361,7 +361,7 @@ const Strategies: NextPage = () => {
                 });
               }}
             >
-              {t('Leverage')}
+              {t('Deleverage')}
             </Button>
           ),
         },

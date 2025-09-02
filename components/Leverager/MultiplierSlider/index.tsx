@@ -10,7 +10,6 @@ const MultiplierSlider = () => {
     setLeverageRatio,
     currentLeverageRatio,
     minLeverageRatio,
-    maxLeverageRatio,
     newHealthFactor,
     getHealthFactorColor,
     netPosition,
@@ -33,10 +32,7 @@ const MultiplierSlider = () => {
     [blockModal, input.borrowSymbol, input.collateralSymbol, netPosition],
   );
 
-  const max = useMemo(
-    () => Math.floor(Math.max(currentLeverageRatio, maxLeverageRatio) * 1e10) / 1e10,
-    [currentLeverageRatio, maxLeverageRatio],
-  );
+  const max = currentLeverageRatio;
 
   return (
     <Box display="flex" flexDirection="column" gap={2} sx={{ opacity: disabled ? 0.5 : 1 }}>

@@ -113,7 +113,7 @@ function LeveragerModal({ isOpen, close }: Props) {
                 ? input.secondaryOperation === 'deposit'
                   ? t('Leverage')
                   : t('Deleverage')
-                : t('Leverage & Deleverage')}
+                : t('Deleverage')}
             </Typography>
             <Typography sx={{ my: 4 }} fontSize={14} fontWeight={400}>
               {t(
