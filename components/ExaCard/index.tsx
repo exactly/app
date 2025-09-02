@@ -88,11 +88,11 @@ export default function EXACard() {
             <Close fontSize={'small'} />
           </Button>
           <Typography fontSize={16} fontWeight={700} color="white">
-            {t('The first onchain debit & credit card.')}
+            {t('The first onchain credit card.')}
           </Typography>
           <Link href="https://exactly.app" target="_blank">
             <Box display="flex" alignItems="center" color="#12A594" fontSize={14} fontWeight={500}>
-              {t('Join the waitlist')}
+              {t('Download the app.')}
               <ChevronRight />
             </Box>
           </Link>
