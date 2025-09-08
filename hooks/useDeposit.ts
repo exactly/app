@@ -15,6 +15,7 @@ import { formatUnits, parseUnits } from 'viem';
 import waitForTransaction from 'utils/waitForTransaction';
 import { gasLimit } from 'utils/gas';
 import { track } from 'utils/mixpanel';
+import useIsContract from './useIsContract';
 
 type Deposit = {
   deposit: () => void;
@@ -23,6 +24,7 @@ type Deposit = {
 export default (): Deposit => {
   const { t } = useTranslation();
   const { walletAddress, opts } = useWeb3();
+  const isContract = useIsContract();
 
   const {
     symbol,
@@ -77,7 +79,10 @@ export default (): Deposit => {
       if (marketAccount.assetSymbol === 'WETH') {
         const sim = await ETHRouterContract.simulate.deposit({ ...opts, value: amount });
         const gasCost = await estimate(sim.request);
-        if (amount + (gasCost ?? 0n) >= parseUnits(walletBalance || '0', marketAccount.decimals)) {
+        if (
+          amount + (gasCost ?? 0n) >= parseUnits(walletBalance || '0', marketAccount.decimals) &&
+          !isContract(walletAddress)
+        ) {
           throw new CustomError(t('Reserve ETH for gas fees.'), 'warning');
         }
         return gasCost;
