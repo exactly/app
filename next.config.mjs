@@ -47,6 +47,10 @@ export default withSentryConfig(
           { key: 'Access-Control-Allow-Headers', value: 'X-Requested-With, content-type, Authorization' },
         ],
       },
+      {
+        source: '/img/assets/:path*',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
+      },
     ],
 
     images: { unoptimized: true },
