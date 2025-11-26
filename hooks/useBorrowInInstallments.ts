@@ -47,8 +47,8 @@ export default function useBorrowInInstallments() {
   }, [date, installmentsDetails, installmentsRouter, maxRepay]);
 
   const config = useMemo(() => {
-    if (!marketContract || !commonArgs || !installmentsRouter || installments === 1) return;
-    const assetsReceiver = receiver ?? walletAddress ?? zeroAddress;
+    if (!marketContract || !commonArgs || !installmentsRouter || installments === 1 || !walletAddress) return;
+    const assetsReceiver = receiver ?? walletAddress;
     const args = permit
       ? ([marketContract.address, ...commonArgs, permit] as const)
       : ([marketContract.address, ...commonArgs, assetsReceiver] as const);
@@ -63,8 +63,8 @@ export default function useBorrowInInstallments() {
   }, [chain.id, commonArgs, installments, installmentsRouter, marketContract, opts, permit, receiver, walletAddress]);
 
   const ethConfig = useMemo(() => {
-    if (!commonArgs || config === undefined) return;
-    const assetsReceiver = receiver ?? walletAddress ?? zeroAddress;
+    if (!commonArgs || config === undefined || !walletAddress) return;
+    const assetsReceiver = receiver ?? walletAddress;
     const args = permit
       ? ([...commonArgs, permit, assetsReceiver] as const)
       : ([...commonArgs, assetsReceiver] as const);

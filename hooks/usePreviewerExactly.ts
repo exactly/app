@@ -1,11 +1,13 @@
 import { isAddress, zeroAddress } from 'viem';
-import { mainnet, optimismSepolia, optimism } from 'wagmi/chains';
+import { mainnet, optimismSepolia, optimism, base, baseSepolia } from 'wagmi/chains';
 
 import { useWeb3 } from './useWeb3';
 import { usePreviewerExactly, useLegacyPreviewerExactly } from 'types/abi';
 import mainnetPreviewer from '@exactly/protocol/deployments/ethereum/Previewer.json' assert { type: 'json' };
 import optimismPreviewer from '@exactly/protocol/deployments/optimism/Previewer.json' assert { type: 'json' };
 import sepoliaPreviewer from '@exactly/protocol/deployments/op-sepolia/Previewer.json' assert { type: 'json' };
+import basePreviewer from '@exactly/protocol/deployments/base/Previewer.json' assert { type: 'json' };
+import baseSepoliaPreviewer from '@exactly/protocol/deployments/base-sepolia/Previewer.json' assert { type: 'json' };
 
 export default (override?: number) => {
   const { chain, walletAddress } = useWeb3();
@@ -14,6 +16,8 @@ export default (override?: number) => {
     [optimismSepolia.id]: sepoliaPreviewer.address,
     [optimism.id]: optimismPreviewer.address,
     [mainnet.id]: mainnetPreviewer.address,
+    [base.id]: basePreviewer.address,
+    [baseSepolia.id]: baseSepoliaPreviewer.address,
   }[override ?? chain.id];
 
   if (!address || !isAddress(address)) throw new Error(`No deployment for ${chain.id}`);

@@ -14,14 +14,19 @@ export const usePreviewerStaking = (override?: number) => {
     [optimismSepolia.id]: sepoliaPreviewer.address,
   }[override ?? chain.id];
 
-  if (!address || !isAddress(address)) throw new Error(`No deployment for ${chain.id}`);
+  // if (!address || !isAddress(address)) throw new Error(`No deployment for ${chain.id}`);
+  const hasDeployment = address && isAddress(address);
 
-  return useStakingPreviewerStaking({
-    chainId: override ?? chain.id,
-    address,
-    args: [walletAddress ?? zeroAddress],
-    staleTime: 5_000,
-  });
+  return useStakingPreviewerStaking(
+    hasDeployment
+      ? {
+          chainId: override ?? chain.id,
+          address,
+          args: [walletAddress ?? zeroAddress],
+          staleTime: 5_000,
+        }
+      : undefined,
+  );
 };
 
 export const usePreviewerAllClaimable = (amount: bigint, override?: number) => {
@@ -31,12 +36,16 @@ export const usePreviewerAllClaimable = (amount: bigint, override?: number) => {
     [optimismSepolia.id]: sepoliaPreviewer.address,
   }[override ?? chain.id];
 
-  if (!address || !isAddress(address)) throw new Error(`No deployment for ${chain.id}`);
+  const hasDeployment = address && isAddress(address);
 
-  return useStakingPreviewerAllClaimable({
-    chainId: override ?? chain.id,
-    address,
-    args: [walletAddress ?? zeroAddress, amount],
-    staleTime: 5_000,
-  });
+  return useStakingPreviewerAllClaimable(
+    hasDeployment
+      ? {
+          chainId: override ?? chain.id,
+          address,
+          args: [walletAddress ?? zeroAddress, amount],
+          staleTime: 5_000,
+        }
+      : undefined,
+  );
 };

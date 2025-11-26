@@ -5,7 +5,7 @@ import { Box, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { readdir, readFile } from 'fs/promises';
 import { basename } from 'path';
-import { optimismSepolia, mainnet, optimism } from 'wagmi/chains';
+import { optimismSepolia, mainnet, optimism, base, baseSepolia } from 'wagmi/chains';
 
 import { defaultChain } from 'utils/client';
 import Feed from 'components/RiskFeed/Feed';
@@ -61,6 +61,8 @@ const networks = {
   [mainnet.id]: 'ethereum',
   [optimism.id]: optimism.network,
   [optimismSepolia.id]: 'op-sepolia',
+  [base.id]: base.network,
+  [baseSepolia.id]: 'base-sepolia',
 };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
