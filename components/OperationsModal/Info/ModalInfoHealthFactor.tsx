@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
 import { useTranslation } from 'react-i18next';
 import { parseUnits } from 'viem';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { WAD } from '@exactly/lib';
 
 import parseHealthFactor from 'utils/parseHealthFactor';
 

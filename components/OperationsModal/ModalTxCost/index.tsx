@@ -2,7 +2,7 @@ import React from 'react';
 import { Typography, Skeleton, Box } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { formatUnits } from 'viem';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { WAD } from '@exactly/lib';
 
 import ModalInfo from 'components/common/modal/ModalInfo';
 import useAccountData from 'hooks/useAccountData';

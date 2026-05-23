@@ -4,8 +4,7 @@ import { Box, Button, Divider, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
 import { optimismSepolia, optimism } from 'wagmi/chains';
-import MAX_UINT256 from '@exactly/lib/esm/fixed-point-math/MAX_UINT256';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { MAX_UINT256, WAD } from '@exactly/lib';
 
 import { useStartDebtManagerButton, useStartLeverager } from 'hooks/useActionButton';
 import StrategyRowCard from 'components/strategies/StrategyRowCard';

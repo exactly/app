@@ -19,13 +19,13 @@ import {
 import { useTranslation } from 'react-i18next';
 import Image from 'next/image';
 import Draggable from 'react-draggable';
-import { TransitionProps } from 'react-transition-group/Transition';
+import { TransitionProps } from '@mui/material/transitions';
 import CloseIcon from '@mui/icons-material/Close';
 import StakingEXAInput from '../StakingEXAInput';
 import { useWeb3 } from 'hooks/useWeb3';
 import formatNumber from 'utils/formatNumber';
 import { useEXAPrice } from 'hooks/useEXA';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { WAD } from '@exactly/lib';
 import { formatEther, parseEther } from 'viem';
 import { Transaction } from 'types/Transaction';
 import { useStakeEXA } from 'contexts/StakeEXAContext';

@@ -1,7 +1,6 @@
 import { useCallback, useState } from 'react';
 import { parseUnits, type Address, type EstimateContractGasParameters, type Hex, formatUnits } from 'viem';
-import MAX_UINT256 from '@exactly/lib/esm/fixed-point-math/MAX_UINT256';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { MAX_UINT256, WAD } from '@exactly/lib';
 
 import { ERC20, Market } from 'types/contracts';
 import { useWeb3 } from './useWeb3';

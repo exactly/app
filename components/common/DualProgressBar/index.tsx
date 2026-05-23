@@ -1,6 +1,6 @@
 import React, { FC, ReactNode, useMemo } from 'react';
 import Tooltip from '@mui/material/Tooltip';
-import { styled } from '@mui/system';
+import { styled } from '@mui/material/styles';
 
 const ProgressBar = styled('div')(({ theme }) => ({
   display: 'flex',

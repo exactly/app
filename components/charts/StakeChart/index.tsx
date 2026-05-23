@@ -19,7 +19,7 @@ import LoadingChart from 'components/charts/LoadingChart';
 import TooltipChart from 'components/charts/TooltipChart';
 import { useStakeEXA } from 'contexts/StakeEXAContext';
 import { parseEther } from 'viem';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { WAD } from '@exactly/lib';
 
 const StakeChart = () => {
   const { t } = useTranslation();

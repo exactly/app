@@ -38,7 +38,7 @@ const config: PlaywrightTestConfig = {
   ],
   outputDir: 'test-results/',
   webServer: {
-    command: 'bun start',
+    command: 'pnpm start',
     timeout: 66_666,
     url: 'http://127.0.0.1:3000',
     reuseExistingServer: !process.env.CI,

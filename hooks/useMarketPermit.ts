@@ -26,7 +26,7 @@ export default function useMarketPermit(marketSymbol: string) {
         ...params,
         verifyingContract: {
           ...market,
-          address: pad(trim(implementation), { size: 20 }),
+          address: pad(trim(implementation as `0x${string}`), { size: 20 }),
         },
       });
     },

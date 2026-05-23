@@ -95,6 +95,7 @@ function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'colu
         }
 
         if (cancelled()) return;
+        if (uti === undefined) return setTo('N/A');
         setTo(toPercentage(Number(formatUnits(uti, 18))));
       } catch {
         setTo('N/A');

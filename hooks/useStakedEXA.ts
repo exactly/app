@@ -3,9 +3,7 @@ import { stakedExaABI, useStakedExaBalanceOf } from 'types/abi';
 import useContract from './useContract';
 import { formatEther, parseEther, zeroAddress } from 'viem';
 import { useWeb3 } from './useWeb3';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
-import lnWad from '@exactly/lib/esm/fixed-point-math/lnWad';
-import expWad from '@exactly/lib/esm/fixed-point-math/expWad';
+import { WAD, lnWad, expWad } from '@exactly/lib';
 import { useCallback, useMemo } from 'react';
 import { useStakeEXA } from 'contexts/StakeEXAContext';
 

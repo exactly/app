@@ -1,11 +1,13 @@
 import { useMemo, useState, useEffect } from 'react';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
-import baseRate from '@exactly/lib/esm/interest-rate-model/baseRate';
-import fixedRate from '@exactly/lib/esm/interest-rate-model/fixedRate';
-import fixedUtilization from '@exactly/lib/esm/interest-rate-model/fixedUtilization';
-import floatingRate from '@exactly/lib/esm/interest-rate-model/floatingRate';
-import floatingUtilization from '@exactly/lib/esm/interest-rate-model/floatingUtilization';
-import globalUtilization from '@exactly/lib/esm/interest-rate-model/globalUtilization';
+import {
+  WAD,
+  baseRate,
+  fixedRate,
+  fixedUtilization,
+  floatingRate,
+  floatingUtilization,
+  globalUtilization,
+} from '@exactly/lib';
 
 import useAccountData from './useAccountData';
 import useIRM from './useIRM';

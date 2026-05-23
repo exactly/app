@@ -1,9 +1,8 @@
 import { useCallback } from 'react';
-import { Address, Hex } from 'viem';
+import { Address, hexToSignature } from 'viem';
 import { useSignTypedData } from 'wagmi';
 import dayjs from 'dayjs';
 import useContractVersion from 'hooks/useContractVersion';
-import { splitSignature } from '@ethersproject/bytes';
 import { Market } from 'types/contracts';
 import { useWeb3 } from 'hooks/useWeb3';
 
@@ -53,14 +52,14 @@ export default function useSignPermit() {
           deadline,
         },
       });
-      const { v, r, s } = splitSignature(signatureHex);
+      const { v, r, s } = hexToSignature(signatureHex);
 
       return {
         value,
         deadline,
-        v,
-        r: r as Hex,
-        s: s as Hex,
+        v: Number(v),
+        r,
+        s,
       };
     },
     [chain.id, contractVersion, opts, signTypedDataAsync, walletAddress],

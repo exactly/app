@@ -40,7 +40,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import Image from 'next/image';
 import Draggable from 'react-draggable';
 import { TransitionProps } from '@mui/material/transitions';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { WAD } from '@exactly/lib';
 import MainActionButton from 'components/common/MainActionButton';
 
 function PaperComponent(props: PaperProps | undefined) {

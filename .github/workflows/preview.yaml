@@ -16,13 +16,14 @@ jobs:
       SENTRY_ENVIRONMENT: development
       NEXT_PUBLIC_NETWORK: 11155420
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
-          node-version: 20
-      - uses: oven-sh/setup-bun@v1
-      - run: bun install
-      - run: bun run check
+          node-version: 24
+          package-manager-cache: false
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run check
 
   e2e:
     needs: [check]
@@ -42,22 +43,17 @@ jobs:
         shardIndex: [1, 2, 3, 4]
         shardTotal: [4]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
-          node-version: 20
-      - uses: oven-sh/setup-bun@v1
-      - uses: actions/cache@v4
-        with:
-          path: ${{ github.workspace }}/.next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lockb') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}
-          restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lockb') }}-
-      - run: bun install
-      - run: bun run build:e2e
-      - run: bun playwright install chromium --with-deps
-      - run: bun playwright test --project=chromium --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
-      - uses: actions/upload-artifact@v4
+          node-version: 24
+          package-manager-cache: false
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build:e2e
+      - run: pnpm exec playwright install chromium --with-deps
+      - run: pnpm exec playwright test --project=chromium --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: blob-report-${{ matrix.shardIndex }}
@@ -69,19 +65,20 @@ jobs:
     if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
-          node-version: 20
-      - uses: oven-sh/setup-bun@v1
-      - run: bun install
-      - uses: actions/download-artifact@v4
+          node-version: 24
+          package-manager-cache: false
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/download-artifact@v8
         with:
           path: all-blob-reports
           pattern: blob-report-*
           merge-multiple: true
-      - run: bun playwright merge-reports --reporter html ./all-blob-reports
-      - uses: actions/upload-artifact@v4
+      - run: pnpm exec playwright merge-reports --reporter html ./all-blob-reports
+      - uses: actions/upload-artifact@v7
         with:
           name: html-report
           path: playwright-report
@@ -92,13 +89,14 @@ jobs:
     if: ${{ always() && needs.e2e-report.result == 'success' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v8
         with:
           name: html-report
           path: html-report
-      - uses: cloudflare/pages-action@v1
+      - uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: 569f3c4008862b4cc595f409db748f41
-          projectName: app-test
-          directory: html-report
+          packageManager: npm
+          command: pages deploy html-report --project-name=app-test --branch=${{ github.ref_name }}

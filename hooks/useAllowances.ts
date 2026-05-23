@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Address, erc20ABI, erc4626ABI, usePublicClient } from 'wagmi';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
-import MAX_UINT256 from '@exactly/lib/esm/fixed-point-math/MAX_UINT256';
+import { MAX_UINT256, WAD } from '@exactly/lib';
 import useDebtManager from './useDebtManager';
 import useAccountData from './useAccountData';
 import useETHRouter from './useETHRouter';

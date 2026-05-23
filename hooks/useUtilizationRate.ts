@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { parseEther } from 'viem';
-import floatingRate from '@exactly/lib/esm/interest-rate-model/floatingRate';
+import { floatingRate } from '@exactly/lib';
 
 import useAccountData from './useAccountData';
 import useIRM from './useIRM';

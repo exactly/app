@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { WAD } from '@exactly/lib';
 
 import useAccountData from './useAccountData';
 import useTotalsUsd from './useTotalsUsd';

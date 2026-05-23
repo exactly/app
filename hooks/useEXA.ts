@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { zeroAddress } from 'viem';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { WAD } from '@exactly/lib';
 
 import { useWeb3 } from './useWeb3';
 import {

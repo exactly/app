@@ -65,7 +65,7 @@ const networks = {
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
   const deployments = 'node_modules/@exactly/protocol/deployments';
-  const id = Number(process.env.NEXT_PUBLIC_NETWORK);
+  const id = Number(process.env.NEXT_PUBLIC_NETWORK ?? defaultChain.id);
   const network = networks[id as keyof typeof networks];
 
   if (!network) {

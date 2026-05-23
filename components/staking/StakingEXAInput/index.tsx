@@ -16,13 +16,13 @@ import {
   useTheme,
 } from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
-import { type Hex, formatEther, parseEther } from 'viem';
+import { hexToSignature, formatEther, parseEther } from 'viem';
 import waitForTransaction from 'utils/waitForTransaction';
 import { stakedExaABI } from 'types/abi';
 import { AbiParametersToPrimitiveTypes, ExtractAbiFunction, ExtractAbiFunctionNames } from 'abitype';
 import Draggable from 'react-draggable';
 import CloseIcon from '@mui/icons-material/Close';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { WAD } from '@exactly/lib';
 
 import { ModalBox } from 'components/common/modal/ModalBox';
 
@@ -41,7 +41,6 @@ import { track } from 'utils/mixpanel';
 import { useStakeEXA } from 'contexts/StakeEXAContext';
 import dayjs from 'dayjs';
 import { useSignTypedData } from 'wagmi';
-import { splitSignature } from '@ethersproject/bytes';
 import useIsContract from 'hooks/useIsContract';
 
 type Params<T extends ExtractAbiFunctionNames<typeof stakedExaABI>> = AbiParametersToPrimitiveTypes<
@@ -205,12 +204,12 @@ function StakingEXAInput({ refetch, operation }: Props) {
         nonce,
         deadline,
       },
-    }).then(splitSignature);
+    }).then(hexToSignature);
 
     return {
       value,
       deadline,
-      ...{ v, r: r as Hex, s: s as Hex },
+      ...{ v: Number(v), r, s },
     } as const;
   }, [displayNetwork.id, exa, opts, qty, signTypedDataAsync, stakedEXA, walletAddress]);
 

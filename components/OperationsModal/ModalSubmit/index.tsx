@@ -1,6 +1,5 @@
 import React, { FC, MouseEvent, useCallback } from 'react';
-import { Button, CircularProgress, Typography } from '@mui/material';
-import { Box } from '@mui/system';
+import { Box, Button, CircularProgress, Typography } from '@mui/material';
 import { useOperationContext } from 'contexts/OperationContext';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useTranslation } from 'react-i18next';

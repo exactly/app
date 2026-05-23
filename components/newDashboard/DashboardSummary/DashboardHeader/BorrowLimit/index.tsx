@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { formatUnits } from 'viem';
 import { Box, Skeleton, Typography } from '@mui/material';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { WAD } from '@exactly/lib';
 
 import { BorrowLimitIcon } from 'components/Icons';
 import { useTranslation } from 'react-i18next';

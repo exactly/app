@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import useAccountData from './useAccountData';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { WAD } from '@exactly/lib';
 
 export function useFixedBalances(symbol: string) {
   const { marketAccount } = useAccountData(symbol);

@@ -1,4 +1,4 @@
-import type { Options } from '@sentry/types';
+import type { init } from '@sentry/nextjs';
 
 type ErrorMap = { [key: string]: RegExp[] };
 
@@ -13,7 +13,7 @@ const isIgnored = (err: Error): boolean => {
   return Boolean(ignored[err.name]?.some((msg) => msg.test(err.message)));
 };
 
-export const beforeSend: Options['beforeSend'] = async (event, hint) => {
+export const beforeSend: NonNullable<Parameters<typeof init>[0]>['beforeSend'] = async (event, hint) => {
   const { originalException } = hint;
 
   if (originalException && originalException instanceof Error) {

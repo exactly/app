@@ -1,7 +1,7 @@
 import { MarketAccount } from 'hooks/useAccountData';
 import { parseUnits } from 'viem';
 import dayjs from 'dayjs';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { WAD } from '@exactly/lib';
 
 import { HealthFactor } from 'types/HealthFactor';
 

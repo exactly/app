@@ -1,6 +1,5 @@
 import { useCallback } from 'react';
 import { optimismSepolia } from 'wagmi/chains';
-import { ErrorCode } from '@ethersproject/logger';
 import { captureException as sentryCaptureException } from '@sentry/nextjs';
 
 import { useOperationContext } from 'contexts/OperationContext';
@@ -23,7 +22,7 @@ export default function useHandleOperationError(): HandleOperationErrorFunc {
         ['withdraw', 'withdrawAtMaturity', 'borrow', 'borrowAtMaturity'].includes(operation) &&
         exception &&
         exception?.code &&
-        exception?.code === ErrorCode.UNPREDICTABLE_GAS_LIMIT
+        exception?.code === 'UNPREDICTABLE_GAS_LIMIT'
       ) {
         return '';
       }

@@ -1,4 +1,4 @@
-import globalUtilization from '@exactly/lib/esm/interest-rate-model/globalUtilization';
+import { globalUtilization } from '@exactly/lib';
 import useAccountData from './useAccountData';
 
 export default (symbol: string) => {

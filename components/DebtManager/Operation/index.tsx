@@ -4,9 +4,8 @@ import { useTranslation } from 'react-i18next';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import { usePublicClient, useSignTypedData } from 'wagmi';
 import dayjs from 'dayjs';
-import { formatUnits, Hex, isAddress, parseUnits, parseEther, trim, pad } from 'viem';
-import { splitSignature } from '@ethersproject/bytes';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { formatUnits, hexToSignature, isAddress, parseUnits, parseEther, trim, pad } from 'viem';
+import { WAD } from '@exactly/lib';
 
 import { ModalBox, ModalBoxRow } from 'components/common/modal/ModalBox';
 import ModalAdvancedSettings from 'components/common/modal/ModalAdvancedSettings';
@@ -334,7 +333,7 @@ function Operation() {
 
     if (!marketImpl) return;
     const deadline = BigInt(dayjs().unix() + 3_600);
-    const verifyingContract = pad(trim(marketImpl), { size: 20 });
+    const verifyingContract = pad(trim(marketImpl as `0x${string}`), { size: 20 });
     if (!isAddress(verifyingContract)) return;
 
     const value = await marketContract.read.previewWithdraw([maxBorrowAssets]);
@@ -362,13 +361,13 @@ function Operation() {
         nonce: marketNonce,
         deadline,
       },
-    }).then(splitSignature);
+    }).then(hexToSignature);
 
     const permit = {
       account: walletAddress,
       deadline,
       value,
-      ...{ v, r: r as Hex, s: s as Hex },
+      ...{ v: Number(v), r, s },
     } as const;
 
     if (input.from.maturity && input.to.maturity) {

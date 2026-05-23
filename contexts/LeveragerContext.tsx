@@ -20,13 +20,12 @@ import {
   trim,
   isAddress,
   hexToBigInt,
+  hexToSignature,
   keccak256,
   encodeAbiParameters,
 } from 'viem';
-import { splitSignature } from '@ethersproject/bytes';
 import { AbiParametersToPrimitiveTypes, ExtractAbiFunction, ExtractAbiFunctionNames } from 'abitype';
-import MAX_UINT256 from '@exactly/lib/esm/fixed-point-math/MAX_UINT256';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { MAX_UINT256, WAD } from '@exactly/lib';
 
 import type { ErrorData } from 'types/Error';
 import type { Transaction } from 'types/Transaction';
@@ -800,7 +799,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       ]);
 
       if (!impl) return;
-      const verifyingContract = pad(trim(impl), { size: 20 });
+      const verifyingContract = pad(trim(impl as Hex), { size: 20 });
       if (!isAddress(verifyingContract)) return;
 
       const { v, r, s } = await signTypedDataAsync({
@@ -827,13 +826,13 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
           nonce,
           deadline,
         },
-      }).then(splitSignature);
+      }).then(hexToSignature);
 
       const permit = {
         account: walletAddress,
         value,
         deadline,
-        ...{ v, r: r as Hex, s: s as Hex },
+        ...{ v: Number(v), r, s },
       } as const;
 
       return { type: 'permit', value: permit } as const;

@@ -1,34 +1,37 @@
 import { defineConfig } from '@wagmi/cli';
 import { react } from '@wagmi/cli/plugins';
-
-import EXA from '@exactly/protocol/deployments/optimism/EXA.json' assert { type: 'json' };
-import ERC20 from '@exactly/protocol/deployments/op-sepolia/DAI.json' assert { type: 'json' };
-import VELO from '@exactly/protocol/deployments/optimism/VELO.json' assert { type: 'json' };
-import Airdrop from '@exactly/protocol/deployments/optimism/Airdrop.json' assert { type: 'json' };
-import Auditor from '@exactly/protocol/deployments/op-sepolia/Auditor.json' assert { type: 'json' };
-import Permit2 from '@exactly/protocol/deployments/op-sepolia/Permit2.json' assert { type: 'json' };
-import Market from '@exactly/protocol/deployments/op-sepolia/MarketDAI.json' assert { type: 'json' };
-import EXAPool from '@exactly/protocol/deployments/optimism/EXAPool.json' assert { type: 'json' };
-import Swapper from '@exactly/protocol/deployments/optimism/Swapper.json' assert { type: 'json' };
-import EXAGauge from '@exactly/protocol/deployments/optimism/EXAGauge.json' assert { type: 'json' };
-import Previewer from '@exactly/protocol/deployments/op-sepolia/Previewer.json' assert { type: 'json' };
-import LegacyPreviewer from '@exactly/protocol/deployments/ethereum/Previewer.json' assert { type: 'json' };
-import DebtManager from '@exactly/protocol/deployments/op-sepolia/DebtManager.json' assert { type: 'json' };
-import DebtPreviewer from '@exactly/protocol/deployments/op-sepolia/DebtPreviewer.json' assert { type: 'json' };
-import MarketETHRouter from '@exactly/protocol/deployments/op-sepolia/MarketETHRouter.json' assert { type: 'json' };
-import RewardsController from '@exactly/protocol/deployments/op-sepolia/RewardsController.json' assert { type: 'json' };
-import InterestRateModel from '@exactly/protocol/deployments/op-sepolia/InterestRateModelDAI.json' assert { type: 'json' };
-import ExtraFinanceLendingABI from './abi/extraFinanceLending.json' assert { type: 'json' };
-import DelegateRegistryABI from './abi/DelegateRegistry.json' assert { type: 'json' };
-import GasPriceOracle from './abi/GasPriceOracle.json' assert { type: 'json' };
-import EscrowedEXA from '@exactly/protocol/deployments/optimism/esEXA.json' assert { type: 'json' };
-import SablierV2LockupLinear from '@exactly/protocol/deployments/optimism/SablierV2LockupLinear.json' assert { type: 'json' };
-import SablierV2NFTDescriptor from '@exactly/protocol/deployments/optimism/SablierV2NFTDescriptor.json' assert { type: 'json' };
-import InstallmentsRouter from '@exactly/protocol/deployments/op-sepolia/InstallmentsRouter.json' assert { type: 'json' };
-import StakedEXA from '@exactly/protocol/deployments/op-sepolia/stEXA.json' assert { type: 'json' };
-import StakingPreviewer from '@exactly/protocol/deployments/op-sepolia/StakingPreviewer.json' assert { type: 'json' };
+import { createRequire } from 'node:module';
 
 import { Abi } from 'viem';
+
+const require = createRequire(import.meta.url);
+
+const EXA = require('@exactly/protocol/deployments/optimism/EXA.json');
+const ERC20 = require('@exactly/protocol/deployments/op-sepolia/DAI.json');
+const VELO = require('@exactly/protocol/deployments/optimism/VELO.json');
+const Airdrop = require('@exactly/protocol/deployments/optimism/Airdrop.json');
+const Auditor = require('@exactly/protocol/deployments/op-sepolia/Auditor.json');
+const Permit2 = require('@exactly/protocol/deployments/op-sepolia/Permit2.json');
+const Market = require('@exactly/protocol/deployments/op-sepolia/MarketDAI.json');
+const EXAPool = require('@exactly/protocol/deployments/optimism/EXAPool.json');
+const Swapper = require('@exactly/protocol/deployments/optimism/Swapper.json');
+const EXAGauge = require('@exactly/protocol/deployments/optimism/EXAGauge.json');
+const Previewer = require('@exactly/protocol/deployments/op-sepolia/Previewer.json');
+const LegacyPreviewer = require('@exactly/protocol/deployments/ethereum/Previewer.json');
+const DebtManager = require('@exactly/protocol/deployments/op-sepolia/DebtManager.json');
+const DebtPreviewer = require('@exactly/protocol/deployments/op-sepolia/DebtPreviewer.json');
+const MarketETHRouter = require('@exactly/protocol/deployments/op-sepolia/MarketETHRouter.json');
+const RewardsController = require('@exactly/protocol/deployments/op-sepolia/RewardsController.json');
+const InterestRateModel = require('@exactly/protocol/deployments/op-sepolia/InterestRateModelDAI.json');
+const ExtraFinanceLendingABI = require('./abi/extraFinanceLending.json');
+const DelegateRegistryABI = require('./abi/DelegateRegistry.json');
+const GasPriceOracle = require('./abi/GasPriceOracle.json');
+const EscrowedEXA = require('@exactly/protocol/deployments/optimism/esEXA.json');
+const SablierV2LockupLinear = require('@exactly/protocol/deployments/optimism/SablierV2LockupLinear.json');
+const SablierV2NFTDescriptor = require('@exactly/protocol/deployments/optimism/SablierV2NFTDescriptor.json');
+const InstallmentsRouter = require('@exactly/protocol/deployments/op-sepolia/InstallmentsRouter.json');
+const StakedEXA = require('@exactly/protocol/deployments/op-sepolia/stEXA.json');
+const StakingPreviewer = require('@exactly/protocol/deployments/op-sepolia/StakingPreviewer.json');
 
 export default defineConfig({
   out: 'types/abi.ts',

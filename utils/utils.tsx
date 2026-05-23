@@ -1,4 +1,4 @@
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { WAD } from '@exactly/lib';
 
 const YEAR_IN_SECONDS = 60n * 60n * 24n * 365n;
 export const DAY = 60n * 60n * 24n;

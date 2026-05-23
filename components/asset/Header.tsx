@@ -1,6 +1,6 @@
 import React, { type FC, useMemo, useCallback, useEffect, useState } from 'react';
 import Grid from '@mui/material/Grid';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { WAD } from '@exactly/lib';
 
 import ItemInfo, { ItemInfoProps } from 'components/common/ItemInfo';
 import formatNumber from 'utils/formatNumber';

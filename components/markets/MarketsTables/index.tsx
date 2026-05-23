@@ -3,8 +3,7 @@ import Grid from '@mui/material/Grid';
 import PoolTable, { TableRow } from './poolTable';
 import { useTranslation } from 'react-i18next';
 import { formatEther, formatUnits } from 'viem';
-import MAX_UINT256 from '@exactly/lib/esm/fixed-point-math/MAX_UINT256';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { MAX_UINT256, WAD } from '@exactly/lib';
 
 import formatNumber from 'utils/formatNumber';
 import getFloatingDepositAPR from 'utils/getFloatingDepositAPR';

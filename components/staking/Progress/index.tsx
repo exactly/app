@@ -3,7 +3,7 @@ import { Box, Tooltip, Typography, useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useStakeEXA } from 'contexts/StakeEXAContext';
 import { parseEther } from 'viem';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { WAD } from '@exactly/lib';
 import StakingProgressBar from '../StakingProgress';
 import { InfoOutlined } from '@mui/icons-material';
 

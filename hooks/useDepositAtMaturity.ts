@@ -1,4 +1,4 @@
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { WAD } from '@exactly/lib';
 
 import { useCallback, useMemo, useState } from 'react';
 import { useOperationContext } from 'contexts/OperationContext';

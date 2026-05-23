@@ -20,7 +20,8 @@ git clone git@github.com:exactly/app.git
 and install its dependencies with
 
 ```bash
-bun install
+corepack enable
+pnpm install --frozen-lockfile
 ```
 
 ## Running the app locally
@@ -28,7 +29,7 @@ bun install
 The app can be started locally with
 
 ```bash
-bun dev
+pnpm dev
 ```
 
 and the instance should be accessible at `http://localhost:3000`.
@@ -45,7 +46,7 @@ NEXT_PUBLIC_NETWORK=11155420  # Network to use by default
 A development server can be started at `http://localhost:3000` with
 
 ```bash
-bun dev
+pnpm dev
 ```
 
 ## Testing
@@ -65,19 +66,19 @@ TENDERLY_USER=<tenderly user>
 The full suite can be run using
 
 ```bash
-bun start:e2e             # Or `bun dev:e2e` for a dev server
+pnpm start:e2e            # Or `pnpm dev:e2e` for a dev server
 ```
 
 to start the app and in another terminal
 
 ```bash
-bun run test
+pnpm test
 ```
 
 To run a single test use the same above but specifiy the spec to run with
 
 ```bash
-bun run test -- [spec path] # e.g. e2e/specs/0-enter-exit-market/weth.spec.ts
+pnpm test -- [spec path] # e.g. e2e/specs/0-enter-exit-market/weth.spec.ts
 ```
 
 Use the `--headed` flag to review the test running in the browser.

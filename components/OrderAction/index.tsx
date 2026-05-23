@@ -1,6 +1,6 @@
 import React, { FC, MouseEvent, useCallback } from 'react';
 import Button from '@mui/material/Button';
-import Box from '@mui/system/Box';
+import Box from '@mui/material/Box';
 import { useTranslation } from 'react-i18next';
 
 import useActionButton from 'hooks/useActionButton';

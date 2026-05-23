@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { parseUnits } from 'viem';
 import { captureException } from '@sentry/nextjs';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { WAD } from '@exactly/lib';
 
 import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasicContext';
 import { useOperationContext } from 'contexts/OperationContext';
@@ -45,7 +45,10 @@ export default (operation: MarketsBasicOperation): PreviewFixedOperation => {
           operation === 'deposit'
             ? previewerContract.read.previewDepositAtAllMaturities
             : previewerContract.read.previewBorrowAtAllMaturities;
-        const previewPools = await preview([marketAccount.market, initialAssets]);
+        const previewPools = (await preview([marketAccount.market, initialAssets])) as readonly {
+          maturity: bigint;
+          assets: bigint;
+        }[];
         const currentTimestamp = BigInt(dayjs().unix());
 
         const fixedOptions: MarketsBasicOption[] = previewPools.map(({ maturity, assets }) => {

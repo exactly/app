@@ -14,7 +14,7 @@ function ModalSheetButton({ selected = false, children, ...props }: Props) {
       {...props}
       sx={[
         { display: 'flex', alignItems: 'center', gap: 0.5, p: 0.5, borderRadius: 1 },
-        ...(Array.isArray(props.sx) ? props.sx.flat() : [props.sx]),
+        ...(Array.isArray(props.sx) ? props.sx : props.sx ? [props.sx] : []),
       ]}
     >
       <Typography

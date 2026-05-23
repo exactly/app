@@ -3,7 +3,7 @@ import { formatUnits } from 'viem';
 import { Box, Button, Skeleton, Typography, useMediaQuery, useTheme } from '@mui/material';
 import StarsIcon from '@mui/icons-material/Stars';
 import Link from 'next/link';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { WAD } from '@exactly/lib';
 
 import formatNumber from 'utils/formatNumber';
 import Image from 'next/image';

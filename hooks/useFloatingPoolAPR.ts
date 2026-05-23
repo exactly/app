@@ -1,9 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { parseUnits } from 'viem';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
-import floatingRate from '@exactly/lib/esm/interest-rate-model/floatingRate';
-import floatingUtilization from '@exactly/lib/esm/interest-rate-model/floatingUtilization';
-import globalUtilization from '@exactly/lib/esm/interest-rate-model/globalUtilization';
+import { WAD, floatingRate, floatingUtilization, globalUtilization } from '@exactly/lib';
 
 import networkData from 'config/networkData.json' assert { type: 'json' };
 import type { Operation } from 'types/Operation';

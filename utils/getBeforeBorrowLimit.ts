@@ -1,6 +1,6 @@
 import { MarketAccount } from 'hooks/useAccountData';
 import { parseUnits } from 'viem';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { WAD } from '@exactly/lib';
 
 function getBeforeBorrowLimit(marketAccount: MarketAccount, type: string): bigint {
   const { maxBorrowAssets, usdPrice, decimals, isCollateral, floatingDepositAssets, adjustFactor } = marketAccount;

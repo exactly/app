@@ -1,6 +1,6 @@
 import React, { FC, ReactNode } from 'react';
 import Tooltip from '@mui/material/Tooltip';
-import { styled } from '@mui/system';
+import { styled } from '@mui/material/styles';
 import { Avatar, AvatarGroup, Box, Grid, Typography, useTheme } from '@mui/material';
 import formatNumber from 'utils/formatNumber';
 import { formatEther } from 'viem';
@@ -8,7 +8,7 @@ import { useStakeEXA } from 'contexts/StakeEXAContext';
 import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
 import parseTimestamp from 'utils/parseTimestamp';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { WAD } from '@exactly/lib';
 
 const ProgressBar = styled('div')<{ ended: boolean }>(({ ended, theme }) => ({
   display: 'flex',

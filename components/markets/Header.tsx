@@ -1,7 +1,7 @@
 import React, { type FC, useMemo } from 'react';
 import { formatUnits, parseUnits } from 'viem';
 import { useTranslation } from 'react-i18next';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { WAD } from '@exactly/lib';
 
 import HeaderInfo from 'components/common/HeaderInfo';
 import { ItemInfoProps } from 'components/common/ItemInfo';

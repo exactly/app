@@ -4,7 +4,7 @@ import { Box, Typography } from '@mui/material';
 import formatNumber from 'utils/formatNumber';
 import { useTranslation } from 'react-i18next';
 import { formatUnits } from 'viem';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { WAD } from '@exactly/lib';
 
 export type AssetPosition = {
   symbol: string;

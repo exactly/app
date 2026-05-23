@@ -13,7 +13,7 @@ export function ModalBox(props: BoxProps) {
           borderRadius: 1,
           border: `1px solid ${theme.palette.grey[300]}`,
         }),
-        ...(Array.isArray(props.sx) ? props.sx.flat() : [props.sx]),
+        ...(Array.isArray(props.sx) ? props.sx : props.sx ? [props.sx] : []),
       ]}
     />
   );
@@ -39,7 +39,7 @@ export function ModalBoxRow(props: BoxProps) {
             paddingBottom: 0,
           },
         }),
-        ...(Array.isArray(props.sx) ? props.sx.flat() : [props.sx]),
+        ...(Array.isArray(props.sx) ? props.sx : props.sx ? [props.sx] : []),
       ]}
     />
   );

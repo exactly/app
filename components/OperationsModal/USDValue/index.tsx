@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Typography } from '@mui/material';
 import { formatUnits, parseUnits } from 'viem';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { WAD } from '@exactly/lib';
 
 import useAccountData from 'hooks/useAccountData';
 import formatNumber from 'utils/formatNumber';

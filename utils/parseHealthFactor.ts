@@ -1,5 +1,5 @@
 import { formatUnits } from 'viem';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { WAD } from '@exactly/lib';
 
 function parseHealthFactor(debt: bigint, collateral: bigint) {
   //TODO => check case when the user doesn't have any collateral or debt

@@ -1,8 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { parseUnits } from 'viem';
-import splitInstallments from '@exactly/lib/esm/installments/split';
-import fixedUtilization from '@exactly/lib/esm/interest-rate-model/fixedUtilization';
-import globalUtilization from '@exactly/lib/esm/interest-rate-model/globalUtilization';
+import { fixedUtilization, globalUtilization, splitInstallments } from '@exactly/lib';
 import useAccountData from 'hooks/useAccountData';
 import { INTERVAL } from 'utils/utils';
 import useIRM from 'hooks/useIRM';
@@ -57,7 +55,7 @@ export default function useInstallmentsData({
         globalUtilization(totalFloatingDepositAssets, totalFloatingBorrowAssets, floatingBackupBorrowed),
         irmParameters,
         timestamp,
-        { rateTolerance: 10n ** 15n },
+        { tolerance: 10n ** 15n },
       );
       const totalPrincipal = installmentsPrincipal.reduce((acc, val) => acc + val, 0n);
       const maxRepay = installmentsRepayAmount.reduce((acc, val) => acc + val, 0n);

@@ -17,7 +17,7 @@ import useIsContract from 'hooks/useIsContract';
 import { track } from 'utils/mixpanel';
 import waitForTransaction from 'utils/waitForTransaction';
 import formatNumber from 'utils/formatNumber';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { WAD } from '@exactly/lib';
 import { erc20ABI, useContractRead } from 'wagmi';
 
 type Permit = {
@@ -29,7 +29,7 @@ type Permit = {
 };
 
 export default function useBorrowInInstallments() {
-  const { installmentsDetails, installments, marketContract, date, symbol, slippage, setTx, setErrorData } =
+  const { installmentsDetails, installments, marketContract, date, symbol, slippage, receiver, setTx, setErrorData } =
     useOperationContext();
   const { walletAddress, opts, chain } = useWeb3();
   const [permit, setPermit] = useState<Permit>();
@@ -48,22 +48,28 @@ export default function useBorrowInInstallments() {
 
   const config = useMemo(() => {
     if (!marketContract || !commonArgs || !installmentsRouter || installments === 1) return;
-    const args = [marketContract.address, ...commonArgs] as const;
+    const assetsReceiver = receiver ?? walletAddress ?? zeroAddress;
+    const args = permit
+      ? ([marketContract.address, ...commonArgs, permit] as const)
+      : ([marketContract.address, ...commonArgs, assetsReceiver] as const);
     return {
       ...opts,
       chainId: chain.id,
       enabled: true,
       address: installmentsRouter.address,
       account: walletAddress ?? zeroAddress,
-      args: permit ? ([...args, permit] as const) : args,
+      args,
     };
-  }, [chain.id, commonArgs, installments, installmentsRouter, marketContract, opts, permit, walletAddress]);
+  }, [chain.id, commonArgs, installments, installmentsRouter, marketContract, opts, permit, receiver, walletAddress]);
 
   const ethConfig = useMemo(() => {
     if (!commonArgs || config === undefined) return;
-    const args = permit ? ([...commonArgs, permit] as const) : commonArgs;
+    const assetsReceiver = receiver ?? walletAddress ?? zeroAddress;
+    const args = permit
+      ? ([...commonArgs, permit, assetsReceiver] as const)
+      : ([...commonArgs, assetsReceiver] as const);
     return { ...config, args };
-  }, [commonArgs, config, permit]);
+  }, [commonArgs, config, permit, receiver, walletAddress]);
 
   const prepare = usePrepareInstallmentsRouterBorrow(isBorrowETH ? undefined : config);
   const prepareETH = usePrepareInstallmentsRouterBorrowEth(isBorrowETH ? ethConfig : undefined);

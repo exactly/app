@@ -2,15 +2,15 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import request from 'graphql-request';
 import { createPublicClient, getAddress, http } from 'viem';
 import { optimism } from 'viem/chains';
-import { address as sablierV2LockupLinear } from '@exactly/protocol/deployments/optimism/SablierV2LockupLinear.json';
-import { address as timelockController } from '@exactly/protocol/deployments/optimism/TimelockController.json';
-import { address as rewardsController } from '@exactly/protocol/deployments/optimism/RewardsController.json';
-import { address as escrowedEXA } from '@exactly/protocol/deployments/optimism/esEXA.json';
-import { address as airdrop } from '@exactly/protocol/deployments/optimism/Airdrop.json';
-import { address as exaAddress } from '@exactly/protocol/deployments/optimism/EXA.json';
+import sablierV2LockupLinearDeployment from '@exactly/protocol/deployments/optimism/SablierV2LockupLinear.json';
+import timelockControllerDeployment from '@exactly/protocol/deployments/optimism/TimelockController.json';
+import rewardsControllerDeployment from '@exactly/protocol/deployments/optimism/RewardsController.json';
+import escrowedEXADeployment from '@exactly/protocol/deployments/optimism/esEXA.json';
+import airdropDeployment from '@exactly/protocol/deployments/optimism/Airdrop.json';
+import exaDeployment from '@exactly/protocol/deployments/optimism/EXA.json';
 import { exaABI, sablierV2LockupLinearABI } from '../../types/abi';
 import { getStreamsByCategory } from 'queries/getStreamsByCategory';
-import networkData from 'config/networkData.json' assert { type: 'json' };
+import networkData from 'config/networkData.json';
 import { defaultChain } from 'utils/client';
 
 const { PRIVATE_ALCHEMY_API_KEY } = process.env;
@@ -21,6 +21,12 @@ const client = createPublicClient({
 
 const SABLIER_V2_LOCKUP_DYNAMIC = '0x6f68516c21E248cdDfaf4898e66b2b0Adee0e0d6';
 const TREASURY = '0x23fD464e0b0eE21cEdEb929B19CABF9bD5215019';
+const sablierV2LockupLinear = sablierV2LockupLinearDeployment.address;
+const timelockController = timelockControllerDeployment.address;
+const rewardsController = rewardsControllerDeployment.address;
+const escrowedEXA = escrowedEXADeployment.address;
+const airdrop = airdropDeployment.address;
+const exaAddress = exaDeployment.address;
 const EXCLUDED_ADDRESSES = [
   SABLIER_V2_LOCKUP_DYNAMIC,
   sablierV2LockupLinear,

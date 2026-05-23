@@ -16,7 +16,7 @@ function OperationSquare({ type, ...props }: Props) {
       {...props}
       sx={[
         { bgcolor: type === 'floating' ? 'green' : 'blue' },
-        ...(Array.isArray(props.sx) ? props.sx.flat() : [props.sx]),
+        ...(Array.isArray(props.sx) ? props.sx : props.sx ? [props.sx] : []),
       ]}
     />
   );

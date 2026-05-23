@@ -33,7 +33,7 @@ import formatNumber from 'utils/formatNumber';
 import { Transaction } from 'types/Transaction';
 import Loading from 'components/common/modal/Loading';
 import useRewards from 'hooks/useRewards';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { WAD } from '@exactly/lib';
 import { useWeb3 } from 'hooks/useWeb3';
 import RewardsTooltip from 'components/RewardsTooltip';
 import { useModal } from 'contexts/ModalContext';

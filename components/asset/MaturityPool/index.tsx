@@ -1,7 +1,6 @@
 import React, { useMemo, type FC } from 'react';
 import Grid from '@mui/material/Grid';
-import MAX_UINT256 from '@exactly/lib/esm/fixed-point-math/MAX_UINT256';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { MAX_UINT256, WAD } from '@exactly/lib';
 
 import MaturityPoolsTable from './MaturityPoolsTable';
 import MaturityPoolInfo from './MaturityPoolInfo';

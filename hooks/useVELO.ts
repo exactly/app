@@ -6,7 +6,7 @@ import { useEXAGaugeBalanceOf, useEXAGaugeRewardRate } from './useEXAGauge';
 import { useEXAPoolGetReserves, useEXAPoolTotalSupply } from './useEXAPool';
 import { parseEther } from 'viem';
 import { toPercentage } from 'utils/utils';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { WAD } from '@exactly/lib';
 
 import { veloABI } from 'types/abi';
 import useContract from './useContract';

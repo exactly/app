@@ -14,7 +14,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { WAD } from '@exactly/lib';
 
 import OperationSquare from 'components/common/OperationSquare';
 import parseTimestamp from 'utils/parseTimestamp';

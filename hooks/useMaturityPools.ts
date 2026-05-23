@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { formatUnits } from 'viem';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { WAD } from '@exactly/lib';
 
 import formatNumber from 'utils/formatNumber';
 

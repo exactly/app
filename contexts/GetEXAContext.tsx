@@ -11,12 +11,12 @@ import React, {
 
 import {
   type Hash,
-  Hex,
   encodeFunctionData,
   parseEther,
   parseUnits,
   zeroAddress,
   hexToBigInt,
+  hexToSignature,
   keccak256,
   encodeAbiParameters,
   formatUnits,
@@ -26,8 +26,7 @@ import * as wagmiChains from 'wagmi/chains';
 import { useSignTypedData, useWalletClient } from 'wagmi';
 import { optimism } from 'wagmi/chains';
 
-import MAX_UINT256 from '@exactly/lib/esm/fixed-point-math/MAX_UINT256';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { MAX_UINT256, WAD } from '@exactly/lib';
 
 import {
   type Route,
@@ -63,7 +62,6 @@ import useIsPermit from 'hooks/useIsPermit';
 import usePermit2 from 'hooks/usePermit2';
 import waitForTransaction from 'utils/waitForTransaction';
 import dayjs from 'dayjs';
-import { splitSignature } from '@ethersproject/bytes';
 import useDelayedEffect from 'hooks/useDelayedEffect';
 import { track } from 'utils/mixpanel';
 import useContractVersion from 'hooks/useContractVersion';
@@ -313,12 +311,12 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
           nonce,
           deadline,
         },
-      }).then(splitSignature);
+      }).then(hexToSignature);
 
       const permit = {
         value,
         deadline,
-        ...{ v, r: r as Hex, s: s as Hex },
+        ...{ v: Number(v), r, s },
       } as const;
 
       return { type: 'permit', value: permit } as const;

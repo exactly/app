@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { CircularProgress, Tooltip, Typography } from '@mui/material';
 import { useNetwork, useSwitchNetwork } from 'wagmi';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { WAD } from '@exactly/lib';
 
 import waitForTransaction from 'utils/waitForTransaction';
 

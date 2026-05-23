@@ -1,4 +1,4 @@
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { WAD } from '@exactly/lib';
 
 const ONE_YEAR = 31_536_000n;
 

@@ -3,7 +3,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { usePreviewerStaking } from 'hooks/useStakingPreviewer';
 import useAccountData from 'hooks/useAccountData';
 import { useEXAPrice } from 'hooks/useEXA';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import { WAD } from '@exactly/lib';
 import getVouchersPrice from 'utils/getVouchersPrice';
 
 type Parameters = {

@@ -1,9 +1,6 @@
 import request from 'graphql-request';
 import { formatUnits } from 'viem';
-import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
-import floatingRate from '@exactly/lib/esm/interest-rate-model/floatingRate';
-import floatingUtilization from '@exactly/lib/esm/interest-rate-model/floatingUtilization';
-import globalUtilization from '@exactly/lib/esm/interest-rate-model/globalUtilization';
+import { WAD, floatingRate, floatingUtilization, globalUtilization } from '@exactly/lib';
 
 const FIXED_INTERVAL = 86_400 * 7 * 4;
 
