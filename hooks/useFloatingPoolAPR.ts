@@ -1,15 +1,11 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { parseUnits } from 'viem';
 import { WAD, floatingRate, floatingUtilization, globalUtilization } from '@exactly/lib';
 
-import networkData from 'config/networkData.json' assert { type: 'json' };
 import type { Operation } from 'types/Operation';
-import queryRates from 'utils/queryRates';
 import useAccountData from './useAccountData';
-import useDelayedEffect from './useDelayedEffect';
-import { useWeb3 } from './useWeb3';
-import { useGlobalError } from 'contexts/GlobalErrorContext';
 import useIRM from './useIRM';
+import useFloatingDepositRates from './useFloatingDepositRates';
 
 type FloatingPoolAPR = {
   depositAPR: number | undefined;
@@ -22,14 +18,10 @@ export default (
   qty?: string,
   operation?: Extract<Operation, 'deposit' | 'borrow'>,
 ): FloatingPoolAPR => {
-  const { chain } = useWeb3();
   const { marketAccount } = useAccountData(symbol);
+  const { data: depositAPRs, isLoading } = useFloatingDepositRates(operation !== 'borrow');
 
   const irm = useIRM(symbol);
-
-  const [depositAPR, setDepositAPR] = useState<number | undefined>();
-  const [loading, setLoading] = useState<boolean>(true);
-  const { setIndexerError } = useGlobalError();
 
   const borrowAPR = useMemo((): number | undefined => {
     if (!marketAccount || !irm || operation === 'deposit') {
@@ -52,42 +44,22 @@ export default (
     );
   }, [marketAccount, irm, operation, qty]);
 
-  const fetchAPRs = useCallback(
-    async (cancelled: () => boolean) => {
-      if (operation === 'borrow') return;
-      setLoading(true);
+  const depositAPR = useMemo((): number | undefined => {
+    if (operation === 'borrow' || !marketAccount) return undefined;
 
-      if (!marketAccount) return setDepositAPR(undefined);
+    const depositAPRRate = depositAPRs?.[marketAccount.market.toLowerCase()];
+    if (depositAPRRate === undefined) return undefined;
 
-      try {
-        const subgraphUrl = networkData[String(chain.id) as keyof typeof networkData]?.subgraph.exactly;
-        if (!subgraphUrl) return;
-        const [{ apr: depositAPRRate }] = await queryRates(subgraphUrl, marketAccount.market, 'deposit', {
-          maxFuturePools: marketAccount.maxFuturePools,
-        });
+    const { totalFloatingDepositAssets, decimals } = marketAccount;
+    const futureSupply = totalFloatingDepositAssets + parseUnits(qty || '0', decimals);
+    const ratio = Number(futureSupply === 0n ? 0n : (totalFloatingDepositAssets * WAD) / futureSupply) / 1e18;
 
-        if (cancelled()) return;
-        const { totalFloatingDepositAssets, decimals } = marketAccount;
-
-        const futureSupply = totalFloatingDepositAssets + parseUnits(qty || '0', decimals);
-        const ratio = Number(futureSupply === 0n ? 0n : (totalFloatingDepositAssets * WAD) / futureSupply) / 1e18;
-        const finalAPR = ratio * depositAPRRate;
-
-        setDepositAPR(finalAPR);
-        setLoading(false);
-      } catch {
-        setIndexerError();
-        setDepositAPR(undefined);
-      }
-    },
-    [operation, marketAccount, chain, qty, setIndexerError],
-  );
-
-  const { isLoading: delayedLoading } = useDelayedEffect({ effect: fetchAPRs });
+    return ratio * depositAPRRate;
+  }, [operation, marketAccount, depositAPRs, qty]);
 
   return {
     depositAPR,
     borrowAPR,
-    loading: loading || delayedLoading,
+    loading: operation === 'borrow' ? false : !marketAccount || isLoading,
   };
 };

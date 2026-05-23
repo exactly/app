@@ -1,27 +1,22 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { FloatingPoolItemData } from 'types/FloatingPoolItemData';
 import useAssets from './useAssets';
-import { useWeb3 } from 'hooks/useWeb3';
 import useFixedPools from './useFixedPools';
 import useAccountData, { MarketAccount } from './useAccountData';
-import getFloatingDepositAPR from 'utils/getFloatingDepositAPR';
-import { useGlobalError } from 'contexts/GlobalErrorContext';
 import { formatUnits } from 'viem';
+import useFloatingDepositRates from './useFloatingDepositRates';
 
 export default function useDashboard(type: 'deposit' | 'borrow') {
   const { accountData, getMarketAccount } = useAccountData();
   const orderAssets = useAssets();
-  const { chain } = useWeb3();
   const { deposits, borrows } = useFixedPools();
-  const { setIndexerError } = useGlobalError();
   const isDeposit = type === 'deposit';
+  const { data: depositAPRs, isLoading: depositAPRsLoading } = useFloatingDepositRates(isDeposit);
 
   const defaultRows: FloatingPoolItemData[] = useMemo<FloatingPoolItemData[]>(
     () => orderAssets.map((s) => ({ symbol: s })),
     [orderAssets],
   );
-
-  const [floatingData, setFloatingData] = useState<FloatingPoolItemData[] | undefined>(defaultRows);
 
   const getValueInUSD = useCallback(
     (symbol: string, amount: bigint): number => {
@@ -33,8 +28,8 @@ export default function useDashboard(type: 'deposit' | 'borrow') {
     [getMarketAccount],
   );
 
-  const getFloatingData = useCallback(async (): Promise<FloatingPoolItemData[] | undefined> => {
-    if (!accountData) return;
+  const floatingData = useMemo<FloatingPoolItemData[] | undefined>(() => {
+    if (!accountData || (isDeposit && depositAPRsLoading)) return;
 
     const allMarkets = Object.values(accountData)
       .filter((market: MarketAccount) => {
@@ -45,44 +40,21 @@ export default function useDashboard(type: 'deposit' | 'borrow') {
         return orderAssets.indexOf(a.assetSymbol) - orderAssets.indexOf(b.assetSymbol);
       });
 
-    return await Promise.all(
-      allMarkets.map(
-        async ({
-          assetSymbol,
-          floatingDepositAssets,
-          floatingBorrowAssets,
+    return allMarkets.map(
+      ({ assetSymbol, floatingDepositAssets, floatingBorrowAssets, market, floatingBorrowRate }) => {
+        const apr = isDeposit ? depositAPRs?.[market.toLowerCase()] : Number(floatingBorrowRate) / 1e18;
+
+        return {
+          symbol: assetSymbol,
+          depositedAmount: floatingDepositAssets,
+          borrowedAmount: floatingBorrowAssets,
+          apr,
+          valueUSD: getValueInUSD(assetSymbol, isDeposit ? floatingDepositAssets : floatingBorrowAssets),
           market,
-          maxFuturePools,
-          floatingBorrowRate,
-        }) => {
-          const apr = isDeposit
-            ? await getFloatingDepositAPR(chain.id, 'deposit', maxFuturePools, market).catch(() => {
-                setIndexerError();
-                return undefined;
-              })
-            : Number(floatingBorrowRate) / 1e18;
-
-          return {
-            symbol: assetSymbol,
-            depositedAmount: floatingDepositAssets,
-            borrowedAmount: floatingBorrowAssets,
-            apr,
-            valueUSD: getValueInUSD(assetSymbol, isDeposit ? floatingDepositAssets : floatingBorrowAssets),
-            market,
-          };
-        },
-      ),
+        };
+      },
     );
-  }, [accountData, chain.id, getValueInUSD, isDeposit, orderAssets, setIndexerError]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const asyncData = await getFloatingData();
-      setFloatingData(asyncData);
-    };
-
-    fetchData();
-  }, [getFloatingData]);
+  }, [accountData, depositAPRs, depositAPRsLoading, getValueInUSD, isDeposit, orderAssets]);
 
   const fixedRows = useMemo(() => {
     const fixedData = isDeposit ? deposits : borrows;

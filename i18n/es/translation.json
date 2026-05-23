@@ -4,7 +4,7 @@
   "Total Deposits": "Depósitos Totales",
   "Total Borrows": "Préstamos Totales",
   "Deposit APR": "TNA del Depósito",
-  "Change in the underlying Variable Rate Pool shares value over the last 15 minutes, annualized.": "Cambio en el valor de las acciones del pool de tasa variable subyacente durante los últimos 15 minutos, anualizado.",
+  "Projected from the current Variable Rate Pool onchain snapshot, annualized.": "Proyectada a partir de la instantánea onchain actual del Pool de Tasa Variable, anualizada.",
   "Borrow APR": "TNA del Préstamo",
   "Utilization Rate": "Tasa de Utilización",
   "Deposit Rewards APR": "TNA Recompensa por Depósito",

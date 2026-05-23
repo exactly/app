@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FC, useMemo } from 'react';
 import Grid from '@mui/material/Grid';
 import PoolTable, { TableRow } from './poolTable';
 import { useTranslation } from 'react-i18next';
@@ -6,19 +6,17 @@ import { formatEther, formatUnits } from 'viem';
 import { MAX_UINT256, WAD } from '@exactly/lib';
 
 import formatNumber from 'utils/formatNumber';
-import getFloatingDepositAPR from 'utils/getFloatingDepositAPR';
 
 import { Box } from '@mui/material';
 
 import { globals } from 'styles/theme';
-import { useWeb3 } from 'hooks/useWeb3';
 import useAssets from 'hooks/useAssets';
 import PoolMobile from './poolMobile';
 import { TableHeader } from 'components/common/TableHeadCell';
 import useAccountData from 'hooks/useAccountData';
-import { useGlobalError } from 'contexts/GlobalErrorContext';
 import useRewards from 'hooks/useRewards';
 import { WEEK } from 'utils/utils';
+import useFloatingDepositRates from 'hooks/useFloatingDepositRates';
 
 const { smOrLess, mdOrMore } = globals;
 
@@ -32,15 +30,11 @@ const sortByDefault = (defaultRows: TableRow[], toSort: TableRow[]) =>
 
 const MarketTables: FC = () => {
   const { t } = useTranslation();
-  const { chain } = useWeb3();
   const { accountData } = useAccountData();
+  const { data: floatingDepositAPRs } = useFloatingDepositRates();
   const { rates } = useRewards();
   const assets = useAssets();
   const defaultRows = useMemo<TableRow[]>(() => assets.map((s) => ({ symbol: s })), [assets]);
-
-  const [rows, setRows] = useState<TableRow[]>([...defaultRows]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const { setIndexerError } = useGlobalError();
 
   const floatingHeaders: TableHeader<TableRow>[] = [
     {
@@ -59,7 +53,7 @@ const MarketTables: FC = () => {
     {
       key: 'Best Deposit APR',
       title: t('Best Deposit APR'),
-      tooltipTitle: t('Change in the underlying Variable Rate Pool shares value over the last 15 minutes, annualized.'),
+      tooltipTitle: t('Projected from the current Variable Rate Pool onchain snapshot, annualized.'),
       sortKey: 'depositAPR',
       sx: { pl: 1.5, pr: 1.5, pt: 1, pb: 1 },
     },
@@ -125,112 +119,91 @@ const MarketTables: FC = () => {
     },
   ];
 
-  const defineRows = useCallback(async () => {
-    setIsLoading(true);
-
-    if (!accountData || !chain) return;
-
+  const rows = useMemo(() => {
+    if (!accountData) return [...defaultRows];
     const tempRows: TableRow[] = [];
 
-    await Promise.all(
-      accountData.map(
-        async ({
-          assetSymbol: symbol,
-          market: marketAddress,
-          totalFloatingDepositAssets,
-          totalFloatingBorrowAssets,
-          usdPrice,
-          decimals,
-          maxFuturePools,
-          floatingBorrowRate,
-          fixedPools,
-        }) => {
-          let totalDeposited = 0n;
-          let totalBorrowed = 0n;
+    accountData.forEach(
+      ({
+        assetSymbol: symbol,
+        market: marketAddress,
+        totalFloatingDepositAssets,
+        totalFloatingBorrowAssets,
+        usdPrice,
+        decimals,
+        floatingBorrowRate,
+        fixedPools,
+      }) => {
+        let totalDeposited = 0n;
+        let totalBorrowed = 0n;
 
-          totalDeposited += totalFloatingDepositAssets;
-          totalBorrowed += totalFloatingBorrowAssets;
+        totalDeposited += totalFloatingDepositAssets;
+        totalBorrowed += totalFloatingBorrowAssets;
 
-          fixedPools.forEach(({ supplied, borrowed }) => {
-            totalDeposited += supplied;
-            totalBorrowed += borrowed;
-          });
+        fixedPools.forEach(({ supplied, borrowed }) => {
+          totalDeposited += supplied;
+          totalBorrowed += borrowed;
+        });
 
-          const floatingDepositAPR = await getFloatingDepositAPR(
-            chain.id,
-            'deposit',
-            maxFuturePools,
-            marketAddress,
-          ).catch(() => {
-            setIndexerError();
-            return undefined;
-          });
+        const floatingDepositAPR = floatingDepositAPRs?.[marketAddress.toLowerCase()];
 
-          const depositRewards =
-            rates[symbol]?.map(({ floatingDeposit }) => floatingDeposit).reduce((sum, reward) => sum + reward, 0n) ||
-            0n;
+        const depositRewards =
+          rates[symbol]?.map(({ floatingDeposit }) => floatingDeposit).reduce((sum, reward) => sum + reward, 0n) || 0n;
 
-          const bestFixedDeposit = fixedPools.reduce(
-            (best, { maturity, depositRate }) =>
-              Number(formatEther(depositRate)) > best.rate
-                ? { maturity: maturity, rate: Number(formatEther(depositRate)) }
-                : best,
-            { maturity: 0n, rate: 0 },
-          );
+        const bestFixedDeposit = fixedPools.reduce(
+          (best, { maturity, depositRate }) =>
+            Number(formatEther(depositRate)) > best.rate
+              ? { maturity: maturity, rate: Number(formatEther(depositRate)) }
+              : best,
+          { maturity: 0n, rate: 0 },
+        );
 
-          const bestFixedBorrow = fixedPools.reduce(
-            (best, { maturity, minBorrowRate }) =>
-              (Number(formatEther(minBorrowRate)) === best.rate && maturity > best.maturity) ||
-              Number(formatEther(minBorrowRate)) < best.rate
-                ? { maturity: maturity, rate: Number(formatEther(minBorrowRate)) }
-                : best,
-            { maturity: 0n, rate: Number(formatEther(MAX_UINT256)) },
-          );
+        const bestFixedBorrow = fixedPools.reduce(
+          (best, { maturity, minBorrowRate }) =>
+            (Number(formatEther(minBorrowRate)) === best.rate && maturity > best.maturity) ||
+            Number(formatEther(minBorrowRate)) < best.rate
+              ? { maturity: maturity, rate: Number(formatEther(minBorrowRate)) }
+              : best,
+          { maturity: 0n, rate: Number(formatEther(MAX_UINT256)) },
+        );
 
-          const bestDeposit =
-            floatingDepositAPR === undefined
-              ? { maturity: bestFixedDeposit.maturity, rate: Number(bestFixedDeposit.rate) }
-              : bestFixedDeposit.rate > floatingDepositAPR + Number(depositRewards)
-                ? { maturity: bestFixedDeposit.maturity, rate: bestFixedDeposit.rate }
-                : { maturity: 0n, rate: floatingDepositAPR };
+        const bestDeposit =
+          floatingDepositAPR === undefined
+            ? { maturity: bestFixedDeposit.maturity, rate: Number(bestFixedDeposit.rate) }
+            : bestFixedDeposit.rate > floatingDepositAPR + Number(depositRewards)
+              ? { maturity: bestFixedDeposit.maturity, rate: bestFixedDeposit.rate }
+              : { maturity: 0n, rate: floatingDepositAPR };
 
-          const bestBorrow =
-            bestFixedBorrow.rate < Number(formatEther(floatingBorrowRate))
-              ? { maturity: bestFixedBorrow.maturity, rate: bestFixedBorrow.rate }
-              : { maturity: 0n, rate: Number(formatEther(floatingBorrowRate)) };
-          const [first, second] = [...fixedPools].sort((a, b) => Number(a.maturity) - Number(b.maturity));
-          const now = BigInt(Math.round(Date.now() / 1000));
-          const upcomingMaturity = first.maturity - now < WEEK ? second.maturity : first.maturity;
+        const bestBorrow =
+          bestFixedBorrow.rate < Number(formatEther(floatingBorrowRate))
+            ? { maturity: bestFixedBorrow.maturity, rate: bestFixedBorrow.rate }
+            : { maturity: 0n, rate: Number(formatEther(floatingBorrowRate)) };
+        const [first, second] = [...fixedPools].sort((a, b) => Number(a.maturity) - Number(b.maturity));
+        const now = BigInt(Math.round(Date.now() / 1000));
+        const upcomingMaturity = first.maturity - now < WEEK ? second.maturity : first.maturity;
 
-          tempRows.push({
-            symbol,
-            totalDeposited: formatNumber(formatUnits((totalDeposited * usdPrice) / WAD, decimals)),
-            totalBorrowed: formatNumber(formatUnits((totalBorrowed * usdPrice) / WAD, decimals)),
-            depositAPR: bestDeposit.rate,
-            depositMaturity: bestDeposit.maturity,
-            borrowAPR: bestBorrow.rate,
-            borrowMaturity: bestBorrow.maturity,
-            upcomingMaturity,
-            depositedAssets: formatNumber(formatUnits(totalDeposited, decimals), symbol),
-            borrowedAssets: formatNumber(formatUnits(totalBorrowed, decimals), symbol),
-          });
-        },
-      ),
+        tempRows.push({
+          symbol,
+          totalDeposited: formatNumber(formatUnits((totalDeposited * usdPrice) / WAD, decimals)),
+          totalBorrowed: formatNumber(formatUnits((totalBorrowed * usdPrice) / WAD, decimals)),
+          depositAPR: bestDeposit.rate,
+          depositMaturity: bestDeposit.maturity,
+          borrowAPR: bestBorrow.rate,
+          borrowMaturity: bestBorrow.maturity,
+          upcomingMaturity,
+          depositedAssets: formatNumber(formatUnits(totalDeposited, decimals), symbol),
+          borrowedAssets: formatNumber(formatUnits(totalBorrowed, decimals), symbol),
+        });
+      },
     );
 
-    setRows(
-      sortByDefault(
-        defaultRows,
-        tempRows.filter((row) => row.symbol !== 'USDC.e'),
-      ),
+    return sortByDefault(
+      defaultRows,
+      tempRows.filter((row) => row.symbol !== 'USDC.e'),
     );
+  }, [accountData, defaultRows, floatingDepositAPRs, rates]);
 
-    setIsLoading(false);
-  }, [accountData, chain, defaultRows, rates, setIndexerError]);
-
-  useEffect(() => {
-    void defineRows();
-  }, [defineRows]);
+  const isLoading = !accountData;
 
   return (
     <>

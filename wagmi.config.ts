@@ -23,6 +23,7 @@ const DebtPreviewer = require('@exactly/protocol/deployments/op-sepolia/DebtPrev
 const MarketETHRouter = require('@exactly/protocol/deployments/op-sepolia/MarketETHRouter.json');
 const RewardsController = require('@exactly/protocol/deployments/op-sepolia/RewardsController.json');
 const InterestRateModel = require('@exactly/protocol/deployments/op-sepolia/InterestRateModelDAI.json');
+const RatePreviewer = require('@exactly/protocol/deployments/op-sepolia/RatePreviewer.json');
 const ExtraFinanceLendingABI = require('./abi/extraFinanceLending.json');
 const DelegateRegistryABI = require('./abi/DelegateRegistry.json');
 const GasPriceOracle = require('./abi/GasPriceOracle.json');
@@ -52,6 +53,7 @@ export default defineConfig({
     { name: 'DebtPreviewer', abi: DebtPreviewer.abi as Abi },
     { name: 'MarketETHRouter', abi: MarketETHRouter.abi as Abi },
     { name: 'InterestRateModel', abi: InterestRateModel.abi as Abi },
+    { name: 'RatePreviewer', abi: RatePreviewer.abi as Abi },
     { name: 'RewardsController', abi: RewardsController.abi as Abi },
     { name: 'SablierV2LockupLinear', abi: SablierV2LockupLinear.abi as Abi },
     { name: 'SablierV2NFTDescriptor', abi: SablierV2NFTDescriptor.abi as Abi },

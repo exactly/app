@@ -69,9 +69,7 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
           depositAPR !== undefined && marketAccount?.assetSymbol ? (
             <ItemCell key={symbol} value={toPercentage(depositAPR)} symbol={marketAccount.assetSymbol} />
           ) : undefined,
-        tooltipTitle: t(
-          'Change in the underlying Variable Rate Pool shares value over the last 15 minutes, annualized.',
-        ),
+        tooltipTitle: t('Projected from the current Variable Rate Pool onchain snapshot, annualized.'),
       },
       {
         label: t('Borrow APR'),
