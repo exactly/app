@@ -1,65 +1,246 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { WAD } from '@exactly/lib';
 
 import useAccountData from './useAccountData';
 import useDashboard from './useDashboard';
-import { parseEther } from 'viem';
-import fetchAccounts, { Account } from 'queries/fetchAccounts';
+import { Address, parseEther } from 'viem';
 import useRewards from './useRewards';
 import useStETHNativeAPR from './useStETHNativeAPR';
-import dayjs from 'dayjs';
-import networkData from 'config/networkData.json' assert { type: 'json' };
-import { defaultChain } from 'utils/client';
 import useReadOnly from 'hooks/useReadOnly';
+import { useContractEvents } from 'wagmi';
+import { marketAbi, marketBlocks } from 'generated/wagmi';
+import { defaultChain } from 'utils/client';
 
-const subgraphURL = networkData[String(defaultChain.id) as keyof typeof networkData]?.subgraph.exactly;
+type FixedRateEvent =
+  | {
+      market: Address;
+      maturity: bigint;
+      borrow: boolean;
+      assets: bigint;
+      fee: bigint;
+      timestamp?: bigint;
+      blockNumber: bigint;
+      logIndex: number;
+    }
+  | {
+      market: Address;
+      maturity: bigint;
+      borrow: boolean;
+      positionAssets: bigint;
+      blockNumber: bigint;
+      logIndex: number;
+    };
+
+const parseAPR = (apr?: number) => parseEther((apr !== undefined && Number.isFinite(apr) ? apr : 0).toFixed(18));
 
 export default () => {
-  const [accounts, setAccounts] = useState<Account[] | undefined>();
-  const { account: walletAddress } = useReadOnly();
-  const { accountData, isFetching } = useAccountData();
+  const { account } = useReadOnly();
+  const { accountData, isFetching, lastSync } = useAccountData();
   const { floatingRows: floatingDeposit } = useDashboard('deposit');
   const { floatingRows: floatingBorrow } = useDashboard('borrow');
   const stETHNativeAPR = useStETHNativeAPR();
   const { rates } = useRewards();
 
-  useEffect(() => {
-    if (!subgraphURL || !walletAddress) return;
-    fetchAccounts(subgraphURL, walletAddress).then(setAccounts);
-  }, [walletAddress]);
+  const { hasFixedDeposits, hasFixedBorrows, marketAddresses, fromBlock } = useMemo(() => {
+    if (!accountData) return { hasFixedDeposits: false, hasFixedBorrows: false, marketAddresses: [] as Address[] };
+    const marketBlocksByAddress = marketBlocks[defaultChain.id as keyof typeof marketBlocks] as
+      | Record<string, bigint>
+      | undefined;
+    const fixedMarkets = accountData.flatMap(({ market, fixedBorrowPositions, fixedDepositPositions }) => {
+      if (fixedBorrowPositions.length === 0 && fixedDepositPositions.length === 0) return [];
+      const block = marketBlocksByAddress?.[market.toLowerCase()];
+      return block === undefined ? [] : [{ market, fromBlock: block }];
+    });
+
+    return {
+      hasFixedDeposits: accountData.some(({ fixedDepositPositions }) => fixedDepositPositions.length > 0),
+      hasFixedBorrows: accountData.some(({ fixedBorrowPositions }) => fixedBorrowPositions.length > 0),
+      marketAddresses: fixedMarkets.map(({ market }) => market),
+      fromBlock: fixedMarkets.reduce<bigint | undefined>(
+        (min, { fromBlock: block }) => (min === undefined || block < min ? block : min),
+        undefined,
+      ),
+    };
+  }, [accountData]);
+
+  const {
+    data: depositEvents = [],
+    isLoading: depositEventsLoading,
+    isFetching: depositEventsFetching,
+  } = useContractEvents({
+    address: marketAddresses,
+    abi: marketAbi,
+    eventName: 'DepositAtMaturity',
+    strict: true,
+    args: account ? { owner: account } : undefined,
+    fromBlock,
+    toBlock: 'latest',
+    chainId: defaultChain.id,
+    scopeKey: String(lastSync ?? ''),
+    query: {
+      enabled: hasFixedDeposits && Boolean(account && marketAddresses.length),
+      select: (logs) =>
+        logs.map((log): FixedRateEvent => {
+          const { maturity, assets, fee } = log.args;
+          return {
+            market: log.address,
+            maturity,
+            borrow: false,
+            assets,
+            fee,
+            timestamp: log.blockTimestamp === undefined ? undefined : BigInt(log.blockTimestamp),
+            blockNumber: log.blockNumber,
+            logIndex: log.logIndex,
+          };
+        }),
+    },
+  });
+  const {
+    data: withdrawEvents = [],
+    isLoading: withdrawEventsLoading,
+    isFetching: withdrawEventsFetching,
+  } = useContractEvents({
+    address: marketAddresses,
+    abi: marketAbi,
+    eventName: 'WithdrawAtMaturity',
+    strict: true,
+    args: account ? { owner: account } : undefined,
+    fromBlock,
+    toBlock: 'latest',
+    chainId: defaultChain.id,
+    scopeKey: String(lastSync ?? ''),
+    query: {
+      enabled: hasFixedDeposits && Boolean(account && marketAddresses.length),
+      select: (logs) =>
+        logs.map((log): FixedRateEvent => {
+          const { maturity, positionAssets } = log.args;
+          return {
+            market: log.address,
+            maturity,
+            borrow: false,
+            positionAssets,
+            blockNumber: log.blockNumber,
+            logIndex: log.logIndex,
+          };
+        }),
+    },
+  });
+  const {
+    data: borrowEvents = [],
+    isLoading: borrowEventsLoading,
+    isFetching: borrowEventsFetching,
+  } = useContractEvents({
+    address: marketAddresses,
+    abi: marketAbi,
+    eventName: 'BorrowAtMaturity',
+    strict: true,
+    args: account ? { borrower: account } : undefined,
+    fromBlock,
+    toBlock: 'latest',
+    chainId: defaultChain.id,
+    scopeKey: String(lastSync ?? ''),
+    query: {
+      enabled: hasFixedBorrows && Boolean(account && marketAddresses.length),
+      select: (logs) =>
+        logs.map((log): FixedRateEvent => {
+          const { maturity, assets, fee } = log.args;
+          return {
+            market: log.address,
+            maturity,
+            borrow: true,
+            assets,
+            fee,
+            timestamp: log.blockTimestamp === undefined ? undefined : BigInt(log.blockTimestamp),
+            blockNumber: log.blockNumber,
+            logIndex: log.logIndex,
+          };
+        }),
+    },
+  });
+  const {
+    data: repayEvents = [],
+    isLoading: repayEventsLoading,
+    isFetching: repayEventsFetching,
+  } = useContractEvents({
+    address: marketAddresses,
+    abi: marketAbi,
+    eventName: 'RepayAtMaturity',
+    strict: true,
+    args: account ? { borrower: account } : undefined,
+    fromBlock,
+    toBlock: 'latest',
+    chainId: defaultChain.id,
+    scopeKey: String(lastSync ?? ''),
+    query: {
+      enabled: hasFixedBorrows && Boolean(account && marketAddresses.length),
+      select: (logs) =>
+        logs.map((log): FixedRateEvent => {
+          const { maturity, positionAssets } = log.args;
+          return {
+            market: log.address,
+            maturity,
+            borrow: true,
+            positionAssets,
+            blockNumber: log.blockNumber,
+            logIndex: log.logIndex,
+          };
+        }),
+    },
+  });
 
   return useMemo(() => {
-    if (!accountData || !accounts || isFetching) return {};
+    if (
+      !accountData ||
+      isFetching ||
+      (hasFixedDeposits &&
+        (depositEventsLoading || depositEventsFetching || withdrawEventsLoading || withdrawEventsFetching)) ||
+      (hasFixedBorrows && (borrowEventsLoading || borrowEventsFetching || repayEventsLoading || repayEventsFetching))
+    ) {
+      return {};
+    }
     const markets = Object.values(accountData);
-    const now = dayjs().unix();
-
-    const _fixedPositions = accounts.flatMap(({ market: { asset }, fixedPositions }) =>
-      fixedPositions.map((fp) => ({ ...fp, asset })),
-    );
-
-    const fixedDepositsAPRs = _fixedPositions
-      .filter(({ borrow }) => !borrow)
+    const now = Math.floor(Date.now() / 1_000);
+    const fixedAPRs = [...depositEvents, ...withdrawEvents, ...borrowEvents, ...repayEvents]
+      .sort((a, b) =>
+        a.blockNumber === b.blockNumber ? a.logIndex - b.logIndex : a.blockNumber < b.blockNumber ? -1 : 1,
+      )
       .reduce(
-        (acc, { rate, asset, maturity }) => {
-          acc[asset.toLowerCase() + maturity] = maturity < now ? 0n : rate;
-          return acc;
+        (positions, event) => {
+          const key = `${event.market.toLowerCase()}-${event.maturity}-${event.borrow}`;
+          const position = positions[key] ?? { principal: 0n, fee: 0n, rate: 0n };
+          if ('assets' in event) {
+            if (event.timestamp === undefined || event.maturity <= event.timestamp || event.assets === 0n) {
+              return positions;
+            }
+            const totalAmount = position.principal + event.assets;
+            positions[key] = {
+              principal: totalAmount,
+              fee: position.fee + event.fee,
+              rate:
+                (position.principal * position.rate +
+                  event.assets *
+                    ((event.fee * WAD * 31_536_000n) / (event.assets * (event.maturity - event.timestamp)))) /
+                totalAmount,
+            };
+          } else {
+            const positionAssets = position.principal + position.fee;
+            if (positionAssets === 0n) return positions;
+            const principal = (event.positionAssets * position.principal) / positionAssets;
+            const fee = event.positionAssets - principal;
+            positions[key] = {
+              principal: position.principal - principal,
+              fee: position.fee - fee,
+              rate: position.principal === principal ? 0n : position.rate,
+            };
+          }
+          return positions;
         },
-        {} as Record<string, bigint>,
-      );
-
-    const fixedBorrowsAPRs = _fixedPositions
-      .filter(({ borrow }) => borrow)
-      .reduce(
-        (acc, { rate, asset, maturity }) => {
-          acc[asset.toLowerCase() + maturity] = maturity < now ? 0n : rate;
-          return acc;
-        },
-        {} as Record<string, bigint>,
+        {} as Record<string, { principal: bigint; fee: bigint; rate: bigint }>,
       );
 
     const floatingDepositAPRs = floatingDeposit.reduce(
       (acc, { symbol, apr }) => {
-        acc[symbol] = parseEther(String(apr ?? 0));
+        acc[symbol] = parseAPR(apr);
         return acc;
       },
       {} as Record<string, bigint>,
@@ -67,7 +248,7 @@ export default () => {
 
     const floatingBorrowAPRs = floatingBorrow.reduce(
       (acc, { symbol, apr }) => {
-        acc[symbol] = parseEther(String(apr ?? 0));
+        acc[symbol] = parseAPR(apr);
         return acc;
       },
       {} as Record<string, bigint>,
@@ -139,12 +320,12 @@ export default () => {
       return total + (fixedPosition * usdPrice) / BigInt(10 ** decimals);
     }, 0n);
 
-    const projectedFixedDeposits = markets.reduce((total, { asset, fixedDepositPositions, decimals, usdPrice }) => {
+    const projectedFixedDeposits = markets.reduce((total, { market, fixedDepositPositions, decimals, usdPrice }) => {
       const fixedPosition = fixedDepositPositions.reduce(
         (fixedAcc, { position: { principal }, maturity }) =>
           fixedAcc +
           (((principal * usdPrice) / BigInt(10 ** decimals)) *
-            (fixedDepositsAPRs[asset.toLowerCase() + maturity] || 0n)) /
+            (maturity < now ? 0n : fixedAPRs[`${market.toLowerCase()}-${maturity}-false`]?.rate || 0n)) /
             WAD,
         0n,
       );
@@ -170,12 +351,12 @@ export default () => {
       return total + (fixedPosition * usdPrice) / BigInt(10 ** decimals);
     }, 0n);
 
-    const projectedFixedBorrows = markets.reduce((total, { asset, fixedBorrowPositions, decimals, usdPrice }) => {
+    const projectedFixedBorrows = markets.reduce((total, { market, fixedBorrowPositions, decimals, usdPrice }) => {
       const fixedPosition = fixedBorrowPositions.reduce(
         (fixedAcc, { position: { principal }, maturity }) =>
           fixedAcc +
           (((principal * usdPrice) / BigInt(10 ** decimals)) *
-            (fixedBorrowsAPRs[asset.toLowerCase() + maturity] || 0n)) /
+            (maturity < now ? 0n : fixedAPRs[`${market.toLowerCase()}-${maturity}-true`]?.rate || 0n)) /
             WAD,
         0n,
       );
@@ -233,5 +414,26 @@ export default () => {
       netAPR,
       netPosition,
     };
-  }, [accountData, accounts, floatingBorrow, floatingDeposit, isFetching, rates, stETHNativeAPR]);
+  }, [
+    accountData,
+    borrowEvents,
+    borrowEventsFetching,
+    borrowEventsLoading,
+    depositEvents,
+    depositEventsFetching,
+    depositEventsLoading,
+    floatingBorrow,
+    floatingDeposit,
+    hasFixedBorrows,
+    hasFixedDeposits,
+    isFetching,
+    rates,
+    repayEvents,
+    repayEventsFetching,
+    repayEventsLoading,
+    stETHNativeAPR,
+    withdrawEvents,
+    withdrawEventsFetching,
+    withdrawEventsLoading,
+  ]);
 };

@@ -17,29 +17,7 @@ import useReadOnly from 'hooks/useReadOnly';
 import { calculateAPR } from 'utils/calculateAPR';
 
 import Rates from 'components/Rates';
-import {
-  marketAbi,
-  marketDaiAddress,
-  marketDaiBlock,
-  marketExaAddress,
-  marketExaBlock,
-  marketOpAddress,
-  marketOpBlock,
-  marketUsdcAddress,
-  marketUsdcBlock,
-  marketUsdCeAddress,
-  marketUsdCeBlock,
-  marketWbtcAddress,
-  marketWbtcBlock,
-  marketWethAddress,
-  marketWethBlock,
-  marketcbBtcAddress,
-  marketcbBtcBlock,
-  marketcbXrpAddress,
-  marketcbXrpBlock,
-  marketwstEthAddress,
-  marketwstEthBlock,
-} from 'generated/wagmi';
+import { marketAbi, marketBlocks } from 'generated/wagmi';
 import { defaultChain } from 'utils/client';
 
 type Props = {
@@ -251,24 +229,9 @@ const FixedAPR: FC<{
   const { lastSync } = useAccountData(symbol);
   const fromBlock = useMemo(
     () =>
-      (
-        [
-          [marketDaiAddress, marketDaiBlock],
-          [marketUsdcAddress, marketUsdcBlock],
-          [marketUsdCeAddress, marketUsdCeBlock],
-          [marketWethAddress, marketWethBlock],
-          [marketwstEthAddress, marketwstEthBlock],
-          [marketOpAddress, marketOpBlock],
-          [marketWbtcAddress, marketWbtcBlock],
-          [marketcbBtcAddress, marketcbBtcBlock],
-          [marketcbXrpAddress, marketcbXrpBlock],
-          [marketExaAddress, marketExaBlock],
-        ] as const
-      ).find(([address]) =>
-        Object.entries(address).some(
-          ([chainId, value]) => Number(chainId) === defaultChain.id && value.toLowerCase() === market.toLowerCase(),
-        ),
-      )?.[1]?.[defaultChain.id as never],
+      (marketBlocks[defaultChain.id as keyof typeof marketBlocks] as Record<string, bigint> | undefined)?.[
+        market.toLowerCase()
+      ],
     [market],
   );
   const {

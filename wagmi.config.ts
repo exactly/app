@@ -16,7 +16,7 @@ type Deployment = { abi?: Abi; address: Address; receipt?: { blockNumber?: numbe
 type ContractEntry = string | { name?: string; block?: true };
 
 const addressOnlyAbi = [] as const satisfies Abi;
-const contractBlocks: { name: string; blocks: Record<number, number> }[] = [];
+const contractBlocks: { name: string; address: Record<number, Address>; blocks: Record<number, number> }[] = [];
 
 const chainIdByDeploymentNetwork = {
   ethereum: mainnet.id,
@@ -78,7 +78,7 @@ function contract(
     }),
   ) as Record<number, Address>;
 
-  if (Object.keys(blocks).length) contractBlocks.push({ name, blocks });
+  if (Object.keys(blocks).length) contractBlocks.push({ name, address, blocks });
 
   return { name, abi: abi ?? addressOnlyAbi, address };
 }
@@ -90,14 +90,31 @@ const InterestRateModel = deploymentWithAbi('op-sepolia', 'InterestRateModelDAI'
 const blocks = {
   name: 'blocks',
   run: () => ({
-    content: contractBlocks
-      .map(
+    content: [
+      ...contractBlocks.map(
         ({ name, blocks: block }) =>
           `export const ${camelCase(name)}Block = ${JSON.stringify(block, null, 2)
             .replace(/"(\d+)":/gm, '$1:')
             .replace(/: (\d+)/g, ': $1n')} as const`,
+      ),
+      `export const marketBlocks = ${JSON.stringify(
+        contractBlocks.reduce(
+          (acc, { name, address, blocks: block }) => {
+            if (!name.startsWith('Market')) return acc;
+            Object.entries(block).forEach(([chainId, value]) => {
+              acc[Number(chainId)] ??= {};
+              acc[Number(chainId)][address[Number(chainId)].toLowerCase()] = value;
+            });
+            return acc;
+          },
+          {} as Record<number, Record<string, number>>,
+        ),
+        null,
+        2,
       )
-      .join('\n\n'),
+        .replace(/"(\d+)":/gm, '$1:')
+        .replace(/: (\d+)/g, ': $1n')} as const`,
+    ].join('\n\n'),
   }),
 };
 

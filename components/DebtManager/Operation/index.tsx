@@ -33,26 +33,7 @@ import { gasLimit } from 'utils/gas';
 import {
   legacyPreviewerAddress,
   marketAbi,
-  marketDaiAddress,
-  marketDaiBlock,
-  marketExaAddress,
-  marketExaBlock,
-  marketOpAddress,
-  marketOpBlock,
-  marketUsdcAddress,
-  marketUsdcBlock,
-  marketUsdCeAddress,
-  marketUsdCeBlock,
-  marketWbtcAddress,
-  marketWbtcBlock,
-  marketWethAddress,
-  marketWethBlock,
-  marketcbBtcAddress,
-  marketcbBtcBlock,
-  marketcbXrpAddress,
-  marketcbXrpBlock,
-  marketwstEthAddress,
-  marketwstEthBlock,
+  marketBlocks,
   previewerAddress,
   readLegacyPreviewerPreviewBorrowAtAllMaturities,
   readPreviewerPreviewBorrowAtAllMaturities,
@@ -104,29 +85,14 @@ function Operation() {
   const [toRows, setToRows] = useState<PositionTableRow[]>([]);
 
   const borrowFromBlock = useMemo(() => {
+    const marketBlocksByAddress = marketBlocks[defaultChain.id as keyof typeof marketBlocks] as
+      | Record<string, bigint>
+      | undefined;
     const blocks =
-      accountData?.flatMap(({ market }) =>
-        (
-          [
-            [marketDaiAddress, marketDaiBlock],
-            [marketUsdcAddress, marketUsdcBlock],
-            [marketUsdCeAddress, marketUsdCeBlock],
-            [marketWethAddress, marketWethBlock],
-            [marketwstEthAddress, marketwstEthBlock],
-            [marketOpAddress, marketOpBlock],
-            [marketWbtcAddress, marketWbtcBlock],
-            [marketcbBtcAddress, marketcbBtcBlock],
-            [marketcbXrpAddress, marketcbXrpBlock],
-            [marketExaAddress, marketExaBlock],
-          ] as const
-        ).flatMap(([address, block]) =>
-          Object.entries(address).some(
-            ([chainId, value]) => Number(chainId) === defaultChain.id && value.toLowerCase() === market.toLowerCase(),
-          )
-            ? Object.entries(block).flatMap(([chainId, value]) => (Number(chainId) === defaultChain.id ? [value] : []))
-            : [],
-        ),
-      ) ?? [];
+      accountData?.flatMap(({ market }) => {
+        const block = marketBlocksByAddress?.[market.toLowerCase()];
+        return block === undefined ? [] : [block];
+      }) ?? [];
 
     return blocks.length ? blocks.reduce((min, block) => (block < min ? block : min)) : undefined;
   }, [accountData]);
