@@ -1,17 +1,21 @@
 import React, { useCallback } from 'react';
-import { useNetwork, useSwitchNetwork } from 'wagmi';
+import { useChainId, useConnection, useSwitchChain } from 'wagmi';
 import { useTranslation } from 'react-i18next';
 import { LoadingButton, type LoadingButtonProps } from '@mui/lab';
 import { Button } from '@mui/material';
 
-import { useWeb3 } from 'hooks/useWeb3';
 import { useModal } from 'contexts/ModalContext';
+import { defaultChain } from 'utils/client';
+import useReadOnly from 'hooks/useReadOnly';
+import useConnectWallet from 'hooks/useConnectWallet';
 
 function Submit(props: LoadingButtonProps) {
   const { t } = useTranslation();
-  const { isConnected, chain: displayNetwork, connect, impersonateActive, exitImpersonate } = useWeb3();
-  const { chain } = useNetwork();
-  const { switchNetwork, isLoading } = useSwitchNetwork();
+  const { isImpersonating: impersonateActive, exitReadOnly: exitImpersonate } = useReadOnly();
+  const { isConnected } = useConnection();
+  const connect = useConnectWallet();
+  const chainId = useChainId();
+  const { mutate: switchChain, isPending } = useSwitchChain();
   const { close } = useModal('rollover');
 
   const exitAndClose = useCallback(() => {
@@ -35,15 +39,15 @@ function Submit(props: LoadingButtonProps) {
     );
   }
 
-  if (chain && chain.id !== displayNetwork.id) {
+  if (chainId !== defaultChain.id) {
     return (
       <LoadingButton
         fullWidth
-        onClick={() => switchNetwork?.(displayNetwork.id)}
+        onClick={() => switchChain({ chainId: defaultChain.id })}
         variant="contained"
-        loading={isLoading}
+        loading={isPending}
       >
-        {t('Please switch to {{network}} network', { network: displayNetwork.name })}
+        {t('Please switch to {{network}} network', { network: defaultChain.name })}
       </LoadingButton>
     );
   }

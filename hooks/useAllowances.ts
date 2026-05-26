@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Address, erc20ABI, erc4626ABI, usePublicClient } from 'wagmi';
+import { usePublicClient } from 'wagmi';
+import { type Address, erc20Abi, erc4626Abi } from 'viem';
 import { MAX_UINT256, WAD } from '@exactly/lib';
-import useDebtManager from './useDebtManager';
 import useAccountData from './useAccountData';
-import useETHRouter from './useETHRouter';
-import { useWeb3 } from './useWeb3';
 import useAssets from './useAssets';
-import useContract from './useContract';
-import { installmentsRouterABI } from 'types/abi';
+import { debtManagerAddress, installmentsRouterAddress, marketEthRouterAddress } from 'generated/wagmi';
+import { defaultChain } from 'utils/client';
+import useReadOnly from 'hooks/useReadOnly';
 
 export type Allowance = {
   allowance: bigint;
@@ -43,12 +42,16 @@ export const useAllowances = (): AllowancesState => {
   const [allowances, setAllowances] = useState<Allowance[]>();
   const [loading, setLoading] = useState(true);
   const { getMarketAccount } = useAccountData();
-  const { walletAddress, chain } = useWeb3();
-  const client = usePublicClient({ chainId: chain.id });
+  const { account: walletAddress } = useReadOnly();
+  const client = usePublicClient({ chainId: defaultChain.id });
   const assetSymbols = useAssets();
-  const debtManager = useDebtManager();
-  const ethRouter = useETHRouter();
-  const installmentsRouter = useContract('InstallmentsRouter', installmentsRouterABI);
+  const debtManager = Object.entries(debtManagerAddress).find(([chainId]) => Number(chainId) === defaultChain.id)?.[1];
+  const ethRouter = Object.entries(marketEthRouterAddress).find(
+    ([chainId]) => Number(chainId) === defaultChain.id,
+  )?.[1];
+  const installmentsRouter = Object.entries(installmentsRouterAddress).find(
+    ([chainId]) => Number(chainId) === defaultChain.id,
+  )?.[1];
 
   const allowanceDescriptors: AllowanceDescriptor[] = useMemo(() => {
     const debtManagerDescriptor = (asset: string) =>
@@ -56,13 +59,13 @@ export const useAllowances = (): AllowancesState => {
         ? ([
             {
               symbol: asset,
-              spenderAddress: debtManager.address,
+              spenderAddress: debtManager,
               spenderName: 'DebtManager',
               type: 'directAsset',
             },
             {
               symbol: asset,
-              spenderAddress: debtManager.address,
+              spenderAddress: debtManager,
               spenderName: 'DebtManager',
               type: 'shareAsset',
             },
@@ -74,7 +77,7 @@ export const useAllowances = (): AllowancesState => {
         ? ([
             {
               symbol: asset,
-              spenderAddress: installmentsRouter.address,
+              spenderAddress: installmentsRouter,
               spenderName: 'InstallmentsRouter',
               type: 'shareAsset',
             },
@@ -90,7 +93,7 @@ export const useAllowances = (): AllowancesState => {
       } as const,
     ]);
     const ethRouterDescriptor = ethRouter
-      ? ([{ symbol: 'WETH', spenderAddress: ethRouter.address, spenderName: 'ETHRouter', type: 'shareAsset' }] as const)
+      ? ([{ symbol: 'WETH', spenderAddress: ethRouter, spenderName: 'ETHRouter', type: 'shareAsset' }] as const)
       : [];
 
     return [...assetDescriptors, ...ethRouterDescriptor];
@@ -98,6 +101,7 @@ export const useAllowances = (): AllowancesState => {
 
   const descriptorToAllowance = useCallback(
     async (descriptor: AllowanceDescriptor, owner: Address) => {
+      if (!client) return;
       const marketAccount = getMarketAccount(descriptor.symbol);
       if (!marketAccount) return;
       const { asset, market, usdPrice, decimals } = marketAccount;
@@ -123,13 +127,13 @@ export const useAllowances = (): AllowancesState => {
           break;
       }
       const allowance = await client.readContract({
-        abi: erc4626ABI,
+        abi: erc4626Abi,
         address: token,
         functionName: 'allowance',
         args: [owner, spenderAddress],
       });
       const totalSupply = await client.readContract({
-        abi: erc20ABI,
+        abi: erc20Abi,
         address: token,
         functionName: 'totalSupply',
       });
@@ -138,7 +142,7 @@ export const useAllowances = (): AllowancesState => {
         allowanceUSD =
           ((descriptor.type === 'shareAsset'
             ? await client.readContract({
-                abi: erc4626ABI,
+                abi: erc4626Abi,
                 address: token,
                 functionName: 'convertToAssets',
                 args: [allowance],

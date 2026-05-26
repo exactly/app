@@ -9,12 +9,10 @@ import { selectFixedPool } from '../../utils/pools';
 
 const test = base();
 
-test.describe.configure({ mode: 'serial' });
-
 test('OP fixed borrow/repay', async ({ page, web3, setup }) => {
   const pool = selectFixedPool();
 
-  await web3.fork.setBalance(web3.account.address, {
+  await web3.anvil.setBalance(web3.account.address, {
     ETH: 200,
     OP: 250,
   });
@@ -46,6 +44,8 @@ test('OP fixed borrow/repay', async ({ page, web3, setup }) => {
   await dashboard.switchTab('borrow');
 
   await dashboard.checkFixedTableRow('borrow', 'OP', pool);
+  await dashboard.expandFixedTableRow('borrow', 'OP', pool);
+  await dashboard.checkFixedTransaction('borrow');
 
   await repay.execute({
     type: 'fixed',
@@ -53,6 +53,11 @@ test('OP fixed borrow/repay', async ({ page, web3, setup }) => {
     amount: '3',
     maturity: pool,
   });
+
+  await app.reload();
+  await dashboard.switchTab('borrow');
+  await dashboard.expandFixedTableRow('borrow', 'OP', pool);
+  await dashboard.checkFixedTransaction('repay');
 
   await balance.check({ address: web3.account.address, symbol: 'OP', amount: '52', delta: '0.005' });
 });

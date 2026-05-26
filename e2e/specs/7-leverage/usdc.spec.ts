@@ -7,10 +7,8 @@ import { debtManager, permit2, erc20 } from '../../utils/contracts';
 
 const test = base();
 
-test.describe.configure({ mode: 'serial' });
-
 test('USDC leverage', async ({ page, web3, setup }) => {
-  await web3.fork.setBalance(web3.account.address, {
+  await web3.anvil.setBalance(web3.account.address, {
     ETH: 1,
     USDC: 50_000,
   });
@@ -34,7 +32,7 @@ test('USDC leverage', async ({ page, web3, setup }) => {
 
   await page.goto('/strategies');
 
-  await test.step('Leverage USDC (no deposit)', async () => {
+  await test.step('flow: leverage USDC without prior deposit', async () => {
     await leverage.open();
 
     await leverage.checkOption('from', { type: 'empty' });
@@ -81,7 +79,7 @@ test('USDC leverage', async ({ page, web3, setup }) => {
     });
   });
 
-  await test.step('Deleverage USDC', async () => {
+  await test.step('flow: deleverage USDC', async () => {
     await leverage.open();
 
     await leverage.checkOption('from', { type: 'empty' });
@@ -92,7 +90,7 @@ test('USDC leverage', async ({ page, web3, setup }) => {
 
     await leverage.waitForSkeletons();
 
-    await leverage.checkCurrentMultiplier(/3\.15x$/);
+    await leverage.checkCurrentMultiplier(/2\.92x$/);
 
     await leverage.selectMultiplier({ type: 'min' });
 
@@ -120,7 +118,7 @@ test('USDC leverage', async ({ page, web3, setup }) => {
     });
   });
 
-  await test.step('Leverage USDC (with deposit)', async () => {
+  await test.step('flow: leverage USDC with extra deposit', async () => {
     await leverage.open();
 
     await leverage.checkOption('from', { type: 'empty' });

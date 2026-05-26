@@ -1,17 +1,15 @@
 import React, { useCallback, useMemo } from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { optimism } from 'wagmi/chains';
-import { useWeb3 } from 'hooks/useWeb3';
+import { optimism } from 'viem/chains';
 import { track } from 'utils/mixpanel';
+import { defaultChain } from 'utils/client';
 
 const Proposals = () => {
   const { t } = useTranslation();
-  const { chain } = useWeb3();
-
   const spaceURL = useMemo(
-    () => (chain.id === optimism.id ? 'https://gov.exact.ly/' : 'https://demo.snapshot.org/#/exa.eth'),
-    [chain],
+    () => (defaultChain.id === optimism.id ? 'https://gov.exact.ly/' : 'https://demo.snapshot.org/#/exa.eth'),
+    [],
   );
   const handleClick = useCallback(() => {
     track('Button Clicked', {

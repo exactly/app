@@ -6,6 +6,7 @@ export default withSentryConfig(
   {
     reactStrictMode: true,
     productionBrowserSourceMaps: true,
+    pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
     redirects: () => [
       { source: '/markets', destination: '/', permanent: true },
       { source: '/assets/:symbol*', destination: '/:symbol*', permanent: true },
@@ -54,6 +55,24 @@ export default withSentryConfig(
     ],
 
     images: { unoptimized: true },
+    webpack(config) {
+      const entry = config.entry;
+      config.entry = async () => {
+        const entries = await entry();
+        Object.keys(entries).forEach((key) => {
+          if (key.endsWith('.md')) delete entries[key];
+        });
+        return entries;
+      };
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        '@metamask/connect-evm': false,
+        accounts: false,
+        porto: false,
+        'porto/internal': false,
+      };
+      return config;
+    },
   },
   {
     silent: true,

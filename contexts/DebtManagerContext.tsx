@@ -7,21 +7,22 @@ import React, {
   useCallback,
   useReducer,
 } from 'react';
-import { useWalletClient } from 'wagmi';
+import type { Hex } from 'viem';
 import waitForTransaction from 'utils/waitForTransaction';
 
 import type { ErrorData } from 'types/Error';
-import type { PopulatedTransaction, Transaction } from 'types/Transaction';
+import type { Transaction } from 'types/Transaction';
 import type { Position } from 'components/DebtManager/types';
 import useDebtManager from 'hooks/useDebtManager';
 import useAccountData from 'hooks/useAccountData';
 import useMarket from 'hooks/useMarket';
-import { useWeb3 } from 'hooks/useWeb3';
 import type { Market } from 'types/contracts';
 import handleOperationError from 'utils/handleOperationError';
 import useIsContract from 'hooks/useIsContract';
 import { gasLimit } from 'utils/gas';
 import { Args } from './ModalContext';
+import useReadOnly from 'hooks/useReadOnly';
+import { defaultChain } from 'utils/client';
 
 export type RolloverInput = {
   from?: Position;
@@ -72,7 +73,7 @@ type ContextValues = {
 
   needsApproval: (qty: bigint) => Promise<boolean>;
   approve: (maxAssets: bigint) => Promise<void>;
-  submit: (populate: () => Promise<PopulatedTransaction | undefined>) => Promise<void>;
+  submit: (execute: () => Promise<Hex | undefined>) => Promise<void>;
 };
 
 const DebtManagerContext = createContext<ContextValues | null>(null);
@@ -82,8 +83,7 @@ type Props = {
 };
 
 export const DebtManagerContextProvider: FC<PropsWithChildren<Props>> = ({ args, children }) => {
-  const { walletAddress, opts } = useWeb3();
-  const { data: walletClient } = useWalletClient();
+  const { account: walletAddress } = useReadOnly();
   const { getMarketAccount, refreshAccountData } = useAccountData();
   const isContract = useIsContract();
   const [errorData, setErrorData] = useState<ErrorData | undefined>();
@@ -104,33 +104,40 @@ export const DebtManagerContextProvider: FC<PropsWithChildren<Props>> = ({ args,
 
   const needsApproval = useCallback(
     async (qty: bigint): Promise<boolean> => {
-      if (!walletAddress || !market || !debtManager || !opts || qty === 0n) return true;
+      if (!walletAddress || !market || !debtManager || !walletAddress || qty === 0n) return true;
       try {
         const isMultiSig = await isContract(walletAddress);
         if (!isMultiSig) return false;
 
-        const shares = await market.read.previewWithdraw([qty], opts);
-        const allowance = await market.read.allowance([walletAddress, debtManager.address], opts);
+        const shares = await market.read.previewWithdraw([qty], { account: walletAddress });
+        const allowance = await market.read.allowance([walletAddress, debtManager.address], {
+          account: walletAddress,
+        });
         return allowance < shares;
       } catch (e: unknown) {
         setErrorData({ status: true, message: handleOperationError(e) });
         return true;
       }
     },
-    [walletAddress, market, debtManager, isContract, opts],
+    [walletAddress, market, debtManager, isContract],
   );
 
   const approve = useCallback(
     async (assets: bigint) => {
-      if (!debtManager || !market || !opts) return;
+      if (!debtManager || !market || !walletAddress) return;
 
       setIsLoading(true);
       try {
-        const max = await market.read.previewWithdraw([(assets * 100_005n) / 100_000n], opts);
-        const gasEstimation = await market.estimateGas.approve([debtManager.address, max], opts);
+        const max = await market.read.previewWithdraw([(assets * 100_005n) / 100_000n], {
+          account: walletAddress,
+        });
+        const gasEstimation = await market.estimateGas.approve([debtManager.address, max], {
+          account: walletAddress,
+        });
         const hash = await market.write.approve([debtManager.address, max], {
-          ...opts,
-          gasLimit: gasLimit(gasEstimation),
+          account: walletAddress,
+          chain: defaultChain,
+          gas: gasLimit(gasEstimation),
         });
         await waitForTransaction({ hash });
       } catch (e: unknown) {
@@ -139,18 +146,15 @@ export const DebtManagerContextProvider: FC<PropsWithChildren<Props>> = ({ args,
         setIsLoading(false);
       }
     },
-    [debtManager, market, opts],
+    [debtManager, market, walletAddress],
   );
 
   const submit = useCallback(
-    async (populate: () => Promise<PopulatedTransaction | undefined>): Promise<void> => {
-      if (!walletClient) return;
-
+    async (execute: () => Promise<Hex | undefined>): Promise<void> => {
       setIsLoading(true);
       try {
-        const transaction = await populate();
-        if (!transaction) return;
-        const hash = await walletClient.writeContract(transaction);
+        const hash = await execute();
+        if (!hash) return;
         setTx({ status: 'processing', hash });
         const { status, transactionHash } = await waitForTransaction({ hash });
         setTx({ status: status ? 'success' : 'error', hash: transactionHash });
@@ -162,7 +166,7 @@ export const DebtManagerContextProvider: FC<PropsWithChildren<Props>> = ({ args,
         setIsLoading(false);
       }
     },
-    [walletClient, refreshAccountData],
+    [refreshAccountData],
   );
 
   const value: ContextValues = {

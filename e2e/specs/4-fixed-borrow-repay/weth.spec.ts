@@ -8,12 +8,10 @@ import { selectFixedPool } from '../../utils/pools';
 
 const test = base();
 
-test.describe.configure({ mode: 'serial' });
-
 test('WETH fixed borrow/repay', async ({ page, web3, setup }) => {
   const pool = selectFixedPool();
 
-  await web3.fork.setBalance(web3.account.address, {
+  await web3.anvil.setBalance(web3.account.address, {
     ETH: 200,
   });
 
@@ -42,6 +40,8 @@ test('WETH fixed borrow/repay', async ({ page, web3, setup }) => {
 
   await dashboard.switchTab('borrow');
   await dashboard.checkFixedTableRow('borrow', 'WETH', pool);
+  await dashboard.expandFixedTableRow('borrow', 'WETH', pool);
+  await dashboard.checkFixedTransaction('borrow');
 
   await repay.execute({
     type: 'fixed',
@@ -49,4 +49,9 @@ test('WETH fixed borrow/repay', async ({ page, web3, setup }) => {
     amount: '0.25',
     maturity: pool,
   });
+
+  await app.reload();
+  await dashboard.switchTab('borrow');
+  await dashboard.expandFixedTableRow('borrow', 'WETH', pool);
+  await dashboard.checkFixedTransaction('repay');
 });

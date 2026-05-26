@@ -8,7 +8,6 @@ import BorrowAtMaturity from '../operations/BorrowAtMaturity';
 import useAccountData from '../../hooks/useAccountData';
 import ModalAlert from '../common/modal/ModalAlert';
 import ModalInfo from '../common/modal/ModalInfo';
-import { useWeb3 } from '../../hooks/useWeb3';
 import type { DepositConfig } from '.';
 
 type Props = {
@@ -20,23 +19,17 @@ type Props = {
 };
 
 const Borrow = ({ onDeposit, direct, receiver, depositConfig, onNextStep }: Props) => {
-  const { setSymbol, setQty, setReceiver, setOperation, symbol, tx } = useOperationContext();
+  const { setSymbol, setQty, setReceiver, setOperation, symbol } = useOperationContext();
   const { route } = useSocketSwap();
 
   const { marketAccount } = useAccountData('USDC.e');
   const { t } = useTranslation();
-  const { chain } = useWeb3();
-
   useEffect(() => {
     setOperation('borrowAtMaturity');
     setSymbol('USDC.e');
     if (!marketAccount) return;
     if (direct && receiver) setReceiver(receiver);
-  }, [chain.id, marketAccount, receiver, setQty, setReceiver, setSymbol, direct, setOperation]);
-
-  useEffect(() => {
-    if (tx && tx.status === 'success') onNextStep();
-  }, [onNextStep, tx]);
+  }, [marketAccount, receiver, setQty, setReceiver, setSymbol, direct, setOperation]);
 
   return (
     <>
@@ -79,7 +72,7 @@ const Borrow = ({ onDeposit, direct, receiver, depositConfig, onNextStep }: Prop
           boxShadow: palette.mode === 'light' ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : '',
         })}
       >
-        <BorrowAtMaturity>
+        <BorrowAtMaturity onSuccess={onNextStep}>
           {!direct && (
             <Box mt={1}>
               <ModalInfo label={t('Swap Cost')} variant="row">

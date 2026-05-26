@@ -6,5 +6,5 @@ export type Deposit = {
   maturity: bigint;
   assets: bigint;
   fee: bigint;
-  timestamp: number;
+  timestamp?: number;
 };

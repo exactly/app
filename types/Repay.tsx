@@ -5,5 +5,5 @@ export type Repay = {
   market: Address;
   maturity: bigint;
   assets: bigint;
-  timestamp: number;
+  timestamp?: number;
 };

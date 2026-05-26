@@ -8,19 +8,18 @@ import useTranslateOperation from 'hooks/useTranslateOperation';
 import type { Operation } from 'types/Operation';
 import { track } from 'utils/mixpanel';
 import { MATURITY_DAYS } from 'utils/utils';
-import { useOperationContext } from 'contexts/OperationContext';
 
 type Props = {
   operation: Operation;
   maturity: number | bigint;
+  installments?: number;
 };
 
-const Reminder: FC<Props> = ({ operation, maturity }) => {
+const Reminder: FC<Props> = ({ operation, maturity, installments = 1 }) => {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
   const { palette } = useTheme();
   const buttonRef = useRef<HTMLInputElement>(null);
-  const { installments } = useOperationContext();
 
   const isBorrow = useMemo(() => operation?.startsWith('borrow'), [operation]);
 

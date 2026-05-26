@@ -1,15 +1,10 @@
-import { CommonTest } from './types';
+import type { CommonTest } from './types';
 
-export default function ({ page }: CommonTest) {
+export default function ({ test, page }: CommonTest) {
   const reload = async () => {
-    await page.reload({ waitUntil: 'domcontentloaded' });
-    await page.waitForFunction(
-      () => {
-        return document.querySelectorAll('.MuiSkeleton-root').length === 0;
-      },
-      null,
-      { polling: 1_000 },
-    );
+    await test.step('navigation: reload', async () => {
+      await page.reload({ waitUntil: 'domcontentloaded' });
+    });
   };
 
   return { reload };

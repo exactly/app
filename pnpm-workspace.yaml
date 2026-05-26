@@ -1,10 +1,15 @@
 allowBuilds:
+  '@reown/appkit': true
   '@sentry/cli': true
   bigint-buffer: true
   bufferutil: true
   es5-ext: true
   esbuild: true
   keccak: true
+  protobufjs: true
   sharp: true
   utf-8-validate: true
 packages: [.]
+blockExoticSubdeps: false
+overrides:
+  'regl@2.1.2': 'npm:@plotly/regl@2.1.2'

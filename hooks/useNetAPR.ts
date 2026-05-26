@@ -4,15 +4,19 @@ import { WAD } from '@exactly/lib';
 import useAccountData from './useAccountData';
 import useDashboard from './useDashboard';
 import { parseEther } from 'viem';
-import { useWeb3 } from './useWeb3';
 import fetchAccounts, { Account } from 'queries/fetchAccounts';
 import useRewards from './useRewards';
 import useStETHNativeAPR from './useStETHNativeAPR';
 import dayjs from 'dayjs';
+import networkData from 'config/networkData.json' assert { type: 'json' };
+import { defaultChain } from 'utils/client';
+import useReadOnly from 'hooks/useReadOnly';
+
+const subgraphURL = networkData[String(defaultChain.id) as keyof typeof networkData]?.subgraph.exactly;
 
 export default () => {
   const [accounts, setAccounts] = useState<Account[] | undefined>();
-  const { walletAddress, subgraphURL } = useWeb3();
+  const { account: walletAddress } = useReadOnly();
   const { accountData, isFetching } = useAccountData();
   const { floatingRows: floatingDeposit } = useDashboard('deposit');
   const { floatingRows: floatingBorrow } = useDashboard('borrow');
@@ -22,7 +26,7 @@ export default () => {
   useEffect(() => {
     if (!subgraphURL || !walletAddress) return;
     fetchAccounts(subgraphURL, walletAddress).then(setAccounts);
-  }, [subgraphURL, walletAddress]);
+  }, [walletAddress]);
 
   return useMemo(() => {
     if (!accountData || !accounts || isFetching) return {};

@@ -21,10 +21,11 @@ import {
   encodeAbiParameters,
   formatUnits,
 } from 'viem';
-import * as wagmiChains from 'wagmi/chains';
+import * as viemChains from 'viem/chains';
 
 import { useSignTypedData, useWalletClient } from 'wagmi';
-import { optimism } from 'wagmi/chains';
+import { simulateContract, writeContract } from '@wagmi/core';
+import { optimism } from 'viem/chains';
 
 import { MAX_UINT256, WAD } from '@exactly/lib';
 
@@ -42,9 +43,8 @@ import useSocketAssets from 'hooks/useSocketAssets';
 import handleOperationError from 'utils/handleOperationError';
 import type { ErrorData } from 'types/Error';
 import type { Transaction } from 'types/Transaction';
-import { swapperABI } from 'types/abi';
+import { swapperAbi, swapperAddress, permit2Address } from 'generated/wagmi';
 import { useEXAETHPrice, useEXAPrice } from 'hooks/useEXA';
-import { useWeb3 } from 'hooks/useWeb3';
 import {
   socketActiveRoutes,
   socketBridgeStatus,
@@ -53,20 +53,18 @@ import {
   socketQuote,
   socketRequest,
 } from 'utils/socket';
-import { useSwapper } from 'hooks/useSwapper';
 import { useTranslation } from 'react-i18next';
 import useERC20 from 'hooks/useERC20';
 import { gasLimit } from 'utils/gas';
 import useIsContract from 'hooks/useIsContract';
 import useIsPermit from 'hooks/useIsPermit';
-import usePermit2 from 'hooks/usePermit2';
 import waitForTransaction from 'utils/waitForTransaction';
 import dayjs from 'dayjs';
 import useDelayedEffect from 'hooks/useDelayedEffect';
 import { track } from 'utils/mixpanel';
 import useContractVersion from 'hooks/useContractVersion';
-
-const DESTINATION_CHAIN = optimism.id;
+import { defaultChain, isE2E, wagmi } from 'utils/client';
+import useReadOnly from 'hooks/useReadOnly';
 
 export enum Screen {
   SELECT_ROUTE = 'SELECT_ROUTE',
@@ -121,7 +119,7 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
   const [qtyIn, setQtyIn] = useState<string>('');
   const [txError, setTXError] = useState<ContextValues['txError']>();
   const [socketError, setSocketError] = useState<ContextValues['socketError']>();
-  const [chain, setChain] = useState<ContextValues['chain']>();
+  const [sourceChain, setSourceChain] = useState<ContextValues['chain']>();
   const [asset, setAsset] = useState<ContextValues['asset']>();
   const [chains, setChains] = useState<ContextValues['chains']>();
   const [routes, setRoutes] = useState<ContextValues['routes']>();
@@ -132,18 +130,19 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
   const [activeRoutes, setActiveRoutes] = useState<ContextValues['activeRoutes']>();
   const [bridgeStatus, setBridgeStatus] = useState<ContextValues['bridgeStatus']>();
 
-  const { walletAddress, opts, chain: appChain } = useWeb3();
-  const { data: walletClient } = useWalletClient({ chainId: chain?.chainId });
+  const { account: walletAddress } = useReadOnly();
+  const destinationChain = isE2E ? defaultChain.id : optimism.id;
+  const { data: walletClient } = useWalletClient({ chainId: sourceChain?.chainId });
   const { t } = useTranslation();
-  const swapper = useSwapper();
+  const swapper = Object.entries(swapperAddress).find(([chainId]) => Number(chainId) === defaultChain.id)?.[1];
   const exaethPrice = useEXAETHPrice();
   const assets = useSocketAssets();
   const chainAssets = useMemo(
-    () => assets.filter(({ chainId }) => chainId === chain?.chainId),
-    [assets, chain?.chainId],
+    () => assets.filter(({ chainId }) => chainId === sourceChain?.chainId),
+    [assets, sourceChain?.chainId],
   );
   const exaPrice = useEXAPrice();
-  const isBridge = chain?.chainId !== appChain.id;
+  const isBridge = sourceChain?.chainId !== defaultChain.id;
 
   const fetchChains = useCallback(async () => {
     const allChains = await socketChains();
@@ -159,7 +158,7 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
   }, [setChains, walletAddress]);
 
   const fetchRoutes = useCallback(async () => {
-    if (!asset || !chain || !walletAddress || !swapper) return;
+    if (!asset || !sourceChain || !walletAddress || !swapper) return;
 
     setRoutes(undefined);
     setSocketError(undefined);
@@ -169,20 +168,20 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
     }
 
     const destinationPayload = encodeFunctionData({
-      abi: swapperABI,
+      abi: swapperAbi,
       functionName: 'swap',
       args: [walletAddress, 0n, 0n],
     });
     try {
       const quote = await socketQuote({
-        fromChainId: chain.chainId,
-        toChainId: DESTINATION_CHAIN,
+        fromChainId: sourceChain.chainId,
+        toChainId: destinationChain,
         fromTokenAddress: asset.address,
         fromAmount: parseUnits(qtyIn, asset.decimals),
         userAddress: walletAddress || zeroAddress,
         toTokenAddress: NATIVE_TOKEN_ADDRESS,
         destinationPayload,
-        recipient: swapper.address,
+        recipient: swapper,
         destinationGasLimit: 2000000n,
       });
 
@@ -194,30 +193,33 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
       setRoute(undefined);
       setSocketError({ message: t('Error fetching routes from socket'), status: true });
     }
-  }, [asset, chain, qtyIn, swapper, t, walletAddress]);
+  }, [asset, sourceChain, destinationChain, qtyIn, swapper, t, walletAddress]);
 
-  const erc20 = useERC20(asset?.address === NATIVE_TOKEN_ADDRESS ? undefined : asset?.address, chain?.chainId);
+  const erc20 = useERC20(asset?.address === NATIVE_TOKEN_ADDRESS ? undefined : asset?.address, sourceChain?.chainId);
 
   const isMultiSig = useIsContract();
   const isPermit = useIsPermit();
   const contractVersion = useContractVersion();
-  const permit2 = usePermit2();
+  const permit2 = Object.entries(permit2Address).find(([chainId]) => Number(chainId) === defaultChain.id)?.[1];
 
   const approveSameChain = useCallback(async () => {
-    if (!walletAddress || !erc20 || !swapper || !asset || !opts || !permit2) return;
+    if (!walletAddress || !erc20 || !swapper || !asset || !walletAddress || !permit2) return;
     try {
       const minimumApprovalAmount = parseUnits(qtyIn, asset.decimals);
       const approvePermit2 = !(await isPermit(asset.address));
 
       if (await isMultiSig(walletAddress)) {
-        const allowance = await erc20.read.allowance([walletAddress, swapper.address], opts);
+        const allowance = await erc20.read.allowance([walletAddress, swapper], {
+          account: walletAddress,
+        });
 
         if (allowance < minimumApprovalAmount) {
-          const args = [swapper.address, minimumApprovalAmount] as const;
-          const gas = await erc20.estimateGas.approve(args, opts);
+          const args = [swapper, minimumApprovalAmount] as const;
+          const gas = await erc20.estimateGas.approve(args, { account: walletAddress });
           const hash = await erc20.write.approve(args, {
-            ...opts,
-            gasLimit: gasLimit(gas),
+            account: walletAddress,
+            chain: defaultChain,
+            gas: gasLimit(gas),
           });
           track('TX Signed', {
             contractName: 'ERC20',
@@ -236,14 +238,17 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
           });
         }
       } else if (approvePermit2) {
-        const allowance = await erc20.read.allowance([walletAddress, permit2.address], opts);
+        const allowance = await erc20.read.allowance([walletAddress, permit2], {
+          account: walletAddress,
+        });
 
         if (allowance < minimumApprovalAmount) {
-          const args = [permit2.address, MAX_UINT256] as const;
-          const gas = await erc20.estimateGas.approve(args, opts);
+          const args = [permit2, MAX_UINT256] as const;
+          const gas = await erc20.estimateGas.approve(args, { account: walletAddress });
           const hash = await erc20.write.approve(args, {
-            ...opts,
-            gasLimit: gasLimit(gas),
+            account: walletAddress,
+            chain: defaultChain,
+            gas: gasLimit(gas),
           });
           setTX({ status: 'processing', hash });
           track('TX Signed', {
@@ -251,7 +256,7 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
             method: 'approve',
             amount: 'MAX_UINT256',
             hash,
-            to: permit2.address,
+            to: permit2,
             symbol: asset.symbol,
           });
           const { status, transactionHash } = await waitForTransaction({ hash });
@@ -261,7 +266,7 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
             amount: 'MAX_UINT256',
             hash,
             status,
-            to: permit2.address,
+            to: permit2,
             symbol: asset.symbol,
           });
           setTX({ status: status ? 'success' : 'error', hash: transactionHash });
@@ -271,7 +276,7 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
     } catch (err) {
       setTXError({ message: t('Error approving token'), status: true });
     }
-  }, [asset, erc20, isMultiSig, isPermit, opts, permit2, qtyIn, swapper, t, walletAddress]);
+  }, [asset, erc20, isMultiSig, isPermit, permit2, qtyIn, swapper, t, walletAddress]);
 
   const { signTypedDataAsync } = useSignTypedData();
 
@@ -280,11 +285,11 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
 
     const deadline = BigInt(dayjs().unix() + 3_600);
     const value = parseUnits(qtyIn || '0', asset.decimals);
-    const chainId = appChain.id;
+    const chainId = defaultChain.id;
 
     if (await isPermit(asset.address)) {
-      const nonce = await erc20.read.nonces([walletAddress], opts);
-      const name = await erc20.read.name(opts);
+      const nonce = await erc20.read.nonces([walletAddress], { account: walletAddress });
+      const name = await erc20.read.name({ account: walletAddress });
       const version = await contractVersion(asset.address);
 
       const { v, r, s } = await signTypedDataAsync({
@@ -306,7 +311,7 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
         },
         message: {
           owner: walletAddress,
-          spender: swapper.address,
+          spender: swapper,
           value,
           nonce,
           deadline,
@@ -327,7 +332,7 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
       domain: {
         name: 'Permit2',
         chainId,
-        verifyingContract: permit2.address,
+        verifyingContract: permit2,
       },
       types: {
         PermitTransferFrom: [
@@ -346,7 +351,7 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
           token: asset.address,
           amount: value,
         },
-        spender: swapper.address,
+        spender: swapper,
         deadline,
         nonce: hexToBigInt(
           keccak256(
@@ -371,34 +376,22 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
     } as const;
 
     return { type: 'permit2', value: permit } as const;
-  }, [
-    appChain.id,
-    asset,
-    contractVersion,
-    erc20,
-    isPermit,
-    opts,
-    permit2,
-    qtyIn,
-    signTypedDataAsync,
-    swapper,
-    walletAddress,
-  ]);
+  }, [asset, contractVersion, erc20, isPermit, permit2, qtyIn, signTypedDataAsync, swapper, walletAddress]);
 
   const approveCrossChain = useCallback(async () => {
     if (asset?.symbol === 'ETH') setTXStep(TXStep.CONFIRM);
 
-    if (screen !== Screen.REVIEW_ROUTE || !walletAddress || !walletClient || !route || !erc20 || !opts) return;
+    if (screen !== Screen.REVIEW_ROUTE || !walletAddress || !walletClient || !route || !erc20 || !walletAddress) return;
 
     const {
       userTxs: [{ approvalData }],
     } = route;
 
-    const supportedChains = Object.values(wagmiChains);
+    const supportedChains = Object.values(viemChains);
 
     const crossChainOpts = {
-      ...opts,
-      chain: supportedChains.find((c) => c.id === chain?.chainId),
+      account: walletAddress,
+      chain: supportedChains.find((c) => c.id === sourceChain?.chainId),
     };
 
     if (!approvalData) {
@@ -414,10 +407,10 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
 
       if (allowance < minimumApprovalAmount) {
         const args = [approvalData.allowanceTarget, minimumApprovalAmount] as const;
-        const gas = await erc20.estimateGas.approve(args, opts);
+        const gas = await erc20.estimateGas.approve(args, { account: walletAddress });
         const hash = await erc20.write.approve(args, {
           ...crossChainOpts,
-          gasLimit: gasLimit(gas),
+          gas: gasLimit(gas),
         });
         track('TX Signed', {
           contractName: 'ERC20',
@@ -446,9 +439,9 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
       }
       setTXStep(TXStep.APPROVE);
     }
-  }, [asset, chain?.chainId, erc20, opts, route, screen, walletAddress, walletClient]);
+  }, [asset, sourceChain?.chainId, erc20, route, screen, walletAddress, walletClient]);
 
-  const nativeSwap = asset?.symbol === 'ETH' && chain?.chainId === optimism.id;
+  const nativeSwap = asset?.symbol === 'ETH' && sourceChain?.chainId === destinationChain;
   const qtyOut =
     qtyIn === ''
       ? 0n
@@ -507,7 +500,7 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
     const keepETH = 0n;
     if (isBridge) return confirmBridge();
 
-    if (!walletAddress || !route || !swapper || !erc20?.address || !opts || !asset) return;
+    if (!walletAddress || !route || !swapper || !erc20?.address || !walletAddress || !asset) return;
 
     setTXStep(TXStep.CONFIRM_PENDING);
 
@@ -518,12 +511,15 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
       if (await isMultiSig(walletAddress)) {
         const amount = parseUnits(qtyIn, asset.decimals);
         const args = [erc20.address, amount, txData, minEXA, keepETH] as const;
-        const gas = await swapper.estimateGas.swap(args, opts);
-
-        hash = await swapper.write.swap(args, {
-          ...opts,
-          gasLimit: gasLimit(gas),
+        const { request } = await simulateContract(wagmi, {
+          account: walletAddress,
+          address: swapper,
+          abi: swapperAbi,
+          functionName: 'swap',
+          chainId: defaultChain.id,
+          args,
         });
+        hash = await writeContract(wagmi, request);
       } else {
         const permit = await sign();
         if (!permit) return;
@@ -531,20 +527,28 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
         switch (permit.type) {
           case 'permit': {
             const args = [erc20.address, permit.value, txData, minEXA, keepETH] as const;
-            const gas = await swapper.estimateGas.swap(args, opts);
-            hash = await swapper.write.swap(args, {
-              ...opts,
-              gasLimit: gasLimit(gas),
+            const { request } = await simulateContract(wagmi, {
+              account: walletAddress,
+              address: swapper,
+              abi: swapperAbi,
+              functionName: 'swap',
+              chainId: defaultChain.id,
+              args,
             });
+            hash = await writeContract(wagmi, request);
             break;
           }
           case 'permit2': {
             const args = [erc20.address, permit.value, txData, minEXA, keepETH] as const;
-            const gas = await swapper.estimateGas.swap(args, opts);
-            hash = await swapper.write.swap(args, {
-              ...opts,
-              gasLimit: gasLimit(gas),
+            const { request } = await simulateContract(wagmi, {
+              account: walletAddress,
+              address: swapper,
+              abi: swapperAbi,
+              functionName: 'swap',
+              chainId: defaultChain.id,
+              args,
             });
+            hash = await writeContract(wagmi, request);
             break;
           }
         }
@@ -560,21 +564,20 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
     } finally {
       setTXStep(undefined);
     }
-  }, [isBridge, confirmBridge, walletAddress, route, swapper, erc20, opts, asset, isMultiSig, qtyIn, sign]);
+  }, [isBridge, confirmBridge, walletAddress, route, swapper, erc20, asset, isMultiSig, qtyIn, sign]);
 
   const submit = useCallback(async () => {
-    if (!walletClient || !walletAddress || !swapper) return;
+    if (!walletAddress || !swapper) return;
     setTXStep(TXStep.CONFIRM_PENDING);
 
-    const data = encodeFunctionData({
-      abi: swapperABI,
-      functionName: 'swap',
-      args: [walletAddress, 0n, 0n],
-    });
     try {
-      const txHash_ = await walletClient.sendTransaction({
-        to: swapper.address,
-        data,
+      const txHash_ = await writeContract(wagmi, {
+        account: walletAddress,
+        address: swapper,
+        abi: swapperAbi,
+        functionName: 'swap',
+        chainId: defaultChain.id,
+        args: [walletAddress, 0n, 0n],
         value: parseEther(qtyIn),
       });
 
@@ -588,7 +591,7 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
     } finally {
       setTXStep(undefined);
     }
-  }, [qtyIn, setTXError, setScreen, setTXStep, swapper, walletAddress, walletClient]);
+  }, [qtyIn, setTXError, setScreen, setTXStep, swapper, walletAddress]);
 
   useEffect(() => {
     if (!isBridge) return;
@@ -598,12 +601,12 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
       if (!bridgeInProgess) return;
     }
     const fetchBridgeStatus = async () => {
-      if (!tx?.hash || !chain) return;
+      if (!tx?.hash || !sourceChain) return;
       try {
         const response = await socketBridgeStatus({
           transactionHash: tx.hash,
-          fromChainId: chain.chainId,
-          toChainId: optimism.id,
+          fromChainId: sourceChain.chainId,
+          toChainId: destinationChain,
         });
 
         setBridgeStatus(response);
@@ -615,7 +618,7 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
       fetchBridgeStatus();
     }, 2000);
     return () => clearInterval(interval);
-  }, [isBridge, bridgeStatus, chain, tx?.hash]);
+  }, [isBridge, bridgeStatus, sourceChain, destinationChain, tx?.hash]);
 
   const { isLoading: routesLoading } = useDelayedEffect({
     effect: fetchRoutes,
@@ -628,10 +631,9 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
 
   useEffect(() => {
     if (!chains) return;
-    const id = optimism.id;
-    const activeNetwork = chains.find(({ chainId }) => chainId === id);
-    if (activeNetwork) setChain(activeNetwork);
-  }, [chains, setChain]);
+    const activeNetwork = chains.find(({ chainId }) => chainId === destinationChain);
+    if (activeNetwork) setSourceChain(activeNetwork);
+  }, [chains, destinationChain, setSourceChain]);
 
   useEffect(() => {
     setAsset(chainAssets[0]);
@@ -664,7 +666,7 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
     },
 
     setChain: (c: ContextValues['chain']) => {
-      setChain(c);
+      setSourceChain(c);
       const chainAssets_ = assets.filter(({ chainId }) => chainId === c?.chainId);
       setAsset(chainAssets_[0]);
       setQtyIn('');
@@ -679,7 +681,7 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
     qtyIn,
     txError,
     socketError,
-    chain,
+    chain: sourceChain,
     asset,
     chains,
     routes,

@@ -11,13 +11,18 @@ import Progress from 'components/staking/Progress';
 import { StakeEXAProvider } from 'contexts/StakeEXAContext';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import useEtherscanLink from 'hooks/useEtherscanLink';
-import { useStakedEXA } from 'hooks/useStakedEXA';
+import { stakedExaAddress } from 'generated/wagmi';
+import { defaultChain } from 'utils/client';
+
+const stakedExaChainId = Object.keys(stakedExaAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof stakedExaAddress => chainId === defaultChain.id);
 
 const Staking: NextPage = () => {
   const { open: openGetEXA } = useModal('get-exa');
   const { palette } = useTheme();
   const { address } = useEtherscanLink();
-  const stakedEXA = useStakedEXA();
+  const stakedEXA = stakedExaChainId === undefined ? undefined : stakedExaAddress[stakedExaChainId];
 
   return (
     <StakeEXAProvider>
@@ -42,7 +47,7 @@ const Staking: NextPage = () => {
                 <Button
                   id="view"
                   component="a"
-                  href={address(stakedEXA.address)}
+                  href={address(stakedEXA)}
                   target="_blank"
                   rel="noreferrer noopener"
                   sx={{

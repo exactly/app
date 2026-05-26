@@ -6,8 +6,8 @@ import Link from 'next/link';
 import useRouter from 'hooks/useRouter';
 import { useTranslation } from 'react-i18next';
 import { track } from 'utils/mixpanel';
-import { useWeb3 } from 'hooks/useWeb3';
-import { mainnet } from 'wagmi';
+import { mainnet } from 'viem/chains';
+import { defaultChain } from 'utils/client';
 
 const NEWS_READ_KEY = 'news_read';
 
@@ -22,8 +22,7 @@ const isNewsRead = (id: string) => {
 };
 
 const NewsModal = () => {
-  const { chain } = useWeb3();
-  const isEthereum = chain.id === mainnet.id;
+  const isEthereum = defaultChain.id === mainnet.id;
   const { t } = useTranslation();
   const news = useMemo(
     () => [

@@ -1,27 +1,7 @@
-import { stakedExaABI, useStakedExaBalanceOf } from 'types/abi';
-
-import useContract from './useContract';
-import { formatEther, parseEther, zeroAddress } from 'viem';
-import { useWeb3 } from './useWeb3';
+import { formatEther, parseEther } from 'viem';
 import { WAD, lnWad, expWad } from '@exactly/lib';
 import { useCallback, useMemo } from 'react';
 import { useStakeEXA } from 'contexts/StakeEXAContext';
-
-export const useStakedEXA = () => {
-  return useContract('stEXA', stakedExaABI);
-};
-
-export const useStakedEXABalance = () => {
-  const { chain, walletAddress } = useWeb3();
-  const stEXA = useStakedEXA();
-
-  return useStakedExaBalanceOf({
-    chainId: chain.id,
-    address: stEXA?.address,
-    args: [walletAddress ?? zeroAddress],
-    staleTime: 30_000,
-  });
-};
 
 export const useStakedEXAChart = () => {
   const { start, balance, parameters } = useStakeEXA();

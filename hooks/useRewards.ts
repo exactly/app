@@ -1,30 +1,50 @@
-import { useMemo, useCallback, useState } from 'react';
-import { waitForTransaction, Address } from '@wagmi/core';
+import { useMemo, useCallback, useEffect, useRef, useState } from 'react';
+import type { Address } from 'viem';
 
-import { useWeb3 } from './useWeb3';
-import useRewardsController from './useRewardsController';
 import handleOperationError from 'utils/handleOperationError';
 import useAccountData from './useAccountData';
 
 import { AbiParametersToPrimitiveTypes, ExtractAbiFunction } from 'abitype';
-import { previewerABI } from 'types/abi';
+import {
+  previewerAbi,
+  rewardsControllerAbi,
+  rewardsControllerAddress,
+  useReadRewardsControllerAllMarketsOperations,
+  useSimulateRewardsControllerClaim,
+  useSimulateRewardsControllerClaimAll,
+  useWriteRewardsControllerClaim,
+  useWriteRewardsControllerClaimAll,
+} from 'generated/wagmi';
 import { Transaction } from 'types/Transaction';
-import { gasLimit } from 'utils/gas';
 import { parseEther } from 'viem';
+import waitForTransaction from 'utils/waitForTransaction';
+import { defaultChain } from 'utils/client';
+import useReadOnly from 'hooks/useReadOnly';
+import { useConnection } from 'wagmi';
 
 export type RewardRates = AbiParametersToPrimitiveTypes<
-  ExtractAbiFunction<typeof previewerABI, 'exactly'>['outputs']
+  ExtractAbiFunction<typeof previewerAbi, 'exactly'>['outputs']
 >[number][number]['rewardRates'];
 
 export type Rewards = Record<string, { address: Address; amount: bigint; usdPrice: bigint }>;
 export type Rates = Record<string, RewardRates>;
+type ClaimArgs = AbiParametersToPrimitiveTypes<ExtractAbiFunction<typeof rewardsControllerAbi, 'claim'>['inputs']>;
 
 export default () => {
-  const { walletAddress, opts, isConnected } = useWeb3();
-  const controller = useRewardsController();
+  const { account: walletAddress } = useReadOnly();
+  const { isConnected } = useConnection();
   const { accountData, getMarketAccount, refreshAccountData } = useAccountData();
+  const rewardsControllerChainId = Object.keys(rewardsControllerAddress)
+    .map(Number)
+    .find((chainId): chainId is keyof typeof rewardsControllerAddress => chainId === defaultChain.id);
 
   const [isLoading, setIsLoading] = useState(false);
+  const [claimArgs, setClaimArgs] = useState<ClaimArgs>();
+  const claimSetTx = useRef<((tx: Transaction) => void) | undefined>(undefined);
+  const { data: marketOps } = useReadRewardsControllerAllMarketsOperations({
+    chainId: rewardsControllerChainId,
+    query: { enabled: rewardsControllerChainId !== undefined },
+  });
 
   const rewards = useMemo<Rewards>(() => {
     if (!accountData || !getMarketAccount) return {};
@@ -55,18 +75,29 @@ export default () => {
   const claimable = useMemo<boolean>(() => {
     return Object.values(rewards).some(({ amount }) => amount > 0n);
   }, [rewards]);
+  const claimAllSimulation = useSimulateRewardsControllerClaimAll({
+    account: walletAddress,
+    chainId: rewardsControllerChainId,
+    args: walletAddress ? [walletAddress] : undefined,
+    query: { enabled: Boolean(claimable && walletAddress && rewardsControllerChainId !== undefined) },
+  });
+  const claimSimulation = useSimulateRewardsControllerClaim({
+    account: walletAddress,
+    chainId: rewardsControllerChainId,
+    args: claimArgs,
+    query: { enabled: Boolean(claimArgs && walletAddress && rewardsControllerChainId !== undefined) },
+  });
+  const { writeContractAsync: writeClaimAll } = useWriteRewardsControllerClaimAll();
+  const { writeContractAsync: writeClaim } = useWriteRewardsControllerClaim();
 
   const claimAll = useCallback(async () => {
-    if (!claimable || !controller || !walletAddress || !opts) return;
+    if (!claimable || !walletAddress) return;
 
     try {
       setIsLoading(true);
-      const args = [walletAddress] as const;
-      const gas = await controller.estimateGas.claimAll(args, opts);
-      const hash = await controller.write.claimAll(args, {
-        ...opts,
-        gasLimit: gasLimit(gas),
-      });
+      const claimAllRequest = claimAllSimulation.data ?? (await claimAllSimulation.refetch()).data;
+      if (!claimAllRequest) return;
+      const hash = await writeClaimAll(claimAllRequest.request);
       await waitForTransaction({ hash });
 
       await refreshAccountData();
@@ -75,7 +106,7 @@ export default () => {
     } finally {
       setIsLoading(false);
     }
-  }, [claimable, controller, walletAddress, refreshAccountData, opts]);
+  }, [claimAllSimulation, claimable, walletAddress, refreshAccountData, writeClaimAll]);
 
   const rates = useMemo<Rates>(() => {
     if (!accountData) return {};
@@ -108,36 +139,48 @@ export default () => {
       to?: Address;
       setTx?: (tx: Transaction) => void;
     }) => {
-      if (!controller || !isConnected || !opts) return;
+      if (!isConnected || !marketOps?.length || !walletAddress) return;
 
       setIsLoading(true);
 
-      try {
-        const marketOps = await controller.read.allMarketsOperations(opts);
-        const tokens = assets.flatMap((asset) => (rewards[asset] ? [rewards[asset].address] : []));
-        if (!marketOps.length || !tokens.length || !to) {
-          return;
-        }
+      const tokens = assets.flatMap((asset) => (rewards[asset] ? [rewards[asset].address] : []));
+      if (!tokens.length || !to) {
+        setIsLoading(false);
+        return;
+      }
+      claimSetTx.current = setTx;
+      setClaimArgs([marketOps, to, tokens]);
+    },
+    [isConnected, marketOps, rewards, walletAddress],
+  );
 
-        const args = [marketOps, to, tokens] as const;
-        const gas = await controller.estimateGas.claim(args, opts);
-        const hash = await controller.write.claim(args, {
-          ...opts,
-          gasLimit: gasLimit(gas),
-        });
-        setTx && setTx({ hash, status: 'loading' });
+  useEffect(() => {
+    if (!claimArgs || !claimSimulation.data) return;
+    setClaimArgs(undefined);
+    void (async () => {
+      try {
+        const hash = await writeClaim({ account: walletAddress, chainId: rewardsControllerChainId, args: claimArgs });
+        claimSetTx.current?.({ hash, status: 'loading' });
         const { status } = await waitForTransaction({ hash });
-        setTx && setTx({ hash, status: status ? 'success' : 'error' });
+        claimSetTx.current?.({ hash, status: status === 'success' ? 'success' : 'error' });
 
         await refreshAccountData();
       } catch (e) {
         handleOperationError(e);
       } finally {
+        claimSetTx.current = undefined;
         setIsLoading(false);
       }
-    },
-    [controller, isConnected, opts, refreshAccountData, rewards, walletAddress],
-  );
+    })();
+  }, [claimArgs, claimSimulation.data, refreshAccountData, rewardsControllerChainId, walletAddress, writeClaim]);
+
+  useEffect(() => {
+    if (!claimArgs || !claimSimulation.error) return;
+    claimSetTx.current = undefined;
+    setClaimArgs(undefined);
+    setIsLoading(false);
+    handleOperationError(claimSimulation.error);
+  }, [claimArgs, claimSimulation.error]);
 
   return { rewards, rates, claimable, claim, claimAll, isLoading };
 };

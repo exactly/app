@@ -5,13 +5,14 @@ import 'i18n';
 
 import React from 'react';
 import Head from 'next/head';
-import { WagmiConfig } from 'wagmi';
+import { WagmiProvider } from 'wagmi';
+import { QueryClientProvider } from '@tanstack/react-query';
 import type { AppProps } from 'next/app';
 import { Box } from '@mui/material';
 
 import { AccountDataProvider } from 'contexts/AccountDataContext';
 import { ThemeProvider } from 'contexts/ThemeContext';
-import { wagmi, isE2E } from 'utils/client';
+import { wagmi, isE2E, queryClient } from 'utils/client';
 import Footer from 'components/Footer';
 import Navbar from 'components/Navbar';
 import { globals } from 'styles/theme';
@@ -83,38 +84,40 @@ export default function App({ Component, pageProps, router }: AppProps) {
         />
         <meta name="twitter:image" content="https://app.exact.ly/img/social/ogp.png" />
       </Head>
-      <WagmiConfig config={wagmi}>
-        <ThemeProvider>
-          <ModalContextProvider>
-            <GlobalErrorProvider>
-              <AccountDataProvider>
-                <NewIRMBanner />
-                <Box display="flex" flexDirection="column" px={2} height="100%">
-                  <Navbar />
-                  {router.pathname === '/strategies' && (
-                    <Box position="relative" zIndex={-1} mx={-2}>
-                      <Box
-                        position="absolute"
-                        left={0}
-                        bgcolor={({ palette }) => (palette.mode === 'dark' ? 'grey.100' : 'figma.grey.100')}
-                        width="100vw"
-                        height={{ xs: 1400, sm: 440 }}
-                      />
-                    </Box>
-                  )}
-                  <main style={{ flexGrow: 1, maxWidth, margin: '0 auto', width: '100%' }}>
-                    <Component {...pageProps} />
-                  </main>
-                  <Footer />
-                </Box>
-                <Modals />
-                <MaturityDateReminder />
-                <EXACard />
-              </AccountDataProvider>
-            </GlobalErrorProvider>
-          </ModalContextProvider>
-        </ThemeProvider>
-      </WagmiConfig>
+      <WagmiProvider config={wagmi}>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider>
+            <ModalContextProvider>
+              <GlobalErrorProvider>
+                <AccountDataProvider>
+                  <NewIRMBanner />
+                  <Box display="flex" flexDirection="column" px={2} height="100%">
+                    <Navbar />
+                    {router.pathname === '/strategies' && (
+                      <Box position="relative" zIndex={-1} mx={-2}>
+                        <Box
+                          position="absolute"
+                          left={0}
+                          bgcolor={({ palette }) => (palette.mode === 'dark' ? 'grey.100' : 'figma.grey.100')}
+                          width="100vw"
+                          height={{ xs: 1400, sm: 440 }}
+                        />
+                      </Box>
+                    )}
+                    <main style={{ flexGrow: 1, maxWidth, margin: '0 auto', width: '100%' }}>
+                      <Component {...pageProps} />
+                    </main>
+                    <Footer />
+                  </Box>
+                  <Modals />
+                  <MaturityDateReminder />
+                  <EXACard />
+                </AccountDataProvider>
+              </GlobalErrorProvider>
+            </ModalContextProvider>
+          </ThemeProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
     </>
   );
 }

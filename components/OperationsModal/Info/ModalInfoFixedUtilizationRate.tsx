@@ -5,12 +5,24 @@ import ModalInfo, { FromTo, Variant } from 'components/common/modal/ModalInfo';
 import type { Operation } from 'types/Operation';
 import useAccountData from 'hooks/useAccountData';
 import { toPercentage } from 'utils/utils';
-import usePreviewer from 'hooks/usePreviewer';
 import useDelayedEffect from 'hooks/useDelayedEffect';
-import { useWeb3 } from 'hooks/useWeb3';
 import { useTranslation } from 'react-i18next';
 import { formatEther, formatUnits, parseUnits, zeroAddress } from 'viem';
 import { useOperationContext } from 'contexts/OperationContext';
+import {
+  legacyPreviewerAddress,
+  previewerAddress,
+  readLegacyPreviewerPreviewBorrowAtMaturity,
+  readLegacyPreviewerPreviewDepositAtMaturity,
+  readLegacyPreviewerPreviewRepayAtMaturity,
+  readLegacyPreviewerPreviewWithdrawAtMaturity,
+  readPreviewerPreviewBorrowAtMaturity,
+  readPreviewerPreviewDepositAtMaturity,
+  readPreviewerPreviewRepayAtMaturity,
+  readPreviewerPreviewWithdrawAtMaturity,
+} from 'generated/wagmi';
+import { defaultChain, wagmi } from 'utils/client';
+import useReadOnly from 'hooks/useReadOnly';
 
 type Props = {
   qty: string;
@@ -19,10 +31,16 @@ type Props = {
   variant?: Variant;
 };
 
+const legacyPreviewerChainId = Object.keys(legacyPreviewerAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof legacyPreviewerAddress => chainId === defaultChain.id);
+const previewerChainId = Object.keys(previewerAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof previewerAddress => chainId === defaultChain.id);
+
 function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'column' }: Props) {
   const { t } = useTranslation();
-  const previewerContract = usePreviewer();
-  const { walletAddress } = useWeb3();
+  const { account: walletAddress } = useReadOnly();
   const { marketAccount } = useAccountData(symbol);
   const { date } = useOperationContext();
 
@@ -39,7 +57,7 @@ function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'colu
 
   const preview = useCallback(
     async (cancelled: () => boolean) => {
-      if (!marketAccount || !previewerContract || !date) {
+      if (!marketAccount || !date) {
         return setTo(undefined);
       }
       if (!qty) {
@@ -51,45 +69,66 @@ function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'colu
 
       try {
         const initialAssets = parseUnits(qty, marketAccount.decimals);
+        if (legacyPreviewerChainId === undefined && previewerChainId === undefined) return setTo('N/A');
         let uti: bigint | undefined = undefined;
         switch (operation) {
           case 'depositAtMaturity': {
-            const { utilization } = await previewerContract.read.previewDepositAtMaturity([
-              marketAccount.market,
-              date,
-              initialAssets,
-            ]);
-            uti = utilization;
+            if (legacyPreviewerChainId !== undefined) {
+              ({ utilization: uti } = await readLegacyPreviewerPreviewDepositAtMaturity(wagmi, {
+                chainId: legacyPreviewerChainId,
+                args: [marketAccount.market, date, initialAssets],
+              }));
+            } else if (previewerChainId !== undefined) {
+              ({ utilization: uti } = await readPreviewerPreviewDepositAtMaturity(wagmi, {
+                chainId: previewerChainId,
+                args: [marketAccount.market, date, initialAssets],
+              }));
+            }
             break;
           }
 
           case 'withdrawAtMaturity': {
-            const { utilization } = await previewerContract.read.previewWithdrawAtMaturity([
-              marketAccount.market,
-              date,
-              initialAssets,
-              walletAddress ?? zeroAddress,
-            ]);
-            uti = utilization;
+            const args = [marketAccount.market, date, initialAssets, walletAddress ?? zeroAddress] as const;
+            if (legacyPreviewerChainId !== undefined) {
+              ({ utilization: uti } = await readLegacyPreviewerPreviewWithdrawAtMaturity(wagmi, {
+                chainId: legacyPreviewerChainId,
+                args,
+              }));
+            } else if (previewerChainId !== undefined) {
+              ({ utilization: uti } = await readPreviewerPreviewWithdrawAtMaturity(wagmi, {
+                chainId: previewerChainId,
+                args,
+              }));
+            }
             break;
           }
           case 'borrowAtMaturity': {
-            const { utilization } = await previewerContract.read.previewBorrowAtMaturity([
-              marketAccount.market,
-              date,
-              initialAssets,
-            ]);
-            uti = utilization;
+            if (legacyPreviewerChainId !== undefined) {
+              ({ utilization: uti } = await readLegacyPreviewerPreviewBorrowAtMaturity(wagmi, {
+                chainId: legacyPreviewerChainId,
+                args: [marketAccount.market, date, initialAssets],
+              }));
+            } else if (previewerChainId !== undefined) {
+              ({ utilization: uti } = await readPreviewerPreviewBorrowAtMaturity(wagmi, {
+                chainId: previewerChainId,
+                args: [marketAccount.market, date, initialAssets],
+              }));
+            }
             break;
           }
           case 'repayAtMaturity': {
-            const { utilization } = await previewerContract.read.previewRepayAtMaturity([
-              marketAccount.market,
-              date,
-              initialAssets,
-              walletAddress ?? zeroAddress,
-            ]);
-            uti = utilization;
+            const args = [marketAccount.market, date, initialAssets, walletAddress ?? zeroAddress] as const;
+            if (legacyPreviewerChainId !== undefined) {
+              ({ utilization: uti } = await readLegacyPreviewerPreviewRepayAtMaturity(wagmi, {
+                chainId: legacyPreviewerChainId,
+                args,
+              }));
+            } else if (previewerChainId !== undefined) {
+              ({ utilization: uti } = await readPreviewerPreviewRepayAtMaturity(wagmi, {
+                chainId: previewerChainId,
+                args,
+              }));
+            }
             break;
           }
         }
@@ -101,7 +140,7 @@ function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'colu
         setTo('N/A');
       }
     },
-    [date, from, marketAccount, operation, previewerContract, qty, walletAddress],
+    [date, from, marketAccount, operation, qty, walletAddress],
   );
 
   const { isLoading } = useDelayedEffect({ effect: preview });

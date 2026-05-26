@@ -1,10 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Box, Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
-import { usePublicClient, useSignTypedData } from 'wagmi';
+import { useContractEvents, usePublicClient, useSignTypedData } from 'wagmi';
 import dayjs from 'dayjs';
-import { formatUnits, hexToSignature, isAddress, parseUnits, parseEther, trim, pad } from 'viem';
+import { formatUnits, hexToSignature, isAddress, parseEther, trim, pad, type Hex } from 'viem';
 import { WAD } from '@exactly/lib';
 
 import { ModalBox, ModalBoxRow } from 'components/common/modal/ModalBox';
@@ -16,16 +16,11 @@ import { useDebtManagerContext } from 'contexts/DebtManagerContext';
 import parseTimestamp from 'utils/parseTimestamp';
 import ModalSheetButton from 'components/common/modal/ModalSheetButton';
 import formatNumber from 'utils/formatNumber';
-import usePreviewer from 'hooks/usePreviewer';
-import useGraphClient from 'hooks/useGraphClient';
 import useDelayedEffect from 'hooks/useDelayedEffect';
 import PositionTable, { PositionTableRow } from '../PositionTable';
-import { useWeb3 } from 'hooks/useWeb3';
 import Overview from '../Overview';
 import { calculateAPR } from 'utils/calculateAPR';
-import { Borrow } from 'types/Borrow';
 
-import getAllBorrowsAtMaturity from 'queries/getAllBorrowsAtMaturity';
 import ModalInfoEditableSlippage from 'components/OperationsModal/Info/ModalInfoEditableSlippage';
 import handleOperationError from 'utils/handleOperationError';
 import ModalAlert from 'components/common/modal/ModalAlert';
@@ -34,13 +29,48 @@ import LoadingTransaction from 'components/common/modal/Loading';
 import OperationSquare from 'components/common/OperationSquare';
 import Submit from '../Submit';
 import useIsContract from 'hooks/useIsContract';
-import { PopulatedTransaction } from 'types/Transaction';
 import { gasLimit } from 'utils/gas';
+import {
+  legacyPreviewerAddress,
+  marketAbi,
+  marketDaiAddress,
+  marketDaiBlock,
+  marketExaAddress,
+  marketExaBlock,
+  marketOpAddress,
+  marketOpBlock,
+  marketUsdcAddress,
+  marketUsdcBlock,
+  marketUsdCeAddress,
+  marketUsdCeBlock,
+  marketWbtcAddress,
+  marketWbtcBlock,
+  marketWethAddress,
+  marketWethBlock,
+  marketcbBtcAddress,
+  marketcbBtcBlock,
+  marketcbXrpAddress,
+  marketcbXrpBlock,
+  marketwstEthAddress,
+  marketwstEthBlock,
+  previewerAddress,
+  readLegacyPreviewerPreviewBorrowAtAllMaturities,
+  readPreviewerPreviewBorrowAtAllMaturities,
+} from 'generated/wagmi';
+import { defaultChain, wagmi } from 'utils/client';
+import useReadOnly from 'hooks/useReadOnly';
+
+const legacyPreviewerChainId = Object.keys(legacyPreviewerAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof legacyPreviewerAddress => chainId === defaultChain.id);
+const previewerChainId = Object.keys(previewerAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof previewerAddress => chainId === defaultChain.id);
 
 function Operation() {
   const { t } = useTranslation();
   const { accountData, getMarketAccount } = useAccountData();
-  const { walletAddress, chain, opts } = useWeb3();
+  const { account } = useReadOnly();
   const publicClient = usePublicClient();
   const { signTypedDataAsync } = useSignTypedData();
 
@@ -51,8 +81,6 @@ function Operation() {
 
   const { rates } = useRewards();
   const isContract = useIsContract();
-
-  const request = useGraphClient();
 
   const {
     tx,
@@ -73,73 +101,55 @@ function Operation() {
 
   const onClose = useCallback(() => setSheetOpen([false, false]), []);
 
-  const previewerContract = usePreviewer();
-
-  const [fromRows, setFromRows] = useState<PositionTableRow[]>([]);
   const [toRows, setToRows] = useState<PositionTableRow[]>([]);
 
-  const updateFromRows = useCallback(async () => {
-    if (!accountData || !walletAddress) {
-      return;
-    }
+  const borrowFromBlock = useMemo(() => {
+    const blocks =
+      accountData?.flatMap(({ market }) =>
+        (
+          [
+            [marketDaiAddress, marketDaiBlock],
+            [marketUsdcAddress, marketUsdcBlock],
+            [marketUsdCeAddress, marketUsdCeBlock],
+            [marketWethAddress, marketWethBlock],
+            [marketwstEthAddress, marketwstEthBlock],
+            [marketOpAddress, marketOpBlock],
+            [marketWbtcAddress, marketWbtcBlock],
+            [marketcbBtcAddress, marketcbBtcBlock],
+            [marketcbXrpAddress, marketcbXrpBlock],
+            [marketExaAddress, marketExaBlock],
+          ] as const
+        ).flatMap(([address, block]) =>
+          Object.entries(address).some(
+            ([chainId, value]) => Number(chainId) === defaultChain.id && value.toLowerCase() === market.toLowerCase(),
+          )
+            ? Object.entries(block).flatMap(([chainId, value]) => (Number(chainId) === defaultChain.id ? [value] : []))
+            : [],
+        ),
+      ) ?? [];
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const data = await request<any>(getAllBorrowsAtMaturity(walletAddress));
-    if (!data) return;
+    return blocks.length ? blocks.reduce((min, block) => (block < min ? block : min)) : undefined;
+  }, [accountData]);
 
-    const borrows: Borrow[] = data.borrowAtMaturities.map(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ({ id, market, maturity, assets, fee, timestamp }: any): Borrow => ({
-        id,
-        market,
-        maturity,
-        assets: parseUnits(assets, 18),
-        fee: parseUnits(fee, 18),
-        timestamp,
-      }),
-    );
+  const { data: borrowEvents = [] } = useContractEvents({
+    address: accountData?.map(({ market }) => market),
+    abi: marketAbi,
+    eventName: 'BorrowAtMaturity',
+    strict: true,
+    args: account ? { borrower: account } : undefined,
+    fromBlock: borrowFromBlock,
+    toBlock: 'latest',
+    chainId: defaultChain.id,
+    query: { enabled: Boolean(account && accountData?.length) },
+  });
 
-    const apr = (symbol: string, market: string, maturity: bigint): bigint => {
-      const marketAccount = getMarketAccount(symbol);
-      if (!marketAccount) return 0n;
+  const fromRows = useMemo<PositionTableRow[]>(() => {
+    if (!accountData) return [];
 
-      const filtered = borrows.filter(
-        (borrow) => borrow.market.toLowerCase() === market.toLowerCase() && BigInt(borrow.maturity) === maturity,
-      );
-
-      const [allProportionalAssets, allAssets] = filtered.reduce(
-        ([aprAmounts, assets], borrow) => {
-          const transactionAPR = calculateAPR(
-            borrow.fee,
-            borrow.assets,
-            BigInt(borrow.timestamp),
-            BigInt(borrow.maturity),
-          );
-          const proportionalAssets = (transactionAPR * borrow.assets) / 100n;
-
-          return [aprAmounts + proportionalAssets, assets + borrow.assets];
-        },
-        [0n, 0n],
-      );
-
-      if (allAssets === 0n) return 0n;
-
-      return allProportionalAssets / allAssets;
-    };
-
-    setFromRows(
-      accountData.flatMap((entry) => {
-        const {
-          assetSymbol,
-          market,
-          decimals,
-          usdPrice,
-          floatingBorrowRate,
-          floatingBorrowAssets,
-          fixedBorrowPositions,
-        } = entry;
+    return accountData.flatMap(
+      ({ assetSymbol, market, decimals, usdPrice, floatingBorrowRate, floatingBorrowAssets, fixedBorrowPositions }) => {
         return [
-          ...(entry.floatingBorrowAssets > 0n
+          ...(floatingBorrowAssets > 0n
             ? [
                 {
                   symbol: assetSymbol,
@@ -150,33 +160,77 @@ function Operation() {
                 },
               ]
             : []),
-          ...fixedBorrowPositions.map((position) => ({
-            symbol: assetSymbol,
-            maturity: position.maturity,
-            balance: position.previewValue,
-            usdPrice,
-            decimals,
-            apr: apr(assetSymbol, market, position.maturity),
-          })),
-        ];
-      }),
-    );
-  }, [accountData, walletAddress, request, getMarketAccount]);
+          ...fixedBorrowPositions.map((position) => {
+            const [allProportionalAssets, allAssets] = borrowEvents
+              .filter(
+                (event) =>
+                  event.address.toLowerCase() === market.toLowerCase() &&
+                  event.args.maturity === position.maturity &&
+                  event.blockTimestamp !== undefined,
+              )
+              .reduce(
+                ([aprAmounts, assets], event) => {
+                  const transactionAPR = calculateAPR(
+                    event.args.fee,
+                    event.args.assets,
+                    event.blockTimestamp ?? 0n,
+                    event.args.maturity,
+                  );
+                  return [aprAmounts + (transactionAPR * event.args.assets) / 100n, assets + event.args.assets];
+                },
+                [0n, 0n],
+              );
 
-  useEffect(() => {
-    updateFromRows();
-  }, [updateFromRows]);
+            return {
+              symbol: assetSymbol,
+              maturity: position.maturity,
+              balance: position.previewValue,
+              usdPrice,
+              decimals,
+              apr: allAssets === 0n ? 0n : allProportionalAssets / allAssets,
+            };
+          }),
+        ];
+      },
+    );
+  }, [accountData, borrowEvents]);
 
   const updateToRows = useCallback(
     async (cancelled: () => boolean) => {
-      if (!previewerContract || !input.from) return;
+      if (!input.from) return;
 
       const marketAccount = getMarketAccount(input.from.symbol);
       if (!marketAccount) return;
 
-      const { floatingBorrowRate, usdPrice, assetSymbol, decimals } = marketAccount;
+      const { floatingBorrowRate, floatingBorrowAssets, fixedBorrowPositions, usdPrice, assetSymbol, decimals } =
+        marketAccount;
 
-      const fromRow = fromRows.find((r) => r.symbol === assetSymbol && r.maturity === input.from?.maturity);
+      const fromRow =
+        fromRows.find((r) => r.symbol === assetSymbol && r.maturity === input.from?.maturity) ??
+        (input.from.maturity
+          ? fixedBorrowPositions.flatMap((position) =>
+              position.maturity === input.from?.maturity
+                ? [
+                    {
+                      symbol: assetSymbol,
+                      maturity: position.maturity,
+                      balance: position.previewValue,
+                      usdPrice,
+                      decimals,
+                      apr: 0n,
+                    },
+                  ]
+                : [],
+            )[0]
+          : floatingBorrowAssets > 0n
+            ? {
+                symbol: assetSymbol,
+                balance: floatingBorrowAssets,
+                apr: floatingBorrowRate,
+                usdPrice,
+                decimals,
+              }
+            : undefined);
       if (!fromRow || !fromRow.balance) {
         return;
       }
@@ -187,10 +241,19 @@ function Operation() {
       }
 
       try {
-        const previewPools = await previewerContract.read.previewBorrowAtAllMaturities(
-          [marketAccount.market, initialAssets],
-          opts,
-        );
+        const previewPools =
+          legacyPreviewerChainId !== undefined
+            ? await readLegacyPreviewerPreviewBorrowAtAllMaturities(wagmi, {
+                chainId: legacyPreviewerChainId,
+                args: [marketAccount.market, initialAssets],
+              })
+            : previewerChainId !== undefined
+              ? await readPreviewerPreviewBorrowAtAllMaturities(wagmi, {
+                  chainId: previewerChainId,
+                  args: [marketAccount.market, initialAssets],
+                })
+              : undefined;
+        if (!previewPools) return;
         const currentTimestamp = BigInt(dayjs().unix());
 
         const rewards = rates[assetSymbol];
@@ -234,36 +297,68 @@ function Operation() {
             isBest: opt?.maturity === bestOption?.maturity,
           })),
         );
-      } catch (error) {
+      } catch {
         if (cancelled()) return;
         setToRows([]);
       }
     },
-    [previewerContract, input.from, input.percent, getMarketAccount, fromRows, opts, rates],
+    [input.from, input.percent, getMarketAccount, fromRows, rates],
   );
 
   const { isLoading: loadingToRows } = useDelayedEffect({ effect: updateToRows });
 
-  const usdAmount = useMemo(() => {
+  const fromRow = useMemo((): PositionTableRow | undefined => {
     const row = fromRows.find((r) => r.symbol === input.from?.symbol && r.maturity === input.from?.maturity);
-    if (!row || !row.balance) {
-      return '';
-    }
+    if (row) return row;
+
+    const marketAccount = input.from ? getMarketAccount(input.from.symbol) : undefined;
+    if (!marketAccount) return undefined;
+
+    const { floatingBorrowRate, floatingBorrowAssets, fixedBorrowPositions, usdPrice, assetSymbol, decimals } =
+      marketAccount;
+    return input.from?.maturity
+      ? fixedBorrowPositions.flatMap((position) =>
+          position.maturity === input.from?.maturity
+            ? [
+                {
+                  symbol: assetSymbol,
+                  maturity: position.maturity,
+                  balance: position.previewValue,
+                  usdPrice,
+                  decimals,
+                  apr: 0n,
+                },
+              ]
+            : [],
+        )[0]
+      : floatingBorrowAssets > 0n
+        ? {
+            symbol: assetSymbol,
+            balance: floatingBorrowAssets,
+            apr: floatingBorrowRate,
+            usdPrice,
+            decimals,
+          }
+        : undefined;
+  }, [fromRows, getMarketAccount, input.from]);
+
+  const toRow = useMemo(
+    () => toRows.find((row) => input.to?.symbol === row.symbol && input.to?.maturity === row.maturity),
+    [input.to, toRows],
+  );
+
+  const usdAmount = useMemo(() => {
+    if (!fromRow?.balance) return '';
 
     return formatNumber(
-      formatUnits((((row.balance * row.usdPrice) / WAD) * BigInt(input.percent)) / 100n || 0n, row.decimals),
+      formatUnits(
+        (((fromRow.balance * fromRow.usdPrice) / WAD) * BigInt(input.percent)) / 100n || 0n,
+        fromRow.decimals,
+      ),
       'USD',
       true,
     );
-  }, [input.from, input.percent, fromRows]);
-
-  const [fromRow, toRow] = useMemo<[PositionTableRow | undefined, PositionTableRow | undefined]>(
-    () => [
-      fromRows.find((row) => input.from?.symbol === row.symbol && input.from?.maturity === row.maturity),
-      toRows.find((row) => input.to?.symbol === row.symbol && input.to?.maturity === row.maturity),
-    ],
-    [input.from, input.to, fromRows, toRows],
-  );
+  }, [fromRow, input.percent]);
 
   const [maxRepayAssets, maxBorrowAssets] = useMemo(() => {
     const raw = input.slippage || '0';
@@ -281,14 +376,15 @@ function Operation() {
 
   const [requiresApproval, setRequiresApproval] = useState(false);
 
-  const populateTransaction = useCallback(async (): Promise<PopulatedTransaction | undefined> => {
-    if (!walletAddress || !debtManager || !marketContract || !input.from || !input.to || !opts) {
+  const executeTransaction = useCallback(async (): Promise<Hex | undefined> => {
+    if (!account || !debtManager || !marketContract || !input.from || !input.to || !publicClient) {
       return;
     }
 
     const percentage = (BigInt(input.percent) * WAD) / 100n;
+    const accountOptions = { account, chain: defaultChain };
 
-    if (await isContract(walletAddress)) {
+    if (await isContract(account)) {
       if (input.from.maturity && input.to.maturity) {
         const args = [
           marketContract.address,
@@ -298,28 +394,22 @@ function Operation() {
           maxBorrowAssets,
           percentage,
         ] as const;
-        const gas = await debtManager.estimateGas.rollFixed(args, opts);
-        const sim = await debtManager.simulate.rollFixed(args, {
-          ...opts,
-          gasLimit: gasLimit(gas),
-        });
-        return sim.request;
+        const gas = await debtManager.estimateGas.rollFixed(args, accountOptions);
+        const options = { ...accountOptions, gas: gasLimit(gas) };
+        await debtManager.simulate.rollFixed(args, options);
+        return debtManager.write.rollFixed(args, options);
       } else if (input.to.maturity) {
         const args = [marketContract.address, input.to.maturity, maxBorrowAssets, percentage] as const;
-        const gas = await debtManager.estimateGas.rollFloatingToFixed(args, opts);
-        const sim = await debtManager.simulate.rollFloatingToFixed(args, {
-          ...opts,
-          gasLimit: gasLimit(gas),
-        });
-        return sim.request;
+        const gas = await debtManager.estimateGas.rollFloatingToFixed(args, accountOptions);
+        const options = { ...accountOptions, gas: gasLimit(gas) };
+        await debtManager.simulate.rollFloatingToFixed(args, options);
+        return debtManager.write.rollFloatingToFixed(args, options);
       } else if (input.from.maturity) {
         const args = [marketContract.address, input.from.maturity, maxRepayAssets, percentage] as const;
-        const gas = await debtManager.estimateGas.rollFixedToFloating(args, opts);
-        const sim = await debtManager.simulate.rollFixedToFloating(args, {
-          ...opts,
-          gasLimit: gasLimit(gas),
-        });
-        return sim.request;
+        const gas = await debtManager.estimateGas.rollFixedToFloating(args, accountOptions);
+        const options = { ...accountOptions, gas: gasLimit(gas) };
+        await debtManager.simulate.rollFixedToFloating(args, options);
+        return debtManager.write.rollFixedToFloating(args, options);
       } else return;
     }
 
@@ -328,7 +418,7 @@ function Operation() {
         address: marketContract.address,
         slot: '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc',
       }),
-      marketContract.read.nonces([walletAddress], opts),
+      marketContract.read.nonces([account], accountOptions),
     ]);
 
     if (!marketImpl) return;
@@ -342,7 +432,7 @@ function Operation() {
       domain: {
         name: '',
         version: '1',
-        chainId: chain.id,
+        chainId: defaultChain.id,
         verifyingContract,
       },
       types: {
@@ -355,7 +445,7 @@ function Operation() {
         ],
       },
       message: {
-        owner: walletAddress,
+        owner: account,
         spender: debtManager.address,
         value,
         nonce: marketNonce,
@@ -364,7 +454,7 @@ function Operation() {
     }).then(hexToSignature);
 
     const permit = {
-      account: walletAddress,
+      account,
       deadline,
       value,
       ...{ v: Number(v), r, s },
@@ -380,32 +470,24 @@ function Operation() {
         percentage,
         permit,
       ] as const;
-      const gas = await debtManager.estimateGas.rollFixed(args, opts);
-      const sim = await debtManager.simulate.rollFixed(args, {
-        ...opts,
-        gasLimit: gasLimit(gas),
-      });
-      return sim.request;
+      const gas = await debtManager.estimateGas.rollFixed(args, accountOptions);
+      const options = { ...accountOptions, gas: gasLimit(gas) };
+      await debtManager.simulate.rollFixed(args, options);
+      return debtManager.write.rollFixed(args, options);
     } else if (input.to.maturity) {
       const args = [marketContract.address, input.to.maturity, maxBorrowAssets, percentage, permit] as const;
-      const gas = await debtManager.estimateGas.rollFloatingToFixed(args, opts);
-      const sim = await debtManager.simulate.rollFloatingToFixed(args, {
-        ...opts,
-        gasLimit: gasLimit(gas),
-      });
-      return sim.request;
+      const gas = await debtManager.estimateGas.rollFloatingToFixed(args, accountOptions);
+      const options = { ...accountOptions, gas: gasLimit(gas) };
+      await debtManager.simulate.rollFloatingToFixed(args, options);
+      return debtManager.write.rollFloatingToFixed(args, options);
     } else if (input.from.maturity) {
       const args = [marketContract.address, input.from.maturity, maxRepayAssets, percentage, permit] as const;
-      const gas = await debtManager.estimateGas.rollFixedToFloating(args, opts);
-      const sim = await debtManager.simulate.rollFixedToFloating(args, {
-        ...opts,
-        gasLimit: gasLimit(gas),
-      });
-      return sim.request;
+      const gas = await debtManager.estimateGas.rollFixedToFloating(args, accountOptions);
+      const options = { ...accountOptions, gas: gasLimit(gas) };
+      await debtManager.simulate.rollFixedToFloating(args, options);
+      return debtManager.write.rollFixedToFloating(args, options);
     }
   }, [
-    opts,
-    chain.id,
     debtManager,
     input.from,
     input.percent,
@@ -415,7 +497,7 @@ function Operation() {
     maxBorrowAssets,
     maxRepayAssets,
     publicClient,
-    walletAddress,
+    account,
     signTypedDataAsync,
   ]);
 
@@ -429,9 +511,9 @@ function Operation() {
     }
   }, [input.from, input.to, maxBorrowAssets, needsApproval, setErrorData]);
 
-  const { isLoading: loadingStatus } = useDelayedEffect({ effect: load });
+  const { isLoading: loadingStatus } = useDelayedEffect({ effect: load, delay: 0 });
 
-  const rollover = useCallback(() => submit(populateTransaction), [populateTransaction, submit]);
+  const rollover = useCallback(() => submit(executeTransaction), [executeTransaction, submit]);
 
   const approveRollover = useCallback(async () => {
     await approve(maxBorrowAssets);
@@ -463,7 +545,7 @@ function Operation() {
         data-testid="rollover-sheet-from"
       >
         <PositionTable
-          loading={fromRows.length === 0}
+          loading={!accountData}
           data={fromRows}
           showBalance
           onClick={({ symbol, maturity }) => {

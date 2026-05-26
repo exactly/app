@@ -9,10 +9,10 @@ import React, {
 } from 'react';
 
 import { parseEther, parseUnits, zeroAddress, Address } from 'viem';
-import * as wagmiChains from 'wagmi/chains';
+import * as viemChains from 'viem/chains';
 
 import { useWalletClient } from 'wagmi';
-import { optimism } from 'wagmi/chains';
+import { optimism } from 'viem/chains';
 
 import {
   type Route,
@@ -27,7 +27,6 @@ import {
 import handleOperationError from 'utils/handleOperationError';
 import type { ErrorData } from 'types/Error';
 import type { Transaction } from 'types/Transaction';
-import { useWeb3 } from 'hooks/useWeb3';
 import {
   socketActiveRoutes,
   socketBridgeStatus,
@@ -41,6 +40,8 @@ import useERC20 from 'hooks/useERC20';
 import { gasLimit } from 'utils/gas';
 import waitForTransaction from 'utils/waitForTransaction';
 import useDelayedEffect from 'hooks/useDelayedEffect';
+import { defaultChain } from 'utils/client';
+import useReadOnly from 'hooks/useReadOnly';
 
 export enum Screen {
   SELECT_ROUTE = 'SELECT_ROUTE',
@@ -99,7 +100,7 @@ export const SocketSwapProvider: FC<PropsWithChildren> = ({ children }) => {
   const [qtyIn, setQtyIn] = useState<string>('');
   const [txError, setTXError] = useState<ContextValues['txError']>();
   const [socketError, setSocketError] = useState<ContextValues['socketError']>();
-  const [chain, setChain] = useState<ContextValues['chain']>();
+  const [sourceChain, setSourceChain] = useState<ContextValues['chain']>();
   const [fromAssetAddress, setFromAssetAddress] = useState<ContextValues['fromAssetAddress']>();
   const [toAssetAddress, setToAssetAddress] = useState<ContextValues['toAssetAddress']>();
   const [chains, setChains] = useState<ContextValues['chains']>();
@@ -112,11 +113,14 @@ export const SocketSwapProvider: FC<PropsWithChildren> = ({ children }) => {
   const [recipient, setRecipient] = useState<ContextValues['recipient']>();
   const [toChainId, setToChainId] = useState<ContextValues['toChainId']>();
 
-  const { walletAddress, opts, chain: appChain } = useWeb3();
-  const { data: walletClient } = useWalletClient({ chainId: chain?.chainId });
+  const { account: walletAddress } = useReadOnly();
+  const { data: walletClient } = useWalletClient({ chainId: sourceChain?.chainId });
   const { t } = useTranslation();
-  const isBridge = chain?.chainId !== appChain.id;
-  const erc20 = useERC20(fromAssetAddress === NATIVE_TOKEN_ADDRESS ? undefined : fromAssetAddress, chain?.chainId);
+  const isBridge = sourceChain?.chainId !== defaultChain.id;
+  const erc20 = useERC20(
+    fromAssetAddress === NATIVE_TOKEN_ADDRESS ? undefined : fromAssetAddress,
+    sourceChain?.chainId,
+  );
 
   const fetchChains = useCallback(async () => {
     const allChains = await socketChains();
@@ -132,7 +136,7 @@ export const SocketSwapProvider: FC<PropsWithChildren> = ({ children }) => {
   }, [setChains, walletAddress]);
 
   const fetchRoutes = useCallback(async () => {
-    if (!fromAssetAddress || !toAssetAddress || !chain || !walletAddress || !toChainId) return;
+    if (!fromAssetAddress || !toAssetAddress || !sourceChain || !walletAddress || !toChainId) return;
 
     setRoutes(undefined);
     setSocketError(undefined);
@@ -145,7 +149,7 @@ export const SocketSwapProvider: FC<PropsWithChildren> = ({ children }) => {
       const fromAssetDecimals = (await erc20?.read.decimals()) || 18;
 
       const quote = await socketQuote({
-        fromChainId: chain.chainId,
+        fromChainId: sourceChain.chainId,
         toChainId: toChainId,
         fromTokenAddress: fromAssetAddress,
         fromAmount: parseUnits(qtyIn, fromAssetDecimals),
@@ -162,23 +166,23 @@ export const SocketSwapProvider: FC<PropsWithChildren> = ({ children }) => {
       setRoute(undefined);
       setSocketError({ message: t('Error fetching routes from socket'), status: true });
     }
-  }, [fromAssetAddress, toAssetAddress, chain, walletAddress, toChainId, qtyIn, erc20?.read, recipient, t]);
+  }, [fromAssetAddress, toAssetAddress, sourceChain, walletAddress, toChainId, qtyIn, erc20?.read, recipient, t]);
 
   const approve = useCallback(async () => {
     setTXError(undefined);
     if (fromAssetAddress === NATIVE_TOKEN_ADDRESS) setTXStep(TXStep.CONFIRM);
 
-    if (!walletAddress || !walletClient || !route || !erc20 || !opts) return;
+    if (!walletAddress || !walletClient || !route || !erc20 || !walletAddress) return;
 
     const {
       userTxs: [{ approvalData }],
     } = route;
 
-    const supportedChains = Object.values(wagmiChains);
+    const supportedChains = Object.values(viemChains);
 
     const crossChainOpts = {
-      ...opts,
-      chain: supportedChains.find((c) => c.id === chain?.chainId),
+      account: walletAddress,
+      chain: supportedChains.find((c) => c.id === sourceChain?.chainId),
     };
 
     if (!approvalData) {
@@ -194,10 +198,10 @@ export const SocketSwapProvider: FC<PropsWithChildren> = ({ children }) => {
 
       if (allowance < minimumApprovalAmount) {
         const args = [approvalData.allowanceTarget, minimumApprovalAmount] as const;
-        const gas = await erc20.estimateGas.approve(args, opts);
+        const gas = await erc20.estimateGas.approve(args, { account: walletAddress });
         const hash = await erc20.write.approve(args, {
           ...crossChainOpts,
-          gasLimit: gasLimit(gas),
+          gas: gasLimit(gas),
         });
         await waitForTransaction({ hash });
       }
@@ -208,7 +212,7 @@ export const SocketSwapProvider: FC<PropsWithChildren> = ({ children }) => {
       }
       setTXStep(TXStep.APPROVE);
     }
-  }, [chain?.chainId, erc20, fromAssetAddress, opts, route, walletAddress, walletClient]);
+  }, [sourceChain?.chainId, erc20, fromAssetAddress, route, walletAddress, walletClient]);
 
   const submit = useCallback(async () => {
     if (txStep !== TXStep.CONFIRM || !walletClient || !route) return;
@@ -240,11 +244,11 @@ export const SocketSwapProvider: FC<PropsWithChildren> = ({ children }) => {
       if (!bridgeInProgess) return;
     }
     const fetchBridgeStatus = async () => {
-      if (!tx?.hash || !chain) return;
+      if (!tx?.hash || !sourceChain) return;
       try {
         const response = await socketBridgeStatus({
           transactionHash: tx.hash,
-          fromChainId: chain.chainId,
+          fromChainId: sourceChain.chainId,
           toChainId: optimism.id,
         });
 
@@ -257,7 +261,7 @@ export const SocketSwapProvider: FC<PropsWithChildren> = ({ children }) => {
       fetchBridgeStatus();
     }, 2000);
     return () => clearInterval(interval);
-  }, [isBridge, bridgeStatus, chain, tx?.hash]);
+  }, [isBridge, bridgeStatus, sourceChain, tx?.hash]);
 
   const { isLoading: routesLoading } = useDelayedEffect({
     effect: fetchRoutes,
@@ -270,10 +274,9 @@ export const SocketSwapProvider: FC<PropsWithChildren> = ({ children }) => {
 
   useEffect(() => {
     if (!chains) return;
-    const id = optimism.id;
-    const activeNetwork = chains.find(({ chainId }) => chainId === id);
-    if (activeNetwork) setChain(activeNetwork);
-  }, [chains, setChain]);
+    const activeNetwork = chains.find(({ chainId }) => chainId === optimism.id);
+    if (activeNetwork) setSourceChain(activeNetwork);
+  }, [chains, setSourceChain]);
 
   const fetchActiveRoutes = useCallback(async () => {
     if (!walletAddress) return;
@@ -305,7 +308,7 @@ export const SocketSwapProvider: FC<PropsWithChildren> = ({ children }) => {
       }
     },
     setFromAssetAddress: handleFromAssetAddressChange,
-    setChain,
+    setChain: setSourceChain,
     setQtyIn,
     setTXStep,
     approve,
@@ -316,7 +319,7 @@ export const SocketSwapProvider: FC<PropsWithChildren> = ({ children }) => {
     qtyIn,
     txError,
     socketError,
-    chain,
+    chain: sourceChain,
     fromAssetAddress: fromAssetAddress,
     chains,
     routes,

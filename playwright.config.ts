@@ -1,7 +1,11 @@
-import { devices, PlaywrightTestConfig } from '@playwright/test';
+import { join } from 'node:path';
+
+import { devices, type PlaywrightTestConfig } from '@playwright/test';
 import dotenv from 'dotenv';
 
 dotenv.config();
+
+process.env.E2E_ANVIL_STATE ??= join(process.cwd(), 'test-results', `anvil-${process.pid}.json`);
 
 const config: PlaywrightTestConfig = {
   testDir: './e2e/specs',
@@ -13,8 +17,12 @@ const config: PlaywrightTestConfig = {
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: 1,
-  reporter: [process.env.CI ? ['blob'] : ['list', { printSteps: true }]],
+  ...(process.env.E2E_WORKERS ? { workers: Number(process.env.E2E_WORKERS) } : {}),
+  reporter: [
+    process.env.CI ? ['blob'] : ['list', { printSteps: true }],
+    ['json', { outputFile: 'test-results/e2e-results.json' }],
+    ['./e2e/report/trace.ts'],
+  ],
   use: {
     userAgent:
       'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36',
@@ -38,10 +46,10 @@ const config: PlaywrightTestConfig = {
   ],
   outputDir: 'test-results/',
   webServer: {
-    command: 'pnpm start',
-    timeout: 66_666,
+    command: 'pnpm start:e2e',
+    timeout: 240_000,
     url: 'http://127.0.0.1:3000',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     stdout: 'ignore',
     stderr: 'pipe',
   },

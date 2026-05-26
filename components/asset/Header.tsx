@@ -1,4 +1,4 @@
-import React, { type FC, useMemo, useCallback, useEffect, useState } from 'react';
+import React, { type FC, useMemo, useCallback } from 'react';
 import Grid from '@mui/material/Grid';
 import { WAD } from '@exactly/lib';
 
@@ -11,20 +11,33 @@ import DropdownMenu from 'components/DropdownMenu';
 import useAssets from 'hooks/useAssets';
 import AssetOption from './AssetOption';
 import useRouter from 'hooks/useRouter';
-import { Address, formatEther, formatUnits } from 'viem';
+import { formatEther, formatUnits, type Address } from 'viem';
 import useStETHNativeAPR from 'hooks/useStETHNativeAPR';
 import { toPercentage } from 'utils/utils';
 import { track } from 'utils/mixpanel';
 import { Box, Typography } from '@mui/material';
 import getSymbolDescription from 'utils/getSymbolDescription';
-import useContractAddress from 'hooks/useContractAddress';
-import { useWeb3 } from 'hooks/useWeb3';
 import Alert from '@mui/material/Alert';
 import { useFloatingBalances } from 'hooks/useFloatingBalances';
 import { useFixedBalances } from 'hooks/useFixedBalances';
 import useGlobalUtilization from 'hooks/useGlobalUtilization';
-import { mainnet } from 'wagmi';
+import { mainnet } from 'viem/chains';
 import FrozenPill from 'components/common/FrozenPill';
+import { defaultChain } from 'utils/client';
+import {
+  priceFeedDaiAddress,
+  priceFeedEthAddress,
+  priceFeedExaAddress,
+  priceFeedOpAddress,
+  priceFeedUsdcAddress,
+  priceFeedUsdCeAddress,
+  priceFeedWbtcAddress,
+  priceFeedWethAddress,
+  priceFeedcbBtcAddress,
+  priceFeedcbXrpAddress,
+  priceFeedesExaAddress,
+  priceFeedwstEthAddress,
+} from 'generated/wagmi';
 
 type Props = {
   symbol: string;
@@ -35,14 +48,27 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
   const { marketAccount } = useAccountData(symbol);
   const options = useAssets();
   const { push, query } = useRouter();
-  const getContractAddress = useContractAddress();
   const globalUtilization = useGlobalUtilization(symbol);
   const { floatingDeposits, floatingBorrows } = useFloatingBalances(symbol);
   const { fixedDeposits, fixedBorrows } = useFixedBalances(symbol);
-  const [priceFeedAddress, setPriceFeedAddress] = useState<Address | undefined>(undefined);
-  const {
-    chain: { id: displayNetworkId },
-  } = useWeb3();
+  const priceFeedAddress = Object.entries(
+    (
+      {
+        DAI: priceFeedDaiAddress,
+        ETH: priceFeedEthAddress,
+        EXA: priceFeedExaAddress,
+        OP: priceFeedOpAddress,
+        USDC: priceFeedUsdcAddress,
+        'USDC.e': priceFeedUsdCeAddress,
+        WBTC: priceFeedWbtcAddress,
+        WETH: priceFeedWethAddress,
+        cbBTC: priceFeedcbBtcAddress,
+        cbXRP: priceFeedcbXrpAddress,
+        esEXA: priceFeedesExaAddress,
+        wstETH: priceFeedwstEthAddress,
+      } satisfies Partial<Record<string, Partial<Record<number, Address>>>>
+    )[symbol] ?? {},
+  ).find(([chainId]) => Number(chainId) === defaultChain.id)?.[1];
 
   const nativeAPR = useStETHNativeAPR();
 
@@ -53,15 +79,6 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
     },
     [marketAccount],
   );
-
-  useEffect(() => {
-    const fetchPriceFeedAddress = async () => {
-      const address = await getContractAddress(`PriceFeed${symbol}`);
-      setPriceFeedAddress(address);
-    };
-
-    fetchPriceFeedAddress();
-  }, [getContractAddress, symbol]);
 
   const itemsInfo = useMemo(() => {
     const { decimals, usdPrice } = marketAccount ?? {};
@@ -161,12 +178,12 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
   const borrowableUtilization = useMemo(() => {
     if (!marketAccount) return;
 
-    if (displayNetworkId === mainnet.id) return BigInt(9 * 1e17);
+    if (defaultChain.id === mainnet.id) return BigInt(9 * 1e17);
     if ('reserveFactor' in marketAccount) {
       return WAD - marketAccount.reserveFactor;
     }
     return;
-  }, [displayNetworkId, marketAccount]);
+  }, [marketAccount]);
 
   return (
     <>

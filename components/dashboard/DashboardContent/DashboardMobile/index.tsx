@@ -1,5 +1,6 @@
-import React, { FC, PropsWithChildren } from 'react';
-import { formatUnits } from 'viem';
+import React, { FC, PropsWithChildren, useMemo } from 'react';
+import { formatUnits, type Address } from 'viem';
+import { useContractEvents } from 'wagmi';
 
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { Box, Button, ButtonGroup, Grid, Skeleton, Tooltip, Typography } from '@mui/material';
@@ -10,11 +11,36 @@ import useDashboard from 'hooks/useDashboard';
 import formatNumber from 'utils/formatNumber';
 import parseTimestamp from 'utils/parseTimestamp';
 import SwitchCollateral from '../FloatingPoolDashboard/FloatingPoolDashboardTable/SwitchCollateral';
-import APRItem from '../FixedPoolDashboard/FixedPoolDashboardTable/APRItem';
 import useAccountData from 'hooks/useAccountData';
 import { useTranslation } from 'react-i18next';
+import useReadOnly from 'hooks/useReadOnly';
+import { calculateAPR } from 'utils/calculateAPR';
 
 import Rates from 'components/Rates';
+import {
+  marketAbi,
+  marketDaiAddress,
+  marketDaiBlock,
+  marketExaAddress,
+  marketExaBlock,
+  marketOpAddress,
+  marketOpBlock,
+  marketUsdcAddress,
+  marketUsdcBlock,
+  marketUsdCeAddress,
+  marketUsdCeBlock,
+  marketWbtcAddress,
+  marketWbtcBlock,
+  marketWethAddress,
+  marketWethBlock,
+  marketcbBtcAddress,
+  marketcbBtcBlock,
+  marketcbXrpAddress,
+  marketcbXrpBlock,
+  marketwstEthAddress,
+  marketwstEthBlock,
+} from 'generated/wagmi';
+import { defaultChain } from 'utils/client';
 
 type Props = {
   type: 'deposit' | 'borrow';
@@ -158,7 +184,7 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                     )}
                   </FlexItem>
                   <FlexItem title={t('Avg Fixed Rate')} tooltip={t('Average rate for existing deposits.')}>
-                    <APRItem type={type} maturityDate={maturity} market={market} decimals={decimals} />
+                    <FixedAPR type={type} maturityDate={maturity} market={market} decimals={decimals} symbol={symbol} />
                   </FlexItem>
                   <FlexItem title={t('Maturity Date')}>
                     {maturity ? parseTimestamp(maturity) : <Skeleton width={80} />}
@@ -211,6 +237,104 @@ const DashboardMobile: FC<Props> = ({ type }) => {
         })
       )}
     </Box>
+  );
+};
+
+const FixedAPR: FC<{
+  type: 'deposit' | 'borrow';
+  maturityDate: bigint;
+  market: Address;
+  decimals: number;
+  symbol: string;
+}> = ({ type, maturityDate, market, decimals, symbol }) => {
+  const { account } = useReadOnly();
+  const { lastSync } = useAccountData(symbol);
+  const fromBlock = useMemo(
+    () =>
+      (
+        [
+          [marketDaiAddress, marketDaiBlock],
+          [marketUsdcAddress, marketUsdcBlock],
+          [marketUsdCeAddress, marketUsdCeBlock],
+          [marketWethAddress, marketWethBlock],
+          [marketwstEthAddress, marketwstEthBlock],
+          [marketOpAddress, marketOpBlock],
+          [marketWbtcAddress, marketWbtcBlock],
+          [marketcbBtcAddress, marketcbBtcBlock],
+          [marketcbXrpAddress, marketcbXrpBlock],
+          [marketExaAddress, marketExaBlock],
+        ] as const
+      ).find(([address]) =>
+        Object.entries(address).some(
+          ([chainId, value]) => Number(chainId) === defaultChain.id && value.toLowerCase() === market.toLowerCase(),
+        ),
+      )?.[1]?.[defaultChain.id as never],
+    [market],
+  );
+  const {
+    data: depositTxs = [],
+    isLoading: depositTxsLoading,
+    isFetching: depositTxsFetching,
+  } = useContractEvents({
+    address: market,
+    abi: marketAbi,
+    eventName: 'DepositAtMaturity',
+    strict: true,
+    args: account ? { maturity: maturityDate, owner: account } : undefined,
+    fromBlock,
+    toBlock: 'latest',
+    chainId: defaultChain.id,
+    scopeKey: lastSync?.toString(),
+    query: {
+      enabled: type === 'deposit' && Boolean(account),
+      select: (logs) => logs.map(({ args, blockTimestamp }) => ({ ...args, blockTimestamp })),
+    },
+  });
+  const {
+    data: borrowTxs = [],
+    isLoading: borrowTxsLoading,
+    isFetching: borrowTxsFetching,
+  } = useContractEvents({
+    address: market,
+    abi: marketAbi,
+    eventName: 'BorrowAtMaturity',
+    strict: true,
+    args: account ? { maturity: maturityDate, borrower: account } : undefined,
+    fromBlock,
+    toBlock: 'latest',
+    chainId: defaultChain.id,
+    scopeKey: lastSync?.toString(),
+    query: {
+      enabled: type === 'borrow' && Boolean(account),
+      select: (logs) => logs.map(({ args, blockTimestamp }) => ({ ...args, blockTimestamp })),
+    },
+  });
+  const apr = useMemo(() => {
+    const wad = 10n ** BigInt(decimals);
+    const [allAPRbyAmount, allAmounts] = (type === 'borrow' ? borrowTxs : depositTxs).reduce(
+      ([aprAmounts, assets], { fee, assets: eventAssets, maturity, blockTimestamp }) => {
+        if (blockTimestamp === undefined) return [aprAmounts, assets];
+        return [
+          aprAmounts + (calculateAPR(fee, eventAssets, blockTimestamp, maturity) * eventAssets) / wad,
+          assets + eventAssets,
+        ];
+      },
+      [0n, 0n],
+    );
+
+    return allAmounts === 0n ? 0n : (allAPRbyAmount * wad) / allAmounts;
+  }, [borrowTxs, depositTxs, decimals, type]);
+
+  return type === 'borrow' ? (
+    borrowTxsLoading || borrowTxsFetching ? (
+      <Skeleton width={50} />
+    ) : (
+      `${(Number(formatUnits(apr, 18)) || 0).toFixed(2)} %`
+    )
+  ) : depositTxsLoading || depositTxsFetching ? (
+    <Skeleton width={50} />
+  ) : (
+    `${(Number(formatUnits(apr, 18)) || 0).toFixed(2)} %`
   );
 };
 

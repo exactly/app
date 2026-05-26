@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 
-import { type WalletClient, useWalletClient } from 'wagmi';
+import { useWalletClient } from 'wagmi';
+import type { WalletClient } from 'viem';
 import { Web3Provider } from '@ethersproject/providers';
 
 export function walletClientToProvider(walletClient: WalletClient) {

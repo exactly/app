@@ -22,7 +22,6 @@ import Draggable from 'react-draggable';
 import { TransitionProps } from '@mui/material/transitions';
 import CloseIcon from '@mui/icons-material/Close';
 import StakingEXAInput from '../StakingEXAInput';
-import { useWeb3 } from 'hooks/useWeb3';
 import formatNumber from 'utils/formatNumber';
 import { useEXAPrice } from 'hooks/useEXA';
 import { WAD } from '@exactly/lib';
@@ -31,13 +30,20 @@ import { Transaction } from 'types/Transaction';
 import { useStakeEXA } from 'contexts/StakeEXAContext';
 import parseTimestamp from 'utils/parseTimestamp';
 import { LoadingButton } from '@mui/lab';
-import { useStakedEXA } from 'hooks/useStakedEXA';
-import { gasLimit } from 'utils/gas';
 import waitForTransaction from 'utils/waitForTransaction';
 import LoadingTransaction from 'components/common/modal/Loading';
 import { toPercentage } from 'utils/utils';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { stakedExaAddress, useSimulateStakedExaClaimAll, useWriteStakedExaClaimAll } from 'generated/wagmi';
+import { defaultChain } from 'utils/client';
+import useReadOnly from 'hooks/useReadOnly';
+import { useConnection } from 'wagmi';
+import useConnectWallet from 'hooks/useConnectWallet';
+
+const stakedExaChainId = Object.keys(stakedExaAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof stakedExaAddress => chainId === defaultChain.id);
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
@@ -131,12 +137,19 @@ function StakingProgress() {
   const { t } = useTranslation();
   const [stakingModal, setStakingModal] = useState(false);
   const [operation, setOperation] = useState<'deposit' | 'withdraw'>('deposit');
-  const stakedEXA = useStakedEXA();
-  const { connect, isConnected, impersonateActive, opts } = useWeb3();
+  const { account: walletAddress, isImpersonating: impersonateActive } = useReadOnly();
+  const { isConnected } = useConnection();
+  const connect = useConnectWallet();
 
   const { start: stakingStart, balance, totalClaimable, totalEarned, parameters, refetch } = useStakeEXA();
   const [tx, setTx] = useState<Transaction>();
   const [isLoading, setIsLoading] = useState(false);
+  const { data: claimAllSimulation } = useSimulateStakedExaClaimAll({
+    account: walletAddress,
+    chainId: stakedExaChainId,
+    query: { enabled: Boolean(walletAddress && stakedExaChainId !== undefined && totalClaimable > 0n) },
+  });
+  const { mutateAsync: writeClaimAll } = useWriteStakedExaClaimAll();
 
   const EXAPrice = useEXAPrice();
 
@@ -196,13 +209,12 @@ function StakingProgress() {
   }, []);
 
   const claimAll = useCallback(async () => {
-    if (!stakedEXA || !opts) return;
+    if (!claimAllSimulation) return;
 
     setIsLoading(true);
     let hash;
     try {
-      const gas = await stakedEXA.estimateGas.claimAll(opts);
-      hash = await stakedEXA.write.claimAll({ ...opts, gasLimit: gasLimit(gas) });
+      hash = await writeClaimAll(claimAllSimulation.request);
 
       setTx({ status: 'processing', hash });
 
@@ -215,7 +227,7 @@ function StakingProgress() {
       refetch();
       setIsLoading(false);
     }
-  }, [stakedEXA, opts, refetch]);
+  }, [claimAllSimulation, refetch, writeClaimAll]);
 
   return (
     <Box display="flex" flexDirection="column" gap={2}>

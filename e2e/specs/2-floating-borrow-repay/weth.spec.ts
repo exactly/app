@@ -5,10 +5,8 @@ import _app from '../../common/app';
 
 const test = base();
 
-test.describe.configure({ mode: 'serial' });
-
 test('WETH floating borrow/repay', async ({ page, web3, setup }) => {
-  await web3.fork.setBalance(web3.account.address, {
+  await web3.anvil.setBalance(web3.account.address, {
     ETH: 100,
   });
 

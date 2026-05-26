@@ -1,24 +1,23 @@
 import { useMemo } from 'react';
-import { Address, useWalletClient } from 'wagmi';
-import { getContract } from '@wagmi/core';
-import { erc20ABI } from 'types/abi';
+import { usePublicClient, useWalletClient } from 'wagmi';
+import { getContract, type Address } from 'viem';
+import { erc20Abi } from 'generated/wagmi';
 import { ERC20 } from 'types/contracts';
-import { useWeb3 } from './useWeb3';
+import { defaultChain } from 'utils/client';
 
 export default (address?: Address, chainId?: number): ERC20 | undefined => {
-  const { chain } = useWeb3();
   const { data: walletClient } = useWalletClient();
+  const publicClient = usePublicClient({ chainId: chainId || defaultChain.id });
 
   return useMemo(() => {
-    if (!walletClient || !address) return;
+    if (!walletClient || !publicClient || !address) return;
 
     const contract = getContract({
-      chainId: chainId || chain.id,
       address,
-      abi: erc20ABI,
-      walletClient,
+      abi: erc20Abi,
+      client: { public: publicClient, wallet: walletClient },
     });
 
     return contract;
-  }, [address, chain.id, chainId, walletClient]);
+  }, [address, publicClient, walletClient]);
 };

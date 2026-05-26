@@ -9,12 +9,10 @@ import { selectFixedPool } from '../../utils/pools';
 
 const test = base();
 
-test.describe.configure({ mode: 'serial' });
-
 test('OP fixed withdraw/deposit', async ({ page, web3, setup }) => {
   const pool = selectFixedPool();
 
-  await web3.fork.setBalance(web3.account.address, {
+  await web3.anvil.setBalance(web3.account.address, {
     ETH: 100,
     OP: 50_000,
   });
@@ -52,6 +50,8 @@ test('OP fixed withdraw/deposit', async ({ page, web3, setup }) => {
   await navbar.goTo('dashboard');
 
   await dashboard.checkFixedTableRow('deposit', 'OP', pool);
+  await dashboard.expandFixedTableRow('deposit', 'OP', pool);
+  await dashboard.checkFixedTransaction('deposit');
 
   await withdraw.execute({
     type: 'fixed',
@@ -59,6 +59,10 @@ test('OP fixed withdraw/deposit', async ({ page, web3, setup }) => {
     amount: '1000',
     maturity: pool,
   });
+
+  await app.reload();
+  await dashboard.expandFixedTableRow('deposit', 'OP', pool);
+  await dashboard.checkFixedTransaction('withdraw');
 
   await balance.check({ address: web3.account.address, symbol: 'OP', amount: '3500', delta: '0.005' });
 });

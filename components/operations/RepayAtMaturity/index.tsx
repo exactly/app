@@ -1,16 +1,12 @@
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { WAD } from '@exactly/lib';
 
-import ModalTxCost from 'components/OperationsModal/ModalTxCost';
 import ModalGif from 'components/OperationsModal/ModalGif';
 
 import formatNumber from 'utils/formatNumber';
 
-import { useWeb3 } from 'hooks/useWeb3';
-
-import useApprove from 'hooks/useApprove';
 import useBalance from 'hooks/useBalance';
-import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
+import { useOperationContext } from 'contexts/OperationContext';
 import useAccountData from 'hooks/useAccountData';
 import { Grid } from '@mui/material';
 import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
@@ -29,14 +25,25 @@ import useHandleOperationError from 'hooks/useHandleOperationError';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 import ModalInfoRepayWithDiscount from 'components/OperationsModal/Info/ModalInfoRepayWithDiscount';
-import usePreviewer from 'hooks/usePreviewer';
-import useDelayedEffect from 'hooks/useDelayedEffect';
-import { CustomError } from 'types/Error';
-import useEstimateGas from 'hooks/useEstimateGas';
 import { formatUnits, parseUnits, zeroAddress } from 'viem';
 import dayjs from 'dayjs';
-import waitForTransaction from 'utils/waitForTransaction';
-import { gasLimit } from 'utils/gas';
+import {
+  erc20Abi,
+  legacyPreviewerAddress,
+  marketAbi,
+  marketEthRouterAbi,
+  marketEthRouterAddress,
+  previewerAddress,
+  useReadErc20Allowance,
+  useReadLegacyPreviewerPreviewRepayAtMaturity,
+  useReadPreviewerPreviewRepayAtMaturity,
+  useSimulateErc20Approve,
+  useSimulateMarketEthRouterRepayAtMaturity,
+  useSimulateMarketRepayAtMaturity,
+} from 'generated/wagmi';
+import { defaultChain } from 'utils/client';
+import useReadOnly from 'hooks/useReadOnly';
+import { useSendCalls, useWaitForCallsStatus } from 'wagmi';
 
 type RepayWithDiscount = {
   principal: string;
@@ -45,11 +52,17 @@ type RepayWithDiscount = {
   discount: string;
 };
 
+const legacyPreviewerChainId = Object.keys(legacyPreviewerAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof legacyPreviewerAddress => chainId === defaultChain.id);
+const previewerChainId = Object.keys(previewerAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof previewerAddress => chainId === defaultChain.id);
+
 const RepayAtMaturity: FC = () => {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
-  const { walletAddress, opts } = useWeb3();
-  const previewerContract = usePreviewer();
+  const { account: walletAddress } = useReadOnly();
 
   const {
     symbol,
@@ -57,181 +70,222 @@ const RepayAtMaturity: FC = () => {
     setErrorData,
     qty,
     setQty,
-    gasCost,
-    tx,
-    setTx,
     date,
-    requiresApproval,
-    setRequiresApproval,
     isLoading: isLoadingOp,
     setIsLoading: setIsLoadingOp,
-    marketContract,
-    assetContract,
-    ETHRouterContract,
     rawSlippage,
     setRawSlippage,
     slippage,
   } = useOperationContext();
 
-  const [previewData, setPreviewData] = useState<RepayWithDiscount | undefined>();
-
   const handleOperationError = useHandleOperationError();
-
   const [penaltyAssets, setPenaltyAssets] = useState(0n);
   const [positionAssetsAmount, setPositionAssetsAmount] = useState(0n);
-
-  const { marketAccount } = useAccountData(symbol);
-
-  const maxAmountToRepay = useMemo(
-    () => ((positionAssetsAmount + penaltyAssets) * slippage) / WAD,
-    [positionAssetsAmount, penaltyAssets, slippage],
-  );
-
-  const walletBalance = useBalance(symbol, assetContract?.address);
-
+  const { marketAccount, refreshAccountData } = useAccountData(symbol);
+  const walletBalance = useBalance(symbol, marketAccount?.asset);
+  const { mutateAsync: sendCalls, isPending: sendCallsPending } = useSendCalls();
+  const [callId, setCallId] = useState<string>();
   const isLateRepay = useMemo(() => date !== undefined && BigInt(dayjs().unix()) > date, [date]);
-
   const totalPositionAssets = useMemo(() => {
     if (!marketAccount || !date) return 0n;
     const pool = marketAccount.fixedBorrowPositions.find(({ maturity }) => maturity === date);
     return pool ? pool.position.principal + pool.position.fee : 0n;
   }, [date, marketAccount]);
-
-  const preview = useCallback(
-    async (cancelled: () => boolean) => {
-      if (!date || !walletAddress || !previewerContract || !marketAccount || !qty || totalPositionAssets === 0n) return;
-
-      const pool = marketAccount.fixedBorrowPositions.find(({ maturity }) => maturity === date);
-      if (!pool) return;
-
-      const userInput = parseUnits(qty, marketAccount.decimals);
-      const positionAssets = userInput >= totalPositionAssets ? totalPositionAssets : userInput;
-
-      const { assets } = await previewerContract.read.previewRepayAtMaturity([
-        marketAccount.market,
-        date,
-        positionAssets,
-        walletAddress ?? zeroAddress,
-      ]);
-
-      const feeAtMaturity =
-        ((((positionAssets > pool.position.principal ? pool.position.principal : positionAssets) * pool.position.fee) /
-          WAD) *
-          WAD) /
-        pool.position.principal;
-      const principal = positionAssets - feeAtMaturity;
-      const discount = assets - positionAssets;
-
-      if (cancelled()) return;
-
-      setPreviewData({
-        principal: formatNumber(formatUnits(principal, marketAccount.decimals), marketAccount.symbol, true),
-        amountWithDiscount: formatNumber(formatUnits(assets, marketAccount.decimals), marketAccount.symbol, true),
-        feeAtMaturity: formatNumber(formatUnits(feeAtMaturity, marketAccount.decimals), marketAccount.symbol, true),
-        discount: formatNumber(formatUnits(discount, marketAccount.decimals), marketAccount.symbol, true),
-      });
-    },
-    [date, marketAccount, previewerContract, qty, totalPositionAssets, walletAddress],
-  );
-
-  const { isLoading: previewLoading } = useDelayedEffect({ effect: preview });
-
   const totalPenalties = useMemo(() => {
     if (!marketAccount || !date || !isLateRepay) return 0n;
 
-    const { penaltyRate } = marketAccount;
-
-    const currentTimestamp = BigInt(dayjs().unix());
-    const penaltyTime = currentTimestamp - date;
-
-    return (penaltyRate * penaltyTime * totalPositionAssets) / WAD;
+    return (marketAccount.penaltyRate * (BigInt(dayjs().unix()) - date) * totalPositionAssets) / WAD;
   }, [marketAccount, date, isLateRepay, totalPositionAssets]);
-
-  const {
-    approve,
-    estimateGas: approveEstimateGas,
-    isLoading: approveIsLoading,
-    needsApproval,
-  } = useApprove({ operation: 'repayAtMaturity', contract: assetContract, spender: marketAccount?.market });
-
-  const estimate = useEstimateGas();
-
-  const previewGasCost = useCallback(
-    async (quantity: string): Promise<bigint | undefined> => {
-      if (!marketAccount || !walletAddress || !ETHRouterContract || !marketContract || !date || !quantity || !opts)
-        return;
-
-      if (await needsApproval(quantity)) {
-        return approveEstimateGas();
-      }
-
-      const amount = positionAssetsAmount;
-      const maxAmount = maxAmountToRepay;
-
-      if (marketAccount.assetSymbol === 'WETH') {
-        const sim = await ETHRouterContract.simulate.repayAtMaturity([date, amount], {
-          ...opts,
-          value: maxAmount,
-        });
-
-        const gasEstimation = await estimate(sim.request);
-        if (amount + (gasEstimation ?? 0n) >= parseUnits(walletBalance || '0', 18)) {
-          throw new CustomError(t('Reserve ETH for gas fees.'), 'warning');
-        }
-        return gasEstimation;
-      }
-
-      const sim = await marketContract.simulate.repayAtMaturity([date, amount, maxAmount, walletAddress], opts);
-      return estimate(sim.request);
+  const maxAmountToRepay = useMemo(
+    () => ((positionAssetsAmount + penaltyAssets) * slippage) / WAD,
+    [positionAssetsAmount, penaltyAssets, slippage],
+  );
+  const legacyRepayPreview = useReadLegacyPreviewerPreviewRepayAtMaturity({
+    chainId: legacyPreviewerChainId,
+    args:
+      marketAccount && date && positionAssetsAmount > 0n
+        ? [marketAccount.market, date, positionAssetsAmount, walletAddress ?? zeroAddress]
+        : undefined,
+    query: {
+      enabled: Boolean(
+        legacyPreviewerChainId !== undefined && marketAccount && date && positionAssetsAmount > 0n && !isLateRepay,
+      ),
     },
+  });
+  const repayPreview = useReadPreviewerPreviewRepayAtMaturity({
+    chainId: previewerChainId,
+    args:
+      marketAccount && date && positionAssetsAmount > 0n
+        ? [marketAccount.market, date, positionAssetsAmount, walletAddress ?? zeroAddress]
+        : undefined,
+    query: {
+      enabled: Boolean(
+        legacyPreviewerChainId === undefined &&
+          previewerChainId !== undefined &&
+          marketAccount &&
+          date &&
+          positionAssetsAmount > 0n &&
+          !isLateRepay,
+      ),
+    },
+  });
+  const previewData = useMemo<RepayWithDiscount | undefined>(() => {
+    if (!marketAccount || !date || positionAssetsAmount === 0n || totalPositionAssets === 0n) return;
+
+    const pool = marketAccount.fixedBorrowPositions.find(({ maturity }) => maturity === date);
+    const previewAssets =
+      legacyPreviewerChainId !== undefined ? legacyRepayPreview.data?.assets : repayPreview.data?.assets;
+    if (!pool || previewAssets === undefined) return;
+
+    const feeAtMaturity =
+      ((((positionAssetsAmount > pool.position.principal ? pool.position.principal : positionAssetsAmount) *
+        pool.position.fee) /
+        WAD) *
+        WAD) /
+      pool.position.principal;
+    const principal = positionAssetsAmount - feeAtMaturity;
+    const discount = previewAssets - positionAssetsAmount;
+
+    return {
+      principal: formatNumber(formatUnits(principal, marketAccount.decimals), marketAccount.symbol, true),
+      amountWithDiscount: formatNumber(formatUnits(previewAssets, marketAccount.decimals), marketAccount.symbol, true),
+      feeAtMaturity: formatNumber(formatUnits(feeAtMaturity, marketAccount.decimals), marketAccount.symbol, true),
+      discount: formatNumber(formatUnits(discount, marketAccount.decimals), marketAccount.symbol, true),
+    };
+  }, [
+    date,
+    legacyRepayPreview.data?.assets,
+    marketAccount,
+    positionAssetsAmount,
+    repayPreview.data?.assets,
+    totalPositionAssets,
+  ]);
+  const marketEthRouterChainId = Object.keys(marketEthRouterAddress)
+    .map(Number)
+    .find((chainId): chainId is keyof typeof marketEthRouterAddress => chainId === defaultChain.id);
+  const marketEthRouter =
+    marketEthRouterChainId === undefined ? undefined : marketEthRouterAddress[marketEthRouterChainId];
+  const { data: allowance, refetch: refetchAllowance } = useReadErc20Allowance({
+    address: marketAccount?.asset,
+    args: walletAddress && marketAccount ? [walletAddress, marketAccount.market] : undefined,
+    chainId: defaultChain.id,
+    query: { enabled: Boolean(walletAddress && marketAccount && marketAccount.assetSymbol !== 'WETH') },
+  });
+  const inputReady = Boolean(
+    walletAddress &&
+      marketAccount &&
+      date &&
+      positionAssetsAmount > 0n &&
+      maxAmountToRepay > 0n &&
+      (!walletBalance || parseUnits(walletBalance, marketAccount.decimals) >= positionAssetsAmount + penaltyAssets),
+  );
+  const requiresBatchedApproval = Boolean(
+    inputReady && marketAccount?.assetSymbol !== 'WETH' && allowance !== undefined && allowance < maxAmountToRepay,
+  );
+  const approveSimulation = useSimulateErc20Approve({
+    address: marketAccount?.asset,
+    args: marketAccount ? [marketAccount.market, maxAmountToRepay] : undefined,
+    account: walletAddress,
+    chainId: defaultChain.id,
+    query: { enabled: requiresBatchedApproval },
+  });
+  const repaySimulation = useSimulateMarketRepayAtMaturity({
+    address: marketAccount?.market,
+    args: date && walletAddress ? [date, positionAssetsAmount, maxAmountToRepay, walletAddress] : undefined,
+    account: walletAddress,
+    chainId: defaultChain.id,
+    query: { enabled: Boolean(inputReady && marketAccount?.assetSymbol !== 'WETH' && !requiresBatchedApproval) },
+  });
+  const ethRepaySimulation = useSimulateMarketEthRouterRepayAtMaturity({
+    args: date ? [date, positionAssetsAmount] : undefined,
+    account: walletAddress,
+    chainId: marketEthRouterChainId,
+    value: maxAmountToRepay,
+    query: {
+      enabled: Boolean(inputReady && marketAccount?.assetSymbol === 'WETH' && marketEthRouterChainId !== undefined),
+    },
+  });
+  const callsStatus = useWaitForCallsStatus({
+    id: callId,
+    query: { enabled: Boolean(callId) },
+  });
+  const needsBatchedApproval = useCallback(async () => {
+    if (marketAccount?.assetSymbol === 'WETH' || !walletAddress || !marketAccount) return false;
+    return (allowance ?? (await refetchAllowance()).data ?? 0n) < maxAmountToRepay;
+  }, [allowance, marketAccount, maxAmountToRepay, refetchAllowance, walletAddress]);
+  const isLoading = useMemo(() => sendCallsPending || isLoadingOp, [sendCallsPending, isLoadingOp]);
+  const isPreparing = useMemo(
+    () =>
+      approveSimulation.isLoading ||
+      repaySimulation.isLoading ||
+      ethRepaySimulation.isLoading ||
+      legacyRepayPreview.isLoading ||
+      repayPreview.isLoading,
     [
-      opts,
-      marketAccount,
-      walletAddress,
-      ETHRouterContract,
-      marketContract,
-      date,
-      needsApproval,
-      positionAssetsAmount,
-      maxAmountToRepay,
-      estimate,
-      approveEstimateGas,
-      walletBalance,
-      t,
+      approveSimulation.isLoading,
+      ethRepaySimulation.isLoading,
+      legacyRepayPreview.isLoading,
+      repayPreview.isLoading,
+      repaySimulation.isLoading,
     ],
   );
+  const txHash = callsStatus.data?.receipts?.[0]?.transactionHash;
+  const txStatus = useMemo(() => {
+    if (!callId) return;
+    if (callsStatus.data?.status === 'success') return 'success';
+    if (callsStatus.data?.status === 'failure' || callsStatus.isError) return 'error';
+    return 'processing';
+  }, [callId, callsStatus.data?.status, callsStatus.isError]);
+  const simulationError = useMemo(() => {
+    if (!inputReady || !marketAccount) return;
+    if (marketAccount.assetSymbol === 'WETH') return ethRepaySimulation.error;
+    if (requiresBatchedApproval) return approveSimulation.error;
+    return repaySimulation.error;
+  }, [
+    approveSimulation.error,
+    ethRepaySimulation.error,
+    inputReady,
+    marketAccount,
+    repaySimulation.error,
+    requiresBatchedApproval,
+  ]);
 
-  const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
+  useEffect(() => {
+    if (!simulationError) {
+      if (errorData?.component === 'simulation') setErrorData(undefined);
+      return;
+    }
+    setErrorData({ status: true, message: handleOperationError(simulationError), component: 'simulation' });
+  }, [errorData?.component, handleOperationError, setErrorData, simulationError]);
 
-  const isLoading = useMemo(
-    () => isLoadingOp || approveIsLoading || previewIsLoading,
-    [isLoadingOp, approveIsLoading, previewIsLoading],
-  );
+  useEffect(() => {
+    if (!callsStatus.data?.receipts?.length) return;
+    void refreshAccountData();
+    if (marketAccount?.assetSymbol !== 'WETH') void refetchAllowance();
+  }, [callsStatus.data?.receipts, marketAccount?.assetSymbol, refetchAllowance, refreshAccountData]);
 
   const onMax = useCallback(() => {
     if (!marketAccount) return;
-    const { decimals } = marketAccount;
     setPenaltyAssets(totalPenalties);
     setPositionAssetsAmount(totalPositionAssets);
-    setQty(formatUnits(totalPositionAssets + totalPenalties, decimals));
+    setQty(formatUnits(totalPositionAssets + totalPenalties, marketAccount.decimals));
 
-    if (walletBalance && parseUnits(walletBalance, decimals) < totalPositionAssets + totalPenalties)
-      return setErrorData({ status: true, message: 'Insufficient balance' });
+    if (walletBalance && parseUnits(walletBalance, marketAccount.decimals) < totalPositionAssets + totalPenalties)
+      return setErrorData({ status: true, message: 'Insufficient balance', component: 'input' });
 
     setErrorData(undefined);
-  }, [marketAccount, totalPenalties, totalPositionAssets, setQty, walletBalance, setErrorData]);
+  }, [marketAccount, setErrorData, setQty, totalPenalties, totalPositionAssets, walletBalance]);
 
   const handleInputChange = useCallback(
     (value: string) => {
       if (!marketAccount) return;
-      const { decimals } = marketAccount;
 
       setQty(value);
 
-      const input = parseUnits(value || '0', decimals);
+      const input = parseUnits(value || '0', marketAccount.decimals);
 
       if (input === 0n || totalPositionAssets === 0n) {
-        return setErrorData({ status: true, message: 'Cannot repay 0' });
+        return setErrorData({ status: true, message: 'Cannot repay 0', component: 'input' });
       }
 
       const newPositionAssetsAmount =
@@ -242,82 +296,98 @@ const RepayAtMaturity: FC = () => {
       setPenaltyAssets(newPenaltyAssets);
       setPositionAssetsAmount(newPositionAssetsAmount);
 
-      const totalAmount = newPenaltyAssets + newPositionAssetsAmount;
-      if (walletBalance && parseUnits(walletBalance, decimals) < totalAmount) {
-        return setErrorData({ status: true, message: 'Insufficient balance' });
+      if (
+        walletBalance &&
+        parseUnits(walletBalance, marketAccount.decimals) < newPenaltyAssets + newPositionAssetsAmount
+      ) {
+        return setErrorData({ status: true, message: 'Insufficient balance', component: 'input' });
       }
 
       setErrorData(undefined);
     },
-    [marketAccount, setQty, totalPositionAssets, totalPenalties, walletBalance, setErrorData],
+    [marketAccount, setErrorData, setQty, totalPenalties, totalPositionAssets, walletBalance],
   );
 
   const repay = useCallback(async () => {
-    if (!marketAccount || !date || !ETHRouterContract || !qty || !marketContract || !walletAddress || !opts) return;
-
-    let hash;
+    if (!walletAddress || !marketAccount || !date || positionAssetsAmount === 0n || maxAmountToRepay === 0n) return;
     setIsLoadingOp(true);
+    setCallId(undefined);
     try {
+      let id: string;
       if (marketAccount.assetSymbol === 'WETH') {
-        const args = [date, positionAssetsAmount] as const;
-        const gasEstimation = await ETHRouterContract.estimateGas.repayAtMaturity(args, {
-          ...opts,
-          value: maxAmountToRepay,
-        });
-        hash = await ETHRouterContract.write.repayAtMaturity(args, {
-          ...opts,
-          value: maxAmountToRepay,
-          gasLimit: gasLimit(gasEstimation),
-        });
+        if (!marketEthRouter) return;
+        if (ethRepaySimulation.error) throw ethRepaySimulation.error;
+        ({ id } = await sendCalls({
+          account: walletAddress,
+          chainId: defaultChain.id,
+          experimental_fallback: true,
+          calls: [
+            {
+              to: marketEthRouter,
+              abi: marketEthRouterAbi,
+              functionName: 'repayAtMaturity',
+              args: [date, positionAssetsAmount],
+              value: maxAmountToRepay,
+            },
+          ],
+        }));
       } else {
-        const args = [date, positionAssetsAmount, maxAmountToRepay, walletAddress] as const;
-        const gasEstimation = await marketContract.estimateGas.repayAtMaturity(args, opts);
-
-        hash = await marketContract.write.repayAtMaturity(args, {
-          ...opts,
-          gasLimit: gasLimit(gasEstimation),
-        });
+        if (requiresBatchedApproval && approveSimulation.error) throw approveSimulation.error;
+        if (!requiresBatchedApproval && repaySimulation.error) throw repaySimulation.error;
+        ({ id } = await sendCalls({
+          account: walletAddress,
+          chainId: defaultChain.id,
+          experimental_fallback: true,
+          calls: [
+            ...((await needsBatchedApproval())
+              ? [
+                  {
+                    to: marketAccount.asset,
+                    abi: erc20Abi,
+                    functionName: 'approve',
+                    args: [marketAccount.market, maxAmountToRepay],
+                  } as const,
+                ]
+              : []),
+            {
+              to: marketAccount.market,
+              abi: marketAbi,
+              functionName: 'repayAtMaturity',
+              args: [date, positionAssetsAmount, maxAmountToRepay, walletAddress],
+            },
+          ],
+        }));
       }
-
-      setTx({ status: 'processing', hash });
-
-      const { status, transactionHash } = await waitForTransaction({ hash });
-
-      setTx({ status: status ? 'success' : 'error', hash: transactionHash });
+      setCallId(id);
     } catch (error) {
-      if (hash) setTx({ status: 'error', hash });
       setErrorData({ status: true, message: handleOperationError(error) });
     } finally {
       setIsLoadingOp(false);
     }
   }, [
-    marketAccount,
+    approveSimulation.error,
     date,
-    ETHRouterContract,
-    qty,
-    marketContract,
-    walletAddress,
-    opts,
-    setIsLoadingOp,
-    setTx,
-    positionAssetsAmount,
-    maxAmountToRepay,
-    setErrorData,
+    ethRepaySimulation.error,
     handleOperationError,
+    marketAccount,
+    marketEthRouter,
+    maxAmountToRepay,
+    needsBatchedApproval,
+    positionAssetsAmount,
+    repaySimulation.error,
+    requiresBatchedApproval,
+    sendCalls,
+    setErrorData,
+    setIsLoadingOp,
+    walletAddress,
   ]);
 
   const handleSubmitAction = useCallback(async () => {
     if (isLoading) return;
-    if (requiresApproval) {
-      await approve();
-      setRequiresApproval(await needsApproval(qty));
-      return;
-    }
-
     return repay();
-  }, [approve, isLoading, needsApproval, qty, repay, requiresApproval, setRequiresApproval]);
+  }, [isLoading, repay]);
 
-  if (tx) return <ModalGif tx={tx} tryAgain={repay} />;
+  if (txStatus) return <ModalGif status={txStatus} hash={txHash} tryAgain={repay} />;
 
   const decimals = marketAccount?.decimals ?? 18;
 
@@ -392,14 +462,13 @@ const RepayAtMaturity: FC = () => {
           <ModalInfoRepayWithDiscount
             label={t('You are paying with discount')}
             symbol={symbol}
-            isLoading={previewLoading}
-            amountWithDiscount={previewData?.amountWithDiscount}
-            principal={previewData?.principal}
-            feeAtMaturity={previewData?.feeAtMaturity}
-            discount={previewData?.discount}
+            isLoading={legacyRepayPreview.isLoading || repayPreview.isLoading}
+            amountWithDiscount={previewData.amountWithDiscount}
+            principal={previewData.principal}
+            feeAtMaturity={previewData.feeAtMaturity}
+            discount={previewData.discount}
           />
         )}
-        {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
         <ModalAdvancedSettings>
           {isLateRepay && <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation="repayAtMaturity" variant="row" />}
           <ModalInfoEditableSlippage value={rawSlippage} onChange={(e) => setRawSlippage(e.target.value)} />
@@ -420,8 +489,9 @@ const RepayAtMaturity: FC = () => {
           label={translateOperation('repayAtMaturity', { capitalize: true })}
           symbol={symbol}
           submit={handleSubmitAction}
-          isLoading={isLoading}
-          disabled={!qty || parseFloat(qty) <= 0 || isLoading || errorData?.status}
+          isLoading={isLoading || isPreparing}
+          disabled={!qty || parseFloat(qty) <= 0 || isLoading || isPreparing || errorData?.status}
+          refreshOnSubmit={false}
         />
       </Grid>
     </Grid>

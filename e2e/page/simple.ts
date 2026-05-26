@@ -1,4 +1,4 @@
-import { Page, expect } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 import _modal from '../components/modal';
 import { formatMaturity } from '../utils/strings';
@@ -35,21 +35,8 @@ export default function (page: Page) {
   };
 
   const waitForViewReady = async () => {
-    await page.waitForFunction(
-      () => {
-        return (
-          document.querySelector('[data-testid="simple-view"] > div')?.querySelectorAll('.MuiSkeleton-root').length ===
-            0 &&
-          ['submit', 'approve'].every((action) => {
-            const button = document.querySelector(`[data-testid="modal-${action}"]`);
-            if (!button) return true;
-            return !button.classList.contains('MuiLoadingButton-loading');
-          })
-        );
-      },
-      null,
-      { polling: 1_000 },
-    );
+    await expect(page.getByTestId('simple-view').locator('.MuiSkeleton-root')).toHaveCount(0);
+    await expect(page.getByTestId('modal-submit')).toBeVisible();
   };
 
   const checkOverviewVisible = async (visible: boolean) => {

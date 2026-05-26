@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { useAccount } from 'wagmi';
+import { useAccount, useWatchAsset } from 'wagmi';
 import { Tooltip, Typography } from '@mui/material';
 
 import handleOperationError from 'utils/handleOperationError';
@@ -13,6 +13,7 @@ const AddExaTokensButton = () => {
   const { t } = useTranslation();
   const { accountData } = useAccountData();
   const { connector } = useAccount();
+  const { mutateAsync: watchAsset } = useWatchAsset();
   const assets = useAssets();
 
   const onClick = useCallback(async () => {
@@ -36,15 +37,18 @@ const AddExaTokensButton = () => {
     try {
       await Promise.all(
         accountData.map(({ market, decimals, assetSymbol, symbol }) =>
-          connector?.watchAsset?.({ address: market, decimals, symbol, image: imagesBase64[assetSymbol] }),
+          watchAsset({
+            type: 'ERC20',
+            options: { address: market, decimals, symbol, image: imagesBase64[assetSymbol] },
+          }),
         ),
       );
     } catch (error) {
       handleOperationError(error);
     }
-  }, [accountData, assets, connector]);
+  }, [accountData, assets, watchAsset]);
 
-  return connector?.watchAsset ? (
+  return connector ? (
     <Tooltip title={t('Add exaVouchers to Metamask')} placement="top" arrow>
       <Typography variant="link" onClick={onClick} sx={{ cursor: 'pointer' }}>
         + exaVouchers

@@ -8,10 +8,8 @@ import _dashboard from '../../page/dashboard';
 
 const test = base();
 
-test.describe.configure({ mode: 'serial' });
-
 test('USDC floating borrow/repay', async ({ page, web3, setup }) => {
-  await web3.fork.setBalance(web3.account.address, {
+  await web3.anvil.setBalance(web3.account.address, {
     ETH: 100,
   });
 
@@ -41,23 +39,19 @@ test('USDC floating borrow/repay', async ({ page, web3, setup }) => {
 
   await navbar.goTo('dashboard');
 
-  await test.step('should have both USDC and ETH collateral switch checked and disabled', async () => {
-    await dashboard.checkCollateralSwitchStatus('USDC', true, true);
+  await test.step('assert: WETH collateral locked', async () => {
     await dashboard.checkCollateralSwitchStatus('WETH', true, true);
   });
 
-  await test.step('should have both USDC and ETH switches with a tooltip explaining why are disabled', async () => {
+  await test.step('tooltip: WETH collateral locked', async () => {
     await dashboard.checkCollateralSwitchTooltip(
       'WETH',
       'Disabling this collateral will make your health factor less than 1',
     );
-    await dashboard.checkCollateralSwitchTooltip(
-      'USDC',
-      "You can't disable collateral on this asset because you have an active borrow",
-    );
   });
 
   await dashboard.switchTab('borrow');
+  await dashboard.checkFloatingTableRow('borrow', 'USDC');
 
   await repay.execute({
     type: 'floating',

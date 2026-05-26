@@ -1,5 +1,5 @@
 import React, { ReactNode, useCallback, useMemo } from 'react';
-import { Transaction } from 'types/Transaction';
+import type { Hex } from 'viem';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import { Box, Button, CircularProgress, CircularProgressProps, Typography } from '@mui/material';
@@ -13,18 +13,23 @@ import useEtherscanLink from 'hooks/useEtherscanLink';
 import { track } from 'utils/mixpanel';
 
 type Props = {
-  tx: Transaction;
+  tx?: {
+    status: 'loading' | 'processing' | 'success' | 'error';
+    hash?: Hex;
+  };
+  status?: 'loading' | 'processing' | 'success' | 'error';
+  hash?: Hex;
   tryAgain?: () => void;
 };
 
-function ModalGif({ tx, tryAgain }: Props) {
+function ModalGif({ tx, status = tx?.status, hash = tx?.hash, tryAgain }: Props) {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
   const { operation, symbol, qty, date, installments } = useOperationContext();
 
-  const isLoading = useMemo(() => tx.status === 'processing' || tx.status === 'loading', [tx]);
-  const isSuccess = useMemo(() => tx.status === 'success', [tx]);
-  const isError = useMemo(() => tx.status === 'error', [tx]);
+  const isLoading = useMemo(() => status === 'processing' || status === 'loading', [status]);
+  const isSuccess = useMemo(() => status === 'success', [status]);
+  const isError = useMemo(() => status === 'error', [status]);
   const operationName = useMemo(
     () => translateOperation(operation, { variant: 'noun' }),
     [translateOperation, operation],
@@ -37,10 +42,10 @@ function ModalGif({ tx, tryAgain }: Props) {
     track('Button Clicked', {
       location: 'Operations Modal',
       name: 'try again',
-      status: tx.status,
+      status,
     });
     tryAgain?.();
-  }, [tryAgain, tx.status]);
+  }, [tryAgain, status]);
 
   const trackViewOnEtherscan = useCallback(() => {
     track('Button Clicked', { location: 'Operations Modal', name: 'view on etherscan' });
@@ -99,15 +104,17 @@ function ModalGif({ tx, tryAgain }: Props) {
               variant="outlined"
               sx={{ width: '150px', height: '32px', fontWeight: 500, whiteSpace: 'nowrap' }}
               target="_blank"
-              href={txLink(tx.hash ?? '0x')}
+              href={txLink(hash ?? '0x')}
               onClick={trackViewOnEtherscan}
-              disabled={!tx.hash}
+              disabled={!hash}
             >
               {t('View on Etherscan')}
             </Button>
           </Box>
         </Box>
-        {isSuccess && reminder && date !== undefined && <Reminder operation={operation} maturity={date} />}
+        {isSuccess && reminder && date !== undefined && (
+          <Reminder operation={operation} maturity={date} installments={installments} />
+        )}
       </Box>
     </Box>
   );

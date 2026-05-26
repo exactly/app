@@ -3,14 +3,14 @@ import { AbiParametersToPrimitiveTypes, ExtractAbiFunction } from 'abitype';
 
 import AccountDataContext from 'contexts/AccountDataContext';
 import usePreviewerExactly from 'hooks/usePreviewerExactly';
-import { previewerABI, legacyPreviewerABI } from 'types/abi';
+import { previewerAbi, legacyPreviewerAbi } from 'generated/wagmi';
 
 type NewMarketAccount = AbiParametersToPrimitiveTypes<
-  ExtractAbiFunction<typeof previewerABI, 'exactly'>['outputs']
+  ExtractAbiFunction<typeof previewerAbi, 'exactly'>['outputs']
 >[number][number];
 
 export type LegacyMarketAccount = AbiParametersToPrimitiveTypes<
-  ExtractAbiFunction<typeof legacyPreviewerABI, 'exactly'>['outputs']
+  ExtractAbiFunction<typeof legacyPreviewerAbi, 'exactly'>['outputs']
 >[number][number];
 
 export type MarketAccount = NewMarketAccount | LegacyMarketAccount;

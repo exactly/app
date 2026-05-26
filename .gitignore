@@ -17,7 +17,10 @@ next-env.d.ts
 /build
 
 # protocol
-/types/abi.ts
+/generated/wagmi.ts
+/e2e/foundry/broadcast
+/e2e/foundry/cache
+/e2e/foundry/out
 
 # misc
 .vscode/

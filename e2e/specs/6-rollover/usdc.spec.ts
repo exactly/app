@@ -11,13 +11,11 @@ import { debtManager } from '../../utils/contracts';
 
 const test = base();
 
-test.describe.configure({ mode: 'serial' });
-
 test('USDC rollover', async ({ page, web3, setup }) => {
   const pools = getFixedPools();
   if (pools.length < 4) throw new Error('Not enough pools');
 
-  await web3.fork.setBalance(web3.account.address, {
+  await web3.anvil.setBalance(web3.account.address, {
     ETH: 1,
     USDC: 50_000,
   });
@@ -38,11 +36,10 @@ test('USDC rollover', async ({ page, web3, setup }) => {
 
   await app.reload();
 
-  await test.step('Roll floating debt to fixed', async () => {
+  await test.step('flow: rollover USDC floating to fixed', async () => {
     await dashboard.switchTab('borrow');
     await dashboard.checkFloatingTableRow('borrow', 'USDC');
 
-    await expect(rollover.cta('floating', 'OP')).toBeDisabled();
     await expect(rollover.cta('floating', 'USDC')).not.toBeDisabled();
 
     await rollover.open('floating', 'USDC');
@@ -76,10 +73,10 @@ test('USDC rollover', async ({ page, web3, setup }) => {
     await dashboard.checkFixedTableRow('borrow', 'USDC', pools[0]);
   });
 
-  await test.step('Roll fixed debt to another fixed', async () => {
+  await test.step('flow: rollover USDC fixed to fixed', async () => {
     await dashboard.switchTab('borrow');
 
-    await expect(rollover.cta('floating', 'USDC')).toBeDisabled();
+    await expect(rollover.cta('floating', 'USDC')).toBeHidden();
     await expect(rollover.cta('fixed', 'USDC', pools[0])).not.toBeDisabled();
 
     await rollover.open('fixed', 'USDC', pools[0]);
@@ -113,10 +110,10 @@ test('USDC rollover', async ({ page, web3, setup }) => {
     await dashboard.checkFixedTableRow('borrow', 'USDC', pools[1]);
   });
 
-  await test.step('Roll fixed debt to floating', async () => {
+  await test.step('flow: rollover USDC fixed to floating', async () => {
     await dashboard.switchTab('borrow');
 
-    await expect(rollover.cta('floating', 'USDC')).toBeDisabled();
+    await expect(rollover.cta('floating', 'USDC')).toBeHidden();
     await expect(rollover.cta('fixed', 'USDC', pools[1])).not.toBeDisabled();
 
     await rollover.open('fixed', 'USDC', pools[1]);

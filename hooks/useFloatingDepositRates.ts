@@ -1,15 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { floatingDepositRates } from '@exactly/lib';
-import { Address, formatEther, isAddress, zeroAddress } from 'viem';
-import { usePublicClient } from 'wagmi';
-import { optimismSepolia, optimism, base, baseSepolia } from 'wagmi/chains';
+import { formatEther } from 'viem';
+import { useBlock } from 'wagmi';
 
-import { useRatePreviewerSnapshot } from 'types/abi';
-import { useWeb3 } from './useWeb3';
-import optimismRatePreviewer from '@exactly/protocol/deployments/optimism/RatePreviewer.json' assert { type: 'json' };
-import sepoliaRatePreviewer from '@exactly/protocol/deployments/op-sepolia/RatePreviewer.json' assert { type: 'json' };
-import baseRatePreviewer from '@exactly/protocol/deployments/base/RatePreviewer.json' assert { type: 'json' };
-import baseSepoliaRatePreviewer from '@exactly/protocol/deployments/base-sepolia/RatePreviewer.json' assert { type: 'json' };
+import { ratePreviewerAddress, useReadRatePreviewerSnapshot } from 'generated/wagmi';
+import { defaultChain } from 'utils/client';
 
 type MarketSnapshot = Parameters<typeof floatingDepositRates>[0][number];
 type RatePreviewerSnapshot = Omit<
@@ -20,38 +15,6 @@ type RatePreviewerSnapshot = Omit<
   lastFloatingDebtUpdate: bigint | number;
   maxFuturePools: bigint | number;
 };
-
-const ratePreviewerAddress = {
-  [optimismSepolia.id]: sepoliaRatePreviewer.address,
-  [optimism.id]: optimismRatePreviewer.address,
-  [base.id]: baseRatePreviewer.address,
-  [baseSepolia.id]: baseSepoliaRatePreviewer.address,
-} as const;
-
-function useBlockTimestamp(chainId: number, enabled: boolean, snapshot: readonly RatePreviewerSnapshot[] | undefined) {
-  const publicClient = usePublicClient({ chainId });
-  const [timestamp, setTimestamp] = useState<number>();
-
-  useEffect(() => {
-    let cancelled = false;
-    setTimestamp(undefined);
-
-    if (!enabled || !publicClient) return;
-
-    publicClient
-      .getBlock()
-      .then((block) => {
-        if (!cancelled) setTimestamp(Number(block.timestamp));
-      })
-      .catch(() => undefined);
-
-    return () => {
-      cancelled = true;
-    };
-  }, [chainId, enabled, publicClient, snapshot]);
-
-  return timestamp;
-}
 
 const normalizeSnapshot = (snapshot: RatePreviewerSnapshot): MarketSnapshot => ({
   ...snapshot,
@@ -65,28 +28,29 @@ export default function useFloatingDepositRates(enabled = true): {
   isFetching: boolean;
   isLoading: boolean;
 } {
-  const { chain } = useWeb3();
-  const address = ratePreviewerAddress[chain.id as keyof typeof ratePreviewerAddress] as Address | undefined;
-  const shouldRead = enabled && Boolean(address && isAddress(address));
+  const ratePreviewerChainId = Object.keys(ratePreviewerAddress)
+    .map(Number)
+    .find((chainId): chainId is keyof typeof ratePreviewerAddress => chainId === defaultChain.id);
+  const shouldRead = enabled && ratePreviewerChainId !== undefined;
 
   const {
     data: snapshot,
     isFetching,
     isLoading,
-  } = useRatePreviewerSnapshot({
-    address: address ?? zeroAddress,
-    chainId: chain.id,
-    enabled: shouldRead,
-    staleTime: 5_000,
+  } = useReadRatePreviewerSnapshot({
+    chainId: ratePreviewerChainId,
+    query: { enabled: shouldRead, staleTime: 5_000 },
   });
-
-  const blockTimestamp = useBlockTimestamp(chain.id, shouldRead && Boolean(snapshot), snapshot);
+  const { data: block } = useBlock({
+    chainId: ratePreviewerChainId,
+    query: { enabled: shouldRead && Boolean(snapshot) },
+  });
 
   const data = useMemo(() => {
     if (!snapshot) return undefined;
 
     try {
-      const timestamp = blockTimestamp ?? Math.floor(Date.now() / 1_000); // fallback until onchain timestamp loads
+      const timestamp = block ? Number(block.timestamp) : Math.floor(Date.now() / 1_000);
       return Object.fromEntries(
         floatingDepositRates(snapshot.map(normalizeSnapshot), timestamp).map(({ market, rate }) => [
           market.toLowerCase(),
@@ -96,7 +60,7 @@ export default function useFloatingDepositRates(enabled = true): {
     } catch {
       return undefined;
     }
-  }, [snapshot, blockTimestamp]);
+  }, [snapshot, block]);
 
   return {
     data,

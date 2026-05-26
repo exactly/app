@@ -12,7 +12,7 @@ const test = base();
 test.describe.configure({ mode: 'serial' });
 
 test('Vesting esEXA & Claiming EXA', async ({ page, web2, web3 }) => {
-  await web3.fork.setBalance(web3.account.address, {
+  await web3.anvil.setBalance(web3.account.address, {
     ETH: 1,
     esEXA: 100,
     EXA: 25,
@@ -31,7 +31,7 @@ test('Vesting esEXA & Claiming EXA', async ({ page, web2, web3 }) => {
   await page.goto('/vesting');
   await vesting.waitForPageToBeReady();
 
-  await test.step('Vest esEXA', async () => {
+  await test.step('flow: vest esEXA', async () => {
     await vesting.checkBalanceAvailable('100.00');
 
     await vesting.input('1000');
@@ -61,7 +61,7 @@ test('Vesting esEXA & Claiming EXA', async ({ page, web2, web3 }) => {
   const now = Math.ceil(Date.now() / 1_000);
   const half = Math.ceil(period / 2);
 
-  await web3.fork.increaseTime(half);
+  await web3.anvil.increaseTime(half);
   await web2.time.now(now + half);
 
   await web2.graph.streams([
@@ -82,7 +82,7 @@ test('Vesting esEXA & Claiming EXA', async ({ page, web2, web3 }) => {
 
   await app.reload();
 
-  await test.step('Withdraw EXA half-way', async () => {
+  await test.step('flow: withdraw vested EXA halfway', async () => {
     const id = Number(stream);
     await vesting.checkStream({
       id,
@@ -99,7 +99,7 @@ test('Vesting esEXA & Claiming EXA', async ({ page, web2, web3 }) => {
     await balance.check({ address: web3.account.address, symbol: 'EXA', amount: '50', delta: '0.001' });
   });
 
-  await web3.fork.increaseTime(half);
+  await web3.anvil.increaseTime(half);
   await web2.time.now(now + period);
 
   await web2.graph.streams([
@@ -120,7 +120,7 @@ test('Vesting esEXA & Claiming EXA', async ({ page, web2, web3 }) => {
 
   await app.reload();
 
-  await test.step('Withdraw EXA from depleted stream', async () => {
+  await test.step('flow: withdraw depleted EXA stream', async () => {
     const id = Number(stream);
     await vesting.checkStream({
       id,
@@ -139,7 +139,7 @@ test('Vesting esEXA & Claiming EXA', async ({ page, web2, web3 }) => {
 });
 
 test('Claiming multiple streams', async ({ page, web2, web3 }) => {
-  await web3.fork.setBalance(web3.account.address, {
+  await web3.anvil.setBalance(web3.account.address, {
     ETH: 1,
     esEXA: 100,
     EXA: 25,
@@ -169,7 +169,7 @@ test('Claiming multiple streams', async ({ page, web2, web3 }) => {
 
   const now = Math.ceil(Date.now() / 1_000);
 
-  await web3.fork.increaseTime(period * 2);
+  await web3.anvil.increaseTime(period * 2);
   await web2.time.now(now + period * 2);
 
   await web2.graph.streams([
@@ -204,7 +204,7 @@ test('Claiming multiple streams', async ({ page, web2, web3 }) => {
   await page.goto('/vesting');
   await vesting.waitForPageToBeReady();
 
-  await test.step('Withdraw all depleted streams', async () => {
+  await test.step('flow: withdraw all depleted streams', async () => {
     const [id0, id1] = [Number(stream0), Number(stream1)];
 
     await vesting.checkStream({
@@ -234,7 +234,7 @@ test('Claiming multiple streams', async ({ page, web2, web3 }) => {
 });
 
 test('Stream cancellation', async ({ page, web2, web3 }) => {
-  await web3.fork.setBalance(web3.account.address, {
+  await web3.anvil.setBalance(web3.account.address, {
     ETH: 1,
     esEXA: 100,
     EXA: 25,
@@ -277,7 +277,7 @@ test('Stream cancellation', async ({ page, web2, web3 }) => {
   await page.goto('/vesting');
   await vesting.waitForPageToBeReady();
 
-  await test.step('Cancel stream', async () => {
+  await test.step('flow: cancel vesting stream', async () => {
     const id = Number(stream);
     await vesting.checkStream({
       id,

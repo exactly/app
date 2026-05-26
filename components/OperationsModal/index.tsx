@@ -1,4 +1,4 @@
-import React, { forwardRef, ReactElement, Ref, useCallback, useMemo, useRef } from 'react';
+import React, { forwardRef, ReactElement, Ref, useCallback, useRef } from 'react';
 
 import {
   Box,
@@ -25,8 +25,6 @@ import { useModal } from 'contexts/ModalContext';
 import { track } from 'utils/mixpanel';
 
 function PaperComponent(props: PaperProps | undefined) {
-  const { tx } = useOperationContext();
-
   const ref = useRef<HTMLDivElement>(null);
   return (
     <Draggable nodeRef={ref} cancel={'[class*="MuiDialogContent-root"]'}>
@@ -34,12 +32,8 @@ function PaperComponent(props: PaperProps | undefined) {
         ref={ref}
         {...props}
         sx={{
-          borderRadius: tx ? '16px' : '6px',
+          borderRadius: '6px',
           minWidth: '400px',
-          boxShadow: ({ palette }) =>
-            palette.mode === 'light' && tx
-              ? '4px 8px 16px rgba(227, 229, 232, 0.5), -4px -8px 16px rgba(248, 249, 249, 0.25)'
-              : '',
         }}
       />
     </Draggable>
@@ -63,9 +57,8 @@ type Props = {
 function OperationsModal({ isOpen, close }: Props) {
   const translateOperation = useTranslateOperation();
   const { breakpoints, spacing, palette } = useTheme();
-  const { operation, tx } = useOperationContext();
+  const { operation } = useOperationContext();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
-  const loadingTx = useMemo(() => tx && (tx.status === 'loading' || tx.status === 'processing'), [tx]);
 
   const handleCloseButtonClick = useCallback(() => {
     track('Button Clicked', {
@@ -77,13 +70,12 @@ function OperationsModal({ isOpen, close }: Props) {
   }, [close]);
 
   const handleClose = useCallback(() => {
-    if (loadingTx) return;
     close();
     track('Modal Closed', {
       name: 'operations',
       operation,
     });
-  }, [close, loadingTx, operation]);
+  }, [close, operation]);
 
   return (
     <Dialog
@@ -92,9 +84,7 @@ function OperationsModal({ isOpen, close }: Props) {
       PaperComponent={isMobile ? undefined : PaperComponent}
       TransitionComponent={isMobile ? Transition : undefined}
       fullScreen={isMobile}
-      sx={isMobile ? { top: 'auto' } : { backdropFilter: tx ? 'blur(1.5px)' : '' }}
-      BackdropProps={{ style: { backgroundColor: tx ? 'rgb(100, 100, 100 , 0.1)' : '' } }}
-      disableEscapeKeyDown={loadingTx}
+      sx={isMobile ? { top: 'auto' } : undefined}
       data-testid="modal"
     >
       <IconButton
@@ -113,26 +103,24 @@ function OperationsModal({ isOpen, close }: Props) {
       <Box
         sx={{
           padding: { xs: spacing(3, 2, 2), sm: spacing(5, 4, 4) },
-          borderTop: tx ? '' : `4px ${palette.mode === 'light' ? 'black' : 'white'} solid`,
+          borderTop: `4px ${palette.mode === 'light' ? 'black' : 'white'} solid`,
         }}
       >
-        {!tx && (
-          <DialogTitle
-            sx={{
-              p: 0,
-              display: 'flex',
-              justifyContent: 'space-between',
-              mb: { xs: 2, sm: 3 },
-              cursor: { xs: '', sm: 'move' },
-            }}
-            id="draggable-dialog-title"
-          >
-            <Typography fontWeight={700} fontSize={24} data-testid="modal-title">
-              {translateOperation(operation, { capitalize: true })}
-            </Typography>
-            <TypeSwitch />
-          </DialogTitle>
-        )}
+        <DialogTitle
+          sx={{
+            p: 0,
+            display: 'flex',
+            justifyContent: 'space-between',
+            mb: { xs: 2, sm: 3 },
+            cursor: { xs: '', sm: 'move' },
+          }}
+          id="draggable-dialog-title"
+        >
+          <Typography fontWeight={700} fontSize={24} data-testid="modal-title">
+            {translateOperation(operation, { capitalize: true })}
+          </Typography>
+          <TypeSwitch />
+        </DialogTitle>
         <DialogContent sx={{ padding: spacing(4, 0, 0, 0) }}>
           <OperationContainer operation={operation} />
         </DialogContent>

@@ -7,10 +7,8 @@ import { erc20, swapper } from '../../utils/contracts';
 
 const test = base();
 
-test.describe.configure({ mode: 'serial' });
-
 test('Get EXA on same chain', async ({ page, web2, web3 }) => {
-  await web3.fork.setBalance(web3.account.address, {
+  await web3.anvil.setBalance(web3.account.address, {
     ETH: 1,
     OP: 100,
   });
@@ -34,7 +32,7 @@ test('Get EXA on same chain', async ({ page, web2, web3 }) => {
   await page.goto('/get-exa');
   await getEXA.waitForPageToBeReady();
 
-  await test.step('Swap ETH for EXA', async () => {
+  await test.step('flow: swap ETH to EXA', async () => {
     await getEXA.checkView('route');
     await getEXA.checkNetwork('Optimism');
 
@@ -63,7 +61,7 @@ test('Get EXA on same chain', async ({ page, web2, web3 }) => {
   await app.reload();
   await getEXA.waitForPageToBeReady();
 
-  await test.step('Swap OP for EXA', async () => {
+  await test.step('flow: swap OP to EXA', async () => {
     await getEXA.checkView('route');
     await getEXA.checkNetwork('Optimism');
 

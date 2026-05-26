@@ -1,9 +1,8 @@
 import React, { type FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import ModalTxCost from 'components/OperationsModal/ModalTxCost';
 import ModalGif from 'components/OperationsModal/ModalGif';
 
-import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
+import { useOperationContext } from 'contexts/OperationContext';
 import { Grid } from '@mui/material';
 import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
 import AssetInput from 'components/OperationsModal/AssetInput';
@@ -24,23 +23,22 @@ import useTranslateOperation from 'hooks/useTranslateOperation';
 const Borrow: FC = () => {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
-  const { symbol, errorData, qty, gasCost, tx } = useOperationContext();
+  const { symbol, errorData, qty } = useOperationContext();
   const { borrowAPR } = useFloatingPoolAPR(symbol, qty, 'borrow');
   const {
     isLoading,
+    isPreparing,
     onMax,
     handleInputChange,
     handleSubmitAction,
     borrow,
     safeMaximumBorrow,
-    needsApproval,
-    previewGasCost,
+    txStatus,
+    txHash,
   } = useBorrow();
   const { marketAccount } = useAccountData(symbol);
 
-  const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
-
-  if (tx) return <ModalGif tx={tx} tryAgain={borrow} />;
+  if (txStatus) return <ModalGif status={txStatus} hash={txHash} tryAgain={borrow} />;
 
   return (
     <Grid container flexDirection="column">
@@ -70,7 +68,6 @@ const Borrow: FC = () => {
       </Grid>
 
       <Grid item mt={2}>
-        {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
         <ModalRewards symbol={symbol} operation="borrow" />
         <ModalAdvancedSettings>
           <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation="borrow" variant="row" />
@@ -89,8 +86,9 @@ const Borrow: FC = () => {
           label={translateOperation('borrow', { capitalize: true })}
           symbol={symbol === 'WETH' && marketAccount ? marketAccount.symbol : symbol}
           submit={handleSubmitAction}
-          isLoading={isLoading || previewIsLoading}
-          disabled={!qty || parseFloat(qty) <= 0 || isLoading || previewIsLoading || errorData?.status}
+          isLoading={isLoading || isPreparing}
+          disabled={!qty || parseFloat(qty) <= 0 || isLoading || isPreparing || errorData?.status}
+          refreshOnSubmit={false}
         />
       </Grid>
     </Grid>

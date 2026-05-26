@@ -3,7 +3,6 @@ import type { NextPage } from 'next';
 
 import { Box, Typography } from '@mui/material';
 import { useTranslation, Trans } from 'react-i18next';
-import { useWeb3 } from 'hooks/useWeb3';
 import ConnectWalletGovernance from 'components/governance/ConnectWalletGovernance';
 import Claimable from 'components/governance/Claimable';
 import Delegation from 'components/governance/Delegation';
@@ -11,10 +10,13 @@ import Proposals from 'components/governance/Proposals';
 import useMerkleTree from 'hooks/useMerkleTree';
 import { useModal } from 'contexts/ModalContext';
 import { track } from 'utils/mixpanel';
+import useReadOnly from 'hooks/useReadOnly';
+import { useConnection } from 'wagmi';
 
 const Governance: NextPage = () => {
   const { t } = useTranslation();
-  const { isConnected, walletAddress, impersonateActive } = useWeb3();
+  const { account: walletAddress, isImpersonating: impersonateActive } = useReadOnly();
+  const { isConnected } = useConnection();
   const mTree = useMerkleTree(walletAddress);
   const { open: openGetEXA } = useModal('get-exa');
 

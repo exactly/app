@@ -4,15 +4,14 @@ import FloatingPoolInfo from './FloatingPoolInfo';
 import { Box, Grid } from '@mui/material';
 import HistoricalRateChart from 'components/charts/HistoricalRateChart';
 import UtilizationRateChart from 'components/charts/UtilizationRateChart';
-import { useWeb3 } from 'hooks/useWeb3';
-import { mainnet } from 'wagmi';
+import { mainnet } from 'viem/chains';
+import { defaultChain } from 'utils/client';
 
 type AssetFloatingPoolProps = {
   symbol: string;
 };
 
 const AssetFloatingPool: FC<AssetFloatingPoolProps> = ({ symbol }) => {
-  const { chain } = useWeb3();
   return (
     <Box display="flex" flexDirection="column" gap="8px">
       <Grid
@@ -35,7 +34,7 @@ const AssetFloatingPool: FC<AssetFloatingPoolProps> = ({ symbol }) => {
       >
         <HistoricalRateChart symbol={symbol} />
       </Box>
-      {chain.id !== mainnet.id && (
+      {defaultChain.id !== mainnet.id && (
         <Box
           boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : '')}
           borderRadius="0px 0px 6px 6px"

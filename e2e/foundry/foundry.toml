@@ -1,0 +1,20 @@
+[profile.default]
+src = "src"
+script = "script"
+out = "out"
+cache_path = "cache"
+libs = ["../../node_modules", "../../node_modules/.pnpm/node_modules"]
+solc_version = "0.8.26"
+evm_version = "cancun"
+optimizer = true
+optimizer_runs = 1111
+revert_strings = "strip"
+ignored_error_codes = ["unused-param", "code-size", "init-code-size"]
+gas_limit = 3_000_000_000
+disable_block_gas_limit = true
+remappings = [
+  "@exactly/protocol/=../../node_modules/@exactly/protocol/contracts/",
+  "@openzeppelin/=../../node_modules/.pnpm/node_modules/@openzeppelin/",
+  "solady/=../../node_modules/.pnpm/node_modules/solady/",
+  "solmate/=../../node_modules/solmate/",
+]

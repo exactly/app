@@ -8,23 +8,26 @@ import Link from 'next/link';
 import useRouter from 'hooks/useRouter';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import ContractInfo from 'components/ContractInfo';
-import useGetContractAddress from 'hooks/useContractAddress';
 import { ContractInfoType } from 'types/ContractInfoType';
-import { optimism } from 'viem/chains';
-import { useWeb3 } from 'hooks/useWeb3';
+import { defaultChain } from 'utils/client';
+import {
+  airdropAddress,
+  airdropImplementationAddress,
+  debtManagerAddress,
+  debtManagerImplementationAddress,
+  escrowedExaAddress,
+  escrowedExaImplementationAddress,
+  exaAddress,
+  exaImplementationAddress,
+} from 'generated/wagmi';
 
 const Security: NextPage = () => {
   const { t } = useTranslation();
   const { query } = useRouter();
-  const getContractAddress = useGetContractAddress();
   const [contractsData, setContractsData] = useState<ContractInfoType[]>([]);
-  const {
-    chain: { id: displayNetworkId },
-  } = useWeb3();
-
   const contracts = useMemo(
     () => [
-      ...(displayNetworkId === optimism.id
+      ...(defaultChain.id in debtManagerAddress && defaultChain.id in debtManagerImplementationAddress
         ? [
             {
               name: 'DebtManager.sol',
@@ -35,13 +38,23 @@ const Security: NextPage = () => {
               reports: ['ABDK'],
               information: [`629 ${t('lines')} (515 ${t('lines of code')}), 24.9 kb`],
               proxy: async () => {
-                return [{ name: '', address: await getContractAddress('DebtManager_Proxy') }];
+                const address = Object.entries(debtManagerAddress).find(
+                  ([chainId]) => Number(chainId) === defaultChain.id,
+                )?.[1];
+                return address ? [{ name: '', address }] : [];
               },
               implementation: async () => {
-                return [{ name: '', address: await getContractAddress('DebtManager_Implementation') }];
+                const address = Object.entries(debtManagerImplementationAddress).find(
+                  ([chainId]) => Number(chainId) === defaultChain.id,
+                )?.[1];
+                return address ? [{ name: '', address }] : [];
               },
               codeLink: 'https://github.com/exactly/protocol/blob/main/contracts/periphery/DebtManager.sol',
             },
+          ]
+        : []),
+      ...(defaultChain.id in airdropAddress && defaultChain.id in airdropImplementationAddress
+        ? [
             {
               name: 'Airdrop.sol',
               audited: true,
@@ -51,13 +64,23 @@ const Security: NextPage = () => {
               reports: ['ABDK'],
               information: [`24 ${t('lines')} (20 ${t('lines of code')}), 674 bytes`],
               proxy: async () => {
-                return [{ name: '', address: await getContractAddress('Airdrop_Proxy') }];
+                const address = Object.entries(airdropAddress).find(
+                  ([chainId]) => Number(chainId) === defaultChain.id,
+                )?.[1];
+                return address ? [{ name: '', address }] : [];
               },
               implementation: async () => {
-                return [{ name: '', address: await getContractAddress('Airdrop_Implementation') }];
+                const address = Object.entries(airdropImplementationAddress).find(
+                  ([chainId]) => Number(chainId) === defaultChain.id,
+                )?.[1];
+                return address ? [{ name: '', address }] : [];
               },
               codeLink: 'https://github.com/exactly/protocol/blob/main/contracts/periphery/EXA.sol',
             },
+          ]
+        : []),
+      ...(defaultChain.id in exaAddress && defaultChain.id in exaImplementationAddress
+        ? [
             {
               name: 'EXA.sol',
               audited: true,
@@ -67,13 +90,23 @@ const Security: NextPage = () => {
               reports: ['ABDK'],
               information: [`79 ${t('lines')} (65 ${t('lines of code')}), 2.25 kb`],
               proxy: async () => {
-                return [{ name: '', address: await getContractAddress('EXA_Proxy') }];
+                const address = Object.entries(exaAddress).find(
+                  ([chainId]) => Number(chainId) === defaultChain.id,
+                )?.[1];
+                return address ? [{ name: '', address }] : [];
               },
               implementation: async () => {
-                return [{ name: '', address: await getContractAddress('EXA_Implementation') }];
+                const address = Object.entries(exaImplementationAddress).find(
+                  ([chainId]) => Number(chainId) === defaultChain.id,
+                )?.[1];
+                return address ? [{ name: '', address }] : [];
               },
               codeLink: 'https://github.com/exactly/protocol/blob/main/contracts/periphery/Airdrop.sol',
             },
+          ]
+        : []),
+      ...(defaultChain.id in escrowedExaAddress && defaultChain.id in escrowedExaImplementationAddress
+        ? [
             {
               name: 'esEXA.sol',
               audited: true,
@@ -83,17 +116,23 @@ const Security: NextPage = () => {
               reports: ['ABDK', 'OpenZeppelin'],
               information: [`279 ${t('lines')} (242 ${t('lines of code')}), 10.5 kb`],
               proxy: async () => {
-                return [{ name: '', address: await getContractAddress('esEXA_Proxy') }];
+                const address = Object.entries(escrowedExaAddress).find(
+                  ([chainId]) => Number(chainId) === defaultChain.id,
+                )?.[1];
+                return address ? [{ name: '', address }] : [];
               },
               implementation: async () => {
-                return [{ name: '', address: await getContractAddress('esEXA_Implementation') }];
+                const address = Object.entries(escrowedExaImplementationAddress).find(
+                  ([chainId]) => Number(chainId) === defaultChain.id,
+                )?.[1];
+                return address ? [{ name: '', address }] : [];
               },
               codeLink: 'https://github.com/exactly/protocol/blob/main/contracts/periphery/EscrowedEXA.sol',
             },
           ]
         : []),
     ],
-    [displayNetworkId, getContractAddress, t],
+    [t],
   );
 
   useEffect(() => {

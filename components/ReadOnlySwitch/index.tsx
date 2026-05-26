@@ -2,7 +2,6 @@ import React, { FC, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { type SxProps, Box, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { track } from 'utils/mixpanel';
-import { useWeb3 } from 'hooks/useWeb3';
 import useReadOnly from 'hooks/useReadOnly';
 import { AccountInput } from 'components/AccountInput';
 import Switch from 'components/Switch';
@@ -13,9 +12,8 @@ const ReadOnlySwitch: FC<{
   onSubmit?: () => void;
 }> = ({ sx, fontSize = 14, onSubmit }) => {
   const { t } = useTranslation();
-  const { isReadOnly, toggle } = useReadOnly();
+  const { isImpersonating: impersonateActive, isReadOnly, toggle } = useReadOnly();
   const { breakpoints } = useTheme();
-  const { impersonateActive } = useWeb3();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
 
   const handleChange = useCallback(() => {

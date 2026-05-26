@@ -3,13 +3,13 @@ import SocketPlugIn from 'components/BridgeContent/SocketPlugIn';
 import { Box, Typography } from '@mui/material';
 import { t } from 'i18next';
 import { ActiveRoute } from 'types/Bridge';
-import { useWeb3 } from 'hooks/useWeb3';
 import { fetchActiveRoutes } from './utils';
 import SocketTxHistory from './SocketTxHistory';
+import useReadOnly from 'hooks/useReadOnly';
 
 const BridgeContent = () => {
   const [activeRoutes, setActiveRoutes] = useState<ActiveRoute[] | undefined>();
-  const { walletAddress } = useWeb3();
+  const { account: walletAddress } = useReadOnly();
 
   const updateRoutes = useCallback(async () => {
     if (!walletAddress) {

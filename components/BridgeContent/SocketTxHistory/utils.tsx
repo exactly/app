@@ -4,7 +4,7 @@ import ErrorIcon from '@mui/icons-material/ErrorRounded';
 import InfoIcon from '@mui/icons-material/InfoRounded';
 import i18n from 'i18n';
 import networkData from 'config/networkData.json' assert { type: 'json' };
-import { optimism } from 'wagmi/chains';
+import { optimism } from 'viem/chains';
 
 export function routeToTxData(route: ActiveRoute) {
   const { userTxs, bridgeTxHash, routeStatus } = route;

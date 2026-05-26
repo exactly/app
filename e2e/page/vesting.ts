@@ -1,10 +1,8 @@
-import { Page, expect } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 export default function (page: Page) {
   const waitForPageToBeReady = async () => {
-    await page.waitForFunction(() => document.querySelectorAll('.MuiSkeleton-root').length === 0, null, {
-      polling: 1_000,
-    });
+    await expect(page.locator('.MuiSkeleton-root')).toHaveCount(0);
   };
 
   const checkBalanceAvailable = async (balance: string | RegExp) => {
@@ -29,20 +27,12 @@ export default function (page: Page) {
   };
 
   const waitForSubmitToBeReady = async () => {
-    await page.waitForFunction(
-      () => {
-        const button = document.querySelector('[data-testid="vesting-submit"]');
-        if (!button) return true;
-        return !button.classList.contains('MuiLoadingButton-loading');
-      },
-      null,
-      { polling: 1_000 },
-    );
+    await expect(page.getByTestId('vesting-submit')).not.toBeDisabled({ timeout: 10_000 });
   };
 
   const submit = async () => {
     const button = page.getByTestId('vesting-submit');
-    await expect(button).not.toBeDisabled();
+    await expect(button).not.toBeDisabled({ timeout: 10_000 });
     await button.click();
   };
 
@@ -52,16 +42,7 @@ export default function (page: Page) {
 
     const status = page.getByTestId('transaction-status');
     await expect(status).toBeVisible();
-
-    await page.waitForFunction(
-      (message) => {
-        const text = document.querySelector('[data-testid="transaction-status"]');
-        if (!text) return false;
-        return text.textContent !== message;
-      },
-      'Processing transaction...',
-      { polling: 1_000 },
-    );
+    await expect(status).not.toHaveText('Processing transaction...');
   };
 
   const closeVestTransaction = async () => {
@@ -100,38 +81,22 @@ export default function (page: Page) {
 
   const claimStream = async (streamId: number) => {
     const button = page.getByTestId(`vesting-stream-${streamId}-claim`);
-    await expect(button).not.toBeDisabled();
+    await expect(button).not.toBeDisabled({ timeout: 10_000 });
     await button.click();
   };
 
   const waitForClaimStreamTransaction = async (streamId: number) => {
-    await page.waitForFunction(
-      (id) => {
-        const button = document.querySelector(`[data-testid="vesting-stream-${id}-claim"]`);
-        if (!button) return true;
-        return !button.classList.contains('MuiLoadingButton-loading');
-      },
-      streamId,
-      { polling: 1_000 },
-    );
+    await expect(page.getByTestId(`vesting-stream-${streamId}-claim`)).not.toBeDisabled({ timeout: 10_000 });
   };
 
   const claimAllStreams = async () => {
     const button = page.getByTestId('vesting-claim-all');
-    await expect(button).not.toBeDisabled();
+    await expect(button).not.toBeDisabled({ timeout: 10_000 });
     await button.click();
   };
 
   const waitForClaimAllTransaction = async () => {
-    await page.waitForFunction(
-      () => {
-        const button = document.querySelector('[data-testid="vesting-claim-all"]');
-        if (!button) return true;
-        return !button.classList.contains('MuiLoadingButton-loading');
-      },
-      null,
-      { polling: 1_000 },
-    );
+    await expect(page.getByTestId('vesting-claim-all')).not.toBeDisabled({ timeout: 10_000 });
   };
 
   const cancelStream = async (streamId: number) => {
@@ -145,15 +110,7 @@ export default function (page: Page) {
   };
 
   const waitForStreamCancelTransaction = async (streamId: number) => {
-    await page.waitForFunction(
-      (id: number) => {
-        const button = document.querySelector(`[data-testid="vesting-stream-${id}-cancel-submit"]`);
-        if (!button) return true;
-        return !button.classList.contains('MuiLoadingButton-loading');
-      },
-      streamId,
-      { polling: 1_000 },
-    );
+    await expect(page.getByTestId(`vesting-stream-${streamId}-cancel-submit`)).not.toBeVisible();
   };
 
   return {

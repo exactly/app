@@ -1,14 +1,16 @@
 import React, { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Button, Typography } from '@mui/material';
-import { useWeb3 } from '../../hooks/useWeb3';
+import { useConnection } from 'wagmi';
+import useConnectWallet from 'hooks/useConnectWallet';
 
 type Props = {
   onNextStep: () => void;
 };
 
 const Connect = ({ onNextStep }: Props) => {
-  const { isConnected, connect } = useWeb3();
+  const { isConnected } = useConnection();
+  const connect = useConnectWallet();
   const { t } = useTranslation();
 
   useEffect(() => {

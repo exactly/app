@@ -9,7 +9,15 @@ import dayjs from 'dayjs';
 import useAccountData from './useAccountData';
 import useDelayedEffect from './useDelayedEffect';
 import useMaturityPools from './useMaturityPools';
-import usePreviewer from './usePreviewer';
+import {
+  legacyPreviewerAddress,
+  previewerAddress,
+  readLegacyPreviewerPreviewBorrowAtAllMaturities,
+  readLegacyPreviewerPreviewDepositAtAllMaturities,
+  readPreviewerPreviewBorrowAtAllMaturities,
+  readPreviewerPreviewDepositAtAllMaturities,
+} from 'generated/wagmi';
+import { defaultChain, wagmi } from 'utils/client';
 
 const MIN_OPTIONS = 3;
 
@@ -18,8 +26,14 @@ type PreviewFixedOperation = {
   loading: boolean;
 };
 
+const legacyPreviewerChainId = Object.keys(legacyPreviewerAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof legacyPreviewerAddress => chainId === defaultChain.id);
+const previewerChainId = Object.keys(previewerAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof previewerAddress => chainId === defaultChain.id);
+
 export default (operation: MarketsBasicOperation): PreviewFixedOperation => {
-  const previewerContract = usePreviewer();
   const { symbol, qty } = useOperationContext();
   const maturityPools = useMaturityPools(symbol);
   const { marketAccount } = useAccountData(symbol);
@@ -28,7 +42,7 @@ export default (operation: MarketsBasicOperation): PreviewFixedOperation => {
 
   const updateAPR = useCallback(
     async (cancelled: () => boolean) => {
-      if (!marketAccount || !previewerContract) return;
+      if (!marketAccount) return;
 
       if (!qty || parseFloat(qty) === 0) {
         if (cancelled()) return;
@@ -40,15 +54,29 @@ export default (operation: MarketsBasicOperation): PreviewFixedOperation => {
       try {
         setLoading(true);
         const initialAssets = parseUnits(qty, marketAccount.decimals);
-
-        const preview =
-          operation === 'deposit'
-            ? previewerContract.read.previewDepositAtAllMaturities
-            : previewerContract.read.previewBorrowAtAllMaturities;
-        const previewPools = (await preview([marketAccount.market, initialAssets])) as readonly {
-          maturity: bigint;
-          assets: bigint;
-        }[];
+        const previewPools =
+          legacyPreviewerChainId !== undefined
+            ? operation === 'deposit'
+              ? await readLegacyPreviewerPreviewDepositAtAllMaturities(wagmi, {
+                  chainId: legacyPreviewerChainId,
+                  args: [marketAccount.market, initialAssets],
+                })
+              : await readLegacyPreviewerPreviewBorrowAtAllMaturities(wagmi, {
+                  chainId: legacyPreviewerChainId,
+                  args: [marketAccount.market, initialAssets],
+                })
+            : previewerChainId !== undefined
+              ? operation === 'deposit'
+                ? await readPreviewerPreviewDepositAtAllMaturities(wagmi, {
+                    chainId: previewerChainId,
+                    args: [marketAccount.market, initialAssets],
+                  })
+                : await readPreviewerPreviewBorrowAtAllMaturities(wagmi, {
+                    chainId: previewerChainId,
+                    args: [marketAccount.market, initialAssets],
+                  })
+              : undefined;
+        if (!previewPools) return;
         const currentTimestamp = BigInt(dayjs().unix());
 
         const fixedOptions: MarketsBasicOption[] = previewPools.map(({ maturity, assets }) => {
@@ -74,7 +102,7 @@ export default (operation: MarketsBasicOperation): PreviewFixedOperation => {
         setLoading(false);
       }
     },
-    [marketAccount, previewerContract, qty, maturityPools, operation],
+    [marketAccount, qty, maturityPools, operation],
   );
 
   const { isLoading: delayedLoading } = useDelayedEffect({ effect: updateAPR });

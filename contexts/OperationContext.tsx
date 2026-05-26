@@ -12,21 +12,11 @@ import React, {
 import { Address, parseUnits } from 'viem';
 
 import useAccountData from 'hooks/useAccountData';
-import useDelayedEffect from 'hooks/useDelayedEffect';
-import useERC20 from 'hooks/useERC20';
-import useETHRouter from 'hooks/useETHRouter';
-import useHandleOperationError from 'hooks/useHandleOperationError';
-import useMarket from 'hooks/useMarket';
-import { ERC20, Market, MarketETHRouter } from 'types/contracts';
 import { ErrorData } from 'types/Error';
-import { OperationHook } from 'types/OperationHook';
-import { Transaction } from 'types/Transaction';
 import numbers from 'config/numbers.json';
 import type { Operation } from 'types/Operation';
 import { Args } from './ModalContext';
 import useInstallmentsData from '../hooks/useInstallmentsData';
-
-type LoadingButton = { withCircularProgress?: boolean; label?: string };
 
 type ContextValues = {
   operation: Operation;
@@ -38,31 +28,18 @@ type ContextValues = {
   setErrorData: React.Dispatch<React.SetStateAction<ErrorData | undefined>>;
   qty: string;
   setQty: React.Dispatch<React.SetStateAction<string>>;
-  gasCost?: bigint;
-  setGasCost: React.Dispatch<React.SetStateAction<bigint | undefined>>;
-  tx?: Transaction;
-  setTx: React.Dispatch<React.SetStateAction<Transaction | undefined>>;
 
   isLoading: boolean;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
-
-  requiresApproval: boolean;
-  setRequiresApproval: React.Dispatch<React.SetStateAction<boolean>>;
 
   date?: bigint;
   dates: bigint[];
   setDate: React.Dispatch<React.SetStateAction<bigint | undefined>>;
 
-  marketContract?: Market;
-  assetContract?: ERC20;
-  ETHRouterContract?: MarketETHRouter;
-
   rawSlippage: string;
   setRawSlippage: React.Dispatch<React.SetStateAction<string>>;
   slippage: bigint;
 
-  loadingButton: LoadingButton;
-  setLoadingButton: (loading: LoadingButton) => void;
   errorButton?: string;
   setErrorButton: (error?: string) => void;
 
@@ -102,12 +79,8 @@ export const OperationContextProvider: FC<PropsWithChildren<Props>> = ({ args, c
   const [errorData, setErrorData] = useState<ErrorData | undefined>();
 
   const [qty, setQty] = useState<string>('');
-  const [gasCost, setGasCost] = useState<bigint | undefined>();
-  const [tx, setTx] = useState<Transaction | undefined>();
   const [isLoading, setIsLoading] = useState(false);
-  const [loadingButton, setLoadingButton] = useState<LoadingButton>({});
   const [errorButton, setErrorButton] = useState<string | undefined>();
-  const [requiresApproval, setRequiresApproval] = useState(false);
   const [rawSlippage, setRawSlippage] = useState(DEFAULT_SLIPPAGE);
   const [receiver, setReceiver] = useState<Address>();
   const [installments, setInstallments] = useState<number>(1);
@@ -118,9 +91,6 @@ export const OperationContextProvider: FC<PropsWithChildren<Props>> = ({ args, c
       : parseUnits(String(1 + Number(rawSlippage) / 100), 18);
   }, [operation, rawSlippage]);
 
-  const assetContract = useERC20(marketAccount?.asset);
-  const marketContract = useMarket(marketAccount?.market);
-  const ETHRouterContract = useETHRouter();
   const { installmentsOptions, installmentsDetails } = useInstallmentsData({
     operation,
     qty,
@@ -152,29 +122,17 @@ export const OperationContextProvider: FC<PropsWithChildren<Props>> = ({ args, c
     setErrorData,
     qty,
     setQty,
-    gasCost,
-    setGasCost,
-    tx,
-    setTx,
     isLoading,
     setIsLoading,
-    requiresApproval,
-    setRequiresApproval,
 
     date,
     dates,
     setDate: handleDateChange,
 
-    assetContract,
-    marketContract,
-    ETHRouterContract,
-
     rawSlippage,
     setRawSlippage,
     slippage,
 
-    loadingButton,
-    setLoadingButton,
     errorButton,
     setErrorButton,
     receiver,
@@ -194,45 +152,6 @@ export function useOperationContext() {
     throw new Error('Using OperationContext outside of provider');
   }
   return ctx;
-}
-
-export function usePreviewTx({
-  qty,
-  needsApproval,
-  previewGasCost,
-}: {
-  qty: string;
-} & Pick<OperationHook, 'needsApproval' | 'previewGasCost'>) {
-  const { errorData, setErrorData, setGasCost, setRequiresApproval } = useOperationContext();
-  const handleOperationError = useHandleOperationError();
-
-  const previewTx = useCallback(
-    async (cancelled: () => boolean) => {
-      let error: ErrorData | undefined = undefined;
-      const approval = await needsApproval(qty).catch((e) => {
-        error = { status: true, message: handleOperationError(e) };
-        return null;
-      });
-
-      const gas = await previewGasCost(qty).catch((e) => {
-        const msg = handleOperationError(e);
-        error = { status: true, message: msg, component: 'gas', variant: msg.includes('frozen') ? 'warning' : 'error' };
-        return null;
-      });
-
-      setErrorData(error);
-      if (cancelled() || approval === null || gas === null) return;
-
-      setGasCost(gas);
-      setRequiresApproval(approval);
-    },
-    [handleOperationError, needsApproval, previewGasCost, qty, setErrorData, setGasCost, setRequiresApproval],
-  );
-
-  return useDelayedEffect({
-    effect: previewTx,
-    skip: errorData?.status,
-  });
 }
 
 export default OperationContext;

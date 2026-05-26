@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { useAccount } from 'wagmi';
+import { useWatchAsset } from 'wagmi';
 import Image from 'next/image';
 import imageToBase64 from 'utils/imageToBase64';
 import { useTranslation } from 'react-i18next';
@@ -13,7 +13,7 @@ import AssetMinter from './AssetMinter';
 
 function Faucet() {
   const { t } = useTranslation();
-  const { connector } = useAccount();
+  const { mutateAsync: watchAsset } = useWatchAsset();
   const { accountData } = useAccountData();
   const assets = useAssets();
 
@@ -34,13 +34,13 @@ function Faucet() {
       await Promise.all(
         marketAccounts.flatMap((marketAccount) => {
           const { asset: address, decimals, assetSymbol: symbol } = marketAccount;
-          return connector?.watchAsset?.({ symbol, address, decimals, image: imagesBase64[symbol] });
+          return watchAsset({ type: 'ERC20', options: { symbol, address, decimals, image: imagesBase64[symbol] } });
         }),
       );
     } catch {
       // ignore
     }
-  }, [accountData, assets, connector]);
+  }, [accountData, assets, watchAsset]);
 
   return (
     <Box minWidth={{ xs: 200, sm: 350 }}>

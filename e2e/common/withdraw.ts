@@ -23,51 +23,49 @@ export default function ({ test, page }: CommonTest) {
   const modal = _modal(page);
   const navbar = _navbar(page);
 
-  const execute = async ({ type, symbol, amount = '1', shouldApprove = false, maturity }: TestParams) => {
-    await test.step(`${symbol} ${type} withdraw`, async () => {
-      await test.step('should be in the correct page', async () => {
+  const execute = async ({ type, symbol, amount = '1', maturity }: TestParams) => {
+    await test.step(`operation: withdraw ${symbol} ${type}`, async () => {
+      await test.step('navigation: dashboard', async () => {
         if (!page.url().endsWith('/dashboard')) {
           await navbar.goTo('dashboard');
         }
       });
 
-      await test.step('should open the modal', async () => {
+      await test.step(`modal: open withdraw ${symbol} ${type}`, async () => {
         await modal.open(type, 'withdraw', symbol, maturity);
       });
 
-      await test.step('the modal', async () => {
-        await test.step('should have the correct descriptions', async () => {
-          await modal.checkTitle('Withdraw');
-          await modal.checkType(type);
-          await modal.checkAssetSelection(symbol);
+      await test.step(`modal: validate withdraw ${symbol} ${type}`, async () => {
+        await modal.checkTitle('Withdraw');
+        await modal.checkType(type);
+        await modal.checkAssetSelection(symbol);
 
-          if (type === 'fixed') {
-            await modal.checkPoolDate(maturity);
-          }
-        });
+        if (type === 'fixed') {
+          await modal.checkPoolDate(maturity);
+        }
       });
 
-      await test.step('the input', async () => {
-        await test.step(`should allow to input the amount ${amount}`, async () => {
+      await test.step(`input: withdraw ${symbol}`, async () => {
+        await test.step(`input: fill withdraw amount ${amount}`, async () => {
           await modal.input(amount);
           await modal.checkAlertNotFound('error');
         });
       });
 
-      await test.step('the transaction', async () => {
-        await test.step('should be successful', async () => {
-          if (shouldApprove) {
-            await modal.waitForApprove();
-            await modal.approve();
-          }
-
-          await modal.waitForSubmit();
-
+      await test.step(`tx: withdraw ${symbol} ${type}`, async () => {
+        await test.step(`tx: submit withdraw ${symbol} ${type}`, async () => {
           await modal.submit();
+        });
+
+        await test.step(`tx: wait withdraw ${symbol} ${type}`, async () => {
           await modal.waitForTransaction('withdraw');
+        });
 
+        await test.step('tx: assert withdraw success', async () => {
           await modal.checkTransactionStatus('success', `You withdrawn ${amount} ${formatSymbol(symbol)}`);
+        });
 
+        await test.step('modal: close withdraw', async () => {
           await modal.close();
         });
       });
@@ -75,33 +73,33 @@ export default function ({ test, page }: CommonTest) {
   };
 
   const attempt = async ({ type, symbol, amount = '1', maturity }: Omit<TestParams, 'shouldApprove'>) => {
-    await test.step(`${symbol} ${type} attempt withdraw`, async () => {
-      await test.step('should be in the correct page', async () => {
+    await test.step(`operation: attempt withdraw ${symbol} ${type}`, async () => {
+      await test.step('navigation: dashboard', async () => {
         if (!page.url().endsWith('/dashboard')) {
           await navbar.goTo('dashboard');
         }
       });
 
-      await test.step('should open the modal', async () => {
+      await test.step(`modal: open withdraw ${symbol} ${type}`, async () => {
         await modal.open(type, 'withdraw', symbol, maturity);
       });
 
-      await test.step('the modal', async () => {
-        await test.step('should have the correct descriptions', async () => {
-          await modal.checkTitle('Withdraw');
-          await modal.checkType(type);
-          await modal.checkAssetSelection(symbol);
-        });
+      await test.step(`modal: validate withdraw ${symbol} ${type}`, async () => {
+        await modal.checkTitle('Withdraw');
+        await modal.checkType(type);
+        await modal.checkAssetSelection(symbol);
       });
 
-      await test.step('the input', async () => {
-        await test.step(`should warn if the user tries to withdraw with no deposits previously made for ${symbol}`, async () => {
+      await test.step(`input: withdraw ${symbol}`, async () => {
+        await test.step('input: reject above deposited amount', async () => {
           await modal.input(amount);
           await modal.checkAlert('error', `You can't withdraw more than the deposited amount`);
         });
       });
 
-      await modal.close();
+      await test.step('modal: close withdraw attempt', async () => {
+        await modal.close();
+      });
     });
   };
 

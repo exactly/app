@@ -7,6 +7,7 @@ export default function useContractVersion() {
 
   return useCallback(
     async (address: Address) => {
+      if (!publicClient) return '1';
       try {
         const version = await publicClient.readContract({
           address,

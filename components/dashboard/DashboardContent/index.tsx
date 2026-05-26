@@ -6,7 +6,6 @@ const FloatingPoolDashboard = dynamic(() => import('components/dashboard/Dashboa
 const FixedPoolDashboard = dynamic(() => import('components/dashboard/DashboardContent/FixedPoolDashboard'));
 
 import DashboardTabs from 'components/dashboard/DashboardContent/DashboardTabs';
-import { useWeb3 } from 'hooks/useWeb3';
 import { Box, useMediaQuery } from '@mui/material';
 import MobileTabs from 'components/MobileTabs';
 import DashboardMobile from './DashboardMobile';
@@ -14,6 +13,8 @@ import ConnectYourWallet from './ConnectYourWallet';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import useRouter from 'hooks/useRouter';
+import useReadOnly from 'hooks/useReadOnly';
+import { useConnection } from 'wagmi';
 
 function DashboardContent() {
   const { t } = useTranslation();
@@ -33,7 +34,8 @@ function DashboardContent() {
     [t],
   );
 
-  const { isConnected, impersonateActive } = useWeb3();
+  const { isImpersonating: impersonateActive } = useReadOnly();
+  const { isConnected } = useConnection();
   const theme = useTheme();
   const { query } = useRouter();
   const isMobileOrTablet = useMediaQuery(theme.breakpoints.down('md'));

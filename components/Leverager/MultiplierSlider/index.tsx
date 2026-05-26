@@ -10,6 +10,7 @@ const MultiplierSlider = () => {
     setLeverageRatio,
     currentLeverageRatio,
     minLeverageRatio,
+    maxLeverageRatio,
     newHealthFactor,
     getHealthFactorColor,
     netPosition,
@@ -31,8 +32,6 @@ const MultiplierSlider = () => {
     () => !input.collateralSymbol || !input.borrowSymbol || Number(netPosition ?? -1) < 0 || blockModal,
     [blockModal, input.borrowSymbol, input.collateralSymbol, netPosition],
   );
-
-  const max = currentLeverageRatio;
 
   return (
     <Box display="flex" flexDirection="column" gap={2} sx={{ opacity: disabled ? 0.5 : 1 }}>
@@ -71,7 +70,7 @@ const MultiplierSlider = () => {
           defaultValue={currentLeverageRatio}
           valueLabelDisplay="on"
           min={minLeverageRatio}
-          max={max}
+          max={maxLeverageRatio}
           step={0.01}
           valueLabelFormat={(value) => `${value.toFixed(2)}x`}
           disabled={disabled}
@@ -110,7 +109,7 @@ const MultiplierSlider = () => {
         />
         <Typography
           variant="h6"
-          onClick={() => setLeverageRatio(max)}
+          onClick={() => setLeverageRatio(maxLeverageRatio)}
           sx={{ cursor: 'pointer' }}
           data-testid="leverage-slider-max"
         >

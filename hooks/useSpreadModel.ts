@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import {
   WAD,
   baseRate,
@@ -11,7 +11,8 @@ import {
 
 import useAccountData from './useAccountData';
 import useIRM from './useIRM';
-import useMarket from './useMarket';
+import { useReadMarketPreviewFloatingAssetsAverage } from 'generated/wagmi';
+import { defaultChain } from 'utils/client';
 
 export const MAX = 1;
 export const INTERVAL = 0.005;
@@ -20,21 +21,12 @@ const levels = 8;
 
 export default function useSpreadModel(symbol: string) {
   const { marketAccount } = useAccountData(symbol);
-  const market = useMarket(marketAccount?.market, true);
   const irm = useIRM(symbol);
-
-  const [floatingAssetsAverage, setFloatingAssetsAverage] = useState<bigint | undefined>();
-
-  useEffect(() => {
-    const fetchFloatingAssets = async () => {
-      if (!market) return;
-
-      const assets = await market.read.previewFloatingAssetsAverage();
-      setFloatingAssetsAverage(assets);
-    };
-
-    fetchFloatingAssets();
-  }, [market]);
+  const { data: floatingAssetsAverage } = useReadMarketPreviewFloatingAssetsAverage({
+    address: marketAccount?.market,
+    chainId: defaultChain.id,
+    query: { enabled: Boolean(marketAccount?.market) },
+  });
 
   const data = useMemo(() => {
     if (!marketAccount || !irm || !floatingAssetsAverage) {

@@ -5,9 +5,10 @@ import { Box, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { readdir, readFile } from 'fs/promises';
 import { basename } from 'path';
-import { optimismSepolia, mainnet, optimism, base, baseSepolia } from 'wagmi/chains';
+import { anvil, mainnet, optimism } from 'viem/chains';
 
 import { defaultChain } from 'utils/client';
+import { deploymentNetworkByChainId } from 'utils/chains';
 import Feed from 'components/RiskFeed/Feed';
 import { Contracts } from 'components/RiskFeed/Decode';
 
@@ -57,22 +58,15 @@ const Activity = ({ contracts }: Props) => {
 
 const ignore = ['.chainId', 'PriceFeed', 'Balancer', 'Uniswap', 'Socket'];
 
-const networks = {
-  [mainnet.id]: 'ethereum',
-  [optimism.id]: optimism.network,
-  [optimismSepolia.id]: 'op-sepolia',
-  [base.id]: base.network,
-  [baseSepolia.id]: 'base-sepolia',
-};
-
 export const getStaticProps: GetStaticProps<Props> = async () => {
   const deployments = 'node_modules/@exactly/protocol/deployments';
   const id = Number(process.env.NEXT_PUBLIC_NETWORK ?? defaultChain.id);
-  const network = networks[id as keyof typeof networks];
+  const network = deploymentNetworkByChainId[id as keyof typeof deploymentNetworkByChainId];
 
   if (!network) {
     throw new Error(`unknown network id: ${id}`);
   }
+  if (id === anvil.id) return { props: { contracts: {} } };
 
   const files = (await readdir(`${deployments}/${network}`)).filter(
     (name) => !name.includes('_') && !ignore.some((p) => name.startsWith(p)),

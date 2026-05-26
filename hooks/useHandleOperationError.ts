@@ -1,23 +1,22 @@
 import { useCallback } from 'react';
-import { optimismSepolia } from 'wagmi/chains';
+import { optimismSepolia } from 'viem/chains';
 import { captureException as sentryCaptureException } from '@sentry/nextjs';
 
 import { useOperationContext } from 'contexts/OperationContext';
-import { useWeb3 } from './useWeb3';
 import handleOperationError from 'utils/handleOperationError';
+import { defaultChain } from 'utils/client';
 
 type HandleOperationErrorFunc = (
   exception: Parameters<typeof handleOperationError>[0],
 ) => ReturnType<typeof handleOperationError>;
 
 export default function useHandleOperationError(): HandleOperationErrorFunc {
-  const { chain } = useWeb3();
   const { symbol, operation } = useOperationContext();
 
   const captureException = useCallback<typeof sentryCaptureException>(
     (exception) => {
       if (
-        chain?.id === optimismSepolia.id &&
+        defaultChain.id === optimismSepolia.id &&
         symbol === 'WETH' &&
         ['withdraw', 'withdrawAtMaturity', 'borrow', 'borrowAtMaturity'].includes(operation) &&
         exception &&
@@ -29,7 +28,7 @@ export default function useHandleOperationError(): HandleOperationErrorFunc {
 
       return sentryCaptureException(exception);
     },
-    [chain, symbol, operation],
+    [symbol, operation],
   );
 
   return useCallback<HandleOperationErrorFunc>(

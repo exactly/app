@@ -1,21 +1,36 @@
 import { useMemo } from 'react';
-import { formatUnits } from 'viem';
-import { Address, useBalance } from 'wagmi';
-import { useWeb3 } from './useWeb3';
+import { formatUnits, type Address } from 'viem';
+import { useBalance } from 'wagmi';
+import useAccountData from './useAccountData';
+import { defaultChain } from 'utils/client';
+import useReadOnly from 'hooks/useReadOnly';
+import { useReadErc20BalanceOf } from 'generated/wagmi';
 
 export default (symbol?: string, asset?: Address, useERC20 = false, chainId?: number): string | undefined => {
-  const { walletAddress, chain } = useWeb3();
+  const { account: walletAddress } = useReadOnly();
+  const { marketAccount } = useAccountData(symbol ?? '');
+  const shouldUseNativeBalance = symbol === 'WETH' && !useERC20;
 
-  const { data, error } = useBalance({
+  const { data: nativeBalance, error: nativeError } = useBalance({
     address: walletAddress,
-    token: symbol === 'WETH' && !useERC20 ? undefined : asset,
-    chainId: chainId ?? chain.id,
+    chainId: chainId ?? defaultChain.id,
+    query: { enabled: Boolean(walletAddress && shouldUseNativeBalance) },
+  });
+  const { data: tokenBalance, error: tokenError } = useReadErc20BalanceOf({
+    address: asset,
+    args: walletAddress ? [walletAddress] : undefined,
+    chainId: chainId ?? defaultChain.id,
+    query: { enabled: Boolean(walletAddress && asset && !shouldUseNativeBalance) },
   });
 
   return useMemo(() => {
-    if (!data || (!asset && symbol !== 'WETH')) return;
-    if (error) return;
+    if (shouldUseNativeBalance) {
+      if (!nativeBalance || nativeError) return;
+      return formatUnits(nativeBalance.value, nativeBalance.decimals);
+    }
 
-    return formatUnits(data.value, data.decimals);
-  }, [data, asset, symbol, error]);
+    if (tokenBalance === undefined || tokenError || !asset) return;
+
+    return formatUnits(tokenBalance, marketAccount?.decimals ?? 18);
+  }, [asset, marketAccount?.decimals, nativeBalance, nativeError, shouldUseNativeBalance, tokenBalance, tokenError]);
 };

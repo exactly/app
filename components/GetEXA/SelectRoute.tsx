@@ -6,22 +6,28 @@ import { useTranslation } from 'react-i18next';
 import ChainSelector from './ChainSelector';
 import Image from 'next/image';
 import { Screen, TXStep, useGetEXA } from 'contexts/GetEXAContext';
-import { useNetwork } from 'wagmi';
-import { useWeb3 } from 'hooks/useWeb3';
 import RouteStepsWrapper from './RouteSteps';
 import Routes from './Routes';
 import SocketAssetSelector from 'components/SocketAssetSelector';
-import { optimism } from 'wagmi/chains';
-import { useEXABalance, useEXAPrice } from 'hooks/useEXA';
-import { formatEther, formatUnits } from 'viem';
+import { useEXAPrice } from 'hooks/useEXA';
+import { formatEther, formatUnits, zeroAddress } from 'viem';
 import formatNumber from 'utils/formatNumber';
 import { track } from 'utils/mixpanel';
 import { AssetBalance } from 'types/Bridge';
 import MainActionButton from 'components/common/MainActionButton';
+import { defaultChain } from 'utils/client';
+import useReadOnly from 'hooks/useReadOnly';
+import { useConnection } from 'wagmi';
+import useConnectWallet from 'hooks/useConnectWallet';
+import { exaAddress, useReadExaBalanceOf } from 'generated/wagmi';
+
+const exaChainId = Object.keys(exaAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof exaAddress => chainId === defaultChain.id);
 
 const SelectRoute = () => {
   const {
-    chain,
+    chain: sourceChain,
     route,
     qtyOut,
     qtyIn,
@@ -39,12 +45,16 @@ const SelectRoute = () => {
     submit,
   } = useGetEXA();
   const { t } = useTranslation();
-  const { chain: walletChain } = useNetwork();
-  const { connect, walletAddress } = useWeb3();
-  const isConnected = !!walletChain;
+  const { account: walletAddress } = useReadOnly();
+  const { isConnected } = useConnection();
+  const connect = useConnectWallet();
   const exaPrice = useEXAPrice();
-  const nativeSwap = asset?.symbol === 'ETH' && chain?.chainId === optimism.id;
-  const { data: exaBalance } = useEXABalance({ watch: true });
+  const nativeSwap = asset?.symbol === 'ETH' && sourceChain?.chainId === defaultChain.id;
+  const { data: exaBalance } = useReadExaBalanceOf({
+    chainId: exaChainId,
+    args: [walletAddress ?? zeroAddress],
+    query: { enabled: exaChainId !== undefined, staleTime: 30_000, refetchInterval: 12_000 },
+  });
   const insufficientBalance = Boolean(asset && qtyIn && Number(qtyIn) > asset.amount);
 
   const handleSubmit = useCallback(
@@ -122,7 +132,7 @@ const SelectRoute = () => {
               </Typography>
               <ChainSelector />
             </Box>
-            {chain && (
+            {sourceChain && (
               <Box display="flex" alignItems="center" gap={1} fontSize="14px">
                 <Typography fontSize={14} fontWeight={500}>
                   {t('Asset')}:

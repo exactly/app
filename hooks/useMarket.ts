@@ -1,28 +1,27 @@
 import { useMemo } from 'react';
-import { Address, usePublicClient, useWalletClient } from 'wagmi';
-import { marketABI } from 'types/abi';
-import { getContract } from '@wagmi/core';
+import { usePublicClient, useWalletClient } from 'wagmi';
+import { getContract, type Address } from 'viem';
+import { marketAbi } from 'generated/wagmi';
 import { Market } from 'types/contracts';
-import { useWeb3 } from './useWeb3';
 
-export default (address?: Address, readOnly?: boolean): Market | undefined => {
-  const { chain } = useWeb3();
+function useMarket(address?: Address): Market | undefined {
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
 
   const marketContract = useMemo(() => {
     if (!address) return;
-    if (!walletClient && !readOnly) return;
+    if (!walletClient || !publicClient) return;
 
     const contract = getContract({
-      chainId: chain.id,
       address,
-      abi: marketABI,
-      ...(readOnly || !walletClient ? { publicClient } : { walletClient }),
+      abi: marketAbi,
+      client: { public: publicClient, wallet: walletClient },
     });
 
     return contract;
-  }, [address, walletClient, chain.id, publicClient, readOnly]);
+  }, [address, walletClient, publicClient]);
 
   return marketContract;
-};
+}
+
+export default useMarket;

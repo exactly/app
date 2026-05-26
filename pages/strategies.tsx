@@ -3,7 +3,7 @@ import type { NextPage } from 'next';
 import { Box, Button, Divider, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
-import { optimismSepolia, optimism } from 'wagmi/chains';
+import { optimismSepolia, optimism } from 'viem/chains';
 import { MAX_UINT256, WAD } from '@exactly/lib';
 
 import { useStartDebtManagerButton, useStartLeverager } from 'hooks/useActionButton';
@@ -18,10 +18,10 @@ import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
 import useRewards from 'hooks/useRewards';
 import { parseEther } from 'viem';
 import { useVELOPoolAPR } from 'hooks/useVELO';
-import { useWeb3 } from 'hooks/useWeb3';
 import FeaturedStrategies from 'components/strategies/FeaturedStrategies';
 import { useModal } from '../contexts/ModalContext';
 import { track } from 'utils/mixpanel';
+import { defaultChain } from 'utils/client';
 
 const Strategies: NextPage = () => {
   const { t } = useTranslation();
@@ -29,9 +29,6 @@ const Strategies: NextPage = () => {
   const { startLeverager } = useStartLeverager();
   const { startDebtManager } = useStartDebtManagerButton();
   const { open: openGetEXA } = useModal('get-exa');
-
-  const { chain } = useWeb3();
-
   const hf = useHealthFactor();
   const hfLabel = parseHealthFactor(hf?.debt ?? 0n, hf?.collateral ?? 0n);
 
@@ -246,9 +243,9 @@ const Strategies: NextPage = () => {
           imgPath: '/img/strategies/featured_leverage.svg',
         },
       ]
-        .filter((s) => s.chainId === chain.id || s.chainId === undefined)
+        .filter((s) => s.chainId === defaultChain.id || s.chainId === undefined)
         .slice(0, 3),
-    [chain.id, hfLabel, lowestBorrowAPR, maxYield, query, startDebtManager, startLeverager, t],
+    [hfLabel, lowestBorrowAPR, maxYield, query, startDebtManager, startLeverager, t],
   );
 
   const exactlyStrategies = useMemo(
@@ -414,8 +411,8 @@ const Strategies: NextPage = () => {
             </Button>
           ),
         },
-      ].filter((s) => s.visibleChainId === undefined || s.visibleChainId.includes(chain.id)),
-    [chain.id, hfLabel, lowestBorrowAPR, maxYield, openGetEXA, query, startDebtManager, startLeverager, t],
+      ].filter((s) => s.visibleChainId === undefined || s.visibleChainId.includes(defaultChain.id)),
+    [hfLabel, lowestBorrowAPR, maxYield, openGetEXA, query, startDebtManager, startLeverager, t],
   );
 
   const thirdPartyStrategies: (Strategy & { chainId?: number })[] = useMemo(
@@ -467,8 +464,8 @@ const Strategies: NextPage = () => {
           ),
           imgPath: '/img/assets/VELO.svg',
         },
-      ].filter((s) => s.chainId === chain.id || s.chainId === undefined),
-    [chain.id, query, t, veloRate],
+      ].filter((s) => s.chainId === defaultChain.id || s.chainId === undefined),
+    [query, t, veloRate],
   );
 
   return (

@@ -40,7 +40,7 @@ function Selector({ label, backgroundColor, selected, ...props }: SelectorProps)
 function TypeSwitch() {
   const { t } = useTranslation();
   const theme = useTheme();
-  const { tx, operation, setOperation } = useOperationContext();
+  const { operation, setOperation } = useOperationContext();
 
   const toggle = useCallback(() => {
     const op = isFixedOperation(operation) ? operation.replaceAll('AtMaturity', '') : `${operation}AtMaturity`;
@@ -73,10 +73,6 @@ function TypeSwitch() {
       },
     ];
   }, [operation, theme, toggle, t]);
-
-  if (tx) {
-    return null;
-  }
 
   return (
     <Box

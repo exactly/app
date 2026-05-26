@@ -42,14 +42,13 @@ const OperationTab: FC<OperationTabProps> = ({ label, isSelected, onClick }) => 
 const OperationTabs: FC = () => {
   const { t } = useTranslation();
   const { operation, onChangeOperation, setSelected } = useMarketsBasic();
-  const { setQty, setErrorData, setLoadingButton, setErrorButton } = useOperationContext();
+  const { setQty, setErrorData, setErrorButton } = useOperationContext();
 
   const handleOperationChange = (op: MarketsBasicOperation) => {
     setQty('');
     setSelected(0n);
     onChangeOperation(op);
     setErrorData(undefined);
-    setLoadingButton({});
     setErrorButton(undefined);
   };
 

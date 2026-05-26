@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Box,
   Button,
@@ -15,10 +15,23 @@ import {
 } from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
 import dayjs from 'dayjs';
-import { hexToSignature, formatEther, parseEther } from 'viem';
+import { hexToSignature, formatEther, parseEther, zeroAddress, type Hex } from 'viem';
 import waitForTransaction from 'utils/waitForTransaction';
-import { escrowedExaABI } from 'types/abi';
-import { AbiParametersToPrimitiveTypes, ExtractAbiFunction, ExtractAbiFunctionNames } from 'abitype';
+import {
+  escrowedExaAddress,
+  exaAddress,
+  useReadExaAllowance,
+  useReadExaBalanceOf,
+  useReadExaName,
+  useReadExaNonces,
+  useReadEscrowedExaBalanceOf,
+  useReadEscrowedExaReserveRatio,
+  useReadEscrowedExaVestingPeriod,
+  useSimulateEscrowedExaVest,
+  useSimulateExaApprove,
+  useWriteEscrowedExaVest,
+  useWriteExaApprove,
+} from 'generated/wagmi';
 import Draggable from 'react-draggable';
 import CloseIcon from '@mui/icons-material/Close';
 import { WAD } from '@exactly/lib';
@@ -26,30 +39,29 @@ import { WAD } from '@exactly/lib';
 import { ModalBox } from 'components/common/modal/ModalBox';
 
 import ModalInput from 'components/OperationsModal/ModalInput';
-import { useWeb3 } from 'hooks/useWeb3';
-import { useSignTypedData } from 'wagmi';
+import { useConnection, useSignTypedData } from 'wagmi';
 import { useTranslation, Trans } from 'react-i18next';
 import MainActionButton from 'components/common/MainActionButton';
 import Image from 'next/image';
-import { useEXA, useEXABalance, useEXAPrice } from 'hooks/useEXA';
-import {
-  useEscrowedEXA,
-  useEscrowedEXABalance,
-  useEscrowedEXAReserveRatio,
-  useEscrowedEXAVestingPeriod,
-} from 'hooks/useEscrowedEXA';
+import { useEXAPrice } from 'hooks/useEXA';
 import formatNumber from 'utils/formatNumber';
 import { toPercentage } from 'utils/utils';
 import useIsContract from 'hooks/useIsContract';
-import { gasLimit } from 'utils/gas';
 import { Transaction } from 'types/Transaction';
 import LoadingTransaction from 'components/common/modal/Loading';
 import { track } from 'utils/mixpanel';
 import { useModal } from '../../contexts/ModalContext';
+import { defaultChain } from 'utils/client';
+import useReadOnly from 'hooks/useReadOnly';
 
-type Params<T extends ExtractAbiFunctionNames<typeof escrowedExaABI>> = AbiParametersToPrimitiveTypes<
-  ExtractAbiFunction<typeof escrowedExaABI, T>['inputs']
->;
+type Permit = { value: bigint; deadline: bigint; v: number; r: Hex; s: Hex };
+
+const escrowedExaChainId = Object.keys(escrowedExaAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof escrowedExaAddress => chainId === defaultChain.id);
+const exaChainId = Object.keys(exaAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof exaAddress => chainId === defaultChain.id);
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
@@ -144,62 +156,142 @@ type Props = {
 
 function VestingInput({ refetch }: Props) {
   const { t } = useTranslation();
+  const { account: walletAddress, isImpersonating: impersonateActive } = useReadOnly();
 
-  const exa = useEXA();
-  const escrowedEXA = useEscrowedEXA();
-  const { data: balance, isLoading: balanceIsLoading } = useEscrowedEXABalance();
-  const { data: exaBalance } = useEXABalance();
-  const { data: reserveRatio } = useEscrowedEXAReserveRatio();
-  const { data: vestingPeriod } = useEscrowedEXAVestingPeriod();
+  const { data: balance, isLoading: balanceIsLoading } = useReadEscrowedExaBalanceOf({
+    chainId: escrowedExaChainId,
+    args: [walletAddress ?? zeroAddress],
+    query: { enabled: escrowedExaChainId !== undefined, staleTime: 30_000 },
+  });
+  const { data: exaBalance } = useReadExaBalanceOf({
+    chainId: exaChainId,
+    args: [walletAddress ?? zeroAddress],
+    query: { enabled: exaChainId !== undefined, staleTime: 30_000 },
+  });
+  const { data: reserveRatio } = useReadEscrowedExaReserveRatio({
+    chainId: escrowedExaChainId,
+    query: { enabled: escrowedExaChainId !== undefined, staleTime: 30_000 },
+  });
+  const { data: vestingPeriod } = useReadEscrowedExaVestingPeriod({
+    chainId: escrowedExaChainId,
+    query: { enabled: escrowedExaChainId !== undefined, staleTime: 30_000 },
+  });
   const EXAPrice = useEXAPrice();
-  const { impersonateActive, chain: displayNetwork, isConnected, opts, walletAddress } = useWeb3();
+  const { isConnected } = useConnection();
+  const exa = exaChainId === undefined ? undefined : exaAddress[exaChainId];
+  const escrowedEXA = escrowedExaChainId === undefined ? undefined : escrowedExaAddress[escrowedExaChainId];
   const isContract = useIsContract();
   const { signTypedDataAsync } = useSignTypedData();
   const [isLoading, setIsLoading] = useState(false);
   const [tx, setTx] = useState<Transaction>();
+  const [permit, setPermit] = useState<Permit>();
+  const [submitPermitVest, setSubmitPermitVest] = useState(false);
   const { open: openGetEXA } = useModal('get-exa');
 
   const [qty, setQty] = useState<string>('');
+  const amount = useMemo(() => (qty ? parseEther(qty) : 0n), [qty]);
 
   const usdValue = useMemo(() => {
     if (!qty || !EXAPrice) return;
 
-    const parsedQty = parseEther(qty);
-    const usd = (parsedQty * EXAPrice) / WAD;
+    const usd = (amount * EXAPrice) / WAD;
 
     return formatEther(usd);
-  }, [EXAPrice, qty]);
+  }, [EXAPrice, amount, qty]);
 
   const [reserve, moreThanBalance, exaRemaining] = useMemo(() => {
     if (reserveRatio === undefined || exaBalance === undefined || !qty) return [undefined, false];
-    const parsed = parseEther(qty);
-    const _reserve = (parsed * reserveRatio) / WAD;
+    const _reserve = (amount * reserveRatio) / WAD;
     const _exaRemaining = _reserve - exaBalance;
 
     return [formatEther(_reserve), _reserve > exaBalance, _exaRemaining];
-  }, [reserveRatio, qty, exaBalance]);
+  }, [reserveRatio, amount, qty, exaBalance]);
+
+  const reserveAmount = useMemo(
+    () => (reserveRatio === undefined ? 0n : (amount * reserveRatio) / WAD + 1n),
+    [amount, reserveRatio],
+  );
+  const exaAllowance = useReadExaAllowance({
+    chainId: exaChainId,
+    args: walletAddress && escrowedEXA ? [walletAddress, escrowedEXA] : undefined,
+    query: { enabled: Boolean(walletAddress && escrowedEXA && exaChainId !== undefined) },
+  });
+  const { data: nonce } = useReadExaNonces({
+    chainId: exaChainId,
+    args: walletAddress ? [walletAddress] : undefined,
+    query: { enabled: Boolean(walletAddress && exaChainId !== undefined) },
+  });
+  const { data: name } = useReadExaName({
+    chainId: exaChainId,
+    query: { enabled: exaChainId !== undefined },
+  });
+  const approveSimulation = useSimulateExaApprove({
+    account: walletAddress,
+    chainId: exaChainId,
+    args: escrowedEXA ? [escrowedEXA, reserveAmount] : undefined,
+    query: { enabled: Boolean(walletAddress && escrowedEXA && exaChainId !== undefined && reserveAmount > 1n) },
+  });
+  const vestArgs = useMemo(
+    () =>
+      walletAddress && reserveRatio !== undefined && vestingPeriod !== undefined
+        ? ([amount, walletAddress, reserveRatio, BigInt(vestingPeriod)] as const)
+        : undefined,
+    [amount, reserveRatio, vestingPeriod, walletAddress],
+  );
+  const permitVestArgs = useMemo(
+    () => (vestArgs && permit ? ([vestArgs[0], vestArgs[1], vestArgs[2], vestArgs[3], permit] as const) : undefined),
+    [permit, vestArgs],
+  );
+  const vestSimulation = useSimulateEscrowedExaVest({
+    account: walletAddress,
+    chainId: escrowedExaChainId,
+    args: vestArgs,
+    query: {
+      enabled: Boolean(
+        walletAddress &&
+          escrowedExaChainId !== undefined &&
+          reserveRatio !== undefined &&
+          vestingPeriod !== undefined &&
+          amount > 0n,
+      ),
+    },
+  });
+  const permitVestSimulation = useSimulateEscrowedExaVest({
+    account: walletAddress,
+    chainId: escrowedExaChainId,
+    args: permitVestArgs,
+    query: {
+      enabled: Boolean(
+        walletAddress &&
+          escrowedExaChainId !== undefined &&
+          reserveRatio !== undefined &&
+          vestingPeriod !== undefined &&
+          permit &&
+          amount > 0n &&
+          submitPermitVest,
+      ),
+    },
+  });
+  const { writeContractAsync: approveExa } = useWriteExaApprove();
+  const { writeContractAsync: vest } = useWriteEscrowedExaVest();
 
   const insufficientFunds = useMemo(() => {
-    return parseEther(qty) > (balance || 0n) || !qty || moreThanBalance;
-  }, [balance, moreThanBalance, qty]);
+    return amount > (balance || 0n) || !qty || moreThanBalance;
+  }, [amount, balance, moreThanBalance, qty]);
 
   const sign = useCallback(async () => {
-    if (!walletAddress || reserveRatio === undefined || !exa || !escrowedEXA) return;
+    if (!walletAddress || reserveRatio === undefined || !exa || !escrowedEXA || nonce === undefined || !name) return;
 
     const deadline = BigInt(dayjs().unix() + 3_600);
-    const _qty = parseEther(qty);
-    const value = (_qty * reserveRatio) / WAD + 1n;
-
-    const nonce = await exa.read.nonces([walletAddress], opts);
-    const name = await exa.read.name(opts);
+    const value = (amount * reserveRatio) / WAD + 1n;
 
     const { v, r, s } = await signTypedDataAsync({
       primaryType: 'Permit',
       domain: {
         name,
         version: '1',
-        chainId: displayNetwork.id,
-        verifyingContract: exa.address,
+        chainId: defaultChain.id,
+        verifyingContract: exa,
       },
       types: {
         Permit: [
@@ -212,7 +304,7 @@ function VestingInput({ refetch }: Props) {
       },
       message: {
         owner: walletAddress,
-        spender: escrowedEXA.address,
+        spender: escrowedEXA,
         value,
         nonce,
         deadline,
@@ -224,46 +316,38 @@ function VestingInput({ refetch }: Props) {
       deadline,
       ...{ v: Number(v), r, s },
     } as const;
-  }, [displayNetwork.id, escrowedEXA, exa, opts, qty, reserveRatio, signTypedDataAsync, walletAddress]);
+  }, [amount, escrowedEXA, exa, name, nonce, reserveRatio, signTypedDataAsync, walletAddress]);
 
   const submit = useCallback(async () => {
-    if (
-      !walletAddress ||
-      reserveRatio === undefined ||
-      vestingPeriod === undefined ||
-      !escrowedEXA ||
-      !exa ||
-      !opts ||
-      !qty
-    )
+    if (!walletAddress || reserveRatio === undefined || vestingPeriod === undefined || !escrowedEXA || !exa || !qty) {
       return;
+    }
 
     setIsLoading(true);
-    const amount = parseEther(qty);
-    const res = (amount * reserveRatio) / WAD + 1n;
+    let permitPending = false;
 
     let hash;
     try {
-      let args: Params<'vest'> = [amount, walletAddress, reserveRatio, BigInt(vestingPeriod)] as const;
-
       if (await isContract(walletAddress)) {
-        const allowance = await exa.read.allowance([walletAddress, escrowedEXA.address]);
+        const allowance = (await exaAllowance.refetch()).data;
 
-        if (allowance < res) {
-          const approve = [escrowedEXA.address, res] as const;
-          const gas = await exa.estimateGas.approve(approve, opts);
-          const approveHash = await exa.write.approve(approve, { ...opts, gasLimit: gasLimit(gas) });
+        if ((allowance ?? 0n) < reserveAmount) {
+          const approveRequest = approveSimulation.data ?? (await approveSimulation.refetch()).data;
+          if (!approveRequest) return;
+          const approveHash = await approveExa(approveRequest.request);
           await waitForTransaction({ hash: approveHash });
         }
 
-        const gas = await escrowedEXA.estimateGas.vest(args, opts);
-        hash = await escrowedEXA.write.vest(args, { ...opts, gasLimit: gasLimit(gas) });
+        const vestRequest = vestSimulation.data ?? (await vestSimulation.refetch()).data;
+        if (!vestRequest || !vestArgs) return;
+        hash = await vest({ account: walletAddress, chainId: escrowedExaChainId, args: vestArgs });
       } else {
         const p = await sign();
         if (!p) return;
-        args = [...args, p] as const;
-        const gas = await escrowedEXA.estimateGas.vest(args, opts);
-        hash = await escrowedEXA.write.vest(args, { ...opts, gasLimit: gasLimit(gas) });
+        permitPending = true;
+        setPermit(p);
+        setSubmitPermitVest(true);
+        return;
       }
 
       setTx({ status: 'processing', hash });
@@ -274,9 +358,52 @@ function VestingInput({ refetch }: Props) {
     } catch (e) {
       if (hash) setTx({ status: 'error', hash });
     } finally {
-      setIsLoading(false);
+      if (!permitPending) setIsLoading(false);
     }
-  }, [walletAddress, reserveRatio, vestingPeriod, escrowedEXA, exa, opts, qty, isContract, sign]);
+  }, [
+    walletAddress,
+    reserveRatio,
+    vestingPeriod,
+    escrowedEXA,
+    exa,
+    qty,
+    isContract,
+    exaAllowance,
+    reserveAmount,
+    approveSimulation,
+    approveExa,
+    vestSimulation,
+    vestArgs,
+    vest,
+    sign,
+  ]);
+
+  useEffect(() => {
+    if (!submitPermitVest || !permitVestSimulation.data) return;
+    setSubmitPermitVest(false);
+    void (async () => {
+      let hash;
+      try {
+        if (!permitVestArgs) return;
+        hash = await vest({ account: walletAddress, chainId: escrowedExaChainId, args: permitVestArgs });
+        setTx({ status: 'processing', hash });
+        const { status, transactionHash } = await waitForTransaction({ hash });
+        setTx({ status: status === 'success' ? 'success' : 'error', hash: transactionHash });
+      } catch {
+        if (hash) setTx({ status: 'error', hash });
+      } finally {
+        setPermit(undefined);
+        setIsLoading(false);
+      }
+    })();
+  }, [permitVestArgs, permitVestSimulation.data, submitPermitVest, vest, walletAddress]);
+
+  useEffect(() => {
+    if (!submitPermitVest || !permitVestSimulation.error) return;
+    setSubmitPermitVest(false);
+    setPermit(undefined);
+    setIsLoading(false);
+  }, [permitVestSimulation.error, submitPermitVest]);
 
   const handleMaxClick = useCallback(() => {
     if (balance) {
@@ -479,7 +606,7 @@ function VestingInput({ refetch }: Props) {
             data-testid="vesting-submit"
             disabled={insufficientFunds}
           >
-            {insufficientFunds && parseEther(qty) > 0n ? t('Insufficient esEXA balance') : t('Vest esEXA')}
+            {insufficientFunds && amount > 0n ? t('Insufficient esEXA balance') : t('Vest esEXA')}
           </MainActionButton>
         )}
       </Box>

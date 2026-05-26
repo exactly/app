@@ -1,18 +1,19 @@
 import snapshot from '@snapshot-labs/snapshot.js';
-import { useWeb3 } from './useWeb3';
 import { useCallback, useEffect, useState } from 'react';
 import exa from '@exactly/protocol/deployments/optimism/EXA.json';
-import { optimism } from 'wagmi/chains';
+import { optimism } from 'viem/chains';
+import { defaultChain } from 'utils/client';
+import useReadOnly from 'hooks/useReadOnly';
 
 export default function useGovernance(delegation = true) {
   const [votingPower, setVotingPower] = useState<number | undefined>(undefined);
-  const { chain, walletAddress } = useWeb3();
+  const { account: walletAddress } = useReadOnly();
 
   const fetchVotingPower = useCallback(async () => {
     if (!walletAddress) return;
     const { vp } = await snapshot.utils.getVp(
       walletAddress,
-      String(chain.id),
+      String(defaultChain.id),
       [
         { name: 'erc20-balance-of', params: { symbol: 'EXA', address: exa.address, decimals: 18 } },
         {
@@ -21,13 +22,13 @@ export default function useGovernance(delegation = true) {
         },
       ],
       'latest',
-      chain.id === optimism.id ? 'gov.exa.eth' : 'exa.eth',
+      defaultChain.id === optimism.id ? 'gov.exa.eth' : 'exa.eth',
       delegation,
       { url: 'https://score.snapshot.org/' },
     );
     setVotingPower(vp);
     return vp;
-  }, [chain.id, delegation, walletAddress]);
+  }, [delegation, walletAddress]);
 
   useEffect(() => {
     fetchVotingPower();

@@ -3,7 +3,7 @@ import { parseUnits } from 'viem';
 import type { Address, PublicClient } from 'viem';
 
 import { erc20, type ERC20TokenSymbol } from '../utils/contracts';
-import { CommonTest } from './types';
+import type { CommonTest } from './types';
 
 export default function ({ test, publicClient }: CommonTest & { publicClient: PublicClient }) {
   type BalanceParams = {
@@ -14,7 +14,7 @@ export default function ({ test, publicClient }: CommonTest & { publicClient: Pu
   };
 
   const check = async ({ address, symbol, amount, delta: _delta }: BalanceParams) => {
-    await test.step(`checks ${symbol} balance to be ${_delta ? 'near ' : ''}${amount}`, async () => {
+    await test.step(`assert: balance ${symbol} ${_delta ? '~=' : '='} ${amount}`, async () => {
       const erc20Contract = await erc20(symbol, { publicClient });
       const balance = await erc20Contract.read.balanceOf([address]);
       const decimals = await erc20Contract.read.decimals();
@@ -34,7 +34,7 @@ export default function ({ test, publicClient }: CommonTest & { publicClient: Pu
   };
 
   const exists = async ({ address, symbol }: Pick<BalanceParams, 'address' | 'symbol'>) => {
-    await test.step(`checks that ${address} has some ${symbol} balance`, async () => {
+    await test.step(`assert: balance ${symbol} > 0`, async () => {
       const erc20Contract = await erc20(symbol, { publicClient });
       const balance = await erc20Contract.read.balanceOf([address]);
       expect(balance).toBeGreaterThan(0n);

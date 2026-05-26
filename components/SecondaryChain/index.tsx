@@ -1,18 +1,14 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useWeb3 } from 'hooks/useWeb3';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { Button } from '@mui/material';
-import { optimism, mainnet } from 'wagmi/chains';
+import { optimism, mainnet } from 'viem/chains';
 import usePreviewerExactly from 'hooks/usePreviewerExactly';
+import { defaultChain } from 'utils/client';
 
 const SecondaryChain = () => {
   const { t } = useTranslation();
-  const {
-    chain: { id: displayNetworkId },
-  } = useWeb3();
-
-  const overrideChain = displayNetworkId === optimism.id ? mainnet.id : optimism.id;
+  const overrideChain = defaultChain.id === optimism.id ? mainnet.id : optimism.id;
   const { data } = usePreviewerExactly(overrideChain);
 
   const secondaryChain = useMemo(
@@ -43,9 +39,9 @@ const SecondaryChain = () => {
         color: 'grey.900',
       }}
       target="_blank"
-      href={`https://${displayNetworkId === optimism.id ? 'ethereum' : 'app'}.exact.ly`}
+      href={`https://${defaultChain.id === optimism.id ? 'ethereum' : 'app'}.exact.ly`}
     >
-      {t('Go to')} {displayNetworkId === optimism.id ? mainnet.name : optimism.name}
+      {t('Go to')} {defaultChain.id === optimism.id ? mainnet.name : optimism.name}
     </Button>
   ) : null;
 };

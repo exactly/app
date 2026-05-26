@@ -1,16 +1,21 @@
 import React, { useMemo } from 'react';
+import type { Hex } from 'viem';
 import { useTranslation } from 'react-i18next';
 import { Box, Button, CircularProgress, Typography } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 
-import { Transaction } from 'types/Transaction';
 import useEtherscanLink from 'hooks/useEtherscanLink';
 import { CircularProgressWithIcon } from 'components/OperationsModal/ModalGif';
 import Reminder from 'components/Reminder';
 
 type Props = {
-  tx: Transaction;
+  tx?: {
+    status: 'loading' | 'processing' | 'success' | 'error';
+    hash?: Hex;
+  };
+  status?: 'loading' | 'processing' | 'success' | 'error';
+  hash?: Hex;
   maturity?: bigint;
   messages?: {
     pending?: React.ReactNode;
@@ -19,12 +24,18 @@ type Props = {
   };
 };
 
-function Loading({ tx, maturity, messages: { pending, success, error } = {} }: Props) {
+function Loading({
+  tx,
+  status = tx?.status,
+  hash = tx?.hash,
+  maturity,
+  messages: { pending, success, error } = {},
+}: Props) {
   const { t } = useTranslation();
 
-  const isLoading = useMemo(() => tx.status === 'processing' || tx.status === 'loading', [tx]);
-  const isSuccess = useMemo(() => tx.status === 'success', [tx]);
-  const isError = useMemo(() => tx.status === 'error', [tx]);
+  const isLoading = useMemo(() => status === 'processing' || status === 'loading', [status]);
+  const isSuccess = useMemo(() => status === 'success', [status]);
+  const isError = useMemo(() => status === 'error', [status]);
   const { tx: txLink } = useEtherscanLink();
 
   return (
@@ -55,13 +66,13 @@ function Loading({ tx, maturity, messages: { pending, success, error } = {} }: P
             {isError && error}
           </Typography>
           <Box display="flex" flexDirection="column" alignItems="center" gap="8px" pt={1}>
-            {tx.hash && (
+            {hash && (
               <Button
                 component="a"
                 variant="outlined"
                 sx={{ width: '150px', height: '32px', fontWeight: 500, whiteSpace: 'nowrap' }}
                 target="_blank"
-                href={txLink(tx.hash)}
+                href={txLink(hash)}
               >
                 {t('View on Etherscan')}
               </Button>

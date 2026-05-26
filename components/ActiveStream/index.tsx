@@ -24,14 +24,33 @@ import waitForTransaction from 'utils/waitForTransaction';
 import Image from 'next/image';
 import formatNumber from 'utils/formatNumber';
 import { toPercentage } from 'utils/utils';
-import { useWeb3 } from 'hooks/useWeb3';
-import { useEscrowedEXA, useEscrowedEXAReserves } from 'hooks/useEscrowedEXA';
-import { useSablierV2LockupLinearWithdrawableAmountOf, useSablierV2NftDescriptorTokenUri } from 'hooks/useSablier';
 import Draggable from 'react-draggable';
 import CloseIcon from '@mui/icons-material/Close';
 import { TransitionProps } from '@mui/material/transitions';
 import { track } from 'utils/mixpanel';
 import MainActionButton from 'components/common/MainActionButton';
+import { defaultChain } from 'utils/client';
+import {
+  escrowedExaAddress,
+  sablierV2LockupLinearAddress,
+  sablierV2NftDescriptorAddress,
+  useReadEscrowedExaReserves,
+  useReadSablierV2LockupLinearWithdrawableAmountOf,
+  useReadSablierV2NftDescriptorTokenUri,
+  useWriteEscrowedExaCancel,
+  useWriteEscrowedExaWithdrawMax,
+} from 'generated/wagmi';
+import useReadOnly from 'hooks/useReadOnly';
+
+const escrowedExaChainId = Object.keys(escrowedExaAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof escrowedExaAddress => chainId === defaultChain.id);
+const sablierV2LockupLinearChainId = Object.keys(sablierV2LockupLinearAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof sablierV2LockupLinearAddress => chainId === defaultChain.id);
+const sablierV2NftDescriptorChainId = Object.keys(sablierV2NftDescriptorAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof sablierV2NftDescriptorAddress => chainId === defaultChain.id);
 
 const StyledLinearProgress = styled(LinearProgress, {
   shouldForwardProp: (prop) => prop !== 'barColor',
@@ -102,7 +121,14 @@ const Transition = React.forwardRef(function Transition(
 const NFT: React.FC<{ tokenId: number; open: boolean; onClose: () => void }> = ({ tokenId, open, onClose }) => {
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
-  const { data: nft } = useSablierV2NftDescriptorTokenUri(BigInt(tokenId));
+  const { data: nft } = useReadSablierV2NftDescriptorTokenUri({
+    chainId: sablierV2NftDescriptorChainId,
+    args:
+      sablierV2LockupLinearChainId === undefined
+        ? undefined
+        : [sablierV2LockupLinearAddress[sablierV2LockupLinearChainId], BigInt(tokenId)],
+    query: { enabled: sablierV2LockupLinearChainId !== undefined && sablierV2NftDescriptorChainId !== undefined },
+  });
   const { spacing } = useTheme();
 
   const b64 = nft?.split(',')[1] ?? '';
@@ -173,7 +199,7 @@ const WithdrawAndCancel: React.FC<{
   loading: boolean;
 }> = ({ tokenId, open, onClose, cancel, loading }) => {
   const { spacing } = useTheme();
-  const { impersonateActive } = useWeb3();
+  const { isImpersonating: impersonateActive } = useReadOnly();
   const { t } = useTranslation();
 
   const { breakpoints } = useTheme();
@@ -287,12 +313,19 @@ const ActiveStream: FC<ActiveStreamProps> = ({
   refetch,
 }) => {
   const { t } = useTranslation();
-  const { impersonateActive, opts } = useWeb3();
-  const { data: reserve, isLoading: reserveIsLoading } = useEscrowedEXAReserves(BigInt(tokenId));
-  const { data: withdrawable, isLoading: withdrawableIsLoading } = useSablierV2LockupLinearWithdrawableAmountOf(
-    BigInt(tokenId),
-  );
-  const escrowedEXA = useEscrowedEXA();
+  const { account: walletAddress, isImpersonating: impersonateActive } = useReadOnly();
+  const { data: reserve, isLoading: reserveIsLoading } = useReadEscrowedExaReserves({
+    chainId: escrowedExaChainId,
+    args: [BigInt(tokenId)],
+    query: { enabled: escrowedExaChainId !== undefined, staleTime: 30_000 },
+  });
+  const { data: withdrawable, isLoading: withdrawableIsLoading } = useReadSablierV2LockupLinearWithdrawableAmountOf({
+    chainId: sablierV2LockupLinearChainId,
+    args: [BigInt(tokenId)],
+    query: { enabled: sablierV2LockupLinearChainId !== undefined },
+  });
+  const { writeContractAsync: cancelStream } = useWriteEscrowedExaCancel();
+  const { writeContractAsync: withdrawMax } = useWriteEscrowedExaWithdrawMax();
   const [loading, setLoading] = useState(false);
   const [NFTModalOpen, setNFTModalOpen] = useState(false);
   const [CancelModalOpen, setCancelModalOpen] = useState(false);
@@ -308,10 +341,14 @@ const ActiveStream: FC<ActiveStreamProps> = ({
   }, []);
 
   const cancel = useCallback(async () => {
-    if (!escrowedEXA || !opts) return;
+    if (!walletAddress || escrowedExaChainId === undefined) return;
     setLoading(true);
     try {
-      const tx = await escrowedEXA.write.cancel([[BigInt(tokenId)]], opts);
+      const tx = await cancelStream({
+        account: walletAddress,
+        chainId: escrowedExaChainId,
+        args: [[BigInt(tokenId)]],
+      });
       await waitForTransaction({ hash: tx });
     } catch (e) {
       // if request fails, don't do anything
@@ -319,7 +356,7 @@ const ActiveStream: FC<ActiveStreamProps> = ({
       setLoading(false);
       refetch();
     }
-  }, [escrowedEXA, opts, refetch, tokenId]);
+  }, [cancelStream, refetch, tokenId, walletAddress]);
 
   const elapsed = useMemo(() => {
     const now = Math.floor(Date.now() / 1000);
@@ -342,10 +379,14 @@ const ActiveStream: FC<ActiveStreamProps> = ({
       value: progress,
     });
 
-    if (!escrowedEXA || !opts) return;
+    if (!walletAddress || escrowedExaChainId === undefined) return;
     setLoading(true);
     try {
-      const tx = await escrowedEXA.write.withdrawMax([[BigInt(tokenId)]], opts);
+      const tx = await withdrawMax({
+        account: walletAddress,
+        chainId: escrowedExaChainId,
+        args: [[BigInt(tokenId)]],
+      });
       track('TX Signed', {
         contractName: 'EscrowedEXA',
         method: 'withdrawMax',
@@ -364,7 +405,7 @@ const ActiveStream: FC<ActiveStreamProps> = ({
       setLoading(false);
       refetch();
     }
-  }, [escrowedEXA, opts, progress, refetch, tokenId]);
+  }, [progress, refetch, tokenId, walletAddress, withdrawMax]);
 
   const timeLeft = useMemo(() => {
     const now = Math.floor(Date.now() / 1000);

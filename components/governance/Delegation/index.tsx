@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Avatar,
   Box,
@@ -19,54 +19,72 @@ import { useTranslation } from 'react-i18next';
 import { LoadingButton } from '@mui/lab';
 import { isAddress, zeroAddress } from 'viem';
 import { formatWallet } from 'utils/utils';
-import { useWeb3 } from 'hooks/useWeb3';
-import { useDelegateRegistryClearDelegate, useDelegateRegistrySetDelegate } from 'types/abi';
-import { mainnet, useEnsAvatar, useEnsName } from 'wagmi';
-import useWaitForTransaction from 'hooks/useWaitForTransaction';
+import { useWriteDelegateRegistryClearDelegate, useWriteDelegateRegistrySetDelegate } from 'generated/wagmi';
+import { useEnsAvatar, useEnsName, useWaitForTransactionReceipt } from 'wagmi';
+import { mainnet } from 'viem/chains';
 import * as blockies from 'blockies-ts';
 import { useDelegation, usePrepareClearDelegate, usePrepareDelegate } from 'hooks/useDelegateRegistry';
 import formatNumber from 'utils/formatNumber';
 import useGovernance from 'hooks/useGovernance';
 import { track } from 'utils/mixpanel';
 import MainActionButton from 'components/common/MainActionButton';
+import useReadOnly from 'hooks/useReadOnly';
 
 const Delegation = () => {
   const { votingPower: yourVotes } = useGovernance(false);
   const { votingPower, fetchVotingPower } = useGovernance();
   const { t } = useTranslation();
-  const { walletAddress, impersonateActive, exitImpersonate } = useWeb3();
+  const { account: walletAddress, isImpersonating: impersonateActive, exitReadOnly: exitImpersonate } = useReadOnly();
   const [open, setOpen] = useState<boolean>(false);
   const [input, setInput] = useState<string>('');
   const { data: delegate, isLoading: isLoadingDelegate, refetch: refetchDelegate } = useDelegation();
-  const { config } = usePrepareDelegate(isAddress(input) ? input : zeroAddress);
-  const { write, isLoading: submitLoading, data } = useDelegateRegistrySetDelegate(config);
-  const { config: configClearDelegate } = usePrepareClearDelegate(delegate !== zeroAddress);
+  const { data: delegateSimulation } = usePrepareDelegate(isAddress(input) ? input : zeroAddress);
+  const { mutate: writeDelegate, isPending: submitLoading, data: delegateHash } = useWriteDelegateRegistrySetDelegate();
+  const { data: clearDelegateSimulation } = usePrepareClearDelegate(delegate !== zeroAddress);
   const {
-    write: writeClearDelegate,
-    isLoading: clearDelegateLoading,
-    data: clearDelegateData,
-  } = useDelegateRegistryClearDelegate(configClearDelegate);
-  const { isLoading: waitingDelegate } = useWaitForTransaction({
-    hash: data?.hash,
-    onSettled: () => {
-      refetchDelegate();
-      fetchVotingPower();
-      setOpen(false);
+    mutate: clearDelegate,
+    isPending: clearDelegateLoading,
+    data: clearDelegateHash,
+  } = useWriteDelegateRegistryClearDelegate();
+  const {
+    data: delegateReceipt,
+    error: delegateError,
+    isLoading: waitingDelegate,
+  } = useWaitForTransactionReceipt({
+    hash: delegateHash,
+    query: {
+      enabled: Boolean(delegateHash),
     },
   });
-  const { isLoading: waitingClearDelegate } = useWaitForTransaction({
-    hash: clearDelegateData?.hash,
-    onSettled: () => {
-      refetchDelegate();
-      fetchVotingPower();
+  const {
+    data: clearDelegateReceipt,
+    error: clearDelegateError,
+    isLoading: waitingClearDelegate,
+  } = useWaitForTransactionReceipt({
+    hash: clearDelegateHash,
+    query: {
+      enabled: Boolean(clearDelegateHash),
     },
   });
+
+  useEffect(() => {
+    if (!delegateReceipt && !delegateError) return;
+    refetchDelegate();
+    fetchVotingPower();
+    setOpen(false);
+  }, [delegateError, delegateReceipt, fetchVotingPower, refetchDelegate]);
+
+  useEffect(() => {
+    if (!clearDelegateReceipt && !clearDelegateError) return;
+    refetchDelegate();
+    fetchVotingPower();
+  }, [clearDelegateError, clearDelegateReceipt, fetchVotingPower, refetchDelegate]);
   const { data: delegateENS } = useEnsName({
     address: delegate === zeroAddress ? walletAddress : delegate,
     chainId: mainnet.id,
   });
   const { data: delegateENSAvatar, error: ensAvatarError } = useEnsAvatar({
-    name: delegateENS,
+    name: delegateENS ?? undefined,
     chainId: mainnet.id,
   });
 
@@ -86,6 +104,16 @@ const Delegation = () => {
       value: votingPower,
     });
   }, [votingPower]);
+
+  const handleDelegateSubmit = useCallback(() => {
+    if (!delegateSimulation) return;
+    writeDelegate(delegateSimulation.request);
+  }, [delegateSimulation, writeDelegate]);
+
+  const handleClearDelegate = useCallback(() => {
+    if (!clearDelegateSimulation) return;
+    clearDelegate(clearDelegateSimulation.request);
+  }, [clearDelegate, clearDelegateSimulation]);
 
   const handleModalClose = useCallback(() => {
     setOpen(false);
@@ -117,8 +145,10 @@ const Delegation = () => {
         onClose={handleModalClose}
         input={input}
         setInput={setInput}
-        onDelegate={write}
-        isLoading={submitLoading || waitingDelegate}
+        onDelegate={handleDelegateSubmit}
+        isLoading={
+          submitLoading || waitingDelegate || (isAddress(input) && input !== walletAddress && !delegateSimulation)
+        }
       />
       <Box display="flex" flexDirection="column" gap={3}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -185,7 +215,8 @@ const Delegation = () => {
             <MainActionButton
               fullWidth
               variant="outlined"
-              onClick={writeClearDelegate}
+              onClick={handleClearDelegate}
+              disabled={!clearDelegateSimulation}
               loading={clearDelegateLoading || waitingClearDelegate || waitingDelegate}
             >
               {t('Revoke delegation')}
@@ -219,7 +250,7 @@ const DelegateInputDialog: FC<DelegateInputDialogProps> = ({
   onDelegate,
   isLoading,
 }) => {
-  const { walletAddress } = useWeb3();
+  const { account: walletAddress } = useReadOnly();
   const { t } = useTranslation();
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('md'));

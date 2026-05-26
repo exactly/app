@@ -1,17 +1,21 @@
 import React, { MouseEvent, useCallback } from 'react';
-import { useNetwork, useSwitchNetwork } from 'wagmi';
+import { useChainId, useConnection, useSwitchChain } from 'wagmi';
 import { useTranslation } from 'react-i18next';
 import { LoadingButton, type LoadingButtonProps } from '@mui/lab';
 import { Button } from '@mui/material';
 
-import { useWeb3 } from 'hooks/useWeb3';
 import { useModal } from 'contexts/ModalContext';
+import { defaultChain } from 'utils/client';
+import useReadOnly from 'hooks/useReadOnly';
+import useConnectWallet from 'hooks/useConnectWallet';
 
 function MainActionButton({ onClick, ...props }: LoadingButtonProps) {
   const { t } = useTranslation();
-  const { isConnected, chain: displayNetwork, connect, impersonateActive, exitImpersonate } = useWeb3();
-  const { chain } = useNetwork();
-  const { switchNetworkAsync, isLoading } = useSwitchNetwork();
+  const { isImpersonating: impersonateActive, exitReadOnly: exitImpersonate } = useReadOnly();
+  const { isConnected } = useConnection();
+  const connect = useConnectWallet();
+  const chainId = useChainId();
+  const { mutateAsync: switchChainAsync, isPending } = useSwitchChain();
   const { close } = useModal('rollover');
 
   const exitAndClose = useCallback(() => {
@@ -21,11 +25,11 @@ function MainActionButton({ onClick, ...props }: LoadingButtonProps) {
 
   const handleClick = useCallback(
     async (event: MouseEvent<HTMLButtonElement>) => {
-      if (chain && chain.id !== displayNetwork.id && switchNetworkAsync) {
+      if (chainId !== defaultChain.id) {
         try {
-          const result = await switchNetworkAsync(displayNetwork.id);
+          const result = await switchChainAsync({ chainId: defaultChain.id });
 
-          if (result.id === displayNetwork.id && onClick && event) {
+          if (result.id === defaultChain.id && onClick && event) {
             onClick(event);
           }
         } catch (error) {
@@ -35,7 +39,7 @@ function MainActionButton({ onClick, ...props }: LoadingButtonProps) {
         onClick(event);
       }
     },
-    [chain, displayNetwork.id, switchNetworkAsync, onClick],
+    [chainId, switchChainAsync, onClick],
   );
 
   if (impersonateActive) {
@@ -54,7 +58,7 @@ function MainActionButton({ onClick, ...props }: LoadingButtonProps) {
     );
   }
 
-  return <LoadingButton {...props} loading={isLoading || props.loading} onClick={handleClick} />;
+  return <LoadingButton {...props} loading={isPending || props.loading} onClick={handleClick} />;
 }
 
 export default React.memo(MainActionButton);

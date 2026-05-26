@@ -1,40 +1,34 @@
-import { isAddress, zeroAddress } from 'viem';
-import { mainnet, optimismSepolia, optimism, base, baseSepolia } from 'wagmi/chains';
+import { zeroAddress } from 'viem';
+import {
+  legacyPreviewerAddress,
+  previewerAddress,
+  useReadLegacyPreviewerExactly,
+  useReadPreviewerExactly,
+} from 'generated/wagmi';
 
-import { useWeb3 } from './useWeb3';
-import { usePreviewerExactly, useLegacyPreviewerExactly } from 'types/abi';
-import mainnetPreviewer from '@exactly/protocol/deployments/ethereum/Previewer.json' assert { type: 'json' };
-import optimismPreviewer from '@exactly/protocol/deployments/optimism/Previewer.json' assert { type: 'json' };
-import sepoliaPreviewer from '@exactly/protocol/deployments/op-sepolia/Previewer.json' assert { type: 'json' };
-import basePreviewer from '@exactly/protocol/deployments/base/Previewer.json' assert { type: 'json' };
-import baseSepoliaPreviewer from '@exactly/protocol/deployments/base-sepolia/Previewer.json' assert { type: 'json' };
+import { defaultChain } from 'utils/client';
+import useReadOnly from 'hooks/useReadOnly';
 
 export default (override?: number) => {
-  const { chain, walletAddress } = useWeb3();
+  const { account: walletAddress } = useReadOnly();
+  const chainId = override ?? defaultChain.id;
+  const legacyPreviewerChainId = Object.keys(legacyPreviewerAddress)
+    .map(Number)
+    .find((id): id is keyof typeof legacyPreviewerAddress => id === chainId);
+  const previewerChainId = Object.keys(previewerAddress)
+    .map(Number)
+    .find((id): id is keyof typeof previewerAddress => id === chainId);
 
-  const address = {
-    [optimismSepolia.id]: sepoliaPreviewer.address,
-    [optimism.id]: optimismPreviewer.address,
-    [mainnet.id]: mainnetPreviewer.address,
-    [base.id]: basePreviewer.address,
-    [baseSepolia.id]: baseSepoliaPreviewer.address,
-  }[override ?? chain.id];
+  const legacy = useReadLegacyPreviewerExactly({
+    chainId: legacyPreviewerChainId,
+    args: [walletAddress ?? zeroAddress],
+    query: { enabled: legacyPreviewerChainId !== undefined, staleTime: 5_000 },
+  });
+  const current = useReadPreviewerExactly({
+    chainId: previewerChainId,
+    args: [walletAddress ?? zeroAddress],
+    query: { enabled: previewerChainId !== undefined, staleTime: 5_000 },
+  });
 
-  if (!address || !isAddress(address)) throw new Error(`No deployment for ${chain.id}`);
-
-  if (chain.id === mainnet.id) {
-    return useLegacyPreviewerExactly({
-      chainId: override ?? chain.id,
-      address,
-      args: [walletAddress ?? zeroAddress],
-      staleTime: 5_000,
-    });
-  } else {
-    return usePreviewerExactly({
-      chainId: override ?? chain.id,
-      address,
-      args: [walletAddress ?? zeroAddress],
-      staleTime: 5_000,
-    });
-  }
+  return legacyPreviewerChainId === undefined ? current : legacy;
 };

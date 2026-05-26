@@ -22,7 +22,6 @@ import InfoOutlined from '@mui/icons-material/InfoOutlined';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 import { toPercentage } from 'utils/utils';
 import usePreviousValue from 'hooks/usePreviousValue';
-import Loading from './Loading';
 import FrozenPill from 'components/common/FrozenPill';
 
 const { minAPRValue } = numbers;
@@ -31,10 +30,10 @@ const MarketsBasic: FC = () => {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
   const { palette } = useTheme();
-  const { errorData, qty, assetContract, tx } = useOperationContext();
-  const { symbol, operation, selected, setSelected, reset } = useMarketsBasic();
+  const { errorData, qty } = useOperationContext();
+  const { symbol, operation, selected, setSelected } = useMarketsBasic();
   const { marketAccount } = useAccountData(symbol);
-  const walletBalance = useBalance(symbol, assetContract?.address);
+  const walletBalance = useBalance(symbol, marketAccount?.asset);
   const { options: fixedOptions, loading: loadingFixedOptions } = usePreviewFixedOperation(operation);
   const { handleInputChange: handleDeposit, onMax: onMaxDeposit } = useDepositAtMaturity();
   const { handleBasicInputChange: handleBorrow, onMax: onMaxBorrow, safeMaximumBorrow } = useBorrow();
@@ -250,7 +249,6 @@ const MarketsBasic: FC = () => {
           <MoreSettings operation={operation} />
         </Box>
       </Box>
-      {tx && <Loading isOpen={Boolean(tx)} tx={tx} close={reset} />}
     </>
   );
 };

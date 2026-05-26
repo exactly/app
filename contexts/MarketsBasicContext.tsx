@@ -33,11 +33,7 @@ export const MarketsBasicProvider: FC<PropsWithChildren> = ({ children }) => {
     setDate,
     setOperation: setCtxOperation,
     setQty,
-    setTx,
-    setRequiresApproval,
-    setGasCost,
     setIsLoading,
-    setLoadingButton,
     setErrorData,
     setErrorButton,
     setRawSlippage,
@@ -62,26 +58,12 @@ export const MarketsBasicProvider: FC<PropsWithChildren> = ({ children }) => {
 
   const reset = useCallback(() => {
     setQty('');
-    setTx(undefined);
-    setRequiresApproval(true);
-    setGasCost(undefined);
     setIsLoading(false);
 
-    setLoadingButton({});
     setErrorData(undefined);
     setErrorButton(undefined);
     setRawSlippage(DEFAULT_SLIPPAGE);
-  }, [
-    setErrorButton,
-    setErrorData,
-    setGasCost,
-    setIsLoading,
-    setLoadingButton,
-    setQty,
-    setRawSlippage,
-    setRequiresApproval,
-    setTx,
-  ]);
+  }, [setErrorButton, setErrorData, setIsLoading, setQty, setRawSlippage]);
 
   const value: ContextValues = useMemo(
     () => ({

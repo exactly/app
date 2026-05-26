@@ -1,9 +1,9 @@
-import { interestRateModelABI, auditorABI, marketABI } from 'types/abi';
+import { interestRateModelAbi, auditorAbi, marketAbi } from 'generated/wagmi';
 
 export default [
-  ...marketABI.filter(({ type }) => type === 'error'),
-  ...auditorABI.filter(({ type }) => type === 'error'),
-  ...interestRateModelABI.filter(({ type }) => type === 'error'),
+  ...marketAbi.filter(({ type }) => type === 'error'),
+  ...auditorAbi.filter(({ type }) => type === 'error'),
+  ...interestRateModelAbi.filter(({ type }) => type === 'error'),
   {
     type: 'error',
     name: 'Panic',

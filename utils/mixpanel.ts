@@ -38,7 +38,8 @@ type TrackEvent = {
   'TX Signed': {
     contractName: string;
     method: string;
-    hash: Hash;
+    hash?: Hash;
+    callId?: string;
     amount?: string;
     usdAmount?: string;
   };

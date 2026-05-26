@@ -5,7 +5,6 @@ import CheckIcon from '@mui/icons-material/Check';
 import { Box, Button, Typography } from '@mui/material';
 import { CircularProgressWithIcon } from '../OperationsModal/ModalGif';
 import { useOperationContext } from '../../contexts/OperationContext';
-import useEtherscanLink from '../../hooks/useEtherscanLink';
 import Reminder from '../Reminder';
 import type { App } from '.';
 
@@ -14,9 +13,8 @@ type Props = {
 };
 
 const Success = ({ app }: Props) => {
-  const { tx: txLink } = useEtherscanLink();
   const { t } = useTranslation();
-  const { date, tx } = useOperationContext();
+  const { date } = useOperationContext();
   return (
     <Box
       sx={({ palette }) => ({
@@ -45,18 +43,6 @@ const Success = ({ app }: Props) => {
             {t('Open')} {app.name}
           </Button>
         </Link>
-        {tx?.hash && (
-          <Button
-            component="a"
-            variant="outlined"
-            sx={{ height: '32px', fontWeight: 500, whiteSpace: 'nowrap' }}
-            target="_blank"
-            href={txLink(tx.hash ?? '0x')}
-            fullWidth
-          >
-            {t('View on Etherscan')}
-          </Button>
-        )}
         {date !== undefined && <Reminder maturity={date} operation="borrowAtMaturity" />}
       </Box>
     </Box>

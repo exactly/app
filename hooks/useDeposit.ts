@@ -1,106 +1,187 @@
 import { WAD } from '@exactly/lib';
 
 import { useOperationContext } from 'contexts/OperationContext';
+import {
+  erc20Abi,
+  marketAbi,
+  marketEthRouterAbi,
+  marketEthRouterAddress,
+  useReadErc20Allowance,
+  useSimulateErc20Approve,
+  useSimulateMarketDeposit,
+  useSimulateMarketEthRouterDeposit,
+} from 'generated/wagmi';
 import useAccountData from 'hooks/useAccountData';
-import useApprove from 'hooks/useApprove';
 import useBalance from 'hooks/useBalance';
 import useHandleOperationError from 'hooks/useHandleOperationError';
-import { useWeb3 } from 'hooks/useWeb3';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { OperationHook } from 'types/OperationHook';
-import { CustomError } from 'types/Error';
-import useEstimateGas from './useEstimateGas';
-import { formatUnits, parseUnits } from 'viem';
-import waitForTransaction from 'utils/waitForTransaction';
-import { gasLimit } from 'utils/gas';
+import { useSendCalls, useWaitForCallsStatus } from 'wagmi';
+import { formatUnits, parseUnits, type Hex } from 'viem';
 import { track } from 'utils/mixpanel';
+import useReadOnly from 'hooks/useReadOnly';
+import { defaultChain } from 'utils/client';
 
 type Deposit = {
-  deposit: () => void;
-} & OperationHook;
+  deposit: () => Promise<void>;
+  handleSubmitAction: () => Promise<void>;
+  handleInputChange: (value: string) => void;
+  isPreparing: boolean;
+  isLoading: boolean;
+  onMax: () => void;
+  txStatus?: 'loading' | 'processing' | 'success' | 'error';
+  txHash?: Hex;
+};
 
 export default (): Deposit => {
   const { t } = useTranslation();
-  const { walletAddress, opts } = useWeb3();
+  const { account: walletAddress } = useReadOnly();
 
   const {
     symbol,
+    errorData,
     setErrorData,
     qty,
     setQty,
-    setTx,
-    requiresApproval,
-    setRequiresApproval,
     isLoading: isLoadingOp,
     setIsLoading: setIsLoadingOp,
-    marketContract,
-    assetContract,
-    ETHRouterContract,
     setErrorButton,
   } = useOperationContext();
 
   const handleOperationError = useHandleOperationError();
-
-  const { marketAccount } = useAccountData(symbol);
-
-  const walletBalance = useBalance(symbol, assetContract?.address);
-
-  const {
-    approve,
-    estimateGas: approveEstimateGas,
-    isLoading: approveIsLoading,
-    needsApproval,
-  } = useApprove({ operation: 'deposit', contract: assetContract, spender: marketAccount?.market });
-
-  const estimate = useEstimateGas();
-
-  const previewGasCost = useCallback(
-    async (quantity: string): Promise<bigint | undefined> => {
-      if (
-        !walletAddress ||
-        !ETHRouterContract ||
-        !marketContract ||
-        !quantity ||
-        (walletBalance && parseFloat(quantity) > parseFloat(walletBalance)) ||
-        !marketAccount ||
-        !opts
-      )
-        return;
-
-      if (await needsApproval(quantity)) {
-        return approveEstimateGas();
-      }
-
-      const amount = parseUnits(quantity, marketAccount.decimals);
-
-      if (marketAccount.assetSymbol === 'WETH') {
-        const sim = await ETHRouterContract.simulate.deposit({ ...opts, value: amount });
-        const gasCost = await estimate(sim.request);
-        if (amount + (gasCost ?? 0n) >= parseUnits(walletBalance || '0', marketAccount.decimals)) {
-          throw new CustomError(t('Reserve ETH for gas fees.'), 'warning');
-        }
-        return gasCost;
-      }
-
-      const sim = await marketContract.simulate.deposit([amount, walletAddress], opts);
-      return estimate(sim.request);
+  const { marketAccount, refreshAccountData } = useAccountData(symbol);
+  const walletBalance = useBalance(symbol, marketAccount?.asset);
+  const { mutateAsync: sendCalls, isPending: sendCallsPending } = useSendCalls();
+  const [callId, setCallId] = useState<string>();
+  const amount = useMemo(() => {
+    if (!qty || !marketAccount) return;
+    try {
+      return parseUnits(qty, marketAccount.decimals);
+    } catch {
+      return;
+    }
+  }, [marketAccount, qty]);
+  const marketEthRouterChainId = Object.keys(marketEthRouterAddress)
+    .map(Number)
+    .find((chainId): chainId is keyof typeof marketEthRouterAddress => chainId === defaultChain.id);
+  const marketEthRouter =
+    marketEthRouterChainId === undefined ? undefined : marketEthRouterAddress[marketEthRouterChainId];
+  const { data: allowance, refetch: refetchAllowance } = useReadErc20Allowance({
+    address: marketAccount?.asset,
+    args: walletAddress && marketAccount ? [walletAddress, marketAccount.market] : undefined,
+    chainId: defaultChain.id,
+    query: { enabled: Boolean(walletAddress && marketAccount && marketAccount.assetSymbol !== 'WETH') },
+  });
+  const inputReady = Boolean(
+    walletAddress &&
+      marketAccount &&
+      amount !== undefined &&
+      parseFloat(qty) > 0 &&
+      (!walletBalance || parseFloat(qty) <= parseFloat(walletBalance)),
+  );
+  const requiresBatchedApproval = Boolean(
+    inputReady && marketAccount?.assetSymbol !== 'WETH' && allowance !== undefined && allowance < (amount ?? 0n),
+  );
+  const approveSimulation = useSimulateErc20Approve({
+    address: marketAccount?.asset,
+    args: marketAccount && amount !== undefined ? [marketAccount.market, amount] : undefined,
+    account: walletAddress,
+    chainId: defaultChain.id,
+    query: { enabled: requiresBatchedApproval },
+  });
+  const depositSimulation = useSimulateMarketDeposit({
+    address: marketAccount?.market,
+    args: amount !== undefined && walletAddress ? [amount, walletAddress] : undefined,
+    account: walletAddress,
+    chainId: defaultChain.id,
+    query: {
+      enabled: Boolean(
+        inputReady && marketAccount?.assetSymbol !== 'WETH' && allowance !== undefined && !requiresBatchedApproval,
+      ),
     },
-    [
-      walletAddress,
-      ETHRouterContract,
-      marketContract,
-      walletBalance,
-      marketAccount,
-      needsApproval,
-      opts,
-      estimate,
-      approveEstimateGas,
-      t,
-    ],
+  });
+  const ethDepositSimulation = useSimulateMarketEthRouterDeposit({
+    account: walletAddress,
+    chainId: marketEthRouterChainId,
+    value: amount,
+    query: {
+      enabled: Boolean(inputReady && marketAccount?.assetSymbol === 'WETH' && marketEthRouterChainId !== undefined),
+    },
+  });
+  const callsStatus = useWaitForCallsStatus({
+    id: callId,
+    query: { enabled: Boolean(callId) },
+  });
+
+  const needsBatchedApproval = useCallback(
+    async (quantity: string): Promise<boolean> => {
+      try {
+        if (!quantity || marketAccount?.assetSymbol === 'WETH') return false;
+        if (!walletAddress || !marketAccount) return true;
+        return (allowance ?? (await refetchAllowance()).data ?? 0n) < parseUnits(quantity, marketAccount.decimals);
+      } catch {
+        return true;
+      }
+    },
+    [allowance, marketAccount, refetchAllowance, walletAddress],
   );
 
-  const isLoading = useMemo(() => approveIsLoading || isLoadingOp, [approveIsLoading, isLoadingOp]);
+  const isLoading = useMemo(() => sendCallsPending || isLoadingOp, [sendCallsPending, isLoadingOp]);
+  const isPreparing = useMemo(
+    () => approveSimulation.isLoading || depositSimulation.isLoading || ethDepositSimulation.isLoading,
+    [approveSimulation.isLoading, depositSimulation.isLoading, ethDepositSimulation.isLoading],
+  );
+  const txHash = callsStatus.data?.receipts?.[0]?.transactionHash;
+  const txStatus = useMemo(() => {
+    if (!callId) return;
+    if (callsStatus.data?.status === 'success') return 'success';
+    if (callsStatus.data?.status === 'failure' || callsStatus.isError) return 'error';
+    return 'processing';
+  }, [callId, callsStatus.data?.status, callsStatus.isError]);
+  const simulationError = useMemo(() => {
+    if (!inputReady || !marketAccount) return;
+    if (marketAccount.assetSymbol === 'WETH') return ethDepositSimulation.error;
+    if (requiresBatchedApproval) return approveSimulation.error;
+    return depositSimulation.error;
+  }, [
+    approveSimulation.error,
+    depositSimulation.error,
+    ethDepositSimulation.error,
+    inputReady,
+    marketAccount,
+    requiresBatchedApproval,
+  ]);
+
+  useEffect(() => {
+    if (!simulationError) {
+      if (errorData?.component === 'simulation') setErrorData(undefined);
+      return;
+    }
+    setErrorData({ status: true, message: handleOperationError(simulationError), component: 'simulation' });
+  }, [errorData?.component, handleOperationError, setErrorData, simulationError]);
+
+  useEffect(() => {
+    if (!callsStatus.data?.receipts?.length) return;
+    void refreshAccountData();
+    if (marketAccount?.assetSymbol !== 'WETH') void refetchAllowance();
+  }, [callsStatus.data?.receipts, marketAccount?.assetSymbol, refetchAllowance, refreshAccountData]);
+
+  useEffect(() => {
+    if (!callsStatus.data || !marketAccount || !txHash) return;
+    if (callsStatus.data.status !== 'success' && callsStatus.data.status !== 'failure') return;
+    track('TX Completed', {
+      contractName: 'Market',
+      method: 'deposit',
+      symbol,
+      amount: qty,
+      usdAmount: formatUnits(
+        (parseUnits(qty, marketAccount.decimals) * marketAccount.usdPrice) / WAD,
+        marketAccount.decimals,
+      ),
+      status: callsStatus.data.status === 'success' ? 'success' : 'reverted',
+      hash: txHash,
+    });
+  }, [callsStatus.data, marketAccount, qty, symbol, txHash]);
 
   const onMax = useCallback(() => {
     if (walletBalance) {
@@ -124,91 +205,99 @@ export default (): Deposit => {
   );
 
   const deposit = useCallback(async () => {
-    if (!walletAddress || !marketContract || !marketAccount || !opts) return;
-    let hash;
+    if (!walletAddress || !marketAccount || amount === undefined) return;
     setIsLoadingOp(true);
+    setCallId(undefined);
     try {
-      const amount = parseUnits(qty, marketAccount.decimals);
+      let id: string;
       if (marketAccount.assetSymbol === 'WETH') {
-        if (!ETHRouterContract) return;
-
-        const gasEstimation = await ETHRouterContract.estimateGas.deposit({ ...opts, value: amount });
-
-        hash = await ETHRouterContract.write.deposit({
-          ...opts,
-          value: amount,
-          gasLimit: gasLimit(gasEstimation),
-        });
-        track('TX Signed', {
-          contractName: 'ETHRouter',
-          method: 'deposit',
-          hash,
-          symbol,
-          amount: qty,
-          usdAmount: formatUnits((amount * marketAccount.usdPrice) / WAD, marketAccount.decimals),
-        });
+        if (!marketEthRouter) return;
+        if (ethDepositSimulation.error) throw ethDepositSimulation.error;
+        ({ id } = await sendCalls({
+          account: walletAddress,
+          chainId: defaultChain.id,
+          experimental_fallback: true,
+          calls: [
+            {
+              to: marketEthRouter,
+              abi: marketEthRouterAbi,
+              functionName: 'deposit',
+              value: amount,
+            },
+          ],
+        }));
       } else {
-        const args = [amount, walletAddress] as const;
-        const gasEstimation = await marketContract.estimateGas.deposit(args, opts);
-
-        hash = await marketContract.write.deposit(args, {
-          ...opts,
-          gasLimit: gasLimit(gasEstimation),
-        });
-        track('TX Signed', {
-          contractName: 'Market',
-          method: 'deposit',
-          symbol,
-          amount: qty,
-          usdAmount: formatUnits((amount * marketAccount.usdPrice) / WAD, marketAccount.decimals),
-          hash,
-        });
+        if (requiresBatchedApproval && approveSimulation.error) throw approveSimulation.error;
+        if (!requiresBatchedApproval && depositSimulation.error) throw depositSimulation.error;
+        ({ id } = await sendCalls({
+          account: walletAddress,
+          chainId: defaultChain.id,
+          experimental_fallback: true,
+          calls: [
+            ...((await needsBatchedApproval(qty))
+              ? [
+                  {
+                    to: marketAccount.asset,
+                    abi: erc20Abi,
+                    functionName: 'approve',
+                    args: [marketAccount.market, amount],
+                  } as const,
+                ]
+              : []),
+            {
+              to: marketAccount.market,
+              abi: marketAbi,
+              functionName: 'deposit',
+              args: [amount, walletAddress],
+            },
+          ],
+        }));
       }
-
-      setTx({ status: 'processing', hash });
-
-      const { status, transactionHash } = await waitForTransaction({ hash });
-      track('TX Completed', {
-        contractName: 'Market',
+      setCallId(id);
+      track('TX Signed', {
+        contractName: marketAccount.assetSymbol === 'WETH' ? 'ETHRouter' : 'Market',
         method: 'deposit',
+        callId: id,
         symbol,
         amount: qty,
         usdAmount: formatUnits((amount * marketAccount.usdPrice) / WAD, marketAccount.decimals),
-        status,
-        hash: transactionHash,
       });
-
-      setTx({ status: status ? 'success' : 'error', hash: transactionHash });
     } catch (error) {
-      if (hash) setTx({ status: 'error', hash });
       setErrorData({ status: true, message: handleOperationError(error) });
     } finally {
       setIsLoadingOp(false);
     }
   }, [
     walletAddress,
-    marketContract,
     marketAccount,
-    opts,
+    amount,
+    marketEthRouter,
+    ethDepositSimulation.error,
+    requiresBatchedApproval,
+    approveSimulation.error,
+    depositSimulation.error,
     setIsLoadingOp,
+    sendCalls,
+    needsBatchedApproval,
     qty,
-    setTx,
-    ETHRouterContract,
+    symbol,
     setErrorData,
     handleOperationError,
-    symbol,
   ]);
 
   const handleSubmitAction = useCallback(async () => {
     if (isLoading) return;
-    if (requiresApproval) {
-      await approve();
-      setRequiresApproval(await needsApproval(qty));
-      return;
-    }
-
     return deposit();
-  }, [isLoading, requiresApproval, qty, deposit, approve, setRequiresApproval, needsApproval]);
+  }, [isLoading, deposit]);
 
-  return { isLoading, onMax, handleInputChange, handleSubmitAction, needsApproval, previewGasCost, deposit };
+  return {
+    isLoading,
+    isPreparing,
+    onMax,
+    handleInputChange,
+    handleSubmitAction,
+    deposit,
+    txStatus,
+    txHash,
+  };
 };

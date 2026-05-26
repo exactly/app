@@ -1,7 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDisconnect, useEnsAvatar, useEnsName } from 'wagmi';
-import { mainnet } from 'wagmi/chains';
-import { useWeb3 } from 'hooks/useWeb3';
+import { mainnet } from 'viem/chains';
 import { formatWallet } from 'utils/utils';
 import SettingsIcon from '@mui/icons-material/Settings';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
@@ -16,6 +15,9 @@ import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
 import useRouter from 'hooks/useRouter';
 import { track } from 'utils/mixpanel';
+import { defaultChain } from 'utils/client';
+import useReadOnly from 'hooks/useReadOnly';
+import useConnectWallet from 'hooks/useConnectWallet';
 
 const { onlyDesktop } = globals;
 
@@ -33,17 +35,18 @@ function Wallet() {
   }, []);
   const closeMenu = () => setAnchorEl(null);
 
-  const { walletAddress, connect, impersonateActive, exitImpersonate, chain } = useWeb3();
+  const { account: walletAddress, isImpersonating: impersonateActive, exitReadOnly: exitImpersonate } = useReadOnly();
+  const connect = useConnectWallet();
   const { disconnect } = useDisconnect();
   const { data: ens, error: ensError } = useEnsName({ address: walletAddress, chainId: mainnet.id });
   const { data: ensAvatar, error: ensAvatarError } = useEnsAvatar({
-    name: ens,
+    name: ens ?? undefined,
     chainId: mainnet.id,
   });
   const { query } = useRouter();
 
   const formattedWallet = formatWallet(walletAddress);
-  const network = chain?.name;
+  const network = defaultChain.name;
 
   const avatarImgSrc = useMemo(() => {
     if (!walletAddress) return '';
@@ -55,11 +58,11 @@ function Wallet() {
     track('Button Clicked', {
       location: 'Navbar',
       name: 'connect wallet',
-      chainId: chain?.id,
+      chainId: defaultChain.id,
       impersonateActive,
     });
     connect();
-  }, [chain?.id, connect, impersonateActive]);
+  }, [connect, impersonateActive]);
 
   const handleDisconnectClick = useCallback(() => {
     closeMenu();
@@ -67,10 +70,10 @@ function Wallet() {
     track('Button Clicked', {
       name: 'disconnect wallet',
       location: 'Wallet',
-      chainId: chain?.id,
+      chainId: defaultChain.id,
       impersonateActive,
     });
-  }, [chain, disconnect, exitImpersonate, impersonateActive]);
+  }, [disconnect, exitImpersonate, impersonateActive]);
 
   if (!walletAddress) {
     return (
@@ -82,7 +85,7 @@ function Wallet() {
       >
         {t('Connect wallet')}
         <Image
-          src={`/img/networks/${chain?.id}.svg`}
+          src={`/img/networks/${defaultChain.id}.svg`}
           alt=""
           width={20}
           height={20}
@@ -113,7 +116,7 @@ function Wallet() {
         data-testid="wallet-menu"
       >
         <Image
-          src={`/img/networks/${chain?.id}.svg`}
+          src={`/img/networks/${defaultChain.id}.svg`}
           alt=""
           width={20}
           height={20}
@@ -175,7 +178,7 @@ function Wallet() {
             </Box>
             <Box display="flex" gap={0.5}>
               <Image
-                src={`/img/networks/${chain?.id}.svg`}
+                src={`/img/networks/${defaultChain.id}.svg`}
                 alt=""
                 width={20}
                 height={20}

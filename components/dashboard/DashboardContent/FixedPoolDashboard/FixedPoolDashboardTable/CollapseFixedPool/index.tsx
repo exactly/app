@@ -17,9 +17,10 @@ import { useTranslation } from 'react-i18next';
 type Props = {
   open: boolean;
   transactions: FixedPoolTransaction[];
+  loading: boolean;
 };
 
-function CollapseFixedPool({ open, transactions }: Props) {
+function CollapseFixedPool({ open, transactions, loading }: Props) {
   const { t } = useTranslation();
   const headers: TableHeader<FixedPoolTransaction>[] = [
     {
@@ -41,7 +42,7 @@ function CollapseFixedPool({ open, transactions }: Props) {
   ];
   return (
     <Collapse in={open} timeout="auto" unmountOnExit>
-      <Table size="small" aria-label="purchases">
+      <Table size="small" aria-label="purchases" data-testid="dashboard-fixed-transactions">
         <TableHead sx={{ backgroundColor: 'grey.200' }}>
           <TableRow>
             {headers.map(({ title, align }) => (
@@ -54,8 +55,13 @@ function CollapseFixedPool({ open, transactions }: Props) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {transactions?.map(({ id, date, type, amount, amountUSD, isBorrowOrDeposit, APR }) => (
-            <TableRow key={`collapsed_${id}`} sx={{ '&:last-child td, &:last-child th': { border: 0 } }} hover>
+          {transactions?.map(({ id, operation, date, type, amount, amountUSD, isBorrowOrDeposit, APR }) => (
+            <TableRow
+              key={`collapsed_${id}`}
+              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+              hover
+              data-testid={`dashboard-fixed-transaction-${operation}`}
+            >
               <TableCell component="th" align="left" size="small" sx={{ pl: 1 }}>
                 <Typography variant="body2">{date || <Skeleton width={70} />}</Typography>
               </TableCell>
@@ -92,6 +98,22 @@ function CollapseFixedPool({ open, transactions }: Props) {
               </TableCell>
             </TableRow>
           ))}
+          {loading && (
+            <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+              <TableCell component="th" align="left" size="small" sx={{ pl: 1 }}>
+                <Skeleton width={70} />
+              </TableCell>
+              <TableCell align="left" size="small">
+                <Skeleton width={80} />
+              </TableCell>
+              <TableCell align="left" size="small">
+                <Skeleton width={120} />
+              </TableCell>
+              <TableCell align="left" size="small">
+                <Skeleton width={50} />
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
     </Collapse>

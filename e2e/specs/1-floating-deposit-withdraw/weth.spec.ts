@@ -4,10 +4,8 @@ import _withdraw from '../../common/withdraw';
 
 const test = base();
 
-test.describe.configure({ mode: 'serial' });
-
 test('WETH floating deposit/withdraw', async ({ page, web3 }) => {
-  await web3.fork.setBalance(web3.account.address, {
+  await web3.anvil.setBalance(web3.account.address, {
     ETH: 100,
   });
 

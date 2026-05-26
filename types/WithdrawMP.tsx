@@ -6,5 +6,5 @@ export type WithdrawMP = {
   maturity: bigint;
   positionAssets: bigint;
   assets: bigint;
-  timestamp: number;
+  timestamp?: number;
 };

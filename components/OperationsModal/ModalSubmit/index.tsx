@@ -1,12 +1,14 @@
 import React, { FC, MouseEvent, useCallback } from 'react';
 import { Box, Button, CircularProgress, Typography } from '@mui/material';
 import { useOperationContext } from 'contexts/OperationContext';
-import { useWeb3 } from 'hooks/useWeb3';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 import useAccountData from 'hooks/useAccountData';
 import { track } from 'utils/mixpanel';
 import MainActionButton from 'components/common/MainActionButton';
+import useReadOnly from 'hooks/useReadOnly';
+import { useConnection } from 'wagmi';
+import useConnectWallet from 'hooks/useConnectWallet';
 
 type Props = {
   symbol: string;
@@ -14,21 +16,24 @@ type Props = {
   label: string;
   isLoading?: boolean;
   disabled?: boolean;
+  refreshOnSubmit?: boolean;
 };
 
-function ModalSubmit({ isLoading = false, disabled = false, submit, symbol, label }: Props) {
+function ModalSubmit({ isLoading = false, disabled = false, refreshOnSubmit = true, submit, symbol, label }: Props) {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
-  const { operation, loadingButton, isLoading: isLoadingOp, tx, errorButton, requiresApproval } = useOperationContext();
-  const { isConnected, connect, impersonateActive, exitImpersonate } = useWeb3();
+  const { operation, isLoading: isLoadingOp, errorButton } = useOperationContext();
+  const { isImpersonating: impersonateActive, exitReadOnly: exitImpersonate } = useReadOnly();
+  const { isConnected } = useConnection();
+  const connect = useConnectWallet();
   const { refreshAccountData } = useAccountData();
 
   const handleSubmit = useCallback(async () => {
     await submit();
-    if (!requiresApproval) {
+    if (refreshOnSubmit) {
       await refreshAccountData();
     }
-  }, [submit, refreshAccountData, requiresApproval]);
+  }, [submit, refreshAccountData, refreshOnSubmit]);
 
   const handleExitImpersonate = useCallback(() => {
     track('Button Clicked', {
@@ -45,20 +50,6 @@ function ModalSubmit({ isLoading = false, disabled = false, submit, symbol, labe
     });
     connect();
   }, [connect]);
-
-  const handleApproveClick = useCallback(
-    (event: MouseEvent<HTMLButtonElement>) => {
-      const text = (event.target as HTMLButtonElement).innerText;
-      track('Button Clicked', {
-        location: 'Operations Modal',
-        name: 'approve',
-        symbol,
-        text,
-      });
-      handleSubmit();
-    },
-    [handleSubmit, symbol],
-  );
 
   const handleSubmitClick = useCallback(
     (event: MouseEvent<HTMLButtonElement>) => {
@@ -90,39 +81,16 @@ function ModalSubmit({ isLoading = false, disabled = false, submit, symbol, labe
     );
   }
 
-  if (requiresApproval) {
-    return (
-      <MainActionButton
-        fullWidth
-        loading={isLoading}
-        loadingIndicator={
-          <LoadingIndicator
-            withCircularProgress={loadingButton.withCircularProgress || !loadingButton.label}
-            label={loadingButton.label}
-          />
-        }
-        onClick={handleApproveClick}
-        color="primary"
-        variant="contained"
-        disabled={disabled}
-        data-testid="modal-approve"
-      >
-        {t('Approve {{symbol}}', { symbol })}
-      </MainActionButton>
-    );
-  }
-
   return (
     <MainActionButton
       fullWidth
       loading={isLoading}
       loadingIndicator={
         <LoadingIndicator
-          withCircularProgress={!isLoadingOp || Boolean(tx)}
+          withCircularProgress={!isLoadingOp}
           label={
-            (isLoadingOp && !tx && t('Sign the transaction on your wallet')) ||
-            ((isLoadingOp || Boolean(tx)) &&
-              `${translateOperation(operation, { variant: 'present', capitalize: true })} ${symbol}`) ||
+            (isLoadingOp && t('Sign the transaction on your wallet')) ||
+            (isLoading && `${translateOperation(operation, { variant: 'present', capitalize: true })} ${symbol}`) ||
             ''
           }
         />

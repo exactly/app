@@ -32,7 +32,6 @@ import type { Transaction } from 'types/Transaction';
 import useDebtManager from 'hooks/useDebtManager';
 import useAccountData, { type MarketAccount } from 'hooks/useAccountData';
 import useMarket from 'hooks/useMarket';
-import { useWeb3 } from 'hooks/useWeb3';
 import type { Market } from 'types/contracts';
 import handleOperationError from 'utils/handleOperationError';
 import useIsContract from 'hooks/useIsContract';
@@ -44,20 +43,22 @@ import formatNumber from 'utils/formatNumber';
 import useHealthFactor from 'hooks/useHealthFactor';
 import parseHealthFactor from 'utils/parseHealthFactor';
 import useERC20 from 'hooks/useERC20';
-import usePermit2 from 'hooks/usePermit2';
 import dayjs from 'dayjs';
-import useDebtPreviewer, { type Limit, type Leverage as LeverageStatus, type Rates } from 'hooks/useDebtPreviewer';
+import { type Limit, type Leverage as LeverageStatus, type Rates } from 'hooks/useDebtPreviewer';
 import useDelayedEffect from 'hooks/useDelayedEffect';
 import useRewards from 'hooks/useRewards';
 import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
-import { debtManagerABI } from 'types/abi';
+import { debtManagerAbi, debtPreviewerAbi, debtPreviewerAddress, permit2Address } from 'generated/wagmi';
 import useStETHNativeAPR from 'hooks/useStETHNativeAPR';
 import useIsPermit from 'hooks/useIsPermit';
 import { gasLimit } from 'utils/gas';
 import useContractVersion from 'hooks/useContractVersion';
+import { defaultChain, wagmi } from 'utils/client';
+import { readContract } from '@wagmi/core';
+import useReadOnly from 'hooks/useReadOnly';
 
-type Params<T extends ExtractAbiFunctionNames<typeof debtManagerABI>> = AbiParametersToPrimitiveTypes<
-  ExtractAbiFunction<typeof debtManagerABI, T>['inputs']
+type Params<T extends ExtractAbiFunctionNames<typeof debtManagerAbi>> = AbiParametersToPrimitiveTypes<
+  ExtractAbiFunction<typeof debtManagerAbi, T>['inputs']
 >;
 
 type Input = {
@@ -157,7 +158,7 @@ const minHealthFactorMarkets = (maIn: MarketAccount, maOut: MarketAccount): bigi
 export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) => {
   const { t } = useTranslation();
   const { palette } = useTheme();
-  const { walletAddress, chain, opts } = useWeb3();
+  const { account: walletAddress } = useReadOnly();
   const healthFactor = useHealthFactor();
   const { getMarketAccount, refreshAccountData } = useAccountData();
   const isContract = useIsContract();
@@ -192,8 +193,10 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
   const assetOut = useERC20(maOut?.asset);
 
   const debtManager = useDebtManager();
-  const debtPreviewer = useDebtPreviewer();
-  const permit2 = usePermit2();
+  const debtPreviewer = Object.entries(debtPreviewerAddress).find(
+    ([chainId]) => Number(chainId) === defaultChain.id,
+  )?.[1];
+  const permit2 = Object.entries(permit2Address).find(([chainId]) => Number(chainId) === defaultChain.id)?.[1];
 
   const stETHNativeAPR = useStETHNativeAPR();
 
@@ -215,7 +218,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
   const defaultLeverage = useCallback(
     async (cancelled: () => boolean, borrowSymbol: string | undefined = input.borrowSymbol) => {
-      if (!debtPreviewer || !walletAddress || !borrowSymbol || !opts) {
+      if (!debtPreviewer || !walletAddress || !borrowSymbol) {
         setLeverageStatus(undefined);
         return undefined;
       }
@@ -224,10 +227,14 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       if (!_maOut) return undefined;
 
       try {
-        const result = await debtPreviewer.read.leverage(
-          [_maOut.market, _maOut.market, walletAddress, minHealthFactor(_maOut, _maOut)],
-          opts,
-        );
+        const result = await readContract(wagmi, {
+          account: walletAddress,
+          address: debtPreviewer,
+          abi: debtPreviewerAbi,
+          functionName: 'leverage',
+          chainId: defaultChain.id,
+          args: [_maOut.market, _maOut.market, walletAddress, minHealthFactor(_maOut, _maOut)],
+        });
 
         if (cancelled()) return undefined;
 
@@ -239,7 +246,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
         return undefined;
       }
     },
-    [debtPreviewer, getMarketAccount, input.borrowSymbol, minHealthFactor, opts, walletAddress],
+    [debtPreviewer, getMarketAccount, input.borrowSymbol, minHealthFactor, walletAddress],
   );
 
   const walletBalance = useBalance(input.collateralSymbol, maIn?.asset, true);
@@ -302,7 +309,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
   const preview = useCallback(
     async (cancelled: () => boolean) => {
-      if (!debtPreviewer || !maIn || !maOut || !walletAddress || !leverageStatus || !opts) {
+      if (!debtPreviewer || !maIn || !maOut || !walletAddress || !leverageStatus) {
         return;
       }
 
@@ -314,8 +321,22 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       try {
         const _limit =
           input.secondaryOperation === 'deposit'
-            ? await debtPreviewer.read.previewLeverage(args, opts)
-            : await debtPreviewer.read.previewDeleverage(args, opts);
+            ? await readContract(wagmi, {
+                account: walletAddress,
+                address: debtPreviewer,
+                abi: debtPreviewerAbi,
+                functionName: 'previewLeverage',
+                chainId: defaultChain.id,
+                args,
+              })
+            : await readContract(wagmi, {
+                account: walletAddress,
+                address: debtPreviewer,
+                abi: debtPreviewerAbi,
+                functionName: 'previewDeleverage',
+                chainId: defaultChain.id,
+                args,
+              });
 
         const leverageRatesArgs = [
           maIn.market,
@@ -327,7 +348,14 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
           input.collateralSymbol === 'wstETH' ? stETHNativeAPR : 0n,
           input.collateralSymbol === 'wstETH' ? stETHNativeAPR : 0n,
         ] as const;
-        const _loopRates = await debtPreviewer.read.leverageRates(leverageRatesArgs, opts);
+        const _loopRates = await readContract(wagmi, {
+          account: walletAddress,
+          address: debtPreviewer,
+          abi: debtPreviewerAbi,
+          functionName: 'leverageRates',
+          chainId: defaultChain.id,
+          args: leverageRatesArgs,
+        });
 
         if (cancelled()) return;
 
@@ -349,7 +377,6 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       maIn,
       maOut,
       minHealthFactor,
-      opts,
       stETHNativeAPR,
       userInput,
       walletAddress,
@@ -572,7 +599,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       !permit2 ||
       !debtManager ||
       !limit ||
-      !opts ||
+      !walletAddress ||
       !leverageStatus
     ) {
       return true;
@@ -583,20 +610,25 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       if (await isContract(walletAddress)) {
         if (input.secondaryOperation === 'deposit') {
           setApprovalStatus('ERC20');
-          const assetAllowance = await assetIn.read.allowance([walletAddress, debtManager.address], opts);
+          const assetAllowance = await assetIn.read.allowance([walletAddress, debtManager.address], {
+            account: walletAddress,
+          });
           if (assetAllowance < userInput) return true;
 
           setApprovalStatus('MARKET-OUT');
-          const marketOutAllownce = await marketOut.read.allowance([walletAddress, debtManager.address], opts);
+          const marketOutAllownce = await marketOut.read.allowance([walletAddress, debtManager.address], {
+            account: walletAddress,
+          });
           const _slippage = (leverageStatus.borrow * ((maIn.floatingBorrowRate * 300n) / 31_536_000n)) / WAD;
-          const borrowShares = await marketIn.read.previewWithdraw(
-            [limit.borrow - leverageStatus.borrow + _slippage],
-            opts,
-          );
+          const borrowShares = await marketIn.read.previewWithdraw([limit.borrow - leverageStatus.borrow + _slippage], {
+            account: walletAddress,
+          });
           if (marketOutAllownce < borrowShares) return true;
         } else {
           setApprovalStatus('MARKET-IN');
-          const marketInAllowance = await marketIn.read.allowance([walletAddress, debtManager.address], opts);
+          const marketInAllowance = await marketIn.read.allowance([walletAddress, debtManager.address], {
+            account: walletAddress,
+          });
           const _slippage = (maIn.floatingBorrowAssets * ((maIn.floatingBorrowRate * 300n) / 31_536_000n)) / WAD;
           const permitShares = await marketIn.read.previewWithdraw(
             [
@@ -604,7 +636,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
                 userInput +
                 _slippage,
             ],
-            opts,
+            { account: walletAddress },
           );
           if (marketInAllowance < permitShares) return true;
         }
@@ -615,7 +647,9 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
       if (!(await isPermit(maIn.asset)) && input.secondaryOperation === 'deposit') {
         setApprovalStatus('ERC20-PERMIT2');
-        const allowance = await assetIn.read.allowance([walletAddress, permit2.address], opts);
+        const allowance = await assetIn.read.allowance([walletAddress, permit2], {
+          account: walletAddress,
+        });
         if (allowance < userInput) return true;
       }
 
@@ -637,7 +671,6 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     permit2,
     debtManager,
     limit,
-    opts,
     leverageStatus,
     isContract,
     isPermit,
@@ -645,7 +678,17 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
   ]);
 
   const approve = useCallback(async () => {
-    if (!debtManager || !maIn || !marketIn || !marketOut || !assetIn || !permit2 || !limit || !opts || !leverageStatus)
+    if (
+      !debtManager ||
+      !maIn ||
+      !marketIn ||
+      !marketOut ||
+      !assetIn ||
+      !permit2 ||
+      !limit ||
+      !walletAddress ||
+      !leverageStatus
+    )
       return;
 
     setIsLoading(true);
@@ -654,19 +697,25 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       switch (approvalStatus) {
         case 'ERC20': {
           const args = [debtManager.address, userInput] as const;
-          const gasEstimation = await assetIn.estimateGas.approve(args, opts);
+          const gasEstimation = await assetIn.estimateGas.approve(args, {
+            account: walletAddress,
+          });
           hash = await assetIn.write.approve(args, {
-            ...opts,
-            gasLimit: gasLimit(gasEstimation),
+            account: walletAddress,
+            chain: defaultChain,
+            gas: gasLimit(gasEstimation),
           });
           break;
         }
         case 'ERC20-PERMIT2': {
-          const args = [permit2.address, MAX_UINT256] as const;
-          const gasEstimation = await assetIn.estimateGas.approve(args, opts);
+          const args = [permit2, MAX_UINT256] as const;
+          const gasEstimation = await assetIn.estimateGas.approve(args, {
+            account: walletAddress,
+          });
           hash = await assetIn.write.approve(args, {
-            ...opts,
-            gasLimit: gasLimit(gasEstimation),
+            account: walletAddress,
+            chain: defaultChain,
+            gas: gasLimit(gasEstimation),
           });
           break;
         }
@@ -678,28 +727,33 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
                 userInput +
                 _slippage,
             ],
-            opts,
+            { account: walletAddress },
           );
           const args = [debtManager.address, permitShares] as const;
-          const gasEstimation = await marketIn.estimateGas.approve(args, opts);
+          const gasEstimation = await marketIn.estimateGas.approve(args, {
+            account: walletAddress,
+          });
           hash = await marketIn.write.approve(args, {
-            ...opts,
-            gasLimit: gasLimit(gasEstimation),
+            account: walletAddress,
+            chain: defaultChain,
+            gas: gasLimit(gasEstimation),
           });
           break;
         }
         case 'MARKET-OUT': {
           const _slippage = (leverageStatus.borrow * ((maIn.floatingBorrowRate * 3_600n * 12n) / 31_536_000n)) / WAD;
 
-          const borrowShares = await marketIn.read.previewWithdraw(
-            [limit.borrow - leverageStatus.borrow + _slippage],
-            opts,
-          );
+          const borrowShares = await marketIn.read.previewWithdraw([limit.borrow - leverageStatus.borrow + _slippage], {
+            account: walletAddress,
+          });
           const args = [debtManager.address, borrowShares] as const;
-          const gasEstimation = await marketOut.estimateGas.approve(args, opts);
+          const gasEstimation = await marketOut.estimateGas.approve(args, {
+            account: walletAddress,
+          });
           hash = await marketOut.write.approve(args, {
-            ...opts,
-            gasLimit: gasLimit(gasEstimation),
+            account: walletAddress,
+            chain: defaultChain,
+            gas: gasLimit(gasEstimation),
           });
           break;
         }
@@ -723,14 +777,16 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     maIn,
     marketIn,
     marketOut,
-    opts,
     permit2,
     userInput,
+    walletAddress,
   ]);
 
   const signPermit = useCallback(
     async (value: bigint, who: 'assetIn' | 'marketIn' | 'marketOut') => {
-      if (!walletAddress || !maIn || !marketIn || !marketOut || !assetIn || !permit2 || !debtManager) return;
+      if (!walletAddress || !maIn || !marketIn || !marketOut || !assetIn || !permit2 || !debtManager || !publicClient) {
+        return;
+      }
 
       const deadline = BigInt(dayjs().unix() + 3_600);
       const permitAllowed = await isPermit(assetIn.address);
@@ -740,8 +796,8 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
           primaryType: 'PermitTransferFrom',
           domain: {
             name: 'Permit2',
-            chainId: chain.id,
-            verifyingContract: permit2.address,
+            chainId: defaultChain.id,
+            verifyingContract: permit2,
           },
           types: {
             PermitTransferFrom: [
@@ -794,8 +850,10 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
             })
           : assetIn.address,
         who.startsWith('market')
-          ? (who === 'marketIn' ? marketIn : marketOut).read.nonces([walletAddress], opts)
-          : assetIn.read.nonces([walletAddress], opts),
+          ? (who === 'marketIn' ? marketIn : marketOut).read.nonces([walletAddress], {
+              account: walletAddress,
+            })
+          : assetIn.read.nonces([walletAddress], { account: walletAddress }),
       ]);
 
       if (!impl) return;
@@ -805,9 +863,9 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       const { v, r, s } = await signTypedDataAsync({
         primaryType: 'Permit',
         domain: {
-          name: who.startsWith('market') ? '' : await assetIn.read.name(opts),
+          name: who.startsWith('market') ? '' : await assetIn.read.name({ account: walletAddress }),
           version: await contractVersion(verifyingContract),
-          chainId: chain.id,
+          chainId: defaultChain.id,
           verifyingContract,
         },
         types: {
@@ -839,14 +897,12 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     },
     [
       assetIn,
-      chain.id,
       contractVersion,
       debtManager,
       isPermit,
       maIn,
       marketIn,
       marketOut,
-      opts,
       permit2,
       publicClient,
       signTypedDataAsync,
@@ -868,7 +924,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       !maOut ||
       !leverageStatus ||
       !limit ||
-      !opts
+      !walletAddress
     ) {
       return;
     }
@@ -886,10 +942,13 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
             let args: Params<'leverage'> = [marketIn.address, userInput, ratio];
 
             if (isMultiSig) {
-              const gasEstimation = await debtManager.estimateGas.leverage(args, opts);
+              const gasEstimation = await debtManager.estimateGas.leverage(args, {
+                account: walletAddress,
+              });
               hash = await debtManager.write.leverage(args, {
-                ...opts,
-                gasLimit: gasLimit(gasEstimation),
+                account: walletAddress,
+                chain: defaultChain,
+                gas: gasLimit(gasEstimation),
               });
               break;
             }
@@ -897,7 +956,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
             const _slippage = (leverageStatus.borrow * ((maIn.floatingBorrowRate * 300n) / 31_536_000n)) / WAD;
             const borrowShares = await marketIn.read.previewWithdraw(
               [limit.borrow - leverageStatus.borrow + _slippage],
-              opts,
+              { account: walletAddress },
             );
             const [assetPermit, marketPermit] = await Promise.all([
               signPermit(userInput, 'assetIn'),
@@ -911,19 +970,25 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
             switch (assetPermit.type) {
               case 'permit': {
                 const _args = [marketIn.address, ratio, marketPermit.value, assetPermit.value] as const;
-                const gasEstimation = await debtManager.estimateGas.leverage(_args, opts);
+                const gasEstimation = await debtManager.estimateGas.leverage(_args, {
+                  account: walletAddress,
+                });
                 hash = await debtManager.write.leverage(_args, {
-                  ...opts,
-                  gasLimit: gasLimit(gasEstimation),
+                  account: walletAddress,
+                  chain: defaultChain,
+                  gas: gasLimit(gasEstimation),
                 });
                 break;
               }
               case 'permit2': {
                 args = [...args, marketPermit.value, assetPermit.value];
-                const gasEstimation = await debtManager.estimateGas.leverage(args, opts);
+                const gasEstimation = await debtManager.estimateGas.leverage(args, {
+                  account: walletAddress,
+                });
                 hash = await debtManager.write.leverage(args, {
-                  ...opts,
-                  gasLimit: gasLimit(gasEstimation),
+                  account: walletAddress,
+                  chain: defaultChain,
+                  gas: gasLimit(gasEstimation),
                 });
                 break;
               }
@@ -934,10 +999,13 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
             const args: Params<'deleverage'> = [marketIn.address, userInput, ratio] as const;
 
             if (isMultiSig) {
-              const gasEstimation = await debtManager.estimateGas.deleverage(args, opts);
+              const gasEstimation = await debtManager.estimateGas.deleverage(args, {
+                account: walletAddress,
+              });
               hash = await debtManager.write.deleverage(args, {
-                ...opts,
-                gasLimit: gasLimit(gasEstimation),
+                account: walletAddress,
+                chain: defaultChain,
+                gas: gasLimit(gasEstimation),
               });
               break;
             }
@@ -949,7 +1017,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
                   userInput +
                   _slippage,
               ],
-              opts,
+              { account: walletAddress },
             );
             const marketPermit = await signPermit(permitShares, 'marketIn');
 
@@ -958,10 +1026,13 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
             }
 
             const _args = [marketIn.address, userInput, ratio, marketPermit.value] as const;
-            const gasEstimation = await debtManager.estimateGas.deleverage(_args, opts);
+            const gasEstimation = await debtManager.estimateGas.deleverage(_args, {
+              account: walletAddress,
+            });
             hash = await debtManager.write.deleverage(_args, {
-              ...opts,
-              gasLimit: gasLimit(gasEstimation),
+              account: walletAddress,
+              chain: defaultChain,
+              gas: gasLimit(gasEstimation),
             });
             break;
           }
@@ -995,7 +1066,6 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     maOut,
     leverageStatus,
     limit,
-    opts,
     isContract,
     refreshAccountData,
     userInput,

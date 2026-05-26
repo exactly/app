@@ -2,7 +2,16 @@ import type { KnipConfig } from 'knip';
 
 const config: KnipConfig = {
   project: ['**/*.{ts,tsx,js,jsx,json}'],
-  ignoreDependencies: ['@sentry/cli', 'sharp', 'ts-node'],
+  ignoreDependencies: [
+    '@base-org/account',
+    '@coinbase/wallet-sdk',
+    '@safe-global/safe-apps-provider',
+    '@sentry/cli',
+    '@walletconnect/ethereum-provider',
+    'sharp',
+    'solmate',
+    'ts-node',
+  ],
   entry: ['wagmi.config.ts'],
 };
 

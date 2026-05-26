@@ -5,10 +5,8 @@ import _balance from '../../common/balance';
 
 const test = base();
 
-test.describe.configure({ mode: 'serial' });
-
 test('USDC floating deposit/withdraw', async ({ page, web3 }) => {
-  await web3.fork.setBalance(web3.account.address, {
+  await web3.anvil.setBalance(web3.account.address, {
     ETH: 1,
     USDC: 5,
   });

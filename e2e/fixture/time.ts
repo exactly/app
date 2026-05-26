@@ -1,9 +1,10 @@
-import { type Page } from '@playwright/test';
+import { test, type Page } from '@playwright/test';
 
 function time(page: Page) {
-  const now = async (timestamp: number) => {
-    const fake = new Date(Math.floor(timestamp) * 1_000).valueOf();
-    await page.addInitScript(`{
+  const now = async (timestamp: number) =>
+    test.step(`setup: browser time ${timestamp}`, async () => {
+      const fake = new Date(Math.floor(timestamp) * 1_000).valueOf();
+      await page.addInitScript(`{
       Date = class extends Date {
         constructor(...args) {
           if (args.length === 0) {
@@ -17,7 +18,7 @@ function time(page: Page) {
       const __DateNow = Date.now;
       Date.now = () => __DateNow() + __DateNowOffset;
     }`);
-  };
+    });
 
   return {
     now,

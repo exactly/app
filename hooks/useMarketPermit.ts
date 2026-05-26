@@ -1,13 +1,13 @@
 import { useCallback } from 'react';
-import { pad, trim } from 'viem';
-import { Address, usePublicClient } from 'wagmi';
+import { pad, trim, type Address } from 'viem';
+import { usePublicClient } from 'wagmi';
 import useAccountData from 'hooks/useAccountData';
 import useSignPermit from 'hooks/useSignPermit';
-import { useWeb3 } from 'hooks/useWeb3';
 import useMarket from 'hooks/useMarket';
+import useReadOnly from 'hooks/useReadOnly';
 
 export default function useMarketPermit(marketSymbol: string) {
-  const { walletAddress } = useWeb3();
+  const { account: walletAddress } = useReadOnly();
   const publicClient = usePublicClient();
   const { marketAccount } = useAccountData(marketSymbol);
   const market = useMarket(marketAccount?.market);
@@ -15,7 +15,7 @@ export default function useMarketPermit(marketSymbol: string) {
 
   return useCallback(
     async (params: { spender: Address; value: bigint; duration: number }) => {
-      if (!market || !walletAddress) return;
+      if (!market || !walletAddress || !publicClient) return;
       const implementation = await publicClient.getStorageAt({
         address: market.address,
         slot: '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc',
@@ -26,7 +26,7 @@ export default function useMarketPermit(marketSymbol: string) {
         ...params,
         verifyingContract: {
           ...market,
-          address: pad(trim(implementation as `0x${string}`), { size: 20 }),
+          address: pad(trim(implementation), { size: 20 }),
         },
       });
     },

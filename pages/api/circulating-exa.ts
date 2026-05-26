@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import request from 'graphql-request';
-import { createPublicClient, getAddress, http } from 'viem';
+import { createPublicClient, getAddress, http, type Address } from 'viem';
 import { optimism } from 'viem/chains';
 import sablierV2LockupLinearDeployment from '@exactly/protocol/deployments/optimism/SablierV2LockupLinear.json';
 import timelockControllerDeployment from '@exactly/protocol/deployments/optimism/TimelockController.json';
@@ -8,7 +8,7 @@ import rewardsControllerDeployment from '@exactly/protocol/deployments/optimism/
 import escrowedEXADeployment from '@exactly/protocol/deployments/optimism/esEXA.json';
 import airdropDeployment from '@exactly/protocol/deployments/optimism/Airdrop.json';
 import exaDeployment from '@exactly/protocol/deployments/optimism/EXA.json';
-import { exaABI, sablierV2LockupLinearABI } from '../../types/abi';
+import { exaAbi, sablierV2LockupLinearAbi } from '../../generated/wagmi';
 import { getStreamsByCategory } from 'queries/getStreamsByCategory';
 import networkData from 'config/networkData.json';
 import { defaultChain } from 'utils/client';
@@ -21,12 +21,12 @@ const client = createPublicClient({
 
 const SABLIER_V2_LOCKUP_DYNAMIC = '0x6f68516c21E248cdDfaf4898e66b2b0Adee0e0d6';
 const TREASURY = '0x23fD464e0b0eE21cEdEb929B19CABF9bD5215019';
-const sablierV2LockupLinear = sablierV2LockupLinearDeployment.address;
-const timelockController = timelockControllerDeployment.address;
-const rewardsController = rewardsControllerDeployment.address;
-const escrowedEXA = escrowedEXADeployment.address;
-const airdrop = airdropDeployment.address;
-const exaAddress = exaDeployment.address;
+const sablierV2LockupLinear = getAddress(sablierV2LockupLinearDeployment.address);
+const timelockController = getAddress(timelockControllerDeployment.address);
+const rewardsController = getAddress(rewardsControllerDeployment.address);
+const escrowedEXA = getAddress(escrowedEXADeployment.address);
+const airdrop = getAddress(airdropDeployment.address);
+const exaAddress = getAddress(exaDeployment.address);
 const EXCLUDED_ADDRESSES = [
   SABLIER_V2_LOCKUP_DYNAMIC,
   sablierV2LockupLinear,
@@ -35,16 +35,16 @@ const EXCLUDED_ADDRESSES = [
   escrowedEXA,
   TREASURY,
   airdrop,
-];
+] as const satisfies readonly Address[];
 
 const exa = {
-  abi: exaABI,
-  address: getAddress(exaAddress),
+  abi: exaAbi,
+  address: exaAddress,
 } as const;
 
 const sablierLinear = {
-  abi: sablierV2LockupLinearABI,
-  address: getAddress(sablierV2LockupLinear),
+  abi: sablierV2LockupLinearAbi,
+  address: sablierV2LockupLinear,
 } as const;
 
 const subgraphUrl = networkData[String(defaultChain.id) as keyof typeof networkData]?.subgraph['sablier'];
@@ -62,17 +62,16 @@ async function withdrawableFromCategory(category: 'LockupLinear' | 'LockupDynami
       { origin: 'https://app.exact.ly' },
     );
     if (category === 'LockupLinear') {
-      totalWithdrawable += (
-        await client.multicall({
-          contracts: [
-            ...streams.map(({ tokenId }) => ({
-              ...sablierLinear,
-              functionName: 'withdrawableAmountOf',
-              args: [tokenId],
-            })),
-          ],
-        })
-      ).reduce((total, { result }) => total + (result as bigint), 0n);
+      const withdrawables = await Promise.all(
+        streams.map(({ tokenId }) =>
+          client.readContract({
+            ...sablierLinear,
+            functionName: 'withdrawableAmountOf',
+            args: [BigInt(tokenId)],
+          }),
+        ),
+      );
+      totalWithdrawable += withdrawables.reduce((total, result) => total + result, 0n);
     }
     last = streams.length ? streams[streams.length - 1].id : undefined;
   } while (last);
@@ -89,16 +88,18 @@ export default async function (_: NextApiRequest, res: NextApiResponse) {
   res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=3600');
 
   try {
-    const [{ result: decimals }, { result: totalSupply }, ...balancesResult] = await client.multicall({
-      contracts: [
-        { ...exa, functionName: 'decimals' },
-        { ...exa, functionName: 'totalSupply' },
-        ...EXCLUDED_ADDRESSES.map((address) => ({ ...exa, functionName: 'balanceOf', args: [address] })),
-      ],
-    });
+    const [decimals, totalSupply, balances] = await Promise.all([
+      client.readContract({ ...exa, functionName: 'decimals' }),
+      client.readContract({ ...exa, functionName: 'totalSupply' }),
+      Promise.all(
+        EXCLUDED_ADDRESSES.map((address) =>
+          client.readContract({ ...exa, functionName: 'balanceOf', args: [address] }),
+        ),
+      ),
+    ]);
     const totalWithdrawable = await withdrawableFromCategory('LockupLinear');
-    const nonCirculatingSupply = balancesResult.reduce((total, { result }) => total + (result as bigint), 0n);
-    const circulatingSupply = (totalSupply as bigint) - nonCirculatingSupply + totalWithdrawable;
+    const nonCirculatingSupply = balances.reduce((total, result) => total + result, 0n);
+    const circulatingSupply = totalSupply - nonCirculatingSupply + totalWithdrawable;
     res.status(200).json(Number(circulatingSupply) / 10 ** Number(decimals));
   } catch (error) {
     res.status(502).json({ message: 'There was an error fetching the circulating supply' });

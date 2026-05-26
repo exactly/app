@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Avatar,
   AvatarGroup,
@@ -16,10 +16,25 @@ import {
   useTheme,
 } from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
-import { hexToSignature, formatEther, parseEther } from 'viem';
+import { hexToSignature, formatEther, parseEther, zeroAddress, type Hex } from 'viem';
 import waitForTransaction from 'utils/waitForTransaction';
-import { stakedExaABI } from 'types/abi';
-import { AbiParametersToPrimitiveTypes, ExtractAbiFunction, ExtractAbiFunctionNames } from 'abitype';
+import {
+  exaAddress,
+  stakedExaAddress,
+  useReadExaAllowance,
+  useReadExaBalanceOf,
+  useReadExaName,
+  useReadExaNonces,
+  useReadStakedExaBalanceOf,
+  useSimulateExaApprove,
+  useSimulateStakedExaDeposit,
+  useSimulateStakedExaPermitAndDeposit,
+  useSimulateStakedExaWithdraw,
+  useWriteExaApprove,
+  useWriteStakedExaDeposit,
+  useWriteStakedExaPermitAndDeposit,
+  useWriteStakedExaWithdraw,
+} from 'generated/wagmi';
 import Draggable from 'react-draggable';
 import CloseIcon from '@mui/icons-material/Close';
 import { WAD } from '@exactly/lib';
@@ -27,25 +42,29 @@ import { WAD } from '@exactly/lib';
 import { ModalBox } from 'components/common/modal/ModalBox';
 
 import ModalInput from 'components/OperationsModal/ModalInput';
-import { useWeb3 } from 'hooks/useWeb3';
 import { useTranslation } from 'react-i18next';
 import MainActionButton from 'components/common/MainActionButton';
 import Image from 'next/image';
-import { useEXA, useEXABalance, useEXAPrice } from 'hooks/useEXA';
-import { useStakedEXA, useStakedEXABalance } from 'hooks/useStakedEXA';
+import { useEXAPrice } from 'hooks/useEXA';
 import formatNumber from 'utils/formatNumber';
-import { gasLimit } from 'utils/gas';
 import { Transaction } from 'types/Transaction';
 import LoadingTransaction from 'components/common/modal/Loading';
 import { track } from 'utils/mixpanel';
 import { useStakeEXA } from 'contexts/StakeEXAContext';
 import dayjs from 'dayjs';
-import { useSignTypedData } from 'wagmi';
+import { useConnection, useSignTypedData } from 'wagmi';
 import useIsContract from 'hooks/useIsContract';
+import { defaultChain } from 'utils/client';
+import useReadOnly from 'hooks/useReadOnly';
 
-type Params<T extends ExtractAbiFunctionNames<typeof stakedExaABI>> = AbiParametersToPrimitiveTypes<
-  ExtractAbiFunction<typeof stakedExaABI, T>['inputs']
->;
+type Permit = { value: bigint; deadline: bigint; v: number; r: Hex; s: Hex };
+
+const exaChainId = Object.keys(exaAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof exaAddress => chainId === defaultChain.id);
+const stakedExaChainId = Object.keys(stakedExaAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof stakedExaAddress => chainId === defaultChain.id);
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
@@ -140,53 +159,109 @@ type Props = {
 
 function StakingEXAInput({ refetch, operation }: Props) {
   const { t } = useTranslation();
+  const { account: walletAddress } = useReadOnly();
 
-  const exa = useEXA();
-  const stakedEXA = useStakedEXA();
-  const { data: balance, isLoading: balanceIsLoading } = useStakedEXABalance();
-  const { data: exaBalance, isLoading: exaBalanceIsLoading } = useEXABalance();
+  const { data: balance, isLoading: balanceIsLoading } = useReadStakedExaBalanceOf({
+    chainId: stakedExaChainId,
+    args: [walletAddress ?? zeroAddress],
+    query: { enabled: stakedExaChainId !== undefined, staleTime: 30_000 },
+  });
+  const { data: exaBalance, isLoading: exaBalanceIsLoading } = useReadExaBalanceOf({
+    chainId: exaChainId,
+    args: [walletAddress ?? zeroAddress],
+    query: { enabled: exaChainId !== undefined, staleTime: 30_000 },
+  });
   const { rewardsTokens } = useStakeEXA();
   const EXAPrice = useEXAPrice();
-  const { isConnected, opts, walletAddress, chain: displayNetwork } = useWeb3();
+  const { isConnected } = useConnection();
+  const exa = exaChainId === undefined ? undefined : exaAddress[exaChainId];
+  const stakedEXA = stakedExaChainId === undefined ? undefined : stakedExaAddress[stakedExaChainId];
   const [isLoading, setIsLoading] = useState(false);
   const [tx, setTx] = useState<Transaction>();
+  const [permit, setPermit] = useState<Permit>();
+  const [submitPermitAndDeposit, setSubmitPermitAndDeposit] = useState(false);
   const { signTypedDataAsync } = useSignTypedData();
   const isContract = useIsContract();
 
   const [qty, setQty] = useState<string>('');
+  const amount = useMemo(() => (qty ? parseEther(qty) : 0n), [qty]);
   const theme = useTheme();
   const usdValue = useMemo(() => {
     if (!qty || !EXAPrice) return;
 
-    const parsedQty = parseEther(qty);
-    const usd = (parsedQty * EXAPrice) / WAD;
+    const usd = (amount * EXAPrice) / WAD;
 
     return formatEther(usd);
-  }, [EXAPrice, qty]);
+  }, [EXAPrice, amount, qty]);
+
+  const exaAllowance = useReadExaAllowance({
+    chainId: exaChainId,
+    args: walletAddress && stakedEXA ? [walletAddress, stakedEXA] : undefined,
+    query: { enabled: Boolean(walletAddress && stakedEXA && exaChainId !== undefined && operation === 'deposit') },
+  });
+  const { data: nonce } = useReadExaNonces({
+    chainId: exaChainId,
+    args: walletAddress ? [walletAddress] : undefined,
+    query: { enabled: Boolean(walletAddress && exaChainId !== undefined && operation === 'deposit') },
+  });
+  const { data: name } = useReadExaName({
+    chainId: exaChainId,
+    query: { enabled: exaChainId !== undefined && operation === 'deposit' },
+  });
+  const approveSimulation = useSimulateExaApprove({
+    account: walletAddress,
+    chainId: exaChainId,
+    args: stakedEXA ? [stakedEXA, amount] : undefined,
+    query: { enabled: Boolean(walletAddress && stakedEXA && exaChainId !== undefined && amount > 0n) },
+  });
+  const depositSimulation = useSimulateStakedExaDeposit({
+    account: walletAddress,
+    chainId: stakedExaChainId,
+    args: walletAddress ? [amount, walletAddress] : undefined,
+    query: {
+      enabled: Boolean(walletAddress && stakedExaChainId !== undefined && amount > 0n && operation === 'deposit'),
+    },
+  });
+  const permitAndDepositSimulation = useSimulateStakedExaPermitAndDeposit({
+    account: walletAddress,
+    chainId: stakedExaChainId,
+    args: walletAddress && permit ? [amount, walletAddress, permit] : undefined,
+    query: {
+      enabled: Boolean(
+        walletAddress && permit && stakedExaChainId !== undefined && amount > 0n && submitPermitAndDeposit,
+      ),
+    },
+  });
+  const withdrawSimulation = useSimulateStakedExaWithdraw({
+    account: walletAddress,
+    chainId: stakedExaChainId,
+    args: walletAddress ? [amount, walletAddress, walletAddress] : undefined,
+    query: {
+      enabled: Boolean(walletAddress && stakedExaChainId !== undefined && amount > 0n && operation === 'withdraw'),
+    },
+  });
+  const { writeContractAsync: approveExa } = useWriteExaApprove();
+  const { writeContractAsync: deposit } = useWriteStakedExaDeposit();
+  const { writeContractAsync: permitAndDeposit } = useWriteStakedExaPermitAndDeposit();
+  const { writeContractAsync: withdraw } = useWriteStakedExaWithdraw();
 
   const insufficientFunds = useMemo(() => {
-    return operation === 'deposit'
-      ? parseEther(qty) > (exaBalance || 0n) || !qty
-      : parseEther(qty) > (balance || 0n) || !qty;
-  }, [balance, exaBalance, operation, qty]);
+    return operation === 'deposit' ? amount > (exaBalance || 0n) || !qty : amount > (balance || 0n) || !qty;
+  }, [amount, balance, exaBalance, operation, qty]);
 
   const sign = useCallback(async () => {
-    if (!walletAddress || !exa || !stakedEXA) return;
+    if (!walletAddress || !exa || !stakedEXA || nonce === undefined || !name) return;
 
     const deadline = BigInt(dayjs().unix() + 3_600);
-    const _qty = parseEther(qty);
-    const value = _qty + 1n;
-
-    const nonce = await exa.read.nonces([walletAddress], opts);
-    const name = await exa.read.name(opts);
+    const value = amount + 1n;
 
     const { v, r, s } = await signTypedDataAsync({
       primaryType: 'Permit',
       domain: {
         name,
         version: '1',
-        chainId: displayNetwork.id,
-        verifyingContract: exa.address,
+        chainId: defaultChain.id,
+        verifyingContract: exa,
       },
       types: {
         Permit: [
@@ -199,7 +274,7 @@ function StakingEXAInput({ refetch, operation }: Props) {
       },
       message: {
         owner: walletAddress,
-        spender: stakedEXA.address,
+        spender: stakedEXA,
         value,
         nonce,
         deadline,
@@ -211,36 +286,37 @@ function StakingEXAInput({ refetch, operation }: Props) {
       deadline,
       ...{ v: Number(v), r, s },
     } as const;
-  }, [displayNetwork.id, exa, opts, qty, signTypedDataAsync, stakedEXA, walletAddress]);
+  }, [amount, exa, name, nonce, signTypedDataAsync, stakedEXA, walletAddress]);
 
   const submit = useCallback(async () => {
-    if (!walletAddress || !stakedEXA || !exa || !opts || !qty) return;
+    if (!walletAddress || !stakedEXA || !exa || !qty) return;
 
     setIsLoading(true);
-    const amount = parseEther(qty);
+    let permitPending = false;
 
     let hash;
     try {
       if (operation === 'deposit') {
         if (await isContract(walletAddress)) {
-          const args: Params<'deposit'> = [amount, walletAddress] as const;
-          const allowance = await exa.read.allowance([walletAddress, stakedEXA.address]);
+          const allowance = (await exaAllowance.refetch()).data;
 
-          if (allowance < amount) {
-            const approve = [stakedEXA.address, amount] as const;
-            const gas = await exa.estimateGas.approve(approve, opts);
-            const approveHash = await exa.write.approve(approve, { ...opts, gasLimit: gasLimit(gas) });
+          if ((allowance ?? 0n) < amount) {
+            const approveRequest = approveSimulation.data ?? (await approveSimulation.refetch()).data;
+            if (!approveRequest) return;
+            const approveHash = await approveExa(approveRequest.request);
             await waitForTransaction({ hash: approveHash });
           }
 
-          const gas = await stakedEXA.estimateGas.deposit(args, opts);
-          hash = await stakedEXA.write.deposit(args, { ...opts, gasLimit: gasLimit(gas) });
+          const depositRequest = depositSimulation.data ?? (await depositSimulation.refetch()).data;
+          if (!depositRequest) return;
+          hash = await deposit(depositRequest.request);
         } else {
           const p = await sign();
           if (!p) return;
-          const args: Params<'permitAndDeposit'> = [amount, walletAddress, p] as const;
-          const gas = await stakedEXA.estimateGas.permitAndDeposit(args, opts);
-          hash = await stakedEXA.write.permitAndDeposit(args, { ...opts, gasLimit: gasLimit(gas) });
+          permitPending = true;
+          setPermit(p);
+          setSubmitPermitAndDeposit(true);
+          return;
         }
 
         setTx({ status: 'processing', hash });
@@ -249,10 +325,9 @@ function StakingEXAInput({ refetch, operation }: Props) {
 
         setTx({ status: status === 'success' ? 'success' : 'error', hash: transactionHash });
       } else {
-        const args: Params<'withdraw'> = [amount, walletAddress, walletAddress] as const;
-
-        const gas = await stakedEXA.estimateGas.withdraw(args, opts);
-        hash = await stakedEXA.write.withdraw(args, { ...opts, gasLimit: gasLimit(gas) });
+        const withdrawRequest = withdrawSimulation.data ?? (await withdrawSimulation.refetch()).data;
+        if (!withdrawRequest) return;
+        hash = await withdraw(withdrawRequest.request);
         setTx({ status: 'processing', hash });
 
         const { status, transactionHash } = await waitForTransaction({ hash });
@@ -262,10 +337,56 @@ function StakingEXAInput({ refetch, operation }: Props) {
     } catch (e) {
       if (hash) setTx({ status: 'error', hash });
     } finally {
-      refetch();
-      setIsLoading(false);
+      if (!permitPending) {
+        refetch();
+        setIsLoading(false);
+      }
     }
-  }, [walletAddress, stakedEXA, exa, opts, qty, operation, isContract, sign, refetch]);
+  }, [
+    walletAddress,
+    stakedEXA,
+    exa,
+    qty,
+    operation,
+    isContract,
+    amount,
+    exaAllowance,
+    approveSimulation,
+    approveExa,
+    depositSimulation,
+    deposit,
+    sign,
+    withdrawSimulation,
+    withdraw,
+    refetch,
+  ]);
+
+  useEffect(() => {
+    if (!submitPermitAndDeposit || !permitAndDepositSimulation.data) return;
+    setSubmitPermitAndDeposit(false);
+    void (async () => {
+      let hash;
+      try {
+        hash = await permitAndDeposit(permitAndDepositSimulation.data.request);
+        setTx({ status: 'processing', hash });
+        const { status, transactionHash } = await waitForTransaction({ hash });
+        setTx({ status: status === 'success' ? 'success' : 'error', hash: transactionHash });
+      } catch {
+        if (hash) setTx({ status: 'error', hash });
+      } finally {
+        setPermit(undefined);
+        refetch();
+        setIsLoading(false);
+      }
+    })();
+  }, [permitAndDeposit, permitAndDepositSimulation.data, refetch, submitPermitAndDeposit]);
+
+  useEffect(() => {
+    if (!submitPermitAndDeposit || !permitAndDepositSimulation.error) return;
+    setSubmitPermitAndDeposit(false);
+    setPermit(undefined);
+    setIsLoading(false);
+  }, [permitAndDepositSimulation.error, submitPermitAndDeposit]);
 
   const handleMaxClick = useCallback(() => {
     operation === 'deposit' ? setQty(formatEther(exaBalance || 0n)) : setQty(formatEther(balance || 0n));
@@ -423,7 +544,7 @@ function StakingEXAInput({ refetch, operation }: Props) {
           data-testid="staking-submit"
           disabled={insufficientFunds}
         >
-          {insufficientFunds && parseEther(qty) > 0n
+          {insufficientFunds && amount > 0n
             ? t('Insufficient EXA balance')
             : operation === 'deposit'
               ? balance && balance > 0

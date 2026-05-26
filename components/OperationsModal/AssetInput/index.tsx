@@ -5,8 +5,8 @@ import ModalInput from 'components/OperationsModal/ModalInput';
 import AvailableAmount, { Props as AAProps } from '../AvailableAmount';
 import USDValue from '../USDValue';
 import AssetSelector from '../AssetSelector';
-import { useWeb3 } from 'hooks/useWeb3';
 import { track } from 'utils/mixpanel';
+import { useConnection } from 'wagmi';
 
 type Props = {
   qty: string;
@@ -18,7 +18,7 @@ type Props = {
 } & AAProps;
 
 function AssetInput({ qty, onChange, symbol, decimals, amount, label, onMax, tooltip, disabled }: Props) {
-  const { isConnected } = useWeb3();
+  const { isConnected } = useConnection();
 
   const handleBlur = useCallback(() => {
     track('Input Unfocused', {

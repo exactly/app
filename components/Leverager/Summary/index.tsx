@@ -13,13 +13,13 @@ import RewardsGroup from '../RewardsGroup';
 import handleOperationError from 'utils/handleOperationError';
 import formatNumber from 'utils/formatNumber';
 import useAccountData from 'hooks/useAccountData';
-import { useWeb3 } from 'hooks/useWeb3';
 import { useModal } from 'contexts/ModalContext';
 import MainActionButton from 'components/common/MainActionButton';
+import useReadOnly from 'hooks/useReadOnly';
 
 const Summary = () => {
   const { t } = useTranslation();
-  const { impersonateActive, exitImpersonate } = useWeb3();
+  const { isImpersonating: impersonateActive, exitReadOnly: exitImpersonate } = useReadOnly();
 
   const {
     input,

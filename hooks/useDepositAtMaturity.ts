@@ -1,133 +1,262 @@
 import { WAD } from '@exactly/lib';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useOperationContext } from 'contexts/OperationContext';
+import {
+  erc20Abi,
+  marketAbi,
+  marketEthRouterAbi,
+  marketEthRouterAddress,
+  useReadErc20Allowance,
+  useReadLegacyPreviewerPreviewDepositAtMaturity,
+  useReadPreviewerPreviewDepositAtMaturity,
+  useSimulateErc20Approve,
+  useSimulateMarketDepositAtMaturity,
+  useSimulateMarketEthRouterDepositAtMaturity,
+  legacyPreviewerAddress,
+  previewerAddress,
+} from 'generated/wagmi';
 import useAccountData from 'hooks/useAccountData';
-import useApprove from 'hooks/useApprove';
 import useBalance from 'hooks/useBalance';
 import useHandleOperationError from 'hooks/useHandleOperationError';
-import usePreviewer from 'hooks/usePreviewer';
-import { useWeb3 } from 'hooks/useWeb3';
 import { useTranslation } from 'react-i18next';
-import { OperationHook } from 'types/OperationHook';
-import { CustomError } from 'types/Error';
-import useEstimateGas from './useEstimateGas';
-import { formatUnits, parseUnits } from 'viem';
-import waitForTransaction from 'utils/waitForTransaction';
+import { formatUnits, parseUnits, type Hex } from 'viem';
 import dayjs from 'dayjs';
-import { gasLimit } from 'utils/gas';
 import { track } from 'utils/mixpanel';
+import { defaultChain } from 'utils/client';
+import useReadOnly from 'hooks/useReadOnly';
+import { useSendCalls, useWaitForCallsStatus } from 'wagmi';
 
 type DepositAtMaturity = {
-  deposit: () => void;
+  deposit: () => Promise<void>;
+  handleSubmitAction: () => Promise<void>;
+  handleInputChange: (value: string) => void;
   updateAPR: () => void;
+  isPreparing: boolean;
+  isLoading: boolean;
+  onMax: () => void;
   optimalDepositAmount: bigint | undefined;
   rawSlippage: string;
   setRawSlippage: (value: string) => void;
   fixedRate: bigint | undefined;
   gtMaxYield: boolean;
-} & OperationHook;
+  txStatus?: 'loading' | 'processing' | 'success' | 'error';
+  txHash?: Hex;
+};
+
+const legacyPreviewerChainId = Object.keys(legacyPreviewerAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof legacyPreviewerAddress => chainId === defaultChain.id);
+const previewerChainId = Object.keys(previewerAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof previewerAddress => chainId === defaultChain.id);
 
 export default (): DepositAtMaturity => {
   const { t } = useTranslation();
-  const { walletAddress, opts } = useWeb3();
+  const { account: walletAddress } = useReadOnly();
 
   const {
     symbol,
+    errorData,
     setErrorData,
     qty,
     setQty,
-    setTx,
     date,
-    requiresApproval,
-    setRequiresApproval,
     isLoading: isLoadingOp,
     setIsLoading: setIsLoadingOp,
-    marketContract,
-    assetContract,
-    ETHRouterContract,
     rawSlippage,
     setRawSlippage,
     slippage,
     setErrorButton,
   } = useOperationContext();
 
-  const { marketAccount } = useAccountData(symbol);
-
+  const { marketAccount, refreshAccountData } = useAccountData(symbol);
   const handleOperationError = useHandleOperationError();
-
-  const [fixedRate, setFixedRate] = useState<bigint | undefined>();
-  const [fixedFee, setFixedFee] = useState<bigint | undefined>();
-  const [gtMaxYield, setGtMaxYield] = useState<boolean>(false);
-
-  const walletBalance = useBalance(symbol, assetContract?.address);
-
-  const previewerContract = usePreviewer();
-
-  const {
-    approve,
-    estimateGas: approveEstimateGas,
-    isLoading: approveIsLoading,
-    needsApproval,
-  } = useApprove({ operation: 'depositAtMaturity', contract: assetContract, spender: marketAccount?.market });
-
-  const estimate = useEstimateGas();
-
-  const previewGasCost = useCallback(
-    async (quantity: string): Promise<bigint | undefined> => {
-      if (
-        !marketAccount ||
-        !walletAddress ||
-        !marketContract ||
-        !ETHRouterContract ||
-        !date ||
-        !quantity ||
-        (walletBalance && parseFloat(quantity) > parseFloat(walletBalance)) ||
-        !opts ||
-        !fixedFee
-      )
-        return;
-
-      if (await needsApproval(quantity)) {
-        return approveEstimateGas();
-      }
-
-      const amount = parseUnits(quantity, marketAccount.decimals);
-      const minAmount = ((amount + fixedFee) * slippage) / WAD;
-
-      if (marketAccount.assetSymbol === 'WETH') {
-        const sim = await ETHRouterContract.simulate.depositAtMaturity([date, minAmount], {
-          ...opts,
-          value: amount,
-        });
-        const gasCost = await estimate(sim.request);
-        if (amount + (gasCost ?? 0n) >= parseUnits(walletBalance || '0', 18)) {
-          throw new CustomError(t('Reserve ETH for gas fees.'), 'warning');
-        }
-        return gasCost;
-      }
-
-      const sim = await marketContract.simulate.depositAtMaturity([date, amount, minAmount, walletAddress], opts);
-      return estimate(sim.request);
+  const [gtMaxYield, setGtMaxYield] = useState(false);
+  const walletBalance = useBalance(symbol, marketAccount?.asset);
+  const { mutateAsync: sendCalls, isPending: sendCallsPending } = useSendCalls();
+  const [callId, setCallId] = useState<string>();
+  const amount = useMemo(() => {
+    if (!qty || !marketAccount) return;
+    try {
+      return parseUnits(qty, marketAccount.decimals);
+    } catch {
+      return;
+    }
+  }, [marketAccount, qty]);
+  const marketEthRouterChainId = Object.keys(marketEthRouterAddress)
+    .map(Number)
+    .find((chainId): chainId is keyof typeof marketEthRouterAddress => chainId === defaultChain.id);
+  const marketEthRouter =
+    marketEthRouterChainId === undefined ? undefined : marketEthRouterAddress[marketEthRouterChainId];
+  const legacyDepositPreview = useReadLegacyPreviewerPreviewDepositAtMaturity({
+    chainId: legacyPreviewerChainId,
+    args: marketAccount && date && amount !== undefined ? [marketAccount.market, date, amount] : undefined,
+    query: {
+      enabled: Boolean(
+        legacyPreviewerChainId !== undefined && marketAccount && date && amount !== undefined && amount > 0n,
+      ),
     },
+  });
+  const depositPreview = useReadPreviewerPreviewDepositAtMaturity({
+    chainId: previewerChainId,
+    args: marketAccount && date && amount !== undefined ? [marketAccount.market, date, amount] : undefined,
+    query: {
+      enabled: Boolean(
+        legacyPreviewerChainId === undefined &&
+          previewerChainId !== undefined &&
+          marketAccount &&
+          date &&
+          amount !== undefined &&
+          amount > 0n,
+      ),
+    },
+  });
+  const finalAssets =
+    legacyPreviewerChainId !== undefined ? legacyDepositPreview.data?.assets : depositPreview.data?.assets;
+  const fixedFee = amount !== undefined && finalAssets !== undefined ? finalAssets - amount : undefined;
+  const { optimalDepositAmount, depositRate } = useMemo<{
+    optimalDepositAmount?: bigint;
+    depositRate?: bigint;
+  }>(() => {
+    if (!marketAccount) return { optimalDepositAmount: 0n, depositRate: 0n };
+
+    const pool = marketAccount.fixedPools.find(({ maturity }) => maturity === date);
+    return {
+      optimalDepositAmount: pool?.optimalDeposit,
+      depositRate: pool?.depositRate,
+    };
+  }, [marketAccount, date]);
+  const fixedRate = useMemo(() => {
+    if (!date || !depositRate) return;
+    if (!amount || !finalAssets) return depositRate;
+    const currentTimestamp = BigInt(dayjs().unix());
+    return (((finalAssets * WAD) / amount - WAD) * 31_536_000n) / (date - currentTimestamp);
+  }, [amount, date, depositRate, finalAssets]);
+  const minAmount = amount !== undefined && fixedFee !== undefined ? ((amount + fixedFee) * slippage) / WAD : undefined;
+  const { data: allowance, refetch: refetchAllowance } = useReadErc20Allowance({
+    address: marketAccount?.asset,
+    args: walletAddress && marketAccount ? [walletAddress, marketAccount.market] : undefined,
+    chainId: defaultChain.id,
+    query: { enabled: Boolean(walletAddress && marketAccount && marketAccount.assetSymbol !== 'WETH') },
+  });
+  const inputReady = Boolean(
+    walletAddress &&
+      marketAccount &&
+      date &&
+      amount !== undefined &&
+      minAmount !== undefined &&
+      parseFloat(qty) > 0 &&
+      (!walletBalance || parseFloat(qty) <= parseFloat(walletBalance)),
+  );
+  const requiresBatchedApproval = Boolean(
+    inputReady && marketAccount?.assetSymbol !== 'WETH' && allowance !== undefined && allowance < (amount ?? 0n),
+  );
+  const approveSimulation = useSimulateErc20Approve({
+    address: marketAccount?.asset,
+    args: marketAccount && amount !== undefined ? [marketAccount.market, amount] : undefined,
+    account: walletAddress,
+    chainId: defaultChain.id,
+    query: { enabled: requiresBatchedApproval },
+  });
+  const depositSimulation = useSimulateMarketDepositAtMaturity({
+    address: marketAccount?.market,
+    args:
+      date && amount !== undefined && minAmount !== undefined && walletAddress
+        ? [date, amount, minAmount, walletAddress]
+        : undefined,
+    account: walletAddress,
+    chainId: defaultChain.id,
+    query: {
+      enabled: Boolean(
+        inputReady && marketAccount?.assetSymbol !== 'WETH' && allowance !== undefined && !requiresBatchedApproval,
+      ),
+    },
+  });
+  const ethDepositSimulation = useSimulateMarketEthRouterDepositAtMaturity({
+    args: date && minAmount !== undefined ? [date, minAmount] : undefined,
+    account: walletAddress,
+    chainId: marketEthRouterChainId,
+    value: amount,
+    query: {
+      enabled: Boolean(inputReady && marketAccount?.assetSymbol === 'WETH' && marketEthRouterChainId !== undefined),
+    },
+  });
+  const callsStatus = useWaitForCallsStatus({
+    id: callId,
+    query: { enabled: Boolean(callId) },
+  });
+  const needsBatchedApproval = useCallback(async () => {
+    if (marketAccount?.assetSymbol === 'WETH' || !walletAddress || amount === undefined || !marketAccount) return false;
+    return (allowance ?? (await refetchAllowance()).data ?? 0n) < amount;
+  }, [allowance, amount, marketAccount, refetchAllowance, walletAddress]);
+  const isLoading = useMemo(() => sendCallsPending || isLoadingOp, [sendCallsPending, isLoadingOp]);
+  const isPreparing = useMemo(
+    () =>
+      approveSimulation.isLoading ||
+      depositSimulation.isLoading ||
+      ethDepositSimulation.isLoading ||
+      legacyDepositPreview.isLoading ||
+      depositPreview.isLoading,
     [
-      marketAccount,
-      walletAddress,
-      marketContract,
-      ETHRouterContract,
-      date,
-      walletBalance,
-      opts,
-      needsApproval,
-      fixedFee,
-      slippage,
-      estimate,
-      approveEstimateGas,
-      t,
+      approveSimulation.isLoading,
+      depositPreview.isLoading,
+      depositSimulation.isLoading,
+      ethDepositSimulation.isLoading,
+      legacyDepositPreview.isLoading,
     ],
   );
+  const txHash = callsStatus.data?.receipts?.[0]?.transactionHash;
+  const txStatus = useMemo(() => {
+    if (!callId) return;
+    if (callsStatus.data?.status === 'success') return 'success';
+    if (callsStatus.data?.status === 'failure' || callsStatus.isError) return 'error';
+    return 'processing';
+  }, [callId, callsStatus.data?.status, callsStatus.isError]);
+  const simulationError = useMemo(() => {
+    if (!inputReady || !marketAccount) return;
+    if (marketAccount.assetSymbol === 'WETH') return ethDepositSimulation.error;
+    if (requiresBatchedApproval) return approveSimulation.error;
+    return depositSimulation.error;
+  }, [
+    approveSimulation.error,
+    depositSimulation.error,
+    ethDepositSimulation.error,
+    inputReady,
+    marketAccount,
+    requiresBatchedApproval,
+  ]);
 
-  const isLoading = useMemo(() => approveIsLoading || isLoadingOp, [approveIsLoading, isLoadingOp]);
+  useEffect(() => {
+    if (!simulationError) {
+      if (errorData?.component === 'simulation') setErrorData(undefined);
+      return;
+    }
+    setErrorData({ status: true, message: handleOperationError(simulationError), component: 'simulation' });
+  }, [errorData?.component, handleOperationError, setErrorData, simulationError]);
+
+  useEffect(() => {
+    if (!callsStatus.data?.receipts?.length) return;
+    void refreshAccountData();
+    if (marketAccount?.assetSymbol !== 'WETH') void refetchAllowance();
+  }, [callsStatus.data?.receipts, marketAccount?.assetSymbol, refetchAllowance, refreshAccountData]);
+
+  useEffect(() => {
+    if (!callsStatus.data || !marketAccount || !txHash) return;
+    if (callsStatus.data.status !== 'success' && callsStatus.data.status !== 'failure') return;
+    track('TX Completed', {
+      contractName: marketAccount.assetSymbol === 'WETH' ? 'ETHRouter' : 'Market',
+      method: 'depositAtMaturity',
+      symbol,
+      amount: qty,
+      usdAmount: formatUnits(
+        (parseUnits(qty, marketAccount.decimals) * marketAccount.usdPrice) / WAD,
+        marketAccount.decimals,
+      ),
+      status: callsStatus.data.status === 'success' ? 'success' : 'reverted',
+      hash: txHash,
+    });
+  }, [callsStatus.data, marketAccount, qty, symbol, txHash]);
 
   const onMax = useCallback(() => {
     if (walletBalance) {
@@ -136,24 +265,10 @@ export default (): DepositAtMaturity => {
     }
   }, [setErrorData, setQty, walletBalance]);
 
-  const { optimalDepositAmount, depositRate } = useMemo<{
-    optimalDepositAmount?: bigint;
-    depositRate?: bigint;
-  }>(() => {
-    if (!marketAccount) return { optimalDepositAmount: 0n, depositRate: 0n };
-
-    const { fixedPools = [] } = marketAccount;
-    const pool = fixedPools.find(({ maturity }) => maturity === date);
-    return {
-      optimalDepositAmount: pool?.optimalDeposit,
-      depositRate: pool?.depositRate,
-    };
-  }, [marketAccount, date]);
-
   const handleInputChange = useCallback(
     (value: string) => {
       if (!marketAccount) return;
-      const { decimals } = marketAccount;
+
       setQty(value);
 
       if (walletBalance && parseFloat(value) > parseFloat(walletBalance)) {
@@ -162,143 +277,108 @@ export default (): DepositAtMaturity => {
       }
       setErrorButton(undefined);
       setErrorData(undefined);
-
-      setGtMaxYield(!!optimalDepositAmount && parseUnits(value || '0', decimals) > optimalDepositAmount);
+      setGtMaxYield(!!optimalDepositAmount && parseUnits(value || '0', marketAccount.decimals) > optimalDepositAmount);
     },
-    [setQty, walletBalance, setErrorButton, setErrorData, optimalDepositAmount, marketAccount, t],
+    [marketAccount, optimalDepositAmount, setErrorButton, setErrorData, setQty, t, walletBalance],
   );
 
   const deposit = useCallback(async () => {
-    if (
-      !marketAccount ||
-      !date ||
-      !qty ||
-      !ETHRouterContract ||
-      !marketContract ||
-      !walletAddress ||
-      !opts ||
-      !fixedFee
-    )
-      return;
-
-    let hash;
+    if (!walletAddress || !marketAccount || !date || amount === undefined || minAmount === undefined) return;
     setIsLoadingOp(true);
+    setCallId(undefined);
     try {
-      const amount = parseUnits(qty, marketAccount.decimals);
-      const minAmount = ((amount + fixedFee) * slippage) / WAD;
+      let id: string;
       if (marketAccount.assetSymbol === 'WETH') {
-        const args = [date, minAmount] as const;
-        const gasEstimation = await ETHRouterContract.estimateGas.depositAtMaturity(args, {
-          ...opts,
-          value: amount,
-        });
-        hash = await ETHRouterContract.write.depositAtMaturity(args, {
-          ...opts,
-          value: amount,
-          gasLimit: gasLimit(gasEstimation),
-        });
-        track('TX Signed', {
-          contractName: 'ETHRouter',
-          method: 'depositAtMaturity',
-          hash,
-          symbol,
-          amount: qty,
-          usdAmount: formatUnits((amount * marketAccount.usdPrice) / WAD, marketAccount.decimals),
-        });
+        if (!marketEthRouter) return;
+        if (ethDepositSimulation.error) throw ethDepositSimulation.error;
+        ({ id } = await sendCalls({
+          account: walletAddress,
+          chainId: defaultChain.id,
+          experimental_fallback: true,
+          calls: [
+            {
+              to: marketEthRouter,
+              abi: marketEthRouterAbi,
+              functionName: 'depositAtMaturity',
+              args: [date, minAmount],
+              value: amount,
+            },
+          ],
+        }));
       } else {
-        const args = [date, amount, minAmount, walletAddress] as const;
-        const gasEstimation = await marketContract.estimateGas.depositAtMaturity(args, opts);
-        hash = await marketContract.write.depositAtMaturity(args, {
-          ...opts,
-          gasLimit: gasLimit(gasEstimation),
-        });
-        track('TX Signed', {
-          contractName: 'Market',
-          method: 'depositAtMaturity',
-          symbol,
-          amount: qty,
-          usdAmount: formatUnits((amount * marketAccount.usdPrice) / WAD, marketAccount.decimals),
-          hash,
-        });
+        if (requiresBatchedApproval && approveSimulation.error) throw approveSimulation.error;
+        if (!requiresBatchedApproval && depositSimulation.error) throw depositSimulation.error;
+        ({ id } = await sendCalls({
+          account: walletAddress,
+          chainId: defaultChain.id,
+          experimental_fallback: true,
+          calls: [
+            ...((await needsBatchedApproval())
+              ? [
+                  {
+                    to: marketAccount.asset,
+                    abi: erc20Abi,
+                    functionName: 'approve',
+                    args: [marketAccount.market, amount],
+                  } as const,
+                ]
+              : []),
+            {
+              to: marketAccount.market,
+              abi: marketAbi,
+              functionName: 'depositAtMaturity',
+              args: [date, amount, minAmount, walletAddress],
+            },
+          ],
+        }));
       }
-
-      setTx({ status: 'processing', hash });
-
-      const { status, transactionHash } = await waitForTransaction({ hash });
-      track('TX Completed', {
+      setCallId(id);
+      track('TX Signed', {
+        contractName: marketAccount.assetSymbol === 'WETH' ? 'ETHRouter' : 'Market',
+        method: 'depositAtMaturity',
+        callId: id,
         symbol,
         amount: qty,
         usdAmount: formatUnits((amount * marketAccount.usdPrice) / WAD, marketAccount.decimals),
-        status,
-        hash: transactionHash,
       });
-
-      setTx({ status: status ? 'success' : 'error', hash: transactionHash });
     } catch (error) {
-      if (hash) setTx({ status: 'error', hash });
       setErrorData({ status: true, message: handleOperationError(error) });
     } finally {
       setIsLoadingOp(false);
     }
   }, [
-    marketAccount,
+    amount,
+    approveSimulation.error,
     date,
-    qty,
-    ETHRouterContract,
-    marketContract,
-    walletAddress,
-    opts,
-    fixedFee,
-    setIsLoadingOp,
-    slippage,
-    setTx,
-    symbol,
-    setErrorData,
+    depositSimulation.error,
+    ethDepositSimulation.error,
     handleOperationError,
+    marketAccount,
+    marketEthRouter,
+    minAmount,
+    needsBatchedApproval,
+    qty,
+    requiresBatchedApproval,
+    sendCalls,
+    setErrorData,
+    setIsLoadingOp,
+    symbol,
+    walletAddress,
   ]);
 
   const handleSubmitAction = useCallback(async () => {
     if (isLoading) return;
-    if (requiresApproval) {
-      await approve();
-      setRequiresApproval(await needsApproval(qty));
-      return;
-    }
-
     return deposit();
-  }, [approve, deposit, isLoading, needsApproval, qty, requiresApproval, setRequiresApproval]);
+  }, [deposit, isLoading]);
 
-  const updateAPR = useCallback(async () => {
-    if (!marketAccount || !date || !previewerContract || !depositRate) {
-      setFixedRate(undefined);
-      return;
-    }
-
-    if (qty) {
-      const initialAssets = parseUnits(qty, marketAccount.decimals);
-      try {
-        const { assets: finalAssets } = await previewerContract.read.previewDepositAtMaturity([
-          marketAccount.market,
-          date,
-          initialAssets,
-        ]);
-        const currentTimestamp = BigInt(dayjs().unix());
-        const rate = (finalAssets * WAD) / initialAssets;
-        const fixedAPR = ((rate - WAD) * 31_536_000n) / (date - currentTimestamp);
-
-        setFixedRate(fixedAPR);
-        setFixedFee(finalAssets - initialAssets);
-      } catch (error) {
-        setFixedRate(undefined);
-        setFixedFee(undefined);
-      }
-    } else {
-      setFixedRate(depositRate);
-    }
-  }, [marketAccount, date, previewerContract, depositRate, qty]);
+  const updateAPR = useCallback(() => {
+    if (legacyPreviewerChainId !== undefined) void legacyDepositPreview.refetch();
+    else void depositPreview.refetch();
+  }, [depositPreview, legacyDepositPreview]);
 
   return {
     isLoading,
+    isPreparing,
     onMax,
     handleInputChange,
     handleSubmitAction,
@@ -309,7 +389,7 @@ export default (): DepositAtMaturity => {
     setRawSlippage,
     fixedRate,
     gtMaxYield,
-    previewGasCost,
-    needsApproval,
+    txStatus,
+    txHash,
   };
 };

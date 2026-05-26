@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import networkData from 'config/networkData.json' assert { type: 'json' };
-import { useWeb3 } from './useWeb3';
 import queryRates from 'utils/queryRates';
 import { captureException } from '@sentry/nextjs';
 import useAccountData from './useAccountData';
 import { useGlobalError } from 'contexts/GlobalErrorContext';
+import { defaultChain } from 'utils/client';
 
 type HistoricalRateData = {
   date: Date;
@@ -18,7 +18,6 @@ const MAX_COUNT = 20;
 const emptyBatch: Awaited<ReturnType<typeof queryRates>> = [];
 
 export default function useHistoricalRates(symbol: string, initialCount = 30, initialInterval = 3_600 * 6) {
-  const { chain } = useWeb3();
   const { marketAccount } = useAccountData(symbol);
   const [loading, setLoading] = useState<boolean>(true);
   const [rates, setRates] = useState<HistoricalRateData[]>([]);
@@ -26,9 +25,9 @@ export default function useHistoricalRates(symbol: string, initialCount = 30, in
 
   const getRatesBatch = useCallback(
     async (type: 'borrow' | 'deposit', count: number, interval: number, offset: number) => {
-      if (!marketAccount || !chain) return emptyBatch;
+      if (!marketAccount) return emptyBatch;
 
-      const subgraphUrl = networkData[String(chain.id) as keyof typeof networkData]?.subgraph.exactly;
+      const subgraphUrl = networkData[String(defaultChain.id) as keyof typeof networkData]?.subgraph.exactly;
       if (!subgraphUrl) return emptyBatch;
 
       const { market: marketAddress, maxFuturePools } = marketAccount;
@@ -47,7 +46,7 @@ export default function useHistoricalRates(symbol: string, initialCount = 30, in
         return emptyBatch;
       }
     },
-    [chain, marketAccount, setIndexerError],
+    [marketAccount, setIndexerError],
   );
 
   const getRates = useCallback(

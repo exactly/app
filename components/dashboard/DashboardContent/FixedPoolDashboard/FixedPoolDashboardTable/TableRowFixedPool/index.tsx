@@ -5,8 +5,8 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { Box, Button, ButtonGroup, IconButton, Skeleton, Stack, TableCell, TableRow, Typography } from '@mui/material';
 import MaturityLinearProgress from 'components/common/MaturityLinearProgress';
-import useFixedOperation from 'hooks/useFixedPoolTransactions';
 import { Address, formatUnits } from 'viem';
+import { useBlockNumber, useContractEvents } from 'wagmi';
 
 import React, { useMemo, useState } from 'react';
 import { FixedPoolTransaction } from 'types/FixedPoolTransaction';
@@ -15,14 +15,38 @@ import formatNumber from 'utils/formatNumber';
 import formatSymbol from 'utils/formatSymbol';
 import parseTimestamp from 'utils/parseTimestamp';
 import CollapseFixedPool from '../CollapseFixedPool';
-import APRItem from '../APRItem';
 import useActionButton, { useStartDebtManagerButton } from 'hooks/useActionButton';
 import type { Deposit } from 'types/Deposit';
 import type { WithdrawMP } from 'types/WithdrawMP';
-import { Borrow } from 'types/Borrow';
-import { Repay } from 'types/Repay';
+import type { Borrow } from 'types/Borrow';
+import type { Repay } from 'types/Repay';
 import useAccountData from 'hooks/useAccountData';
 import useRouter from 'hooks/useRouter';
+import useReadOnly from 'hooks/useReadOnly';
+import {
+  marketAbi,
+  marketDaiAddress,
+  marketDaiBlock,
+  marketExaAddress,
+  marketExaBlock,
+  marketOpAddress,
+  marketOpBlock,
+  marketUsdcAddress,
+  marketUsdcBlock,
+  marketUsdCeAddress,
+  marketUsdCeBlock,
+  marketWbtcAddress,
+  marketWbtcBlock,
+  marketWethAddress,
+  marketWethBlock,
+  marketcbBtcAddress,
+  marketcbBtcBlock,
+  marketcbXrpAddress,
+  marketcbXrpBlock,
+  marketwstEthAddress,
+  marketwstEthBlock,
+} from 'generated/wagmi';
+import { defaultChain } from 'utils/client';
 
 type Props = {
   symbol: string;
@@ -36,11 +60,168 @@ type Props = {
 function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decimals }: Props) {
   const { t } = useTranslation();
   const { query } = useRouter();
-  const { marketAccount } = useAccountData(symbol);
-  const { withdrawTxs, repayTxs, depositTxs, borrowTxs } = useFixedOperation(type, maturityDate, market);
+  const { marketAccount, lastSync } = useAccountData(symbol);
+  const { account } = useReadOnly();
   const [open, setOpen] = useState(false);
   const { handleActionClick } = useActionButton();
   const { startDebtManager, isRolloverDisabled } = useStartDebtManagerButton();
+  const { data: blockNumber } = useBlockNumber({
+    chainId: defaultChain.id,
+    watch: open,
+    query: { enabled: open },
+  });
+  const scopeKey = `${lastSync ?? ''}-${blockNumber ?? ''}`;
+
+  const fromBlock = useMemo(
+    () =>
+      (
+        [
+          [marketDaiAddress, marketDaiBlock],
+          [marketUsdcAddress, marketUsdcBlock],
+          [marketUsdCeAddress, marketUsdCeBlock],
+          [marketWethAddress, marketWethBlock],
+          [marketwstEthAddress, marketwstEthBlock],
+          [marketOpAddress, marketOpBlock],
+          [marketWbtcAddress, marketWbtcBlock],
+          [marketcbBtcAddress, marketcbBtcBlock],
+          [marketcbXrpAddress, marketcbXrpBlock],
+          [marketExaAddress, marketExaBlock],
+        ] as const
+      ).find(([address]) =>
+        Object.entries(address).some(
+          ([chainId, value]) => Number(chainId) === defaultChain.id && value.toLowerCase() === market.toLowerCase(),
+        ),
+      )?.[1]?.[defaultChain.id as never],
+    [market],
+  );
+
+  const {
+    data: depositTxs = [],
+    isLoading: depositTxsLoading,
+    isFetching: depositTxsFetching,
+  } = useContractEvents({
+    address: market,
+    abi: marketAbi,
+    eventName: 'DepositAtMaturity',
+    strict: true,
+    args: account ? { maturity: maturityDate, owner: account } : undefined,
+    fromBlock,
+    toBlock: 'latest',
+    chainId: defaultChain.id,
+    scopeKey,
+    query: {
+      enabled: type === 'deposit' && Boolean(account),
+      select: (logs) =>
+        logs.map((log): Deposit => {
+          const { maturity, assets, fee } = log.args;
+          return {
+            id: `${log.transactionHash}-${log.logIndex}`,
+            market: log.address,
+            maturity,
+            assets,
+            fee,
+            timestamp: log.blockTimestamp === undefined ? undefined : Number(log.blockTimestamp),
+          };
+        }),
+    },
+  });
+  const {
+    data: withdrawTxs = [],
+    isLoading: withdrawTxsLoading,
+    isFetching: withdrawTxsFetching,
+  } = useContractEvents({
+    address: market,
+    abi: marketAbi,
+    eventName: 'WithdrawAtMaturity',
+    strict: true,
+    args: { maturity: maturityDate },
+    fromBlock,
+    toBlock: 'latest',
+    chainId: defaultChain.id,
+    scopeKey,
+    query: {
+      enabled: type === 'deposit' && Boolean(account),
+      select: (logs) =>
+        logs.flatMap((log): WithdrawMP[] => {
+          const { maturity, receiver, owner, positionAssets, assets } = log.args;
+          if (
+            !account ||
+            (owner.toLowerCase() !== account.toLowerCase() && receiver.toLowerCase() !== account.toLowerCase())
+          ) {
+            return [];
+          }
+          return [
+            {
+              id: `${log.transactionHash}-${log.logIndex}`,
+              market: log.address,
+              maturity,
+              positionAssets,
+              assets,
+              timestamp: log.blockTimestamp === undefined ? undefined : Number(log.blockTimestamp),
+            },
+          ];
+        }),
+    },
+  });
+  const {
+    data: borrowTxs = [],
+    isLoading: borrowTxsLoading,
+    isFetching: borrowTxsFetching,
+  } = useContractEvents({
+    address: market,
+    abi: marketAbi,
+    eventName: 'BorrowAtMaturity',
+    strict: true,
+    args: account ? { maturity: maturityDate, borrower: account } : undefined,
+    fromBlock,
+    toBlock: 'latest',
+    chainId: defaultChain.id,
+    scopeKey,
+    query: {
+      enabled: type === 'borrow' && Boolean(account),
+      select: (logs) =>
+        logs.map((log): Borrow => {
+          const { maturity, assets, fee } = log.args;
+          return {
+            id: `${log.transactionHash}-${log.logIndex}`,
+            market: log.address,
+            maturity,
+            assets,
+            fee,
+            timestamp: log.blockTimestamp === undefined ? undefined : Number(log.blockTimestamp),
+          };
+        }),
+    },
+  });
+  const {
+    data: repayTxs = [],
+    isLoading: repayTxsLoading,
+    isFetching: repayTxsFetching,
+  } = useContractEvents({
+    address: market,
+    abi: marketAbi,
+    eventName: 'RepayAtMaturity',
+    strict: true,
+    args: account ? { maturity: maturityDate, borrower: account } : undefined,
+    fromBlock,
+    toBlock: 'latest',
+    chainId: defaultChain.id,
+    scopeKey,
+    query: {
+      enabled: type === 'borrow' && Boolean(account),
+      select: (logs) =>
+        logs.map((log): Repay => {
+          const { maturity, assets } = log.args;
+          return {
+            id: `${log.transactionHash}-${log.logIndex}`,
+            market: log.address,
+            maturity,
+            assets,
+            timestamp: log.blockTimestamp === undefined ? undefined : Number(log.blockTimestamp),
+          };
+        }),
+    },
+  });
 
   const exchangeRate: number | undefined = useMemo(() => {
     if (!marketAccount) return;
@@ -48,25 +229,26 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
   }, [marketAccount]);
 
   const transactions: FixedPoolTransaction[] = useMemo(() => {
-    const allTransactions = [...withdrawTxs, ...repayTxs, ...depositTxs, ...borrowTxs].sort(
-      (a, b) => b.timestamp - a.timestamp,
-    );
+    const allTransactions = [
+      ...withdrawTxs.map((transaction) => ({ ...transaction, operation: 'withdraw' as const })),
+      ...repayTxs.map((transaction) => ({ ...transaction, operation: 'repay' as const })),
+      ...depositTxs.map((transaction) => ({ ...transaction, operation: 'deposit' as const })),
+      ...borrowTxs.map((transaction) => ({ ...transaction, operation: 'borrow' as const })),
+    ].sort((a, b) => (b.timestamp ?? 0) - (a.timestamp ?? 0));
 
-    if (!allTransactions || !exchangeRate) return [];
-    const transformedTxs = allTransactions.map((transaction: Deposit | Borrow | WithdrawMP | Repay) => {
+    if (!exchangeRate) return [];
+    const transformedTxs = allTransactions.map((transaction) => {
       const assets = formatUnits(transaction.assets, decimals);
 
-      const txType =
-        'fee' in transaction
-          ? type === 'borrow'
-            ? t('Borrow')
-            : t('Deposit')
-          : type === 'borrow'
-            ? t('Repay')
-            : t('Withdraw');
+      const txType = {
+        borrow: t('Borrow'),
+        deposit: t('Deposit'),
+        repay: t('Repay'),
+        withdraw: t('Withdraw'),
+      }[transaction.operation];
 
       const transactionAPR =
-        'fee' in transaction
+        'fee' in transaction && transaction.timestamp !== undefined
           ? calculateAPR(
               transaction.fee,
               transaction.assets,
@@ -75,12 +257,13 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
             )
           : undefined;
 
-      const isBorrowOrDeposit = txType.toLowerCase() === 'borrow' || txType.toLowerCase() === 'deposit';
-      const date = parseTimestamp(transaction.timestamp);
+      const isBorrowOrDeposit = transaction.operation === 'borrow' || transaction.operation === 'deposit';
+      const date = transaction.timestamp === undefined ? '-' : parseTimestamp(transaction.timestamp);
       const amountUSD = (parseFloat(assets) * exchangeRate).toFixed(2);
 
       return {
         id: transaction.id,
+        operation: transaction.operation,
         type: txType,
         date,
         amount: assets,
@@ -91,7 +274,27 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
     });
 
     return transformedTxs;
-  }, [withdrawTxs, repayTxs, depositTxs, borrowTxs, type, exchangeRate, decimals, t]);
+  }, [withdrawTxs, repayTxs, depositTxs, borrowTxs, exchangeRate, decimals, t]);
+
+  const apr = useMemo(() => {
+    const txs = type === 'borrow' ? borrowTxs : depositTxs;
+    const wad = 10n ** BigInt(decimals);
+    let allAPRbyAmount = 0n;
+    let allAmounts = 0n;
+
+    txs.forEach(({ fee, assets, timestamp, maturity }) => {
+      if (timestamp === undefined) return;
+      allAPRbyAmount += (calculateAPR(fee, assets, BigInt(timestamp), maturity) * assets) / wad;
+      allAmounts += assets;
+    });
+
+    if (allAmounts === 0n) return 0n;
+
+    return (allAPRbyAmount * wad) / allAmounts;
+  }, [borrowTxs, depositTxs, decimals, type]);
+
+  const aprLoading =
+    type === 'borrow' ? borrowTxsLoading || borrowTxsFetching : depositTxsLoading || depositTxsFetching;
 
   return (
     <>
@@ -123,7 +326,7 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
           {valueUSD !== undefined ? `$${formatNumber(valueUSD, 'USD', true)}` : <Skeleton width={60} />}
         </TableCell>
         <TableCell align="left" size="small">
-          <APRItem type={type} maturityDate={maturityDate} market={market} decimals={decimals} />
+          {aprLoading ? <Skeleton width={50} /> : `${(Number(formatUnits(apr, 18)) || 0).toFixed(2)} %`}
         </TableCell>
         <TableCell align="left" size="small">
           {maturityDate ? parseTimestamp(maturityDate) : <Skeleton width={80} />}
@@ -189,6 +392,7 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
             size="small"
             onClick={() => setOpen(!open)}
             sx={{ border: '1px solid #E3E5E8', borderRadius: '24px' }}
+            data-testid={`dashboard-fixed-${type}-expand-${maturityDate}-${symbol}`}
           >
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
@@ -196,7 +400,15 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
       </TableRow>
       <TableRow>
         <TableCell sx={{ py: 0, pr: 1.5 }} colSpan={7} size="small">
-          <CollapseFixedPool open={open} transactions={transactions} />
+          <CollapseFixedPool
+            open={open}
+            transactions={transactions}
+            loading={
+              type === 'borrow'
+                ? borrowTxsLoading || borrowTxsFetching || repayTxsLoading || repayTxsFetching
+                : depositTxsLoading || depositTxsFetching || withdrawTxsLoading || withdrawTxsFetching
+            }
+          />
         </TableCell>
       </TableRow>
     </>

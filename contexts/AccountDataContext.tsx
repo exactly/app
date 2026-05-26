@@ -1,6 +1,6 @@
 import React, { createContext, useEffect, useState, startTransition, useRef, useContext } from 'react';
 import type { FC, PropsWithChildren } from 'react';
-import { useConfig, useConnect } from 'wagmi';
+import { useConnect, useReconnect } from 'wagmi';
 import useAccountData from 'hooks/useAccountData';
 import { captureException } from '@sentry/nextjs';
 import useRewards, { type Rates } from 'hooks/useRewards';
@@ -17,19 +17,19 @@ export const AccountDataProvider: FC<PropsWithChildren> = ({ children }) => {
   const [lastSync, setLastSync] = useState<number>(Date.now());
 
   const { connect, connectors } = useConnect();
-  const client = useConfig();
+  const { mutate: reconnect } = useReconnect();
   const { refreshAccountData } = useAccountData();
   const { rates } = useRewards();
 
   const focusTimeout = useRef<number>();
 
   useEffect(() => {
-    const safeConnector = connectors.find(({ id, ready }) => ready && id === 'safe');
+    const safeConnector = connectors.find(({ id }) => id === 'safe');
     startTransition(() => {
-      if (safeConnector) connect({ connector: safeConnector });
-      else void client.autoConnect();
+      if (safeConnector) connect({ connector: safeConnector }, { onError: () => reconnect() });
+      else reconnect();
     });
-  }, [client, connect, connectors]);
+  }, [connect, connectors, reconnect]);
 
   useEffect(() => {
     const handle = () => refreshAccountData(0).catch(captureException);

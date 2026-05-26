@@ -1,12 +1,12 @@
 import { useState, useCallback, useEffect } from 'react';
 import { AssetBalance, NATIVE_TOKEN_ADDRESS } from 'types/Bridge';
-import { useWeb3 } from './useWeb3';
 import { socketRequest } from 'utils/socket';
 import usePrices from './usePrices';
 import useBalance from './useBalance';
 import { Hex } from 'viem';
 import VELO_ from '@exactly/protocol/deployments/optimism/VELO.json' assert { type: 'json' };
 import useVELO from './useVELO';
+import useReadOnly from 'hooks/useReadOnly';
 
 export const ETH = {
   chainId: 10,
@@ -36,7 +36,7 @@ const VELO = {
 
 export default (disableFetch?: boolean, chainId?: number) => {
   const [assets, setAssets] = useState<AssetBalance[]>([ETH]);
-  const { walletAddress } = useWeb3();
+  const { account: walletAddress } = useReadOnly();
   const prices = usePrices();
   const veloBalance = useBalance(VELO.symbol, VELO.address, true);
   const { veloPrice } = useVELO();

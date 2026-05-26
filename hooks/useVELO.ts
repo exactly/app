@@ -2,14 +2,21 @@ import { useCallback, useMemo } from 'react';
 import { useAssetPrice } from './useSocketAPI';
 import { useEXAPrice } from './useEXA';
 import useAccountData from './useAccountData';
-import { useEXAGaugeBalanceOf, useEXAGaugeRewardRate } from './useEXAGauge';
-import { useEXAPoolGetReserves, useEXAPoolTotalSupply } from './useEXAPool';
-import { parseEther } from 'viem';
+import { parseEther, zeroAddress } from 'viem';
 import { toPercentage } from 'utils/utils';
 import { WAD } from '@exactly/lib';
 
-import { veloABI } from 'types/abi';
-import useContract from './useContract';
+import {
+  exaGaugeAddress,
+  exaPoolAddress,
+  useReadExaGaugeBalanceOf,
+  useReadExaGaugeRewardRate,
+  useReadExaPoolGetReserves,
+  useReadExaPoolTotalSupply,
+  veloAddress,
+} from 'generated/wagmi';
+import { defaultChain } from 'utils/client';
+import useReadOnly from 'hooks/useReadOnly';
 
 type VELOAccountStatus = {
   poolAPR?: string;
@@ -18,16 +25,26 @@ type VELOAccountStatus = {
   refetch: () => void;
 };
 
-export const useVELO = () => {
-  return useContract('VELO', veloABI);
-};
+const exaGaugeChainId = Object.keys(exaGaugeAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof exaGaugeAddress => chainId === defaultChain.id);
+const exaPoolChainId = Object.keys(exaPoolAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof exaPoolAddress => chainId === defaultChain.id);
+const veloChainId = Object.keys(veloAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof veloAddress => chainId === defaultChain.id);
 
 export const useVELOPoolAPR = () => {
-  const velo = useVELO();
-  const asset = useAssetPrice(velo?.address);
-  const { data: rewardRate } = useEXAGaugeRewardRate({ staleTime: 30_000 });
-  const { data: reserves } = useEXAPoolGetReserves({ staleTime: 30_000 });
-
+  const asset = useAssetPrice(veloChainId === undefined ? undefined : veloAddress[veloChainId]);
+  const { data: rewardRate } = useReadExaGaugeRewardRate({
+    chainId: exaGaugeChainId,
+    query: { enabled: exaGaugeChainId !== undefined, staleTime: 30_000 },
+  });
+  const { data: reserves } = useReadExaPoolGetReserves({
+    chainId: exaPoolChainId,
+    query: { enabled: exaPoolChainId !== undefined, staleTime: 30_000 },
+  });
   const { marketAccount: weth } = useAccountData('WETH');
 
   const apr = useMemo(() => {
@@ -44,15 +61,28 @@ export const useVELOPoolAPR = () => {
 };
 
 export default (): VELOAccountStatus => {
-  const velo = useVELO();
-  const asset = useAssetPrice(velo?.address);
+  const { account: walletAddress } = useReadOnly();
+  const asset = useAssetPrice(veloChainId === undefined ? undefined : veloAddress[veloChainId]);
   const exa = useEXAPrice();
   const { marketAccount: weth } = useAccountData('WETH');
 
-  const { data: rewardRate, refetch: refetchEXAGaugeRewardRate } = useEXAGaugeRewardRate();
-  const { data: reserves, refetch: refetchEXAPoolGetReserves } = useEXAPoolGetReserves();
-  const { data: totalSupply, refetch: refetchEXAPoolTotalSupply } = useEXAPoolTotalSupply();
-  const { data: balance, refetch: refetchEXAGaugeBalanceOf } = useEXAGaugeBalanceOf();
+  const { data: rewardRate, refetch: refetchEXAGaugeRewardRate } = useReadExaGaugeRewardRate({
+    chainId: exaGaugeChainId,
+    query: { enabled: exaGaugeChainId !== undefined },
+  });
+  const { data: reserves, refetch: refetchEXAPoolGetReserves } = useReadExaPoolGetReserves({
+    chainId: exaPoolChainId,
+    query: { enabled: exaPoolChainId !== undefined },
+  });
+  const { data: totalSupply, refetch: refetchEXAPoolTotalSupply } = useReadExaPoolTotalSupply({
+    chainId: exaPoolChainId,
+    query: { enabled: exaPoolChainId !== undefined },
+  });
+  const { data: balance, refetch: refetchEXAGaugeBalanceOf } = useReadExaGaugeBalanceOf({
+    chainId: exaGaugeChainId,
+    args: [walletAddress ?? zeroAddress],
+    query: { enabled: exaGaugeChainId !== undefined },
+  });
 
   const refetch = useCallback(() => {
     refetchEXAGaugeRewardRate();

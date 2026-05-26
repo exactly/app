@@ -1,8 +1,8 @@
 import React, { FC, PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import ModalTxCost from 'components/OperationsModal/ModalTxCost';
+import type { Hex } from 'viem';
 import ModalGif from 'components/OperationsModal/ModalGif';
 import { toPercentage } from 'utils/utils';
-import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
+import { useOperationContext } from 'contexts/OperationContext';
 import { Grid } from '@mui/material';
 import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
 import AssetInput from 'components/OperationsModal/AssetInput';
@@ -25,13 +25,13 @@ import useBorrowInInstallments from 'hooks/useBorrowInInstallments';
 import InstallmentsBreakdown from './InstallmentsBreakdown';
 import Installments from './Installments';
 
-const BorrowAtMaturity: FC<PropsWithChildren> = ({ children }) => {
+const BorrowAtMaturity: FC<PropsWithChildren<{ onSuccess?: (hash?: Hex) => void }>> = ({ children, onSuccess }) => {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
-  const { symbol, errorData, setErrorData, qty, gasCost, tx, installments, installmentsDetails } =
-    useOperationContext();
+  const { symbol, errorData, setErrorData, qty, installments, installmentsDetails } = useOperationContext();
   const {
     isLoading: borrowAtMaturityLoading,
+    isPreparing,
     onMax,
     handleInputChange,
     handleSubmitAction: borrowAtMaturity,
@@ -42,14 +42,16 @@ const BorrowAtMaturity: FC<PropsWithChildren> = ({ children }) => {
     fixedRate,
     hasCollateral,
     safeMaximumBorrow,
-    needsApproval,
-    previewGasCost,
+    txStatus,
+    txHash,
   } = useBorrowAtMaturity();
 
   const {
     handleSubmitAction: borrowInInstallments,
     isLoading: borrowInInstallmentsLoading,
     needsApproval: borrowInInstallmentsNeedsApproval,
+    txStatus: borrowInInstallmentsTxStatus,
+    txHash: borrowInInstallmentsTxHash,
   } = useBorrowInInstallments();
 
   const { marketAccount } = useAccountData(symbol);
@@ -70,11 +72,10 @@ const BorrowAtMaturity: FC<PropsWithChildren> = ({ children }) => {
     }
   }, [hasCollateral, setErrorData, t]);
 
-  const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
   const handleBreakdownSheetClose = useCallback(() => {
     setBreakdownSheetOpen(false);
   }, []);
-  const loading = installments > 1 ? borrowInInstallmentsLoading : borrowAtMaturityLoading || previewIsLoading;
+  const loading = installments > 1 ? borrowInInstallmentsLoading : borrowAtMaturityLoading || isPreparing;
 
   const apr = useMemo(() => {
     if (installments === 1) return toPercentage(Number(fixedRate) / 1e18);
@@ -82,7 +83,25 @@ const BorrowAtMaturity: FC<PropsWithChildren> = ({ children }) => {
     return toPercentage(Number(installmentsDetails.effectiveRate) / 1e18);
   }, [fixedRate, installments, installmentsDetails]);
 
-  if (tx) return <ModalGif tx={tx} tryAgain={borrow} />;
+  useEffect(() => {
+    if (txStatus === 'success') onSuccess?.(txHash);
+  }, [onSuccess, txHash, txStatus]);
+
+  useEffect(() => {
+    if (borrowInInstallmentsTxStatus === 'success') onSuccess?.(borrowInInstallmentsTxHash);
+  }, [borrowInInstallmentsTxHash, borrowInInstallmentsTxStatus, onSuccess]);
+
+  if (installments > 1 && borrowInInstallmentsTxStatus) {
+    return (
+      <ModalGif
+        status={borrowInInstallmentsTxStatus}
+        hash={borrowInInstallmentsTxHash}
+        tryAgain={borrowInInstallments}
+      />
+    );
+  }
+
+  if (txStatus) return <ModalGif status={txStatus} hash={txHash} tryAgain={borrow} />;
 
   return (
     <Grid
@@ -124,7 +143,6 @@ const BorrowAtMaturity: FC<PropsWithChildren> = ({ children }) => {
       </Grid>
 
       <Grid item mt={2}>
-        {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
         <ModalRewards symbol={symbol} operation="borrow" />
         <ModalPenaltyRate symbol={symbol} />
         <ModalAdvancedSettings>
@@ -150,7 +168,8 @@ const BorrowAtMaturity: FC<PropsWithChildren> = ({ children }) => {
           symbol={symbol === 'WETH' && marketAccount ? marketAccount.symbol : symbol}
           submit={installments > 1 ? borrowInInstallments : borrowAtMaturity}
           isLoading={loading}
-          disabled={!qty || parseFloat(qty) <= 0 || loading || previewIsLoading || errorData?.status}
+          disabled={!qty || parseFloat(qty) <= 0 || loading || errorData?.status}
+          refreshOnSubmit={false}
         />
       </Grid>
       {breakdownSheetOpen && (

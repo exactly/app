@@ -1,7 +1,7 @@
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import dynamic from 'next/dynamic';
-import { useNetwork } from 'wagmi';
+import { useChainId } from 'wagmi';
 import { useTranslation } from 'react-i18next';
 import { Box, useMediaQuery, useTheme } from '@mui/material';
 
@@ -22,7 +22,7 @@ type Props = {
 };
 
 const SocketPlugIn = ({ updateRoutes }: Props) => {
-  const { chain } = useNetwork();
+  const currentChainId = useChainId();
   const { palette, breakpoints } = useTheme();
   const { t } = useTranslation();
   const provider = useEthersProvider();
@@ -112,7 +112,7 @@ const SocketPlugIn = ({ updateRoutes }: Props) => {
         provider={provider}
         enableSameChainSwaps
         API_KEY={process.env.NEXT_PUBLIC_SOCKET_API_KEY || ''}
-        defaultSourceNetwork={chain?.id || optimism.id}
+        defaultSourceNetwork={currentChainId || optimism.id}
         defaultDestNetwork={optimism.id}
         defaultDestToken={NATIVE_TOKEN_ADDRESS}
         customize={{

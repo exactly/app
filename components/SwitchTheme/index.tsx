@@ -2,7 +2,7 @@ import React, { ChangeEvent, FC, useCallback } from 'react';
 import { styled } from '@mui/material/styles';
 import Switch, { type Props } from 'components/Switch';
 import { useCustomTheme } from 'contexts/ThemeContext';
-import { useWeb3ModalTheme } from '@web3modal/wagmi/react';
+import { useAppKitTheme } from '@reown/appkit/react';
 import { track } from 'utils/mixpanel';
 
 const StyledSwitch = styled((props: Props) => (
@@ -42,7 +42,7 @@ const StyledSwitch = styled((props: Props) => (
 
 const SwitchTheme: FC<Props> = (props) => {
   const { theme, changeTheme } = useCustomTheme();
-  const { setThemeMode } = useWeb3ModalTheme();
+  const { setThemeMode } = useAppKitTheme();
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>): void => {
       const light = e.target.checked;

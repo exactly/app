@@ -1,11 +1,9 @@
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { setContext, setUser } from '@sentry/nextjs';
-import { mainnet, useConfig } from 'wagmi';
-import { optimismSepolia } from 'wagmi/chains';
+import { useConnection } from 'wagmi';
+import { mainnet, optimismSepolia } from 'viem/chains';
 import Image from 'next/image';
 import useRouter from 'hooks/useRouter';
-
-import { useWeb3 } from 'hooks/useWeb3';
 
 import { AppBar, Box, Button, Chip, IconButton, Toolbar, useTheme, Typography, useMediaQuery } from '@mui/material';
 
@@ -34,16 +32,15 @@ import useReadOnly from 'hooks/useReadOnly';
 import { AccountInput } from 'components/AccountInput';
 import StakingNavButton from 'components/staking/StakingNavButton';
 import { StakeEXAProvider } from 'contexts/StakeEXAContext';
+import { defaultChain } from 'utils/client';
 
 const { onlyMobile, onlyDesktopFlex } = globals;
 
 function Navbar() {
   const { t } = useTranslation();
-  const { connector } = useConfig();
-  const { walletAddress } = useWeb3();
+  const { connector, isConnected } = useConnection();
+  const { account: walletAddress, isImpersonating: impersonateActive, isReadOnly } = useReadOnly();
   const { pathname: currentPathname, query } = useRouter();
-  const { chain, isConnected, impersonateActive } = useWeb3();
-  const { isReadOnly } = useReadOnly();
 
   const { palette, breakpoints } = useTheme();
   const { view } = useCustomTheme();
@@ -65,12 +62,11 @@ function Navbar() {
     setUser({ id: walletAddress });
     setContext('wallet', { connector: connector?.id, name: connector?.name });
     setContext('chain', {
-      id: chain?.id,
-      name: chain?.name,
-      network: chain?.network,
-      testnet: chain?.testnet,
+      id: defaultChain.id,
+      name: defaultChain.name,
+      testnet: defaultChain.testnet,
     });
-  }, [walletAddress, connector, chain]);
+  }, [connector, walletAddress]);
 
   const setBodyColor = (color: string) => {
     document.body.style.backgroundColor = color;
@@ -82,7 +78,7 @@ function Navbar() {
       : setBodyColor(palette.markets.advanced);
   }, [currentPathname, view, palette.markets.advanced, palette.markets.simple]);
 
-  const isEthereum = chain.id === mainnet.id;
+  const isEthereum = defaultChain.id === mainnet.id;
 
   const routes: {
     pathname: string | null;
@@ -223,7 +219,7 @@ function Navbar() {
             ))}
           </Box>
           <Box display="flex" gap={0.5} ml="auto" flexDirection={{ xs: 'row-reverse', sm: 'row' }}>
-            {isConnected && chain?.id === optimismSepolia.id && (
+            {isConnected && defaultChain.id === optimismSepolia.id && (
               <Chip label="OP Sepolia Faucet" onClick={openFaucet} sx={{ my: 'auto', display: onlyDesktopFlex }} />
             )}
             <Box display="flex" gap={0.5}>

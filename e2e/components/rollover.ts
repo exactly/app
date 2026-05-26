@@ -7,18 +7,7 @@ export default function (page: Page) {
   const waitForModalReady = async () => {
     const modal = page.getByTestId('rollover-modal');
     await expect(modal).toBeVisible();
-
-    await page.waitForFunction(
-      () => {
-        return ['submit', 'approve'].every((action) => {
-          const button = document.querySelector(`[data-testid="rollover-${action}"]`);
-          if (!button) return true;
-          return !button.classList.contains('MuiLoadingButton-loading');
-        });
-      },
-      null,
-      { polling: 1_000 },
-    );
+    await expect(page.getByTestId('rollover-submit')).toBeVisible();
   };
 
   const cta = (type: 'floating' | 'fixed', symbol: ERC20TokenSymbol, maturity?: number) => {
@@ -71,7 +60,7 @@ export default function (page: Page) {
   const submit = async () => {
     const button = page.getByTestId('rollover-submit');
     await expect(button).toBeVisible();
-    await expect(button).not.toBeDisabled();
+    await expect(button).not.toBeDisabled({ timeout: 10_000 });
 
     await button.click();
   };
@@ -80,16 +69,7 @@ export default function (page: Page) {
     const status = page.getByTestId('transaction-status');
 
     await expect(status).toBeVisible();
-
-    await page.waitForFunction(
-      (message) => {
-        const text = document.querySelector('[data-testid="transaction-status"]');
-        if (!text) return false;
-        return text.textContent !== message;
-      },
-      'Processing transaction...',
-      { polling: 1_000 },
-    );
+    await expect(status).not.toHaveText('Processing transaction...');
   };
 
   const checkTransactionStatus = async (target: 'success' | 'error', summary: string) => {

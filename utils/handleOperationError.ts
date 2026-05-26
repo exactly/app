@@ -1,6 +1,6 @@
 import { captureException as sentryCaptureException } from '@sentry/nextjs';
 import i18n from 'i18n';
-import errorABI from 'utils/ErrorInterface';
+import errorAbi from 'utils/ErrorInterface';
 import {
   isHex,
   decodeErrorResult,
@@ -73,7 +73,7 @@ export default (error: unknown, captureException: typeof sentryCaptureException 
         if (!isHex(data)) {
           return defaultErr;
         }
-        const decoded = decodeErrorResult({ abi: errorABI, data });
+        const decoded = decodeErrorResult({ abi: errorAbi, data });
         return parse(decoded.errorName);
       } catch {
         //ignore

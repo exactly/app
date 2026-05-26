@@ -1,11 +1,9 @@
 import React, { FC, useMemo } from 'react';
 import { Box } from '@mui/material';
 import ModalAdvancedSettings from 'components/common/modal/ModalAdvancedSettings';
-import ModalTxCost from 'components/OperationsModal/ModalTxCost';
 import ModalInfoEditableSlippage from 'components/OperationsModal/Info/ModalInfoEditableSlippage';
 import useDepositAtMaturity from 'hooks/useDepositAtMaturity';
 import useBorrowAtMaturity from 'hooks/useBorrowAtMaturity';
-import { useOperationContext } from 'contexts/OperationContext';
 import { MarketsBasicOperation } from 'contexts/MarketsBasicContext';
 
 type Props = {
@@ -15,7 +13,6 @@ type Props = {
 const MoreSettings: FC<Props> = ({ operation }) => {
   const { rawSlippage: rawSlippageDeposit, setRawSlippage: setRawSlippageDeposit } = useDepositAtMaturity();
   const { rawSlippage: rawSlippageBorrow, setRawSlippage: setRawSlippageBorrow } = useBorrowAtMaturity();
-  const { gasCost, errorData } = useOperationContext();
 
   const rawSlippage = useMemo(
     () => (operation === 'deposit' ? rawSlippageDeposit : rawSlippageBorrow),
@@ -27,14 +24,11 @@ const MoreSettings: FC<Props> = ({ operation }) => {
   );
 
   return (
-    <>
-      <Box>{errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}</Box>
-      <ModalAdvancedSettings bgColor="transparent" mt={0.5}>
-        <Box mt={-1.5}>
-          <ModalInfoEditableSlippage value={rawSlippage} onChange={(e) => setRawSlippage(e.target.value)} />
-        </Box>
-      </ModalAdvancedSettings>
-    </>
+    <ModalAdvancedSettings bgColor="transparent" mt={0.5}>
+      <Box mt={-1.5}>
+        <ModalInfoEditableSlippage value={rawSlippage} onChange={(e) => setRawSlippage(e.target.value)} />
+      </Box>
+    </ModalAdvancedSettings>
   );
 };
 

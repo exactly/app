@@ -4,48 +4,22 @@ import type { ERC20TokenSymbol } from '../utils/contracts';
 
 export default function (page: Page) {
   const waitForSkeletons = async () => {
-    await page.waitForTimeout(10_000);
-    await page.waitForFunction(
-      () => {
-        const modal = document.querySelector('[data-testid="leverage-modal"]');
-        return modal && modal.querySelectorAll('.MuiSkeleton-root').length === 0;
-      },
-      null,
-      { polling: 1_000 },
-    );
+    await expect(page.getByTestId('leverage-modal').locator('.MuiSkeleton-root')).toHaveCount(0);
   };
 
   const waitSummaryToBeReady = async () => {
-    await page.waitForTimeout(10_000);
     await waitForSkeletons();
-    await page.waitForFunction(
-      () => {
-        return ['approve', 'submit'].every((value) => {
-          const button = document.querySelector(`[data-testid="leverage-${value}"]`);
-          if (!button) return true;
-          const clx = !button.classList.contains('MuiLoadingButton-loading');
-          const attr = button.getAttribute('disabled');
-          return clx && attr === null;
-        });
-      },
-      null,
-      { polling: 1_000 },
-    );
+    for (const action of ['approve', 'submit']) {
+      const button = page.getByTestId(`leverage-${action}`);
+      if (await button.count()) {
+        await expect(button).not.toBeDisabled({ timeout: 10_000 });
+      }
+    }
   };
 
   const waitForStepToContinue = async () => {
-    await page.waitForTimeout(10_000);
     await waitForSkeletons();
-    await page.waitForFunction(
-      () => {
-        const button = document.querySelector(`[data-testid="leverage-modal-continue"]`);
-        if (!button) return true;
-        const attr = button.getAttribute('disabled');
-        return attr === null;
-      },
-      null,
-      { polling: 1_000 },
-    );
+    await expect(page.getByTestId('leverage-modal-continue')).not.toBeDisabled();
   };
 
   const cta = () => {
@@ -172,7 +146,7 @@ export default function (page: Page) {
   const approve = async () => {
     const button = page.getByTestId('leverage-approve');
     await expect(button).toBeVisible();
-    await expect(button).not.toBeDisabled();
+    await expect(button).not.toBeDisabled({ timeout: 10_000 });
 
     await button.click();
   };
@@ -180,7 +154,7 @@ export default function (page: Page) {
   const submit = async () => {
     const button = page.getByTestId('leverage-submit');
     await expect(button).toBeVisible();
-    await expect(button).not.toBeDisabled();
+    await expect(button).not.toBeDisabled({ timeout: 10_000 });
 
     await button.click();
   };
@@ -189,16 +163,7 @@ export default function (page: Page) {
     const status = page.getByTestId('transaction-status');
 
     await expect(status).toBeVisible();
-
-    await page.waitForFunction(
-      (message) => {
-        const text = document.querySelector('[data-testid="transaction-status"]');
-        if (!text) return false;
-        return text.textContent !== message;
-      },
-      'Processing transaction...',
-      { polling: 1_000 },
-    );
+    await expect(status).not.toHaveText('Processing transaction...');
   };
 
   const checkTransactionStatus = async (target: 'success' | 'error', summary: string) => {

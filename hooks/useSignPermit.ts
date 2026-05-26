@@ -4,11 +4,12 @@ import { useSignTypedData } from 'wagmi';
 import dayjs from 'dayjs';
 import useContractVersion from 'hooks/useContractVersion';
 import { Market } from 'types/contracts';
-import { useWeb3 } from 'hooks/useWeb3';
+import { defaultChain } from 'utils/client';
+import useReadOnly from 'hooks/useReadOnly';
 
 export default function useSignPermit() {
   const { signTypedDataAsync } = useSignTypedData();
-  const { chain, walletAddress, opts } = useWeb3();
+  const { account: walletAddress } = useReadOnly();
   const contractVersion = useContractVersion();
 
   return useCallback(
@@ -24,7 +25,9 @@ export default function useSignPermit() {
       verifyingContract: Market;
     }) => {
       if (!verifyingContract || !walletAddress) return;
-      const nonce = await verifyingContract.read.nonces([walletAddress], opts);
+      const nonce = await verifyingContract.read.nonces([walletAddress], {
+        account: walletAddress,
+      });
       const version = await contractVersion(verifyingContract.address);
       const deadline = BigInt(dayjs().unix() + duration);
       const signatureHex = await signTypedDataAsync({
@@ -32,7 +35,7 @@ export default function useSignPermit() {
         domain: {
           name: '',
           version,
-          chainId: chain.id,
+          chainId: defaultChain.id,
           verifyingContract: verifyingContract.address,
         },
         types: {
@@ -62,6 +65,6 @@ export default function useSignPermit() {
         s,
       };
     },
-    [chain.id, contractVersion, opts, signTypedDataAsync, walletAddress],
+    [contractVersion, signTypedDataAsync, walletAddress],
   );
 }

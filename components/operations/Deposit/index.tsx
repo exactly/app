@@ -1,12 +1,12 @@
 import React, { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { Hex } from 'viem';
 
-import ModalTxCost from 'components/OperationsModal/ModalTxCost';
 import ModalGif from 'components/OperationsModal/ModalGif';
 
 import useBalance from 'hooks/useBalance';
 import useAccountData from 'hooks/useAccountData';
-import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
+import { useOperationContext } from 'contexts/OperationContext';
 import { ModalBox, ModalBoxRow, ModalBoxCell } from 'components/common/modal/ModalBox';
 import ModalInfoHealthFactor from 'components/OperationsModal/Info/ModalInfoHealthFactor';
 import ModalInfoBorrowLimit from 'components/OperationsModal/Info/ModalInfoBorrowLimit';
@@ -24,19 +24,22 @@ import { toPercentage } from 'utils/utils';
 import ModalInfoAPR from 'components/OperationsModal/Info/ModalInfoAPR';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 
-const Deposit = ({ children }: { children?: ReactNode }) => {
+const Deposit = ({ children, onSuccess }: { children?: ReactNode; onSuccess?: (hash?: Hex) => void }) => {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
-  const { symbol, errorData, qty, gasCost, tx, assetContract } = useOperationContext();
-  const { isLoading, onMax, handleInputChange, handleSubmitAction, deposit, needsApproval, previewGasCost } =
+  const { symbol, errorData, qty } = useOperationContext();
+  const { isLoading, isPreparing, onMax, handleInputChange, handleSubmitAction, deposit, txStatus, txHash } =
     useDeposit();
   const { marketAccount } = useAccountData(symbol);
-  const walletBalance = useBalance(symbol, assetContract?.address);
+  const walletBalance = useBalance(symbol, marketAccount?.asset);
 
-  const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
   const { depositAPR, loading } = useFloatingPoolAPR(symbol, qty, 'deposit');
 
-  if (tx) return <ModalGif tx={tx} tryAgain={deposit} />;
+  React.useEffect(() => {
+    if (txStatus === 'success') onSuccess?.(txHash);
+  }, [onSuccess, txHash, txStatus]);
+
+  if (txStatus) return <ModalGif status={txStatus} hash={txHash} tryAgain={deposit} />;
 
   return (
     <Grid container flexDirection="column">
@@ -70,7 +73,6 @@ const Deposit = ({ children }: { children?: ReactNode }) => {
       </Grid>
 
       <Grid item mt={2}>
-        {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
         <ModalRewards symbol={symbol} operation="deposit" />
         <ModalAdvancedSettings>
           <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation="deposit" variant="row" />
@@ -91,8 +93,9 @@ const Deposit = ({ children }: { children?: ReactNode }) => {
           label={translateOperation('deposit', { capitalize: true })}
           symbol={symbol}
           submit={handleSubmitAction}
-          isLoading={isLoading || previewIsLoading}
-          disabled={!qty || parseFloat(qty) <= 0 || isLoading || previewIsLoading || errorData?.status}
+          isLoading={isLoading || isPreparing}
+          disabled={!qty || parseFloat(qty) <= 0 || isLoading || isPreparing || errorData?.status}
+          refreshOnSubmit={false}
         />
       </Grid>
     </Grid>

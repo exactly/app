@@ -4,7 +4,6 @@ import { type Address as AddressType, getAddress } from 'viem';
 import { mainnet, optimism } from 'viem/chains';
 import { OperationContextProvider, useOperationContext } from '../../contexts/OperationContext';
 import { SocketSwapProvider, useSocketSwap } from '../../contexts/SocketSwapContext';
-import { useWeb3 } from '../../hooks/useWeb3';
 import useAccountData from '../../hooks/useAccountData';
 import i18n from '../../i18n';
 import Welcome from './Welcome';
@@ -16,6 +15,8 @@ import Deposit from './Deposit';
 import Borrow from './Borrow';
 import Swap from './Swap';
 import Success from './Success';
+import { defaultChain } from 'utils/client';
+import { useConnection } from 'wagmi';
 
 export type DepositConfig = {
   chainId: number;
@@ -167,7 +168,7 @@ export enum Step {
 const Credit = () => {
   const [step, setStep] = useState<Step>(Step.WELCOME);
   const [appIndex, setAppIndex] = useState<number>(0);
-  const { isConnected, chain } = useWeb3();
+  const { isConnected } = useConnection();
   const { symbol, qty } = useOperationContext();
   const { marketAccount, refreshAccountData } = useAccountData(symbol);
   const theme = useTheme();
@@ -182,7 +183,8 @@ const Credit = () => {
   } = useSocketSwap();
 
   const app = apps()[appIndex];
-  const direct = app.depositConfig.chainId === chain.id && app.depositConfig.tokenAddress === marketAccount?.asset;
+  const direct =
+    app.depositConfig.chainId === defaultChain.id && app.depositConfig.tokenAddress === marketAccount?.asset;
 
   useEffect(() => {
     setFromAssetAddress(marketAccount?.asset);

@@ -1,10 +1,9 @@
 import React, { FC, useEffect } from 'react';
 
-import ModalTxCost from 'components/OperationsModal/ModalTxCost';
 import ModalGif from 'components/OperationsModal/ModalGif';
 
 import useBalance from 'hooks/useBalance';
-import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
+import { useOperationContext } from 'contexts/OperationContext';
 import { toPercentage } from 'utils/utils';
 import useAccountData from 'hooks/useAccountData';
 import { Grid } from '@mui/material';
@@ -36,23 +35,22 @@ const DepositAtMaturity: FC = () => {
     handleSubmitAction,
     deposit,
     updateAPR,
+    isPreparing,
     optimalDepositAmount,
     rawSlippage,
     setRawSlippage,
     fixedRate,
     gtMaxYield,
-    needsApproval,
-    previewGasCost,
+    txStatus,
+    txHash,
   } = useDepositAtMaturity();
-  const { symbol, errorData, qty, gasCost, tx, assetContract } = useOperationContext();
-  const walletBalance = useBalance(symbol, assetContract?.address);
+  const { symbol, errorData, qty } = useOperationContext();
   const { marketAccount } = useAccountData(symbol);
+  const walletBalance = useBalance(symbol, marketAccount?.asset);
 
   useEffect(() => void updateAPR(), [updateAPR]);
 
-  const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
-
-  if (tx) return <ModalGif tx={tx} tryAgain={deposit} />;
+  if (txStatus) return <ModalGif status={txStatus} hash={txHash} tryAgain={deposit} />;
 
   const decimals = marketAccount?.decimals ?? 18;
 
@@ -91,7 +89,6 @@ const DepositAtMaturity: FC = () => {
       </Grid>
 
       <Grid item mt={2}>
-        {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
         <ModalAdvancedSettings>
           {optimalDepositAmount !== undefined && (
             <ModalInfo label={t('Optimal deposit amount')} variant="row">
@@ -115,8 +112,9 @@ const DepositAtMaturity: FC = () => {
           label={translateOperation('depositAtMaturity', { capitalize: true })}
           symbol={symbol}
           submit={handleSubmitAction}
-          isLoading={isLoading || previewIsLoading}
-          disabled={!qty || parseFloat(qty) <= 0 || isLoading || previewIsLoading || errorData?.status}
+          isLoading={isLoading || isPreparing}
+          disabled={!qty || parseFloat(qty) <= 0 || isLoading || isPreparing || errorData?.status}
+          refreshOnSubmit={false}
         />
       </Grid>
     </Grid>

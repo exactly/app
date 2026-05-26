@@ -15,14 +15,11 @@ import CloseIcon from '@mui/icons-material/Close';
 
 import Draggable from 'react-draggable';
 import { TransitionProps } from '@mui/material/transitions';
-import { useOperationContext } from 'contexts/OperationContext';
 import ModalGif from 'components/OperationsModal/ModalGif';
 import { Transaction } from 'types/Transaction';
 import { track } from 'utils/mixpanel';
 
 function PaperComponent(props: PaperProps | undefined) {
-  const { tx } = useOperationContext();
-
   const ref = useRef<HTMLDivElement>(null);
   return (
     <Draggable nodeRef={ref} cancel={'[class*="MuiDialogContent-root"]'}>
@@ -30,10 +27,10 @@ function PaperComponent(props: PaperProps | undefined) {
         ref={ref}
         {...props}
         sx={{
-          borderRadius: tx ? '16px' : '6px',
+          borderRadius: '16px',
           minWidth: '400px',
           boxShadow: ({ palette }) =>
-            palette.mode === 'light' && tx
+            palette.mode === 'light'
               ? '4px 8px 16px rgba(227, 229, 232, 0.5), -4px -8px 16px rgba(248, 249, 249, 0.25)'
               : '',
         }}

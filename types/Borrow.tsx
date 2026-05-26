@@ -6,5 +6,5 @@ export type Borrow = {
   maturity: bigint;
   assets: bigint;
   fee: bigint;
-  timestamp: number;
+  timestamp?: number;
 };

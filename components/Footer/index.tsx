@@ -5,15 +5,12 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import { globals } from 'styles/theme';
 import { DiscordIcon } from 'components/Icons';
 import { useTranslation } from 'react-i18next';
-import { useWeb3 } from 'hooks/useWeb3';
-import { optimism, mainnet } from 'wagmi/chains';
+import { optimism, mainnet } from 'viem/chains';
+import { defaultChain } from 'utils/client';
 const { onlyDesktopFlex } = globals;
 
 const Footer = () => {
   const { t } = useTranslation();
-  const {
-    chain: { id: displayNetworkId },
-  } = useWeb3();
   const date = new Date();
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
@@ -45,9 +42,9 @@ const Footer = () => {
               <a
                 target="_blank"
                 rel="noreferrer noopener"
-                href={`https://${displayNetworkId === optimism.id ? 'ethereum' : 'app'}.exact.ly`}
+                href={`https://${defaultChain.id === optimism.id ? 'ethereum' : 'app'}.exact.ly`}
               >
-                {t('Go to')} {displayNetworkId === optimism.id ? mainnet.name : optimism.name}
+                {t('Go to')} {defaultChain.id === optimism.id ? mainnet.name : optimism.name}
               </a>
             </Typography>
             <Typography fontSize="0.85em">|</Typography>

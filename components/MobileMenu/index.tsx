@@ -18,11 +18,10 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import RepeatRoundedIcon from '@mui/icons-material/RepeatRounded';
 import BarChartRoundedIcon from '@mui/icons-material/BarChartRounded';
 import MovingSharpIcon from '@mui/icons-material/MovingSharp';
-import { mainnet, optimism } from 'wagmi/chains';
-import { useWeb3 } from 'hooks/useWeb3';
+import { mainnet, optimism } from 'viem/chains';
 import SecondaryChain from 'components/SecondaryChain';
 import { RewardsButton } from 'components/RewardsModal';
-import { isE2E } from 'utils/client';
+import { defaultChain, isE2E } from 'utils/client';
 
 import RemoveCircleOutlineRoundedIcon from '@mui/icons-material/RemoveCircleOutlineRounded';
 import MonitorHeartRoundedIcon from '@mui/icons-material/MonitorHeartRounded';
@@ -40,9 +39,8 @@ function MobileMenu({ open, handleClose }: Props) {
   const { palette } = useTheme();
   const { pathname: currentPathname, query } = useRouter();
   const date = new Date();
-  const { chain } = useWeb3();
-  const isOPMainnet = chain?.id === optimism.id;
-  const isEthereum = chain?.id === mainnet.id;
+  const isOPMainnet = defaultChain.id === optimism.id;
+  const isEthereum = defaultChain.id === mainnet.id;
 
   const headers = useMemo(
     () => [

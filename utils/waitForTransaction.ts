@@ -1,9 +1,21 @@
 import SafeAppsSDK, { TransactionStatus } from '@safe-global/safe-apps-sdk';
-import { getConfig, waitForTransaction as wait, type WaitForTransactionArgs } from '@wagmi/core';
+import {
+  getConnection,
+  waitForTransactionReceipt,
+  type WaitForTransactionReceiptParameters,
+  type WaitForTransactionReceiptReturnType,
+} from '@wagmi/core';
 import type { Hash } from 'viem';
+import { isE2E, wagmi } from './client';
 
-export default async function waitForTransaction(args: WaitForTransactionArgs) {
-  if (getConfig().connector?.id !== 'safe') return wait(args);
+export type WaitForTransactionArgs = WaitForTransactionReceiptParameters<typeof wagmi>;
+export type WaitForTransactionResult = WaitForTransactionReceiptReturnType<typeof wagmi>;
+
+export default async function waitForTransaction(args: WaitForTransactionArgs): Promise<WaitForTransactionResult> {
+  const connection = getConnection(wagmi);
+  if (connection.connector?.id !== 'safe') {
+    return waitForTransactionReceipt(wagmi, isE2E ? { pollingInterval: 100, ...args } : args);
+  }
 
   const { txs } = new SafeAppsSDK();
   const hash = await new Promise<Hash>(function get(resolve, reject) {
@@ -16,5 +28,5 @@ export default async function waitForTransaction(args: WaitForTransactionArgs) {
       })
       .catch(reject);
   });
-  return wait({ ...args, hash });
+  return waitForTransactionReceipt(wagmi, isE2E ? { pollingInterval: 100, ...args, hash } : { ...args, hash });
 }

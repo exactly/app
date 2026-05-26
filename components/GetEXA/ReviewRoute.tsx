@@ -1,7 +1,7 @@
 import React, { memo, useCallback } from 'react';
 
 import { Box, Typography, Table, TableBody, TableRow, TableCell, Avatar, useTheme, Skeleton } from '@mui/material';
-import { optimism } from 'wagmi/chains';
+import { optimism } from 'viem/chains';
 import { TXStep, useGetEXA } from 'contexts/GetEXAContext';
 import { LoadingButton } from '@mui/lab';
 import { useTranslation } from 'react-i18next';

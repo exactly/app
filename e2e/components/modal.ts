@@ -9,18 +9,7 @@ export default function (page: Page) {
   const waitForModalReady = async () => {
     const modal = page.getByTestId('modal');
     await expect(modal).toBeVisible();
-
-    await page.waitForFunction(
-      () => {
-        return ['submit', 'approve'].every((action) => {
-          const button = document.querySelector(`[data-testid="modal-${action}"]`);
-          if (!button) return true;
-          return !button.classList.contains('MuiLoadingButton-loading');
-        });
-      },
-      null,
-      { polling: 1_000 },
-    );
+    await expect(page.getByTestId('modal-submit')).toBeVisible();
   };
 
   const open = async (type: 'floating' | 'fixed', action: Operation, symbol: ERC20TokenSymbol, maturity?: number) => {
@@ -54,44 +43,10 @@ export default function (page: Page) {
     await page.getByTestId('modal-on-max').click();
   };
 
-  const waitForApprove = async () => {
-    const approve = page.getByTestId('modal-approve');
-    await expect(approve).toBeVisible();
-
-    await page.waitForFunction(
-      () => {
-        const button = document.querySelector('[data-testid="modal-approve"]');
-        if (!button) return false;
-        return !button.classList.contains('MuiLoadingButton-loading');
-      },
-      null,
-      { polling: 1_000 },
-    );
-  };
-
-  const approve = async () => {
-    const button = page.getByTestId('modal-approve');
-    await expect(button).toBeVisible();
-    await expect(button).not.toBeDisabled();
-    await button.click();
-  };
-
-  const waitForSubmit = async () => {
-    await page.waitForFunction(
-      () => {
-        const button = document.querySelector('[data-testid="modal-submit"]');
-        if (!button) return false;
-        return !button.classList.contains('MuiLoadingButton-loading');
-      },
-      null,
-      { polling: 1_000 },
-    );
-  };
-
   const submit = async () => {
     const button = page.getByTestId('modal-submit');
     await expect(button).toBeVisible();
-    await expect(button).not.toBeDisabled();
+    await expect(button).not.toBeDisabled({ timeout: 10_000 });
 
     await button.click();
   };
@@ -100,16 +55,7 @@ export default function (page: Page) {
     const status = page.getByTestId('modal-transaction-status');
 
     await expect(status).toBeVisible();
-
-    await page.waitForFunction(
-      (message) => {
-        const text = document.querySelector('[data-testid="modal-transaction-status"]');
-        if (!text) return false;
-        return text.textContent !== message;
-      },
-      `Sending ${op}...`,
-      { polling: 1_000 },
-    );
+    await expect(status).not.toHaveText(`Sending ${op}...`);
   };
 
   const checkTransactionStatus = async (target: 'success' | 'error', summary: string) => {
@@ -145,7 +91,7 @@ export default function (page: Page) {
   };
 
   const checkPoolDate = async (maturity: number) => {
-    await expect(page.getByTestId('modal-date-selector')).toContainText(formatMaturity(maturity));
+    await expect(page.getByTestId('modal-date-selector').last()).toContainText(formatMaturity(maturity));
   };
 
   const checkAlert = async (variant: 'info' | 'warning' | 'error' | 'success', message: string) => {
@@ -174,9 +120,6 @@ export default function (page: Page) {
     checkInput,
     clearInput,
     onMax,
-    waitForApprove,
-    approve,
-    waitForSubmit,
     submit,
     waitForTransaction,
     checkTransactionStatus,

@@ -34,11 +34,11 @@ import { Transaction } from 'types/Transaction';
 import Loading from 'components/common/modal/Loading';
 import useRewards from 'hooks/useRewards';
 import { WAD } from '@exactly/lib';
-import { useWeb3 } from 'hooks/useWeb3';
 import RewardsTooltip from 'components/RewardsTooltip';
 import { useModal } from 'contexts/ModalContext';
 import { track } from 'utils/mixpanel';
 import MainActionButton from 'components/common/MainActionButton';
+import useReadOnly from 'hooks/useReadOnly';
 
 const CENTS = 100n;
 
@@ -70,7 +70,7 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, close }) => {
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
 
-  const { walletAddress, impersonateActive, exitImpersonate } = useWeb3();
+  const { account: walletAddress, isImpersonating: impersonateActive, exitReadOnly: exitImpersonate } = useReadOnly();
 
   const { rewards: rs, claim } = useRewards();
 

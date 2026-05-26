@@ -1,10 +1,13 @@
 import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { usePreviewerStaking } from 'hooks/useStakingPreviewer';
 import useAccountData from 'hooks/useAccountData';
 import { useEXAPrice } from 'hooks/useEXA';
 import { WAD } from '@exactly/lib';
 import getVouchersPrice from 'utils/getVouchersPrice';
+import { zeroAddress } from 'viem';
+import { stakingPreviewerAddress, useReadStakingPreviewerStaking } from 'generated/wagmi';
+import useReadOnly from 'hooks/useReadOnly';
+import { defaultChain } from 'utils/client';
 
 type Parameters = {
   asset: `0x${string}`;
@@ -59,8 +62,22 @@ type ContextValues = {
 
 const StakeEXAContext = createContext<ContextValues | null>(null);
 
+const stakingPreviewerChainId = Object.keys(stakingPreviewerAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof stakingPreviewerAddress => chainId === defaultChain.id);
+
 export const StakeEXAProvider: FC<PropsWithChildren> = ({ children }) => {
-  const { isLoading, isFetching, data: _data, refetch: _refetch } = usePreviewerStaking();
+  const { account: walletAddress } = useReadOnly();
+  const {
+    isLoading,
+    isFetching,
+    data: _data,
+    refetch: _refetch,
+  } = useReadStakingPreviewerStaking({
+    chainId: stakingPreviewerChainId,
+    args: [walletAddress ?? zeroAddress],
+    query: { enabled: stakingPreviewerChainId !== undefined, staleTime: 5_000 },
+  });
 
   const { accountData } = useAccountData();
   const exaPrice = useEXAPrice();

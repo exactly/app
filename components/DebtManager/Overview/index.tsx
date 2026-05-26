@@ -26,10 +26,9 @@ import useRewards from 'hooks/useRewards';
 import useHealthFactor from 'hooks/useHealthFactor';
 import formatNumber from 'utils/formatNumber';
 import parseHealthFactor from 'utils/parseHealthFactor';
-import usePreviewer from 'hooks/usePreviewer';
-import { useWeb3 } from 'hooks/useWeb3';
 import { formatUnits } from 'viem';
 import Rates from 'components/Rates';
+import useReadOnly from 'hooks/useReadOnly';
 
 type Row = {
   key: string;
@@ -47,18 +46,17 @@ type Props = {
 
 function Overview({ from, to, percent }: Props) {
   const { t } = useTranslation();
-  const { walletAddress } = useWeb3();
+  const { account: walletAddress } = useReadOnly();
   const { marketAccount } = useAccountData(from.symbol);
   const { rates } = useRewards();
   const healthFactor = useHealthFactor();
-  const previewer = usePreviewer();
   const [openDetails, setOpenDetails] = useState(false);
 
   const open = useCallback(() => setOpenDetails(true), []);
   const close = useCallback(() => setOpenDetails(false), []);
 
   const rows = useMemo<Row[]>(() => {
-    if (!walletAddress || !marketAccount || !healthFactor || !from.balance || !previewer) {
+    if (!walletAddress || !marketAccount || !healthFactor || !from.balance) {
       return [];
     }
 
@@ -183,7 +181,7 @@ function Overview({ from, to, percent }: Props) {
           ]
         : []),
     ];
-  }, [walletAddress, marketAccount, from, to, t, rates, healthFactor, percent, previewer, openDetails, open, close]);
+  }, [walletAddress, marketAccount, from, to, t, rates, healthFactor, percent, openDetails, open, close]);
 
   return (
     <TableContainer>

@@ -3,7 +3,7 @@ import { parseUnits } from 'viem';
 import type { Address, PublicClient } from 'viem';
 
 import { erc20, type ERC20TokenSymbol, erc20Market } from '../utils/contracts';
-import { CommonTest } from './types';
+import type { CommonTest } from './types';
 
 export default function ({ test, publicClient }: CommonTest & { publicClient: PublicClient }) {
   type AllowanceParams = {
@@ -15,7 +15,7 @@ export default function ({ test, publicClient }: CommonTest & { publicClient: Pu
   };
 
   const check = async ({ address, type, symbol, spender, less: _less }: AllowanceParams) => {
-    await test.step(`checks ${spender} allowance to be less than ${_less}`, async () => {
+    await test.step(`assert: ${symbol} ${type} allowance <= ${_less}`, async () => {
       let decimals = 18;
       let allowance = 2n ** 256n - 1n;
 

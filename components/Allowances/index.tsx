@@ -2,13 +2,14 @@ import React, { memo } from 'react';
 import i18n from 'i18n';
 import { useTranslation } from 'react-i18next';
 import { Box, Button, Typography, useMediaQuery, useTheme } from '@mui/material';
-import { useWeb3 } from 'hooks/useWeb3';
 import { useAllowances } from 'hooks/useAllowances';
 import AllowancesMobile from 'components/Allowances/AllowancesMobile';
 import AllowancesTable from 'components/Allowances/AllowancesTable';
 import Spender from 'components/Allowances/Spender';
 import Amount from 'components/Allowances/Amount';
 import Asset from 'components/Allowances/Asset';
+import { useConnection } from 'wagmi';
+import useConnectWallet from 'hooks/useConnectWallet';
 
 export const allowanceColumns = () =>
   [
@@ -32,7 +33,8 @@ export const allowanceColumns = () =>
 const Allowances = () => {
   const { t } = useTranslation();
   const { data, loading, update } = useAllowances();
-  const { isConnected, connect } = useWeb3();
+  const { isConnected } = useConnection();
+  const connect = useConnectWallet();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const AllowancesComponent = isMobile ? AllowancesMobile : AllowancesTable;

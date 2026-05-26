@@ -25,52 +25,50 @@ export default function ({ page, test }: CommonTest) {
   const modal = _modal(page);
   const navbar = _navbar(page);
 
-  const execute = async ({ type, symbol, amount = '1', shouldApprove = false, maturity }: TestParams) => {
-    await test.step(`${symbol} ${type} repay`, async () => {
-      await test.step('should be in the correct page', async () => {
+  const execute = async ({ type, symbol, amount = '1', maturity }: TestParams) => {
+    await test.step(`operation: repay ${symbol} ${type}`, async () => {
+      await test.step('navigation: dashboard borrow tab', async () => {
         if (!page.url().endsWith('/dashboard')) {
           await navbar.goTo('dashboard');
           await dashboard.switchTab('borrow');
         }
       });
 
-      await test.step('should open the modal', async () => {
+      await test.step(`modal: open repay ${symbol} ${type}`, async () => {
         await modal.open(type, 'repay', symbol, maturity);
       });
 
-      await test.step('the modal', async () => {
-        await test.step('should have the correct descriptions', async () => {
-          await modal.checkTitle('Repay');
-          await modal.checkType(type);
-          await modal.checkAssetSelection(symbol);
+      await test.step(`modal: validate repay ${symbol} ${type}`, async () => {
+        await modal.checkTitle('Repay');
+        await modal.checkType(type);
+        await modal.checkAssetSelection(symbol);
 
-          if (type === 'fixed') {
-            await modal.checkPoolDate(maturity);
-          }
-        });
+        if (type === 'fixed') {
+          await modal.checkPoolDate(maturity);
+        }
       });
 
-      await test.step('the input', async () => {
-        await test.step(`should allow to input the amount ${amount}`, async () => {
+      await test.step(`input: repay ${symbol}`, async () => {
+        await test.step(`input: fill repay amount ${amount}`, async () => {
           await modal.input(amount);
           await modal.checkAlertNotFound('error');
         });
       });
 
-      await test.step('the transaction', async () => {
-        await test.step('should be successful', async () => {
-          if (shouldApprove) {
-            await modal.waitForApprove();
-            await modal.approve();
-          }
-
-          await modal.waitForSubmit();
-
+      await test.step(`tx: repay ${symbol} ${type}`, async () => {
+        await test.step(`tx: submit repay ${symbol} ${type}`, async () => {
           await modal.submit();
+        });
+
+        await test.step(`tx: wait repay ${symbol} ${type}`, async () => {
           await modal.waitForTransaction('repay');
+        });
 
+        await test.step('tx: assert repay success', async () => {
           await modal.checkTransactionStatus('success', `You repayed ${amount} ${formatSymbol(symbol)}`);
+        });
 
+        await test.step('modal: close repay', async () => {
           await modal.close();
         });
       });

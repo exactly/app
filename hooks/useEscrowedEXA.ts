@@ -1,25 +1,18 @@
 import { useCallback, useEffect, useState, useMemo } from 'react';
-import { Address, zeroAddress, getAddress, type ContractFunctionConfig } from 'viem';
+import { Address, zeroAddress } from 'viem';
 import {
-  escrowedExaABI,
-  useEscrowedExaBalanceOf,
-  useEscrowedExaReserveRatio,
-  useEscrowedExaReserves,
-  useEscrowedExaVestingPeriod,
-  sablierV2LockupLinearABI,
-} from 'types/abi';
+  escrowedExaAbi,
+  escrowedExaAddress,
+  exaAddress,
+  sablierV2LockupLinearAbi,
+  sablierV2LockupLinearAddress,
+} from 'generated/wagmi';
 
-import useContract from './useContract';
-import { useEXA } from './useEXA';
 import useGraphClient from './useGraphClient';
-import { useWeb3 } from './useWeb3';
 import { getStreams } from 'queries/getStreams';
-import { useContractReads } from 'wagmi';
-import { useSablierV2LockupLinear } from './useSablier';
-
-export const useEscrowedEXA = () => {
-  return useContract('esEXA', escrowedExaABI);
-};
+import { useReadContracts } from 'wagmi';
+import { defaultChain } from 'utils/client';
+import useReadOnly from 'hooks/useReadOnly';
 
 type Stream = {
   id: string;
@@ -35,10 +28,20 @@ type Stream = {
   cancelable: boolean;
 };
 
+const escrowedExaChainId = Object.keys(escrowedExaAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof escrowedExaAddress => chainId === defaultChain.id);
+const exaChainId = Object.keys(exaAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof exaAddress => chainId === defaultChain.id);
+const sablierV2LockupLinearChainId = Object.keys(sablierV2LockupLinearAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof sablierV2LockupLinearAddress => chainId === defaultChain.id);
+
 export function useUpdateStreams() {
-  const EXA = useEXA();
-  const esEXA = useEscrowedEXA();
-  const { walletAddress } = useWeb3();
+  const { account: walletAddress } = useReadOnly();
+  const EXA = exaChainId === undefined ? undefined : exaAddress[exaChainId];
+  const esEXA = escrowedExaChainId === undefined ? undefined : escrowedExaAddress[escrowedExaChainId];
   const request = useGraphClient();
 
   const [activeStreams, setActiveStreams] = useState<Stream[]>([]);
@@ -52,7 +55,7 @@ export function useUpdateStreams() {
 
       try {
         data = await request<{ streams: Stream[] }>(
-          getStreams(EXA.address.toLowerCase(), walletAddress || zeroAddress, esEXA.address.toLowerCase(), false),
+          getStreams(EXA.toLowerCase(), walletAddress || zeroAddress, esEXA.toLowerCase(), false),
           'sablier',
         );
       } catch (error) {
@@ -80,86 +83,47 @@ export function useUpdateStreams() {
   return { activeStreams, loading, refetch: fetchStreams };
 }
 
-export const useEscrowedEXAReserves = (stream: bigint) => {
-  const { chain } = useWeb3();
-  const esEXA = useEscrowedEXA();
-
-  return useEscrowedExaReserves({
-    chainId: chain.id,
-    address: esEXA?.address,
-    args: [stream],
-    staleTime: 30_000,
-  });
-};
-
-export const useEscrowedEXABalance = () => {
-  const { chain, walletAddress } = useWeb3();
-  const esEXA = useEscrowedEXA();
-
-  return useEscrowedExaBalanceOf({
-    chainId: chain.id,
-    address: esEXA?.address,
-    args: [walletAddress ?? zeroAddress],
-    staleTime: 30_000,
-  });
-};
-
-export const useEscrowedEXAReserveRatio = () => {
-  const { chain } = useWeb3();
-  const esEXA = useEscrowedEXA();
-
-  return useEscrowedExaReserveRatio({
-    chainId: chain.id,
-    address: esEXA?.address,
-    staleTime: 30_000,
-  });
-};
-
-export const useEscrowedEXAVestingPeriod = () => {
-  const { chain } = useWeb3();
-  const esEXA = useEscrowedEXA();
-
-  return useEscrowedExaVestingPeriod({
-    chainId: chain.id,
-    address: esEXA?.address,
-    staleTime: 30_000,
-  });
-};
-
 export const useEscrowEXATotals = (streams: number[]) => {
-  const { chain } = useWeb3();
-  const sablier = useSablierV2LockupLinear();
-  const esEXA = useEscrowedEXA();
+  const sablier =
+    sablierV2LockupLinearChainId === undefined ? undefined : sablierV2LockupLinearAddress[sablierV2LockupLinearChainId];
+  const esEXA = escrowedExaChainId === undefined ? undefined : escrowedExaAddress[escrowedExaChainId];
 
-  const { data: reserves, isLoading: reserveIsLoading } = useContractReads<
-    ContractFunctionConfig<typeof escrowedExaABI, 'reserves'>[]
-  >({
-    contracts: streams.map((stream) => ({
-      abi: escrowedExaABI,
-      address: esEXA && getAddress(esEXA.address),
-      functionName: 'reserves',
-      args: [BigInt(stream)],
-      chainId: chain.id,
-    })),
+  const { data: reserves, isLoading: reserveIsLoading } = useReadContracts({
+    contracts:
+      esEXA && escrowedExaChainId !== undefined
+        ? streams.map((stream) => ({
+            abi: escrowedExaAbi,
+            address: esEXA,
+            functionName: 'reserves' as const,
+            args: [BigInt(stream)] as const,
+            chainId: escrowedExaChainId,
+          }))
+        : [],
   });
 
-  const { data: withdrawables, isLoading: withdrawableIsLoading } = useContractReads<
-    ContractFunctionConfig<typeof sablierV2LockupLinearABI, 'withdrawableAmountOf'>[]
-  >({
-    contracts: streams.map((stream) => ({
-      abi: sablierV2LockupLinearABI,
-      address: sablier && getAddress(sablier.address),
-      functionName: 'withdrawableAmountOf',
-      args: [BigInt(stream)],
-      chainId: chain.id,
-    })),
+  const { data: withdrawables, isLoading: withdrawableIsLoading } = useReadContracts({
+    contracts:
+      sablier && sablierV2LockupLinearChainId !== undefined
+        ? streams.map((stream) => ({
+            abi: sablierV2LockupLinearAbi,
+            address: sablier,
+            functionName: 'withdrawableAmountOf' as const,
+            args: [BigInt(stream)] as const,
+            chainId: sablierV2LockupLinearChainId,
+          }))
+        : [],
   });
 
-  const sum = useCallback((arr: typeof reserves): bigint | undefined => {
-    if (arr === undefined) return undefined;
-    if (arr.some(({ status }) => status === 'failure')) return undefined;
-    return arr.reduce((total, { status, result }) => (status === 'success' ? total + result : total), 0n);
-  }, []);
+  const sum = useCallback(
+    (
+      arr: readonly ({ status: 'success'; result: bigint } | { status: 'failure' })[] | undefined,
+    ): bigint | undefined => {
+      if (arr === undefined) return undefined;
+      if (arr.some(({ status }) => status === 'failure')) return undefined;
+      return arr.reduce((total, item) => (item.status === 'success' ? total + item.result : total), 0n);
+    },
+    [],
+  );
 
   const totalReserve = useMemo(() => sum(reserves), [reserves, sum]);
 

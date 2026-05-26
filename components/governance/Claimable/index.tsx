@@ -1,33 +1,58 @@
-import React, { FC, useCallback, useMemo } from 'react';
-import { Hex, formatEther, parseEther } from 'viem';
+import React, { FC, useCallback, useEffect, useMemo } from 'react';
+import { formatEther, parseEther, type Hex } from 'viem';
 import Image from 'next/image';
-import useWaitForTransaction from 'hooks/useWaitForTransaction';
 import { Box, Button, Divider, Skeleton, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { LoadingButton } from '@mui/lab';
-import { usePrepareAirdropClaim, useAirdropClaimed, useAirdropStreams } from 'hooks/useAirdrop';
 import MainActionButton from 'components/common/MainActionButton';
-import { useWeb3 } from 'hooks/useWeb3';
 import {
-  useSablierV2LockupLinearWithdrawableAmountOf,
-  useSablierV2NftDescriptorTokenUri,
-  usePrepareSablierV2LockupLinearWithdrawMax,
-} from 'hooks/useSablier';
-import { useAirdropClaim, useSablierV2LockupLinearWithdrawMax } from 'types/abi';
+  airdropAddress,
+  sablierV2LockupLinearAddress,
+  sablierV2NftDescriptorAddress,
+  useReadAirdropClaimed,
+  useReadAirdropStreams,
+  useReadSablierV2LockupLinearWithdrawableAmountOf,
+  useReadSablierV2NftDescriptorTokenUri,
+  useSimulateAirdropClaim,
+  useSimulateSablierV2LockupLinearWithdrawMax,
+  useWriteAirdropClaim,
+  useWriteSablierV2LockupLinearWithdrawMax,
+} from 'generated/wagmi';
 import formatNumber from 'utils/formatNumber';
 import { track } from 'utils/mixpanel';
+import { useWaitForTransactionReceipt } from 'wagmi';
+import useReadOnly from 'hooks/useReadOnly';
+import { defaultChain } from 'utils/client';
 
 type ClaimableProps = {
   amount: bigint;
   proof: Hex[];
 };
 
+const airdropChainId = Object.keys(airdropAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof airdropAddress => chainId === defaultChain.id);
+const sablierV2LockupLinearChainId = Object.keys(sablierV2LockupLinearAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof sablierV2LockupLinearAddress => chainId === defaultChain.id);
+const sablierV2NftDescriptorChainId = Object.keys(sablierV2NftDescriptorAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof sablierV2NftDescriptorAddress => chainId === defaultChain.id);
+
 const Claimable: FC<ClaimableProps> = ({ amount, proof }) => {
   const { t } = useTranslation();
-  const { impersonateActive, exitImpersonate } = useWeb3();
+  const { account: walletAddress, isImpersonating: impersonateActive, exitReadOnly: exitImpersonate } = useReadOnly();
   const parsedAmount = useMemo(() => (amount ? formatNumber(formatEther(amount)) : '0'), [amount]);
 
-  const { data: claimed, isLoading: isLoadingClaimed, refetch } = useAirdropClaimed();
+  const {
+    data: claimed,
+    isLoading: isLoadingClaimed,
+    refetch,
+  } = useReadAirdropClaimed({
+    chainId: airdropChainId,
+    args: walletAddress ? [walletAddress] : undefined,
+    query: { enabled: Boolean(walletAddress && airdropChainId !== undefined) },
+  });
 
   return (
     <Box display="flex" flexDirection="column" gap={4}>
@@ -68,28 +93,47 @@ const Claimable: FC<ClaimableProps> = ({ amount, proof }) => {
 
 const Claim: FC<ClaimableProps & { refresh: () => void }> = ({ amount, proof, refresh }) => {
   const { t } = useTranslation();
+  const { account: walletAddress } = useReadOnly();
 
-  const { config } = usePrepareAirdropClaim({ args: [amount, proof] });
-  const { write: claim, data: claimData, isLoading: claimLoading } = useAirdropClaim(config);
-  const { isLoading: waitingClaim } = useWaitForTransaction({
-    hash: claimData?.hash,
-    onSettled: refresh,
+  const { data: claimSimulation } = useSimulateAirdropClaim({
+    account: walletAddress,
+    chainId: airdropChainId,
+    args: [amount, proof],
+    query: { enabled: Boolean(walletAddress && airdropChainId !== undefined) },
   });
+  const { mutate: claim, data: claimHash, isPending: claimLoading } = useWriteAirdropClaim();
+  const {
+    data: claimReceipt,
+    error: claimError,
+    isLoading: waitingClaim,
+  } = useWaitForTransactionReceipt({
+    hash: claimHash,
+    query: {
+      enabled: Boolean(claimHash),
+    },
+  });
+
+  useEffect(() => {
+    if (!claimReceipt && !claimError) return;
+    refresh();
+  }, [claimError, claimReceipt, refresh]);
+
   const handleClick = useCallback(() => {
-    claim?.();
+    if (!claimSimulation) return;
+    claim(claimSimulation.request);
     track('Button Clicked', {
       location: 'Governance',
       name: 'claim',
       value: formatNumber(formatEther(amount)),
     });
-  }, [amount, claim]);
+  }, [amount, claim, claimSimulation]);
 
   return (
     <MainActionButton
       variant="contained"
       fullWidth
       onClick={handleClick}
-      disabled={claimLoading || waitingClaim}
+      disabled={!claimSimulation || claimLoading || waitingClaim}
       loading={claimLoading || waitingClaim}
     >
       {t('Claim EXA Stream')}
@@ -99,24 +143,68 @@ const Claim: FC<ClaimableProps & { refresh: () => void }> = ({ amount, proof, re
 
 const NFT: FC = () => {
   const { t } = useTranslation();
-  const { data: stream } = useAirdropStreams();
+  const { account: walletAddress } = useReadOnly();
+  const { data: stream } = useReadAirdropStreams({
+    chainId: airdropChainId,
+    args: walletAddress ? [walletAddress] : undefined,
+    query: { enabled: Boolean(walletAddress && airdropChainId !== undefined) },
+  });
   const {
     data: withdrawable,
     isLoading: isLoadingWithdrawable,
     refetch,
-  } = useSablierV2LockupLinearWithdrawableAmountOf(stream);
-  const { data: nft, isLoading: isLoadingNFT } = useSablierV2NftDescriptorTokenUri(stream);
-
-  const { config: withdrawConfig } = usePrepareSablierV2LockupLinearWithdrawMax(stream);
-  const {
-    write: withdraw,
-    data: withdrawData,
-    isLoading: withdrawLoading,
-  } = useSablierV2LockupLinearWithdrawMax(withdrawConfig);
-  const { isLoading: waitingWithdraw } = useWaitForTransaction({
-    hash: withdrawData?.hash,
-    onSettled: () => refetch(),
+  } = useReadSablierV2LockupLinearWithdrawableAmountOf({
+    chainId: sablierV2LockupLinearChainId,
+    args: stream !== undefined ? [stream] : undefined,
+    query: { enabled: Boolean(stream !== undefined && sablierV2LockupLinearChainId !== undefined) },
   });
+  const { data: nft, isLoading: isLoadingNFT } = useReadSablierV2NftDescriptorTokenUri({
+    chainId: sablierV2NftDescriptorChainId,
+    args:
+      stream !== undefined && sablierV2LockupLinearChainId !== undefined
+        ? [sablierV2LockupLinearAddress[sablierV2LockupLinearChainId], stream]
+        : undefined,
+    query: {
+      enabled: Boolean(
+        stream !== undefined &&
+          sablierV2LockupLinearChainId !== undefined &&
+          sablierV2NftDescriptorChainId !== undefined,
+      ),
+    },
+  });
+
+  const { data: withdrawSimulation } = useSimulateSablierV2LockupLinearWithdrawMax({
+    chainId: sablierV2LockupLinearChainId,
+    args: stream !== undefined && walletAddress ? [stream, walletAddress] : undefined,
+    query: {
+      enabled: Boolean(stream !== undefined && walletAddress && sablierV2LockupLinearChainId !== undefined),
+    },
+  });
+  const {
+    mutate: withdraw,
+    data: withdrawHash,
+    isPending: withdrawLoading,
+  } = useWriteSablierV2LockupLinearWithdrawMax();
+  const {
+    data: withdrawReceipt,
+    error: withdrawError,
+    isLoading: waitingWithdraw,
+  } = useWaitForTransactionReceipt({
+    hash: withdrawHash,
+    query: {
+      enabled: Boolean(withdrawHash),
+    },
+  });
+
+  useEffect(() => {
+    if (!withdrawReceipt && !withdrawError) return;
+    refetch();
+  }, [refetch, withdrawError, withdrawReceipt]);
+
+  const handleWithdraw = useCallback(() => {
+    if (!withdrawSimulation) return;
+    withdraw(withdrawSimulation.request);
+  }, [withdraw, withdrawSimulation]);
 
   const b64 = nft?.split(',')[1] ?? '';
   const json = atob(b64) || '{}';
@@ -129,8 +217,9 @@ const NFT: FC = () => {
       <LoadingButton
         variant="contained"
         fullWidth
-        onClick={withdraw}
+        onClick={handleWithdraw}
         disabled={
+          !withdrawSimulation ||
           withdrawLoading ||
           waitingWithdraw ||
           isLoadingWithdrawable ||

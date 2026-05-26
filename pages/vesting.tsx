@@ -20,12 +20,11 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import { useSwitchNetwork } from 'wagmi';
+import { useSwitchChain } from 'wagmi';
 import { useModal } from 'contexts/ModalContext';
 import VestingInput from 'components/VestingInput';
 import ActiveStream from 'components/ActiveStream';
-import { useUpdateStreams, useEscrowedEXA, useEscrowedEXAReserveRatio, useEscrowEXATotals } from 'hooks/useEscrowedEXA';
-import { useWeb3 } from 'hooks/useWeb3';
+import { useUpdateStreams, useEscrowEXATotals } from 'hooks/useEscrowedEXA';
 import useRewards from 'hooks/useRewards';
 import waitForTransaction from 'utils/waitForTransaction';
 import formatNumber from 'utils/formatNumber';
@@ -42,6 +41,18 @@ import Draggable from 'react-draggable';
 import { TransitionProps } from '@mui/material/transitions';
 import { WAD } from '@exactly/lib';
 import MainActionButton from 'components/common/MainActionButton';
+import { defaultChain } from 'utils/client';
+import {
+  escrowedExaAddress,
+  useReadEscrowedExaReserveRatio,
+  useWriteEscrowedExaCancel,
+  useWriteEscrowedExaWithdrawMax,
+} from 'generated/wagmi';
+import useReadOnly from 'hooks/useReadOnly';
+
+const escrowedExaChainId = Object.keys(escrowedExaAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof escrowedExaAddress => chainId === defaultChain.id);
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
@@ -70,7 +81,7 @@ const WithdrawAndCancel: React.FC<{
   const { spacing } = useTheme();
   const { breakpoints } = useTheme();
   const { t } = useTranslation();
-  const { impersonateActive } = useWeb3();
+  const { isImpersonating: impersonateActive } = useReadOnly();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
 
   const handleClose = useCallback(() => {
@@ -154,10 +165,13 @@ const WithdrawAndCancel: React.FC<{
 
 const Vesting: NextPage = () => {
   const { t } = useTranslation();
-  const { impersonateActive, opts } = useWeb3();
+  const { account: walletAddress, isImpersonating: impersonateActive } = useReadOnly();
   const { activeStreams, loading: streamsLoading, refetch } = useUpdateStreams();
-  const { isLoading: switchIsLoading } = useSwitchNetwork();
-  const { data: reserveRatio } = useEscrowedEXAReserveRatio();
+  const { isPending: switchIsLoading } = useSwitchChain();
+  const { data: reserveRatio } = useReadEscrowedExaReserveRatio({
+    chainId: escrowedExaChainId,
+    query: { enabled: escrowedExaChainId !== undefined, staleTime: 30_000 },
+  });
   const { totalReserve, reserveIsLoading, totalWithdrawable, withdrawableIsLoading } = useEscrowEXATotals(
     activeStreams.map(({ tokenId }) => Number(tokenId)),
   );
@@ -165,13 +179,14 @@ const Vesting: NextPage = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [showAll, setShowAll] = useState<boolean>(false);
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
-  const escrowedEXA = useEscrowedEXA();
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
 
   const { rewards } = useRewards();
   const { open: openRewards } = useModal('rewards');
   const { open: openGetEXA } = useModal('get-exa');
+  const { writeContractAsync: withdrawMax } = useWriteEscrowedExaWithdrawMax();
+  const { writeContractAsync: cancelStreams } = useWriteEscrowedExaCancel();
 
   const { usdPrice, unclaimedTokens } = {
     usdPrice: rewards['esEXA']?.usdPrice || 0n,
@@ -205,10 +220,14 @@ const Vesting: NextPage = () => {
       name: 'claim all',
       value: activeStreams.length,
     });
-    if (!activeStreams || !escrowedEXA || !opts) return;
+    if (!activeStreams || !walletAddress || escrowedExaChainId === undefined) return;
     setLoading(true);
     try {
-      const tx = await escrowedEXA.write.withdrawMax([activeStreams.map(({ tokenId }) => BigInt(tokenId))], opts);
+      const tx = await withdrawMax({
+        account: walletAddress,
+        chainId: escrowedExaChainId,
+        args: [activeStreams.map(({ tokenId }) => BigInt(tokenId))],
+      });
       track('TX Signed', {
         contractName: 'EscrowedEXA',
         method: 'withdrawMax',
@@ -227,7 +246,7 @@ const Vesting: NextPage = () => {
       setLoading(false);
       refetch();
     }
-  }, [activeStreams, escrowedEXA, opts, refetch]);
+  }, [activeStreams, refetch, walletAddress, withdrawMax]);
 
   const { totalVestedEsEXA, totalWithdrawnEXA } = totalsStreamData;
 
@@ -259,10 +278,14 @@ const Vesting: NextPage = () => {
   }, [activeStreams.length, allCancelabelStreamsIds.length, handleClaimAll]);
 
   const cancelAll = useCallback(async () => {
-    if (!escrowedEXA || !opts) return;
+    if (!walletAddress || escrowedExaChainId === undefined) return;
     setLoading(true);
     try {
-      const tx = await escrowedEXA.write.cancel([allCancelabelStreamsIds], opts);
+      const tx = await cancelStreams({
+        account: walletAddress,
+        chainId: escrowedExaChainId,
+        args: [allCancelabelStreamsIds],
+      });
       await waitForTransaction({ hash: tx });
     } catch (e) {
       // if request fails, don't do anything
@@ -270,7 +293,7 @@ const Vesting: NextPage = () => {
       setLoading(false);
       refetch();
     }
-  }, [allCancelabelStreamsIds, escrowedEXA, opts, refetch]);
+  }, [allCancelabelStreamsIds, cancelStreams, refetch, walletAddress]);
 
   return (
     <Box display="flex" flexDirection="column" gap={6} maxWidth={800} mx="auto" my={5}>

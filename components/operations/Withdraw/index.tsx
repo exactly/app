@@ -1,12 +1,8 @@
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
-import ModalTxCost from 'components/OperationsModal/ModalTxCost';
 import ModalGif from 'components/OperationsModal/ModalGif';
 
-import { useWeb3 } from 'hooks/useWeb3';
-
-import useApprove from 'hooks/useApprove';
-import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
+import { useOperationContext } from 'contexts/OperationContext';
 import { Grid } from '@mui/material';
 import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
 import AssetInput from 'components/OperationsModal/AssetInput';
@@ -21,15 +17,27 @@ import useAccountData from 'hooks/useAccountData';
 import useHandleOperationError from 'hooks/useHandleOperationError';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
-import useEstimateGas from 'hooks/useEstimateGas';
 import { formatUnits, parseUnits } from 'viem';
-import waitForTransaction from 'utils/waitForTransaction';
-import { gasLimit } from 'utils/gas';
+import useReadOnly from 'hooks/useReadOnly';
+import { defaultChain } from 'utils/client';
+import {
+  marketAbi,
+  marketEthRouterAbi,
+  marketEthRouterAddress,
+  useReadMarketAllowance,
+  useReadMarketPreviewWithdraw,
+  useSimulateMarketApprove,
+  useSimulateMarketEthRouterRedeem,
+  useSimulateMarketEthRouterWithdraw,
+  useSimulateMarketRedeem,
+  useSimulateMarketWithdraw,
+} from 'generated/wagmi';
+import { useSendCalls, useWaitForCallsStatus } from 'wagmi';
 
 const Withdraw: FC = () => {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
-  const { walletAddress, opts } = useWeb3();
+  const { account: walletAddress } = useReadOnly();
 
   const {
     symbol,
@@ -37,84 +45,194 @@ const Withdraw: FC = () => {
     setErrorData,
     qty,
     setQty,
-    gasCost,
-    tx,
-    setTx,
-    requiresApproval,
-    setRequiresApproval,
     isLoading: isLoadingOp,
     setIsLoading: setIsLoadingOp,
-    marketContract,
-    ETHRouterContract,
   } = useOperationContext();
 
   const handleOperationError = useHandleOperationError();
-
-  const { marketAccount } = useAccountData(symbol);
-
+  const { marketAccount, refreshAccountData } = useAccountData(symbol);
   const [isMax, setIsMax] = useState(false);
-
+  const { mutateAsync: sendCalls, isPending: sendCallsPending } = useSendCalls();
+  const [callId, setCallId] = useState<string>();
+  const amount = useMemo(() => {
+    if (!qty || !marketAccount) return;
+    try {
+      return parseUnits(qty, marketAccount.decimals);
+    } catch {
+      return;
+    }
+  }, [marketAccount, qty]);
   const parsedAmount = useMemo(() => {
     if (!marketAccount) return '0';
-    const { floatingDepositAssets, decimals } = marketAccount;
-    return formatUnits(floatingDepositAssets, decimals);
+    return formatUnits(marketAccount.floatingDepositAssets, marketAccount.decimals);
   }, [marketAccount]);
-
-  const {
-    approve,
-    estimateGas: approveEstimateGas,
-    isLoading: approveIsLoading,
-    needsApproval,
-  } = useApprove({ operation: 'withdraw', contract: marketContract, spender: ETHRouterContract?.address });
-
-  const estimate = useEstimateGas();
-
-  const previewGasCost = useCallback(
-    async (quantity: string): Promise<bigint | undefined> => {
-      if (!walletAddress || !marketContract || !ETHRouterContract || !marketAccount || !quantity || !opts) return;
-
-      if (await needsApproval(quantity)) {
-        return approveEstimateGas();
-      }
-      const { floatingDepositShares } = marketAccount;
-
-      const amount = isMax ? floatingDepositShares : parseUnits(quantity, marketAccount.decimals);
-      if (marketAccount.assetSymbol === 'WETH') {
-        const sim = isMax
-          ? await ETHRouterContract.simulate.redeem([amount], opts)
-          : await ETHRouterContract.simulate.withdraw([amount], opts);
-        return estimate(sim.request);
-      }
-
-      const sim = isMax
-        ? await marketContract.simulate.redeem([amount, walletAddress, walletAddress], opts)
-        : await marketContract.simulate.withdraw([amount, walletAddress, walletAddress], opts);
-      return estimate(sim.request);
+  const marketEthRouterChainId = Object.keys(marketEthRouterAddress)
+    .map(Number)
+    .find((chainId): chainId is keyof typeof marketEthRouterAddress => chainId === defaultChain.id);
+  const marketEthRouter =
+    marketEthRouterChainId === undefined ? undefined : marketEthRouterAddress[marketEthRouterChainId];
+  const previewWithdraw = useReadMarketPreviewWithdraw({
+    address: marketAccount?.market,
+    args: amount !== undefined ? [amount] : undefined,
+    chainId: defaultChain.id,
+    query: {
+      enabled: Boolean(walletAddress && marketAccount?.assetSymbol === 'WETH' && !isMax && amount !== undefined),
     },
+  });
+  const approvalAmount = isMax ? marketAccount?.floatingDepositShares : previewWithdraw.data;
+  const { data: marketAllowance, refetch: refetchMarketAllowance } = useReadMarketAllowance({
+    address: marketAccount?.market,
+    args: walletAddress && marketEthRouter ? [walletAddress, marketEthRouter] : undefined,
+    chainId: defaultChain.id,
+    query: { enabled: Boolean(walletAddress && marketEthRouter && marketAccount?.assetSymbol === 'WETH') },
+  });
+  const inputReady = Boolean(
+    walletAddress &&
+      marketAccount &&
+      amount !== undefined &&
+      parseFloat(qty) > 0 &&
+      amount <= marketAccount.floatingDepositAssets,
+  );
+  const requiresBatchedApproval = Boolean(
+    inputReady &&
+      marketAccount?.assetSymbol === 'WETH' &&
+      marketAllowance !== undefined &&
+      approvalAmount !== undefined &&
+      marketAllowance < approvalAmount,
+  );
+  const approveSimulation = useSimulateMarketApprove({
+    address: marketAccount?.market,
+    args: marketEthRouter && approvalAmount !== undefined ? [marketEthRouter, approvalAmount] : undefined,
+    account: walletAddress,
+    chainId: defaultChain.id,
+    query: { enabled: requiresBatchedApproval },
+  });
+  const withdrawSimulation = useSimulateMarketWithdraw({
+    address: marketAccount?.market,
+    args: amount !== undefined && walletAddress ? [amount, walletAddress, walletAddress] : undefined,
+    account: walletAddress,
+    chainId: defaultChain.id,
+    query: { enabled: Boolean(inputReady && marketAccount?.assetSymbol !== 'WETH' && !isMax) },
+  });
+  const redeemSimulation = useSimulateMarketRedeem({
+    address: marketAccount?.market,
+    args:
+      marketAccount && walletAddress ? [marketAccount.floatingDepositShares, walletAddress, walletAddress] : undefined,
+    account: walletAddress,
+    chainId: defaultChain.id,
+    query: { enabled: Boolean(inputReady && marketAccount?.assetSymbol !== 'WETH' && isMax) },
+  });
+  const ethWithdrawSimulation = useSimulateMarketEthRouterWithdraw({
+    args: amount !== undefined ? [amount] : undefined,
+    account: walletAddress,
+    chainId: marketEthRouterChainId,
+    query: {
+      enabled: Boolean(
+        inputReady &&
+          marketAccount?.assetSymbol === 'WETH' &&
+          !isMax &&
+          marketEthRouterChainId !== undefined &&
+          marketAllowance !== undefined &&
+          approvalAmount !== undefined &&
+          marketAllowance >= approvalAmount,
+      ),
+    },
+  });
+  const ethRedeemSimulation = useSimulateMarketEthRouterRedeem({
+    args: marketAccount ? [marketAccount.floatingDepositShares] : undefined,
+    account: walletAddress,
+    chainId: marketEthRouterChainId,
+    query: {
+      enabled: Boolean(
+        inputReady &&
+          marketAccount?.assetSymbol === 'WETH' &&
+          isMax &&
+          marketEthRouterChainId !== undefined &&
+          marketAllowance !== undefined &&
+          approvalAmount !== undefined &&
+          marketAllowance >= approvalAmount,
+      ),
+    },
+  });
+  const callsStatus = useWaitForCallsStatus({
+    id: callId,
+    query: { enabled: Boolean(callId) },
+  });
+  const needsBatchedApproval = useCallback(async () => {
+    if (marketAccount?.assetSymbol !== 'WETH' || !walletAddress || !marketEthRouter || approvalAmount === undefined)
+      return false;
+    return (marketAllowance ?? (await refetchMarketAllowance()).data ?? 0n) < approvalAmount;
+  }, [
+    approvalAmount,
+    marketAccount?.assetSymbol,
+    marketAllowance,
+    marketEthRouter,
+    refetchMarketAllowance,
+    walletAddress,
+  ]);
+  const isLoading = useMemo(() => sendCallsPending || isLoadingOp, [sendCallsPending, isLoadingOp]);
+  const isPreparing = useMemo(
+    () =>
+      approveSimulation.isLoading ||
+      withdrawSimulation.isLoading ||
+      redeemSimulation.isLoading ||
+      ethWithdrawSimulation.isLoading ||
+      ethRedeemSimulation.isLoading ||
+      previewWithdraw.isLoading,
     [
-      walletAddress,
-      marketContract,
-      ETHRouterContract,
-      marketAccount,
-      needsApproval,
-      isMax,
-      estimate,
-      approveEstimateGas,
-      opts,
+      approveSimulation.isLoading,
+      ethRedeemSimulation.isLoading,
+      ethWithdrawSimulation.isLoading,
+      previewWithdraw.isLoading,
+      redeemSimulation.isLoading,
+      withdrawSimulation.isLoading,
     ],
   );
+  const txHash = callsStatus.data?.receipts?.[0]?.transactionHash;
+  const txStatus = useMemo(() => {
+    if (!callId) return;
+    if (callsStatus.data?.status === 'success') return 'success';
+    if (callsStatus.data?.status === 'failure' || callsStatus.isError) return 'error';
+    return 'processing';
+  }, [callId, callsStatus.data?.status, callsStatus.isError]);
+  const simulationError = useMemo(() => {
+    if (!inputReady || !marketAccount) return;
+    if (marketAccount.assetSymbol === 'WETH') {
+      if (requiresBatchedApproval) return approveSimulation.error;
+      return isMax ? ethRedeemSimulation.error : ethWithdrawSimulation.error;
+    }
+    return isMax ? redeemSimulation.error : withdrawSimulation.error;
+  }, [
+    approveSimulation.error,
+    ethRedeemSimulation.error,
+    ethWithdrawSimulation.error,
+    inputReady,
+    isMax,
+    marketAccount,
+    redeemSimulation.error,
+    requiresBatchedApproval,
+    withdrawSimulation.error,
+  ]);
 
-  const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
+  useEffect(() => {
+    if (!simulationError) {
+      if (errorData?.component === 'simulation') setErrorData(undefined);
+      return;
+    }
+    setErrorData({ status: true, message: handleOperationError(simulationError), component: 'simulation' });
+  }, [errorData?.component, handleOperationError, setErrorData, simulationError]);
 
-  const isLoading = useMemo(
-    () => isLoadingOp || approveIsLoading || previewIsLoading,
-    [isLoadingOp, approveIsLoading, previewIsLoading],
-  );
+  useEffect(() => {
+    if (!callsStatus.data?.receipts?.length) return;
+    void refreshAccountData();
+    if (marketAccount?.assetSymbol === 'WETH') void refetchMarketAllowance();
+  }, [callsStatus.data?.receipts, marketAccount?.assetSymbol, refetchMarketAllowance, refreshAccountData]);
 
   const onMax = useCallback(() => {
     setQty(parsedAmount);
+    setErrorData(undefined);
     setIsMax(true);
-  }, [parsedAmount, setQty]);
+  }, [parsedAmount, setErrorData, setQty]);
 
   const handleInputChange = useCallback(
     (value: string) => {
@@ -122,13 +240,8 @@ const Withdraw: FC = () => {
 
       setQty(value);
 
-      const parsed = parseUnits(value || '0', marketAccount.decimals);
-
-      if (parsed > marketAccount.floatingDepositAssets) {
-        return setErrorData({
-          status: true,
-          message: t("You can't withdraw more than the deposited amount"),
-        });
+      if (parseUnits(value || '0', marketAccount.decimals) > marketAccount.floatingDepositAssets) {
+        return setErrorData({ status: true, message: t("You can't withdraw more than the deposited amount") });
       }
 
       setErrorData(undefined);
@@ -138,88 +251,104 @@ const Withdraw: FC = () => {
   );
 
   const withdraw = useCallback(async () => {
-    if (!marketAccount || !walletAddress || !marketContract || !opts) return;
-
-    let hash;
+    if (!walletAddress || !marketAccount || amount === undefined) return;
     setIsLoadingOp(true);
+    setCallId(undefined);
     try {
-      const { floatingDepositShares, decimals } = marketAccount;
-
-      const amount = parseUnits(qty, decimals);
-
+      let id: string;
       if (marketAccount.assetSymbol === 'WETH') {
-        if (!ETHRouterContract) return;
-
-        if (isMax) {
-          const args = [floatingDepositShares] as const;
-          const gasEstimation = await ETHRouterContract.estimateGas.redeem(args, opts);
-          hash = await ETHRouterContract.write.redeem(args, {
-            ...opts,
-            gasLimit: gasLimit(gasEstimation),
-          });
-        } else {
-          const args = [amount] as const;
-          const gasEstimation = await ETHRouterContract.estimateGas.withdraw(args, opts);
-          hash = await ETHRouterContract.write.withdraw(args, {
-            ...opts,
-            gasLimit: gasLimit(gasEstimation),
-          });
+        if (!marketEthRouter) return;
+        if (requiresBatchedApproval && approveSimulation.error) throw approveSimulation.error;
+        if (!requiresBatchedApproval && (isMax ? ethRedeemSimulation.error : ethWithdrawSimulation.error)) {
+          throw isMax ? ethRedeemSimulation.error : ethWithdrawSimulation.error;
         }
+        ({ id } = await sendCalls({
+          account: walletAddress,
+          chainId: defaultChain.id,
+          experimental_fallback: true,
+          calls: [
+            ...((await needsBatchedApproval()) && approvalAmount !== undefined
+              ? [
+                  {
+                    to: marketAccount.market,
+                    abi: marketAbi,
+                    functionName: 'approve',
+                    args: [marketEthRouter, approvalAmount],
+                  } as const,
+                ]
+              : []),
+            isMax
+              ? {
+                  to: marketEthRouter,
+                  abi: marketEthRouterAbi,
+                  functionName: 'redeem',
+                  args: [marketAccount.floatingDepositShares],
+                }
+              : {
+                  to: marketEthRouter,
+                  abi: marketEthRouterAbi,
+                  functionName: 'withdraw',
+                  args: [amount],
+                },
+          ],
+        }));
       } else {
-        if (isMax) {
-          const args = [floatingDepositShares, walletAddress, walletAddress] as const;
-          const gasEstimation = await marketContract.estimateGas.redeem(args, opts);
-          hash = await marketContract.write.redeem(args, {
-            ...opts,
-            gasLimit: gasLimit(gasEstimation),
-          });
-        } else {
-          const args = [amount, walletAddress, walletAddress] as const;
-          const gasEstimation = await marketContract.estimateGas.withdraw(args, opts);
-          hash = await marketContract.write.withdraw(args, {
-            ...opts,
-            gasLimit: gasLimit(gasEstimation),
-          });
+        if (isMax ? redeemSimulation.error : withdrawSimulation.error) {
+          throw isMax ? redeemSimulation.error : withdrawSimulation.error;
         }
+        ({ id } = await sendCalls({
+          account: walletAddress,
+          chainId: defaultChain.id,
+          experimental_fallback: true,
+          calls: [
+            isMax
+              ? {
+                  to: marketAccount.market,
+                  abi: marketAbi,
+                  functionName: 'redeem',
+                  args: [marketAccount.floatingDepositShares, walletAddress, walletAddress],
+                }
+              : {
+                  to: marketAccount.market,
+                  abi: marketAbi,
+                  functionName: 'withdraw',
+                  args: [amount, walletAddress, walletAddress],
+                },
+          ],
+        }));
       }
-
-      setTx({ status: 'processing', hash });
-
-      const { status, transactionHash } = await waitForTransaction({ hash });
-
-      setTx({ status: status ? 'success' : 'error', hash: transactionHash });
+      setCallId(id);
     } catch (error) {
-      if (hash) setTx({ status: 'error', hash });
       setErrorData({ status: true, message: handleOperationError(error) });
     } finally {
       setIsLoadingOp(false);
     }
   }, [
-    marketAccount,
-    walletAddress,
-    marketContract,
-    opts,
-    setIsLoadingOp,
-    qty,
-    setTx,
-    ETHRouterContract,
-    isMax,
-    setErrorData,
+    amount,
+    approvalAmount,
+    approveSimulation.error,
+    ethRedeemSimulation.error,
+    ethWithdrawSimulation.error,
     handleOperationError,
+    isMax,
+    marketAccount,
+    marketEthRouter,
+    needsBatchedApproval,
+    redeemSimulation.error,
+    requiresBatchedApproval,
+    sendCalls,
+    setErrorData,
+    setIsLoadingOp,
+    walletAddress,
+    withdrawSimulation.error,
   ]);
 
   const handleSubmitAction = useCallback(async () => {
     if (isLoading) return;
-    if (requiresApproval) {
-      await approve();
-      setRequiresApproval(await needsApproval(qty));
-      return;
-    }
-
     return withdraw();
-  }, [approve, isLoading, needsApproval, qty, requiresApproval, setRequiresApproval, withdraw]);
+  }, [isLoading, withdraw]);
 
-  if (tx) return <ModalGif tx={tx} tryAgain={withdraw} />;
+  if (txStatus) return <ModalGif status={txStatus} hash={txHash} tryAgain={withdraw} />;
 
   return (
     <Grid container flexDirection="column">
@@ -248,7 +377,6 @@ const Withdraw: FC = () => {
       </Grid>
 
       <Grid item mt={2}>
-        {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
         <ModalAdvancedSettings>
           <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation="withdraw" variant="row" />
           <ModalInfoFloatingUtilizationRate qty={qty} symbol={symbol} operation="withdraw" variant="row" />
@@ -266,8 +394,9 @@ const Withdraw: FC = () => {
           label={translateOperation('withdraw', { capitalize: true })}
           symbol={symbol === 'WETH' && marketAccount ? marketAccount.symbol : symbol}
           submit={handleSubmitAction}
-          isLoading={isLoading}
-          disabled={!qty || parseFloat(qty) <= 0 || isLoading || errorData?.status}
+          isLoading={isLoading || isPreparing}
+          disabled={!qty || parseFloat(qty) <= 0 || isLoading || isPreparing || errorData?.status}
+          refreshOnSubmit={false}
         />
       </Grid>
     </Grid>

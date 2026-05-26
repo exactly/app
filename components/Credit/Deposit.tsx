@@ -10,7 +10,7 @@ type Props = {
 };
 
 const Deposit = ({ onNextStep }: Props) => {
-  const { tx, setSymbol, setQty, setTx, setOperation } = useOperationContext();
+  const { setSymbol, setQty, setOperation } = useOperationContext();
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -18,12 +18,6 @@ const Deposit = ({ onNextStep }: Props) => {
     setSymbol('WETH');
     setQty('');
   }, [setOperation, setQty, setSymbol]);
-
-  useEffect(() => {
-    if (!tx || tx.status !== 'success') return;
-    onNextStep();
-    setTx(undefined);
-  }, [onNextStep, setTx, tx]);
 
   return (
     <>
@@ -43,7 +37,7 @@ const Deposit = ({ onNextStep }: Props) => {
           boxShadow: palette.mode === 'light' ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : '',
         })}
       >
-        <DepositOperation>
+        <DepositOperation onSuccess={onNextStep}>
           <Grid item mt={1}>
             <ModalAlert
               variant="warning"

@@ -9,20 +9,37 @@ import useRouter from 'hooks/useRouter';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import ContractInfo from 'components/ContractInfo';
 import { ContractInfoType } from 'types/ContractInfoType';
-import useContractAddress from 'hooks/useContractAddress';
-import { useWeb3 } from 'hooks/useWeb3';
-import { mainnet, optimismSepolia, optimism } from 'viem/chains';
+import { defaultChain } from 'utils/client';
+import {
+  auditorAddress,
+  interestRateModelDaiAddress,
+  interestRateModelOpAddress,
+  interestRateModelUsdcAddress,
+  interestRateModelWbtcAddress,
+  interestRateModelWethAddress,
+  interestRateModelwstEthAddress,
+  marketDaiAddress,
+  marketDaiImplementationAddress,
+  marketEthRouterAddress,
+  marketEthRouterImplementationAddress,
+  marketOpAddress,
+  marketOpImplementationAddress,
+  marketUsdcAddress,
+  marketUsdcImplementationAddress,
+  marketWbtcAddress,
+  marketWbtcImplementationAddress,
+  marketWethAddress,
+  marketWethImplementationAddress,
+  marketwstEthAddress,
+  marketwstEthImplementationAddress,
+  rewardsControllerAddress,
+  rewardsControllerImplementationAddress,
+} from 'generated/wagmi';
 
 const Security: NextPage = () => {
   const { t } = useTranslation();
   const { query } = useRouter();
   const [contractsData, setContractsData] = useState<ContractInfoType[]>([]);
-
-  const getContractAddress = useContractAddress();
-  const {
-    chain: { id: displayNetworkId },
-  } = useWeb3();
-
   const contracts = useMemo(
     () => [
       {
@@ -34,10 +51,14 @@ const Security: NextPage = () => {
         reports: ['ABDK', 'Coinspect'],
         information: [`482 ${t('lines')} (409 ${t('lines of code')}), 20.5 kb`],
         proxy: async () => {
-          return [{ name: '', address: await getContractAddress('Auditor') }];
+          const address = Object.entries(auditorAddress).find(([chainId]) => Number(chainId) === defaultChain.id)?.[1];
+          if (!address) throw new Error(`missing deployment address for Auditor on chain ${defaultChain.id}`);
+          return [{ name: '', address }];
         },
         implementation: async () => {
-          return [{ name: '', address: await getContractAddress('Auditor') }];
+          const address = Object.entries(auditorAddress).find(([chainId]) => Number(chainId) === defaultChain.id)?.[1];
+          if (!address) throw new Error(`missing deployment address for Auditor on chain ${defaultChain.id}`);
+          return [{ name: '', address }];
         },
         codeLink: 'https://github.com/exactly/protocol/blob/main/contracts/Auditor.sol',
       },
@@ -50,19 +71,65 @@ const Security: NextPage = () => {
         reports: ['ABDK', 'Coinspect'],
         information: [`131 ${t('lines')} (113 ${t('lines of code')}), 5.39 kb`],
         proxy: async () => {
-          return [
-            { name: 'USDC', address: await getContractAddress('InterestRateModelUSDC') },
-            { name: 'WETH', address: await getContractAddress('InterestRateModelWETH') },
-            { name: 'wstETH', address: await getContractAddress('InterestRateModelwstETH') },
-            ...(displayNetworkId === optimism.id
-              ? [{ name: 'OP', address: await getContractAddress('InterestRateModelOP') }]
-              : displayNetworkId === mainnet.id || displayNetworkId === optimismSepolia.id
-                ? [
-                    { name: 'DAI', address: await getContractAddress('InterestRateModelDAI') },
-                    { name: 'WBTC', address: await getContractAddress('InterestRateModelWBTC') },
-                  ]
-                : []),
-          ];
+          const results: ContractInfoType['proxy'] = [];
+          const usdc = Object.entries(interestRateModelUsdcAddress).find(
+            ([chainId]) => Number(chainId) === defaultChain.id,
+          )?.[1];
+          if (usdc) {
+            results.push({
+              name: 'USDC',
+              address: usdc,
+            });
+          }
+          const weth = Object.entries(interestRateModelWethAddress).find(
+            ([chainId]) => Number(chainId) === defaultChain.id,
+          )?.[1];
+          if (weth) {
+            results.push({
+              name: 'WETH',
+              address: weth,
+            });
+          }
+          const wstETH = Object.entries(interestRateModelwstEthAddress).find(
+            ([chainId]) => Number(chainId) === defaultChain.id,
+          )?.[1];
+          if (wstETH) {
+            results.push({
+              name: 'wstETH',
+              address: wstETH,
+            });
+          }
+          const op = Object.entries(interestRateModelOpAddress).find(
+            ([chainId]) => Number(chainId) === defaultChain.id,
+          )?.[1];
+          if (op) {
+            results.push({
+              name: 'OP',
+              address: op,
+            });
+          }
+          const dai = Object.entries(interestRateModelDaiAddress).find(
+            ([chainId]) => Number(chainId) === defaultChain.id,
+          )?.[1];
+          if (dai) {
+            results.push({
+              name: 'DAI',
+              address: dai,
+            });
+          }
+          const wbtc = Object.entries(interestRateModelWbtcAddress).find(
+            ([chainId]) => Number(chainId) === defaultChain.id,
+          )?.[1];
+          if (wbtc) {
+            results.push({
+              name: 'WBTC',
+              address: wbtc,
+            });
+          }
+          if (!results.length) {
+            throw new Error(`missing deployment address for InterestRateModel on chain ${defaultChain.id}`);
+          }
+          return results;
         },
         implementation: (): null => {
           return null;
@@ -78,34 +145,116 @@ const Security: NextPage = () => {
         reports: ['ABDK', 'Coinspect'],
         information: [`1299 ${t('lines')} (1107 ${t('lines of code')}), 57 kb`],
         proxy: async () => {
-          return [
-            { name: 'USDC', address: await getContractAddress('MarketUSDC_Proxy') },
-            { name: 'WETH', address: await getContractAddress('MarketWETH_Proxy') },
-            { name: 'wstETH', address: await getContractAddress('MarketwstETH_Proxy') },
-            ...(displayNetworkId === optimism.id
-              ? [{ name: 'OP', address: await getContractAddress('MarketOP_Proxy') }]
-              : displayNetworkId === mainnet.id || displayNetworkId === optimismSepolia.id
-                ? [
-                    { name: 'DAI', address: await getContractAddress('MarketDAI_Proxy') },
-                    { name: 'WBTC', address: await getContractAddress('InterestRateModelWBTC') },
-                  ]
-                : []),
-          ];
+          const results: ContractInfoType['proxy'] = [];
+          const usdc = Object.entries(marketUsdcAddress).find(([chainId]) => Number(chainId) === defaultChain.id)?.[1];
+          if (usdc) {
+            results.push({
+              name: 'USDC',
+              address: usdc,
+            });
+          }
+          const weth = Object.entries(marketWethAddress).find(([chainId]) => Number(chainId) === defaultChain.id)?.[1];
+          if (weth) {
+            results.push({
+              name: 'WETH',
+              address: weth,
+            });
+          }
+          const wstETH = Object.entries(marketwstEthAddress).find(
+            ([chainId]) => Number(chainId) === defaultChain.id,
+          )?.[1];
+          if (wstETH) {
+            results.push({
+              name: 'wstETH',
+              address: wstETH,
+            });
+          }
+          const op = Object.entries(marketOpAddress).find(([chainId]) => Number(chainId) === defaultChain.id)?.[1];
+          if (op) {
+            results.push({
+              name: 'OP',
+              address: op,
+            });
+          }
+          const dai = Object.entries(marketDaiAddress).find(([chainId]) => Number(chainId) === defaultChain.id)?.[1];
+          if (dai) {
+            results.push({
+              name: 'DAI',
+              address: dai,
+            });
+          }
+          const wbtc = Object.entries(marketWbtcAddress).find(([chainId]) => Number(chainId) === defaultChain.id)?.[1];
+          if (wbtc) {
+            results.push({
+              name: 'WBTC',
+              address: wbtc,
+            });
+          }
+          if (!results.length) {
+            throw new Error(`missing deployment address for Market proxy on chain ${defaultChain.id}`);
+          }
+          return results;
         },
         implementation: async () => {
-          return [
-            { name: 'USDC', address: await getContractAddress('MarketUSDC_Implementation') },
-            { name: 'WETH', address: await getContractAddress('MarketWETH_Implementation') },
-            { name: 'wstETH', address: await getContractAddress('MarketwstETH_Implementation') },
-            ...(displayNetworkId === optimism.id
-              ? [{ name: 'OP', address: await getContractAddress('MarketOP_Implementation') }]
-              : displayNetworkId === mainnet.id || displayNetworkId === optimismSepolia.id
-                ? [
-                    { name: 'DAI', address: await getContractAddress('MarketDAI_Implementation') },
-                    { name: 'WBTC', address: await getContractAddress('MarketWBTC_Implementation') },
-                  ]
-                : []),
-          ];
+          const results: ContractInfoType['proxy'] = [];
+          const usdc = Object.entries(marketUsdcImplementationAddress).find(
+            ([chainId]) => Number(chainId) === defaultChain.id,
+          )?.[1];
+          if (usdc) {
+            results.push({
+              name: 'USDC',
+              address: usdc,
+            });
+          }
+          const weth = Object.entries(marketWethImplementationAddress).find(
+            ([chainId]) => Number(chainId) === defaultChain.id,
+          )?.[1];
+          if (weth) {
+            results.push({
+              name: 'WETH',
+              address: weth,
+            });
+          }
+          const wstETH = Object.entries(marketwstEthImplementationAddress).find(
+            ([chainId]) => Number(chainId) === defaultChain.id,
+          )?.[1];
+          if (wstETH) {
+            results.push({
+              name: 'wstETH',
+              address: wstETH,
+            });
+          }
+          const op = Object.entries(marketOpImplementationAddress).find(
+            ([chainId]) => Number(chainId) === defaultChain.id,
+          )?.[1];
+          if (op) {
+            results.push({
+              name: 'OP',
+              address: op,
+            });
+          }
+          const dai = Object.entries(marketDaiImplementationAddress).find(
+            ([chainId]) => Number(chainId) === defaultChain.id,
+          )?.[1];
+          if (dai) {
+            results.push({
+              name: 'DAI',
+              address: dai,
+            });
+          }
+          const wbtc = Object.entries(marketWbtcImplementationAddress).find(
+            ([chainId]) => Number(chainId) === defaultChain.id,
+          )?.[1];
+          if (wbtc) {
+            results.push({
+              name: 'WBTC',
+              address: wbtc,
+            });
+          }
+          if (!results.length) {
+            throw new Error(`missing deployment address for Market implementation on chain ${defaultChain.id}`);
+          }
+          return results;
         },
         codeLink: 'https://github.com/exactly/protocol/blob/main/contracts/Market.sol',
       },
@@ -118,10 +267,24 @@ const Security: NextPage = () => {
         reports: ['ABDK', 'Coinspect'],
         information: [`150 ${t('lines')} (126 ${t('lines of code')}), 6.24 kb`],
         proxy: async () => {
-          return [{ name: '', address: await getContractAddress('MarketETHRouter_Proxy') }];
+          const address = Object.entries(marketEthRouterAddress).find(
+            ([chainId]) => Number(chainId) === defaultChain.id,
+          )?.[1];
+          if (!address) {
+            throw new Error(`missing deployment address for MarketETHRouter on chain ${defaultChain.id}`);
+          }
+          return [{ name: '', address }];
         },
         implementation: async () => {
-          return [{ name: '', address: await getContractAddress('MarketETHRouter_Implementation') }];
+          const address = Object.entries(marketEthRouterImplementationAddress).find(
+            ([chainId]) => Number(chainId) === defaultChain.id,
+          )?.[1];
+          if (!address) {
+            throw new Error(
+              `missing deployment address for MarketETHRouter_Implementation on chain ${defaultChain.id}`,
+            );
+          }
+          return [{ name: '', address }];
         },
         codeLink: 'https://github.com/exactly/protocol/blob/main/contracts/MarketETHRouter.sol',
       },
@@ -134,15 +297,29 @@ const Security: NextPage = () => {
         reports: ['ABDK', 'Coinspect'],
         information: [`932 ${t('lines')} (873 ${t('lines of code')}), 36.5 kb`],
         proxy: async () => {
-          return [{ name: '', address: await getContractAddress('RewardsController_Proxy') }];
+          const address = Object.entries(rewardsControllerAddress).find(
+            ([chainId]) => Number(chainId) === defaultChain.id,
+          )?.[1];
+          if (!address) {
+            throw new Error(`missing deployment address for RewardsController on chain ${defaultChain.id}`);
+          }
+          return [{ name: '', address }];
         },
         implementation: async () => {
-          return [{ name: '', address: await getContractAddress('RewardsController_Implementation') }];
+          const address = Object.entries(rewardsControllerImplementationAddress).find(
+            ([chainId]) => Number(chainId) === defaultChain.id,
+          )?.[1];
+          if (!address) {
+            throw new Error(
+              `missing deployment address for RewardsController_Implementation on chain ${defaultChain.id}`,
+            );
+          }
+          return [{ name: '', address }];
         },
         codeLink: '',
       },
     ],
-    [displayNetworkId, getContractAddress, t],
+    [t],
   );
 
   useEffect(() => {

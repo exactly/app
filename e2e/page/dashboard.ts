@@ -1,4 +1,4 @@
-import { Page, expect } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 import type { ERC20TokenSymbol } from '../utils/contracts';
 
@@ -33,11 +33,6 @@ export default function (page: Page) {
     await page.mouse.move(0, 0);
   };
 
-  const checkCollateralSwitchStatusLoading = async (symbol: ERC20TokenSymbol) => {
-    const locator = page.getByTestId(`switch-collateral-${symbol}-loading`);
-    await expect(locator).toBeVisible();
-  };
-
   const attemptEnterMarket = async (symbol: ERC20TokenSymbol) => {
     await checkCollateralSwitchStatus(symbol, false, false);
     await page.getByTestId(`switch-collateral-${symbol}-wrapper`).hover();
@@ -66,24 +61,35 @@ export default function (page: Page) {
     await expect(row).toBeVisible();
   };
 
+  const expandFixedTableRow = async (type: 'deposit' | 'borrow', symbol: ERC20TokenSymbol, maturity: number) => {
+    const button = page
+      .getByTestId(`dashboard-fixed-${type}-row-${maturity}-${symbol}`)
+      .getByRole('button', { name: 'expand row' });
+    const transactions = page.getByTestId('dashboard-fixed-transactions').first();
+    if (!(await transactions.isVisible().catch(() => false))) {
+      await button.click();
+    }
+    await expect(transactions).toBeVisible();
+  };
+
+  const checkFixedTransaction = async (operation: 'borrow' | 'deposit' | 'repay' | 'withdraw') => {
+    await expect(page.getByTestId(`dashboard-fixed-transaction-${operation}`).first()).toBeVisible();
+  };
+
   const waitForTransaction = async (symbol: ERC20TokenSymbol) => {
-    await checkCollateralSwitchStatusLoading(symbol);
-    await page.waitForFunction(
-      (selector) => document.querySelector(selector) === null,
-      `[data-testid="switch-collateral-${symbol}-loading"]`,
-      { polling: 1_000 },
-    );
+    await expect(page.getByTestId(`switch-collateral-${symbol}-loading`)).not.toBeVisible();
   };
 
   return {
     checkCollateralSwitchStatus,
     checkCollateralSwitchTooltip,
-    checkCollateralSwitchStatusLoading,
     attemptEnterMarket,
     attemptExitMarket,
     switchTab,
     checkFloatingTableRow,
     checkFixedTableRow,
+    expandFixedTableRow,
+    checkFixedTransaction,
     waitForTransaction,
   };
 }

@@ -1,19 +1,20 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { CircularProgress, Tooltip, Typography } from '@mui/material';
-import { useNetwork, useSwitchNetwork } from 'wagmi';
+import { useChainId, useSwitchChain, useWriteContract } from 'wagmi';
 import { WAD } from '@exactly/lib';
 
 import waitForTransaction from 'utils/waitForTransaction';
 
 import StyledSwitch from 'components/Switch';
 import parseHealthFactor from 'utils/parseHealthFactor';
-import useAuditor from 'hooks/useAuditor';
 import handleOperationError from 'utils/handleOperationError';
 import useHealthFactor from 'hooks/useHealthFactor';
 import useAccountData from 'hooks/useAccountData';
-import { useWeb3 } from 'hooks/useWeb3';
 import { useTranslation } from 'react-i18next';
 import { track } from 'utils/mixpanel';
+import { auditorAbi, auditorAddress } from 'generated/wagmi';
+import { defaultChain } from 'utils/client';
+import useReadOnly from 'hooks/useReadOnly';
 
 type Props = {
   symbol: string;
@@ -22,12 +23,12 @@ type Props = {
 function SwitchCollateral({ symbol }: Props) {
   const { t } = useTranslation();
   const { marketAccount, refreshAccountData } = useAccountData(symbol);
-  const auditor = useAuditor();
-  const { chain } = useNetwork();
-  const { chain: displayNetwork, opts } = useWeb3();
+  const chainId = useChainId();
+  const { account: walletAddress } = useReadOnly();
+  const { writeContractAsync } = useWriteContract();
 
   const healthFactor = useHealthFactor();
-  const { switchNetworkAsync } = useSwitchNetwork();
+  const { mutateAsync: switchChainAsync } = useSwitchChain();
 
   const [optimistic, setOptimistic] = useState<boolean | undefined>();
   const checked = useMemo<boolean>(() => {
@@ -64,7 +65,8 @@ function SwitchCollateral({ symbol }: Props) {
   const [loading, setLoading] = useState<boolean>(false);
 
   const onToggle = useCallback(async () => {
-    if (!marketAccount || !auditor || !opts) return;
+    const auditor = Object.entries(auditorAddress).find(([id]) => Number(id) === defaultChain.id)?.[1];
+    if (!marketAccount || !auditor || !walletAddress) return;
     const { market } = marketAccount;
     let target = !checked;
     track('Option Selected', {
@@ -77,9 +79,14 @@ function SwitchCollateral({ symbol }: Props) {
 
     setLoading(true);
     try {
-      const hash = await (checked
-        ? auditor.write.exitMarket([market], opts)
-        : auditor.write.enterMarket([market], opts));
+      const hash = await writeContractAsync({
+        account: walletAddress,
+        address: auditor,
+        abi: auditorAbi,
+        functionName: checked ? 'exitMarket' : 'enterMarket',
+        args: [market],
+        chainId: defaultChain.id,
+      });
       await waitForTransaction({ hash });
 
       await refreshAccountData();
@@ -90,22 +97,22 @@ function SwitchCollateral({ symbol }: Props) {
       setOptimistic(target);
       setLoading(false);
     }
-  }, [marketAccount, auditor, opts, checked, symbol, refreshAccountData]);
+  }, [marketAccount, checked, symbol, writeContractAsync, refreshAccountData, walletAddress]);
 
   const switchNetworkAndToggle = useCallback(async () => {
-    if (!(chain && chain.id !== displayNetwork.id && switchNetworkAsync)) {
+    if (chainId === defaultChain.id) {
       return onToggle();
     }
     try {
-      const result = await switchNetworkAsync(displayNetwork.id);
+      const result = await switchChainAsync({ chainId: defaultChain.id });
 
-      if (result.id === displayNetwork.id) {
+      if (result.id === defaultChain.id) {
         onToggle();
       }
     } catch (error) {
       return;
     }
-  }, [chain, displayNetwork.id, onToggle, switchNetworkAsync]);
+  }, [chainId, onToggle, switchChainAsync]);
 
   if (loading) {
     return (

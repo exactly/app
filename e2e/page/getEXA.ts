@@ -1,19 +1,9 @@
-import { Page, expect } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 export default function (page: Page) {
   const waitForPageToBeReady = async () => {
-    await page.waitForTimeout(5_000);
-    await page.waitForFunction(
-      () => {
-        const skeletons = document.querySelectorAll('.MuiSkeleton-root').length > 0;
-        const submit = document.querySelector('[data-testid="get-exa-submit"]');
-        if (!submit || skeletons) return false;
-        const attr = submit.getAttribute('disabled');
-        return attr === null;
-      },
-      null,
-      { polling: 1_000 },
-    );
+    await expect(page.locator('.MuiSkeleton-root')).toHaveCount(0);
+    await expect(page.getByTestId('get-exa-submit')).not.toBeDisabled();
   };
 
   const checkView = async (view: 'route' | 'review' | 'tx-status') => {
@@ -69,15 +59,7 @@ export default function (page: Page) {
   const waitForSubmitTransaction = async () => {
     const status = page.getByTestId('transaction-status');
     await expect(status).toBeVisible();
-    await page.waitForFunction(
-      (message) => {
-        const text = document.querySelector('[data-testid="transaction-status"]');
-        if (!text) return false;
-        return text.textContent !== message;
-      },
-      'Processing transaction...',
-      { polling: 1_000 },
-    );
+    await expect(status).not.toHaveText('Processing transaction...');
   };
 
   const checkTransactionStatus = async (target: 'success' | 'error') => {
@@ -98,15 +80,7 @@ export default function (page: Page) {
   };
 
   const waitForApproveTransaction = async () => {
-    await page.waitForFunction(
-      () => {
-        const button = document.querySelector('[data-testid="get-exa-approve"]');
-        if (!button) return true;
-        return !button.classList.contains('MuiLoadingButton-loading');
-      },
-      null,
-      { polling: 1_000 },
-    );
+    await expect(page.getByTestId('get-exa-submit')).toBeVisible({ timeout: 10_000 });
   };
 
   return {

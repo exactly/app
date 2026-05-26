@@ -1,11 +1,11 @@
 import React from 'react';
 import { Box, Button, Typography } from '@mui/material';
-import { useWeb3 } from 'hooks/useWeb3';
 import { useTranslation } from 'react-i18next';
+import useConnectWallet from 'hooks/useConnectWallet';
 
 function ConnectYourWallet() {
   const { t } = useTranslation();
-  const { connect } = useWeb3();
+  const connect = useConnectWallet();
 
   return (
     <Box

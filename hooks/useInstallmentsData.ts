@@ -39,24 +39,32 @@ export default function useInstallmentsData({
         fixedPools,
       } = marketAccount;
       const timestamp = Math.round(Date.now() / 1000);
-      const {
-        amounts: installmentsPrincipal,
-        installments: installmentsRepayAmount,
-        effectiveRate,
-      } = splitInstallments(
-        amount,
-        totalFloatingDepositAssets,
-        Number(firstMaturity),
-        fixedPools.length,
-        fixedPools
-          .filter(({ maturity }) => maturity >= firstMaturity && maturity < firstMaturity + installments_ * INTERVAL)
-          .map(({ supplied, borrowed }) => fixedUtilization(supplied, borrowed, totalFloatingDepositAssets)),
-        floatingUtilization,
-        globalUtilization(totalFloatingDepositAssets, totalFloatingBorrowAssets, floatingBackupBorrowed),
-        irmParameters,
-        timestamp,
-        { tolerance: 10n ** 15n },
-      );
+      let installmentsPrincipal: bigint[];
+      let installmentsRepayAmount: bigint[];
+      let effectiveRate: bigint;
+      try {
+        ({
+          amounts: installmentsPrincipal,
+          installments: installmentsRepayAmount,
+          effectiveRate,
+        } = splitInstallments(
+          amount,
+          totalFloatingDepositAssets,
+          Number(firstMaturity),
+          fixedPools.length,
+          fixedPools
+            .filter(({ maturity }) => maturity >= firstMaturity && maturity < firstMaturity + installments_ * INTERVAL)
+            .map(({ supplied, borrowed }) => fixedUtilization(supplied, borrowed, totalFloatingDepositAssets)),
+          floatingUtilization,
+          globalUtilization(totalFloatingDepositAssets, totalFloatingBorrowAssets, floatingBackupBorrowed),
+          irmParameters,
+          timestamp,
+          { tolerance: 10n ** 15n },
+        ));
+      } catch (error) {
+        if (error instanceof Error && error.message === 'INVALID_INPUT') return;
+        throw error;
+      }
       const totalPrincipal = installmentsPrincipal.reduce((acc, val) => acc + val, 0n);
       const maxRepay = installmentsRepayAmount.reduce((acc, val) => acc + val, 0n);
       const averageRepay = maxRepay / installments_;

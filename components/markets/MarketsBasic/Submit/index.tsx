@@ -1,8 +1,8 @@
 import React, { FC, useMemo } from 'react';
 import ModalSubmit from 'components/OperationsModal/ModalSubmit';
-import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasicContext';
+import Loading from 'components/markets/MarketsBasic/Loading';
+import { MarketsBasicOperation, MarketsBasicOption, useMarketsBasic } from 'contexts/MarketsBasicContext';
 import type { Operation } from 'types/Operation';
-import { usePreviewTx } from 'contexts/OperationContext';
 import useBorrow from 'hooks/useBorrow';
 import useBorrowAtMaturity from 'hooks/useBorrowAtMaturity';
 import useDeposit from 'hooks/useDeposit';
@@ -39,12 +39,13 @@ const Submit: FC<SubmitProps> = ({ symbol, operation, option, qty, errorData }) 
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
   const { marketAccount } = useAccountData(symbol);
+  const { reset } = useMarketsBasic();
   const deposit = useDeposit();
   const depositAtMaturity = useDepositAtMaturity();
   const borrow = useBorrow();
   const borrowAtMaturity = useBorrowAtMaturity();
 
-  const { isLoading, handleSubmitAction, needsApproval, previewGasCost, isFloating } = useMemo(() => {
+  const selected = useMemo(() => {
     const op = getOperation(operation, option.maturity === 0n);
     switch (op) {
       case 'borrow':
@@ -71,27 +72,40 @@ const Submit: FC<SubmitProps> = ({ symbol, operation, option, qty, errorData }) 
     }
   }, [borrow, borrowAtMaturity, deposit, depositAtMaturity, operation, option.maturity]);
 
-  const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
-
   const submitLabel = useMemo(() => {
     const parsed = parseFloat(qty);
     const amount = parsed ? (Number.isInteger(parsed) ? parsed : formatNumber(qty, symbol)) : '';
 
     return `${translateOperation(operation, { capitalize: true })} ${amount} ${formatSymbol(symbol)}${
-      !isFloating && option.maturity ? t(' for {{daysLeft}}', { daysLeft: daysLeft(option.maturity) }) : ''
+      !selected.isFloating && option.maturity ? t(' for {{daysLeft}}', { daysLeft: daysLeft(option.maturity) }) : ''
     }`;
-  }, [isFloating, operation, option.maturity, qty, symbol, t, translateOperation]);
+  }, [selected.isFloating, operation, option.maturity, qty, symbol, t, translateOperation]);
 
   return (
-    <ModalSubmit
-      label={submitLabel}
-      symbol={symbol === 'WETH' && marketAccount ? marketAccount.symbol : symbol}
-      submit={handleSubmitAction}
-      isLoading={isLoading || previewIsLoading}
-      disabled={
-        !qty || parseFloat(qty) <= 0 || isLoading || previewIsLoading || errorData?.status || symbol === 'USDC.e'
-      }
-    />
+    <>
+      <ModalSubmit
+        label={submitLabel}
+        symbol={symbol === 'WETH' && marketAccount ? marketAccount.symbol : symbol}
+        submit={selected.handleSubmitAction}
+        isLoading={selected.isLoading || selected.isPreparing}
+        disabled={
+          !qty ||
+          parseFloat(qty) <= 0 ||
+          selected.isLoading ||
+          selected.isPreparing ||
+          errorData?.status ||
+          symbol === 'USDC.e'
+        }
+        refreshOnSubmit={false}
+      />
+      {selected.txStatus && (
+        <Loading
+          isOpen={Boolean(selected.txStatus)}
+          tx={{ status: selected.txStatus, hash: selected.txHash }}
+          close={reset}
+        />
+      )}
+    </>
   );
 };
 
