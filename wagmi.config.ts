@@ -13,7 +13,7 @@ const GasPriceOracle = require('./abi/GasPriceOracle.json');
 
 type DeploymentNetwork = 'ethereum' | 'optimism' | 'op-sepolia' | 'base' | 'base-sepolia' | 'anvil';
 type Deployment = { abi?: Abi; address: Address; receipt?: { blockNumber?: number } };
-type ContractEntry = string | { name?: string; block?: true };
+type ContractEntry = string | { name?: string; block?: true | number };
 
 const addressOnlyAbi = [] as const satisfies Abi;
 const contractBlocks: { name: string; address: Record<number, Address>; blocks: Record<number, number> }[] = [];
@@ -69,8 +69,13 @@ function contract(
         if (!abi && !result.abi) throw new Error(`missing ABI for ${deploymentNetwork}/${deploymentName}`);
         abi ??= result.abi;
       }
-      if (typeof entry === 'object' && entry.block) {
-        const blockNumber = deploymentNetwork === 'anvil' ? 0 : result.receipt?.blockNumber;
+      if (typeof entry === 'object' && entry.block !== undefined) {
+        const blockNumber =
+          typeof entry.block === 'number'
+            ? entry.block
+            : deploymentNetwork === 'anvil'
+              ? 0
+              : result.receipt?.blockNumber;
         if (blockNumber === undefined) throw new Error(`missing block for ${deploymentNetwork}/${deploymentName}`);
         blocks[chainIdByDeploymentNetwork[deploymentNetwork]] = blockNumber;
       }
@@ -139,7 +144,11 @@ export default defineConfig({
     { name: 'InterestRateModel', abi: InterestRateModel.abi as Abi },
     contract('RatePreviewer', ['op-sepolia', 'optimism', 'base', 'base-sepolia', 'anvil'], true),
     contract('RewardsController', ['optimism', 'op-sepolia'], true),
-    contract('SablierV2LockupLinear', ['optimism', 'op-sepolia', 'anvil'], true),
+    contract(
+      'SablierV2LockupLinear',
+      { optimism: { block: 106_405_061 }, 'op-sepolia': { block: 0 }, anvil: { block: true } },
+      true,
+    ),
     contract('SablierV2NFTDescriptor', ['optimism', 'op-sepolia', 'anvil'], true),
     { name: 'ExtraFinanceLending', abi: ExtraFinanceLendingABI as Abi },
     { name: 'DelegateRegistry', abi: DelegateRegistryABI as Abi },

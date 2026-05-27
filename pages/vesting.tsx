@@ -24,7 +24,7 @@ import { useSwitchChain } from 'wagmi';
 import { useModal } from 'contexts/ModalContext';
 import VestingInput from 'components/VestingInput';
 import ActiveStream from 'components/ActiveStream';
-import { useUpdateStreams, useEscrowEXATotals } from 'hooks/useEscrowedEXA';
+import { useUpdateStreams } from 'hooks/useEscrowedEXA';
 import useRewards from 'hooks/useRewards';
 import waitForTransaction from 'utils/waitForTransaction';
 import formatNumber from 'utils/formatNumber';
@@ -165,17 +165,13 @@ const WithdrawAndCancel: React.FC<{
 
 const Vesting: NextPage = () => {
   const { t } = useTranslation();
-  const { account: walletAddress, isImpersonating: impersonateActive } = useReadOnly();
-  const { activeStreams, loading: streamsLoading, refetch } = useUpdateStreams();
+  const { account, isImpersonating: impersonateActive } = useReadOnly();
+  const { activeStreams, loading: streamsLoading, refetch, refetchStreamData } = useUpdateStreams();
   const { isPending: switchIsLoading } = useSwitchChain();
   const { data: reserveRatio } = useReadEscrowedExaReserveRatio({
     chainId: escrowedExaChainId,
     query: { enabled: escrowedExaChainId !== undefined, staleTime: 30_000 },
   });
-  const { totalReserve, reserveIsLoading, totalWithdrawable, withdrawableIsLoading } = useEscrowEXATotals(
-    activeStreams.map(({ tokenId }) => Number(tokenId)),
-  );
-
   const [loading, setLoading] = useState<boolean>(false);
   const [showAll, setShowAll] = useState<boolean>(false);
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
@@ -194,16 +190,21 @@ const Vesting: NextPage = () => {
   };
 
   const totalsStreamData = useMemo(() => {
-    if (!activeStreams) return { totalVestedEsEXA: 0n, totalWithdrawnEXA: 0n };
+    if (!activeStreams) return { totalReserve: 0n, totalVestedEsEXA: 0n, totalWithdrawable: 0n, totalWithdrawnEXA: 0n };
 
     return activeStreams.reduce(
-      (acc, { depositAmount, withdrawnAmount }) => {
+      (acc, { depositAmount, reserveAmount, withdrawableAmount, withdrawnAmount }) => {
         return {
+          totalReserve:
+            acc.totalReserve === undefined || reserveAmount === undefined
+              ? undefined
+              : acc.totalReserve + BigInt(reserveAmount),
           totalVestedEsEXA: acc.totalVestedEsEXA + BigInt(depositAmount),
+          totalWithdrawable: acc.totalWithdrawable + BigInt(withdrawableAmount),
           totalWithdrawnEXA: acc.totalWithdrawnEXA + BigInt(withdrawnAmount),
         };
       },
-      { totalVestedEsEXA: 0n, totalWithdrawnEXA: 0n },
+      { totalReserve: 0n as bigint | undefined, totalVestedEsEXA: 0n, totalWithdrawable: 0n, totalWithdrawnEXA: 0n },
     );
   }, [activeStreams]);
 
@@ -220,11 +221,11 @@ const Vesting: NextPage = () => {
       name: 'claim all',
       value: activeStreams.length,
     });
-    if (!activeStreams || !walletAddress || escrowedExaChainId === undefined) return;
+    if (!account || escrowedExaChainId === undefined) return;
     setLoading(true);
     try {
       const tx = await withdrawMax({
-        account: walletAddress,
+        account,
         chainId: escrowedExaChainId,
         args: [activeStreams.map(({ tokenId }) => BigInt(tokenId))],
       });
@@ -244,11 +245,11 @@ const Vesting: NextPage = () => {
       // if request fails, don't do anything
     } finally {
       setLoading(false);
-      refetch();
+      refetchStreamData();
     }
-  }, [activeStreams, refetch, walletAddress, withdrawMax]);
+  }, [account, activeStreams, refetchStreamData, withdrawMax]);
 
-  const { totalVestedEsEXA, totalWithdrawnEXA } = totalsStreamData;
+  const { totalReserve, totalVestedEsEXA, totalWithdrawable, totalWithdrawnEXA } = totalsStreamData;
 
   const toggleShowAll = () => {
     setShowAll(!showAll);
@@ -278,11 +279,11 @@ const Vesting: NextPage = () => {
   }, [activeStreams.length, allCancelabelStreamsIds.length, handleClaimAll]);
 
   const cancelAll = useCallback(async () => {
-    if (!walletAddress || escrowedExaChainId === undefined) return;
+    if (!account || escrowedExaChainId === undefined) return;
     setLoading(true);
     try {
       const tx = await cancelStreams({
-        account: walletAddress,
+        account,
         chainId: escrowedExaChainId,
         args: [allCancelabelStreamsIds],
       });
@@ -291,9 +292,9 @@ const Vesting: NextPage = () => {
       // if request fails, don't do anything
     } finally {
       setLoading(false);
-      refetch();
+      refetchStreamData();
     }
-  }, [allCancelabelStreamsIds, cancelStreams, refetch, walletAddress]);
+  }, [account, allCancelabelStreamsIds, cancelStreams, refetchStreamData]);
 
   return (
     <Box display="flex" flexDirection="column" gap={6} maxWidth={800} mx="auto" my={5}>
@@ -473,7 +474,7 @@ const Vesting: NextPage = () => {
                         height={20}
                         style={{ maxWidth: '100%', height: 'auto' }}
                       />
-                      {reserveIsLoading || totalReserve === undefined ? (
+                      {totalReserve === undefined ? (
                         <Skeleton width={30} />
                       ) : (
                         <Box display="flex" flexDirection="column">
@@ -532,35 +533,31 @@ const Vesting: NextPage = () => {
                         height={20}
                         style={{ maxWidth: '100%', height: 'auto' }}
                       />
-                      {withdrawableIsLoading || totalWithdrawable === undefined ? (
-                        <Skeleton width={30} />
-                      ) : (
-                        <Box display="flex" flexDirection="column">
-                          <Box display="flex" gap={0.5}>
-                            <Typography fontSize={19} fontWeight={500}>
-                              {formatNumber(Number(totalWithdrawable) / 1e18)}
-                            </Typography>
-                            <Typography fontSize={19} fontWeight={500} color="grey.400">
-                              / {formatNumber(Number(totalVestedEsEXA - totalWithdrawnEXA) / 1e18)}
-                            </Typography>
-                          </Box>
-                          <Box display="flex" gap={0.5} justifyContent="space-around">
-                            <Typography fontSize={12} fontWeight={500}>
-                              ${formatNumber(formatEther((usdPrice * totalWithdrawable) / WAD), 'USD')}
-                            </Typography>
-                            <Typography fontSize={12} fontWeight={500}>
-                              /
-                            </Typography>
-                            <Typography fontSize={12} fontWeight={500} color="grey.400">
-                              $
-                              {formatNumber(
-                                formatEther((usdPrice * (totalVestedEsEXA - totalWithdrawnEXA)) / WAD),
-                                'USD',
-                              )}
-                            </Typography>
-                          </Box>
+                      <Box display="flex" flexDirection="column">
+                        <Box display="flex" gap={0.5}>
+                          <Typography fontSize={19} fontWeight={500}>
+                            {formatNumber(Number(totalWithdrawable) / 1e18)}
+                          </Typography>
+                          <Typography fontSize={19} fontWeight={500} color="grey.400">
+                            / {formatNumber(Number(totalVestedEsEXA - totalWithdrawnEXA) / 1e18)}
+                          </Typography>
                         </Box>
-                      )}
+                        <Box display="flex" gap={0.5} justifyContent="space-around">
+                          <Typography fontSize={12} fontWeight={500}>
+                            ${formatNumber(formatEther((usdPrice * totalWithdrawable) / WAD), 'USD')}
+                          </Typography>
+                          <Typography fontSize={12} fontWeight={500}>
+                            /
+                          </Typography>
+                          <Typography fontSize={12} fontWeight={500} color="grey.400">
+                            $
+                            {formatNumber(
+                              formatEther((usdPrice * (totalVestedEsEXA - totalWithdrawnEXA)) / WAD),
+                              'USD',
+                            )}
+                          </Typography>
+                        </Box>
+                      </Box>
                     </Box>
                     <Box display="flex" flexDirection="column" gap={2} alignItems="center">
                       {impersonateActive ? (
@@ -597,23 +594,38 @@ const Vesting: NextPage = () => {
             <TransitionGroup>
               {activeStreams
                 .slice(0, showAll ? activeStreams.length : 5)
-                .map(({ id, tokenId, depositAmount, withdrawnAmount, startTime, endTime, cancelable }, index) => (
-                  <Collapse key={id}>
-                    <>
-                      <ActiveStream
-                        key={id}
-                        tokenId={Number(tokenId)}
-                        depositAmount={BigInt(depositAmount)}
-                        withdrawnAmount={BigInt(withdrawnAmount)}
-                        startTime={Number(startTime)}
-                        endTime={Number(endTime)}
-                        cancellable={cancelable}
-                        refetch={refetch}
-                      />
-                      {index !== activeStreams.length - 1 && <Divider key={`divider-${tokenId}`} />}
-                    </>
-                  </Collapse>
-                ))}
+                .map(
+                  (
+                    {
+                      tokenId,
+                      depositAmount,
+                      reserveAmount,
+                      withdrawnAmount,
+                      withdrawableAmount,
+                      startTime,
+                      endTime,
+                      cancelable,
+                    },
+                    index,
+                  ) => (
+                    <Collapse key={tokenId}>
+                      <>
+                        <ActiveStream
+                          tokenId={Number(tokenId)}
+                          depositAmount={BigInt(depositAmount)}
+                          reserveAmount={reserveAmount === undefined ? undefined : BigInt(reserveAmount)}
+                          withdrawnAmount={BigInt(withdrawnAmount)}
+                          withdrawableAmount={BigInt(withdrawableAmount)}
+                          startTime={Number(startTime)}
+                          endTime={Number(endTime)}
+                          cancellable={cancelable}
+                          refetch={refetchStreamData}
+                        />
+                        {index !== activeStreams.length - 1 && <Divider key={`divider-${tokenId}`} />}
+                      </>
+                    </Collapse>
+                  ),
+                )}
             </TransitionGroup>
           </List>
           {activeStreams.length > 5 && (

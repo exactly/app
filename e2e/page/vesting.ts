@@ -86,7 +86,10 @@ export default function (page: Page) {
   };
 
   const waitForClaimStreamTransaction = async (streamId: number) => {
-    await expect(page.getByTestId(`vesting-stream-${streamId}-claim`)).not.toBeDisabled({ timeout: 10_000 });
+    await expect(async () => {
+      if ((await page.getByTestId(`vesting-stream-${streamId}`).count()) === 0) return;
+      expect(await page.getByTestId(`vesting-stream-${streamId}-claim`).isEnabled({ timeout: 100 })).toBe(true);
+    }).toPass({ timeout: 10_000 });
   };
 
   const claimAllStreams = async () => {
@@ -96,7 +99,10 @@ export default function (page: Page) {
   };
 
   const waitForClaimAllTransaction = async () => {
-    await expect(page.getByTestId('vesting-claim-all')).not.toBeDisabled({ timeout: 10_000 });
+    await expect(async () => {
+      if ((await page.getByTestId('vesting-claim-all').count()) === 0) return;
+      expect(await page.getByTestId('vesting-claim-all').isEnabled({ timeout: 100 })).toBe(true);
+    }).toPass({ timeout: 10_000 });
   };
 
   const cancelStream = async (streamId: number) => {

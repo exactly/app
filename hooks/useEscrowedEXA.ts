@@ -1,30 +1,25 @@
-import { useCallback, useEffect, useState, useMemo } from 'react';
-import { Address, zeroAddress } from 'viem';
+import { useCallback, useMemo } from 'react';
 import {
   escrowedExaAbi,
   escrowedExaAddress,
   exaAddress,
   sablierV2LockupLinearAbi,
   sablierV2LockupLinearAddress,
+  sablierV2LockupLinearBlock,
 } from 'generated/wagmi';
 
-import useGraphClient from './useGraphClient';
-import { getStreams } from 'queries/getStreams';
-import { useReadContracts } from 'wagmi';
+import { useContractEvents, useReadContracts } from 'wagmi';
 import { defaultChain } from 'utils/client';
 import useReadOnly from 'hooks/useReadOnly';
 
 type Stream = {
-  id: string;
   tokenId: string;
-  recipient: Address;
   startTime: string;
   endTime: string;
   depositAmount: string;
   withdrawnAmount: string;
-  duration: string;
-  intactAmount: string;
-  canceled: boolean;
+  withdrawableAmount: string;
+  reserveAmount?: string;
   cancelable: boolean;
 };
 
@@ -39,95 +34,190 @@ const sablierV2LockupLinearChainId = Object.keys(sablierV2LockupLinearAddress)
   .find((chainId): chainId is keyof typeof sablierV2LockupLinearAddress => chainId === defaultChain.id);
 
 export function useUpdateStreams() {
-  const { account: walletAddress } = useReadOnly();
+  const { account } = useReadOnly();
   const EXA = exaChainId === undefined ? undefined : exaAddress[exaChainId];
   const esEXA = escrowedExaChainId === undefined ? undefined : escrowedExaAddress[escrowedExaChainId];
-  const request = useGraphClient();
-
-  const [activeStreams, setActiveStreams] = useState<Stream[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  const fetchStreams = useCallback(async () => {
-    if (EXA && esEXA) {
-      setLoading(true);
-
-      let data;
-
-      try {
-        data = await request<{ streams: Stream[] }>(
-          getStreams(EXA.toLowerCase(), walletAddress || zeroAddress, esEXA.toLowerCase(), false),
-          'sablier',
-        );
-      } catch (error) {
-        data = null;
-        setLoading(false);
-      }
-      if (!data) return;
-      const filteredStreams = data.streams.filter((stream: Stream) => {
-        const startTime = Number(stream.startTime);
-        const endTime = Number(stream.endTime);
-        const duration = Number(stream.duration);
-        const intactAmount = BigInt(stream.intactAmount);
-        return startTime + duration === endTime && intactAmount > BigInt(0);
-      });
-
-      setActiveStreams(filteredStreams);
-      setLoading(false);
-    }
-  }, [EXA, esEXA, request, walletAddress]);
-
-  useEffect(() => {
-    fetchStreams();
-  }, [fetchStreams]);
-
-  return { activeStreams, loading, refetch: fetchStreams };
-}
-
-export const useEscrowEXATotals = (streams: number[]) => {
   const sablier =
     sablierV2LockupLinearChainId === undefined ? undefined : sablierV2LockupLinearAddress[sablierV2LockupLinearChainId];
-  const esEXA = escrowedExaChainId === undefined ? undefined : escrowedExaAddress[escrowedExaChainId];
+  const fromBlock =
+    sablierV2LockupLinearChainId === undefined ? undefined : sablierV2LockupLinearBlock[sablierV2LockupLinearChainId];
 
-  const { data: reserves, isLoading: reserveIsLoading } = useReadContracts({
-    contracts:
-      esEXA && escrowedExaChainId !== undefined
-        ? streams.map((stream) => ({
-            abi: escrowedExaAbi,
-            address: esEXA,
-            functionName: 'reserves' as const,
-            args: [BigInt(stream)] as const,
-            chainId: escrowedExaChainId,
-          }))
-        : [],
+  const {
+    data: transfersIn = [],
+    isLoading: transfersInLoading,
+    isFetching: transfersInFetching,
+    refetch: refetchTransfersIn,
+  } = useContractEvents({
+    address: sablier,
+    abi: sablierV2LockupLinearAbi,
+    eventName: 'Transfer',
+    strict: true,
+    args: account ? { to: account } : undefined,
+    fromBlock,
+    toBlock: 'latest',
+    chainId: sablierV2LockupLinearChainId,
+    query: {
+      enabled: Boolean(account && sablier && fromBlock !== undefined),
+      select: (logs) =>
+        logs.map(({ args: { from, to, tokenId }, blockNumber, logIndex }) => ({
+          from,
+          to,
+          tokenId,
+          blockNumber,
+          logIndex,
+        })),
+    },
   });
 
-  const { data: withdrawables, isLoading: withdrawableIsLoading } = useReadContracts({
+  const {
+    data: transfersOut = [],
+    isLoading: transfersOutLoading,
+    isFetching: transfersOutFetching,
+    refetch: refetchTransfersOut,
+  } = useContractEvents({
+    address: sablier,
+    abi: sablierV2LockupLinearAbi,
+    eventName: 'Transfer',
+    strict: true,
+    args: account ? { from: account } : undefined,
+    fromBlock,
+    toBlock: 'latest',
+    chainId: sablierV2LockupLinearChainId,
+    query: {
+      enabled: Boolean(account && sablier && fromBlock !== undefined),
+      select: (logs) =>
+        logs.map(({ args: { from, to, tokenId }, blockNumber, logIndex }) => ({
+          from,
+          to,
+          tokenId,
+          blockNumber,
+          logIndex,
+        })),
+    },
+  });
+
+  const ownedStreamIds = useMemo(() => {
+    if (!account) return [];
+    return Array.from(
+      [...transfersIn, ...transfersOut]
+        .sort((a, b) =>
+          a.blockNumber === b.blockNumber ? a.logIndex - b.logIndex : a.blockNumber < b.blockNumber ? -1 : 1,
+        )
+        .reduce((streams, { to, tokenId }) => {
+          if (to.toLowerCase() === account.toLowerCase()) {
+            streams.set(tokenId.toString(), tokenId);
+          } else {
+            streams.delete(tokenId.toString());
+          }
+          return streams;
+        }, new Map<string, bigint>())
+        .values(),
+    );
+  }, [account, transfersIn, transfersOut]);
+
+  const {
+    data: streams = [],
+    isLoading: streamsLoading,
+    isFetching: streamsFetching,
+    refetch: refetchStreams,
+  } = useReadContracts({
     contracts:
       sablier && sablierV2LockupLinearChainId !== undefined
-        ? streams.map((stream) => ({
+        ? ownedStreamIds.map((streamId) => ({
             abi: sablierV2LockupLinearAbi,
             address: sablier,
-            functionName: 'withdrawableAmountOf' as const,
-            args: [BigInt(stream)] as const,
+            functionName: 'getStream' as const,
+            args: [streamId] as const,
             chainId: sablierV2LockupLinearChainId,
           }))
         : [],
+    query: { enabled: Boolean(sablier && ownedStreamIds.length) },
   });
 
-  const sum = useCallback(
-    (
-      arr: readonly ({ status: 'success'; result: bigint } | { status: 'failure' })[] | undefined,
-    ): bigint | undefined => {
-      if (arr === undefined) return undefined;
-      if (arr.some(({ status }) => status === 'failure')) return undefined;
-      return arr.reduce((total, item) => (item.status === 'success' ? total + item.result : total), 0n);
-    },
-    [],
-  );
+  const {
+    data: reserves = [],
+    isLoading: reservesLoading,
+    isFetching: reservesFetching,
+    refetch: refetchReserves,
+  } = useReadContracts({
+    contracts:
+      esEXA && escrowedExaChainId !== undefined
+        ? ownedStreamIds.map((streamId) => ({
+            abi: escrowedExaAbi,
+            address: esEXA,
+            functionName: 'reserves' as const,
+            args: [streamId] as const,
+            chainId: escrowedExaChainId,
+          }))
+        : [],
+    query: { enabled: Boolean(esEXA && ownedStreamIds.length) },
+  });
 
-  const totalReserve = useMemo(() => sum(reserves), [reserves, sum]);
+  const activeStreams = useMemo(() => {
+    if (!EXA || !esEXA) return [];
+    return streams.flatMap((stream, index): Stream[] => {
+      if (stream.status === 'failure') return [];
+      const { sender, startTime, isCancelable, wasCanceled, asset, endTime, isDepleted, isStream, amounts } =
+        stream.result;
+      if (
+        !isStream ||
+        wasCanceled ||
+        isDepleted ||
+        sender.toLowerCase() !== esEXA.toLowerCase() ||
+        asset.toLowerCase() !== EXA.toLowerCase()
+      ) {
+        return [];
+      }
+      const now = BigInt(Math.floor(Date.now() / 1000));
+      const vestedAmount =
+        now <= BigInt(startTime)
+          ? 0n
+          : now >= BigInt(endTime)
+            ? amounts.deposited
+            : (amounts.deposited * (now - BigInt(startTime))) / (BigInt(endTime) - BigInt(startTime));
+      return [
+        {
+          tokenId: ownedStreamIds[index].toString(),
+          startTime: startTime.toString(),
+          endTime: endTime.toString(),
+          depositAmount: amounts.deposited.toString(),
+          withdrawnAmount: amounts.withdrawn.toString(),
+          withdrawableAmount: (vestedAmount > amounts.withdrawn ? vestedAmount - amounts.withdrawn : 0n).toString(),
+          reserveAmount: reserves[index]?.status === 'success' ? reserves[index].result.toString() : undefined,
+          cancelable: isCancelable,
+        },
+      ];
+    });
+  }, [EXA, esEXA, ownedStreamIds, reserves, streams]);
 
-  const totalWithdrawable = useMemo(() => sum(withdrawables), [withdrawables, sum]);
+  const refetch = useCallback(() => {
+    void refetchTransfersIn();
+    void refetchTransfersOut();
+    if (ownedStreamIds.length) {
+      void refetchStreams();
+      void refetchReserves();
+    }
+  }, [ownedStreamIds.length, refetchReserves, refetchStreams, refetchTransfersIn, refetchTransfersOut]);
 
-  return { totalReserve, reserveIsLoading, totalWithdrawable, withdrawableIsLoading };
-};
+  const refetchStreamData = useCallback(() => {
+    if (ownedStreamIds.length) {
+      void refetchStreams();
+      void refetchReserves();
+    }
+  }, [ownedStreamIds.length, refetchReserves, refetchStreams]);
+
+  return {
+    activeStreams,
+    loading:
+      transfersInLoading ||
+      transfersInFetching ||
+      transfersOutLoading ||
+      transfersOutFetching ||
+      streamsLoading ||
+      streamsFetching ||
+      reservesLoading ||
+      reservesFetching,
+    refetch,
+    refetchStreamData,
+  };
+}

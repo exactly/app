@@ -1,4 +1,6 @@
-import { parseEther } from 'viem';
+import { expect } from '@playwright/test';
+import { createWalletClient, http, parseEther } from 'viem';
+import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 
 import base, { chain } from '../../fixture/base';
 import _app from '../../common/app';
@@ -8,8 +10,6 @@ import _vesting from '../../page/vesting';
 import { escrowedEXA, sablierV2LockupLinear, erc20 } from '../../utils/contracts';
 
 const test = base();
-
-test.describe.configure({ mode: 'serial' });
 
 test('Vesting esEXA & Claiming EXA', async ({ page, web2, web3 }) => {
   await web3.anvil.setBalance(web3.account.address, {
@@ -64,22 +64,6 @@ test('Vesting esEXA & Claiming EXA', async ({ page, web2, web3 }) => {
   await web3.anvil.increaseTime(half);
   await web2.time.now(now + half);
 
-  await web2.graph.streams([
-    {
-      id: `0xb923abdca17aed90eb5ec5e407bd37164f632bfd-10-${stream}`,
-      tokenId: String(stream),
-      recipient: web3.account.address,
-      startTime: String(now),
-      endTime: String(now + period),
-      duration: String(period),
-      depositAmount: String(parseEther('100')),
-      withdrawnAmount: '0',
-      intactAmount: String(parseEther('100')),
-      cancelable: true,
-      canceled: false,
-    },
-  ]);
-
   await app.reload();
 
   await test.step('flow: withdraw vested EXA halfway', async () => {
@@ -101,22 +85,6 @@ test('Vesting esEXA & Claiming EXA', async ({ page, web2, web3 }) => {
 
   await web3.anvil.increaseTime(half);
   await web2.time.now(now + period);
-
-  await web2.graph.streams([
-    {
-      id: `0xb923abdca17aed90eb5ec5e407bd37164f632bfd-10-${stream}`,
-      tokenId: String(stream),
-      recipient: web3.account.address,
-      startTime: String(now),
-      endTime: String(now + period),
-      duration: String(period),
-      depositAmount: String(parseEther('100')),
-      withdrawnAmount: String(parseEther('50')),
-      intactAmount: String(parseEther('50')),
-      cancelable: true,
-      canceled: false,
-    },
-  ]);
 
   await app.reload();
 
@@ -172,35 +140,6 @@ test('Claiming multiple streams', async ({ page, web2, web3 }) => {
   await web3.anvil.increaseTime(period * 2);
   await web2.time.now(now + period * 2);
 
-  await web2.graph.streams([
-    {
-      id: `0xb923abdca17aed90eb5ec5e407bd37164f632bfd-10-${stream0}`,
-      tokenId: String(stream0),
-      recipient: web3.account.address,
-      startTime: String(now),
-      endTime: String(now + period),
-      duration: String(period),
-      depositAmount: String(parseEther('50')),
-      intactAmount: String(parseEther('50')),
-      withdrawnAmount: '0',
-      canceled: false,
-      cancelable: true,
-    },
-    {
-      id: `0xb923abdca17aed90eb5ec5e407bd37164f632bfd-10-${stream1}`,
-      tokenId: String(stream1),
-      recipient: web3.account.address,
-      startTime: String(now),
-      endTime: String(now + period),
-      duration: String(period),
-      depositAmount: String(parseEther('50')),
-      intactAmount: String(parseEther('50')),
-      withdrawnAmount: '0',
-      canceled: false,
-      cancelable: true,
-    },
-  ]);
-
   await page.goto('/vesting');
   await vesting.waitForPageToBeReady();
 
@@ -233,7 +172,62 @@ test('Claiming multiple streams', async ({ page, web2, web3 }) => {
   });
 });
 
-test('Stream cancellation', async ({ page, web2, web3 }) => {
+test('Transferred stream follows Sablier NFT ownership', async ({ page, web3 }) => {
+  const sender = privateKeyToAccount(generatePrivateKey());
+  const senderWalletClient = createWalletClient({ account: sender, chain, transport: http(web3.anvil.url()) });
+
+  await web3.anvil.setBalance(web3.account.address, { ETH: 1 });
+  await web3.anvil.setBalance(sender.address, {
+    ETH: 1,
+    esEXA: 200,
+    EXA: 50,
+  });
+
+  const exa = await erc20('EXA', { walletClient: senderWalletClient });
+  const esEXA = await escrowedEXA({ publicClient: web3.publicClient, walletClient: senderWalletClient });
+  const sablier = await sablierV2LockupLinear({ publicClient: web3.publicClient, walletClient: senderWalletClient });
+  const stream = await sablier.read.nextStreamId();
+  const period = await esEXA.read.vestingPeriod();
+  const reserveRatio = await esEXA.read.reserveRatio();
+
+  await exa.write.approve([esEXA.address, 2n ** 256n - 1n], { account: sender, chain });
+  await esEXA.write.vest([parseEther('100'), sender.address, reserveRatio, BigInt(period)], {
+    account: sender,
+    chain,
+  });
+  await esEXA.write.vest([parseEther('100'), sender.address, reserveRatio, BigInt(period)], {
+    account: sender,
+    chain,
+  });
+
+  const vesting = _vesting(page);
+  const [senderOnlyStream, transferredStream] = [stream, stream + 1n];
+
+  await sablier.write.transferFrom([sender.address, web3.account.address, transferredStream], {
+    account: sender,
+    chain,
+  });
+  await page.goto('/vesting');
+  await vesting.waitForPageToBeReady();
+  await expect(page.getByTestId(`vesting-stream-${Number(senderOnlyStream)}`)).toHaveCount(0);
+  await vesting.checkStream({
+    id: Number(transferredStream),
+    vested: '100.00',
+    reserved: '25.00',
+    withdrawable: /^0\.0[01]$/,
+    left: '100.00',
+    progress: /^0(?:\.0[01])?%$/,
+  });
+
+  await (
+    await sablierV2LockupLinear({ publicClient: web3.publicClient, walletClient: web3.walletClient })
+  ).write.transferFrom([web3.account.address, sender.address, transferredStream], { account: web3.account, chain });
+  await page.reload();
+  await vesting.waitForPageToBeReady();
+  await expect(page.getByText('No vesting streams active yet.')).toBeVisible();
+});
+
+test('Stream cancellation', async ({ page, web3 }) => {
   await web3.anvil.setBalance(web3.account.address, {
     ETH: 1,
     esEXA: 100,
@@ -256,24 +250,6 @@ test('Stream cancellation', async ({ page, web2, web3 }) => {
   const balance = _balance({ test, page, publicClient: web3.publicClient });
   const vesting = _vesting(page);
 
-  const now = Math.ceil(Date.now() / 1_000);
-
-  await web2.graph.streams([
-    {
-      id: `0xb923abdca17aed90eb5ec5e407bd37164f632bfd-10-${stream}`,
-      tokenId: String(stream),
-      recipient: web3.account.address,
-      startTime: String(now),
-      endTime: String(now + period),
-      duration: String(period),
-      depositAmount: String(parseEther('100')),
-      withdrawnAmount: '0',
-      intactAmount: String(parseEther('100')),
-      cancelable: true,
-      canceled: false,
-    },
-  ]);
-
   await page.goto('/vesting');
   await vesting.waitForPageToBeReady();
 
@@ -283,9 +259,9 @@ test('Stream cancellation', async ({ page, web2, web3 }) => {
       id,
       vested: '100.00',
       reserved: '25.00',
-      withdrawable: '0.00',
+      withdrawable: /^0\.0[01]$/,
       left: '100.00',
-      progress: '0%',
+      progress: /^0(?:\.0[01])?%$/,
     });
 
     await vesting.cancelStream(id);

@@ -34,8 +34,6 @@ import {
   escrowedExaAddress,
   sablierV2LockupLinearAddress,
   sablierV2NftDescriptorAddress,
-  useReadEscrowedExaReserves,
-  useReadSablierV2LockupLinearWithdrawableAmountOf,
   useReadSablierV2NftDescriptorTokenUri,
   useWriteEscrowedExaCancel,
   useWriteEscrowedExaWithdrawMax,
@@ -127,7 +125,9 @@ const NFT: React.FC<{ tokenId: number; open: boolean; onClose: () => void }> = (
       sablierV2LockupLinearChainId === undefined
         ? undefined
         : [sablierV2LockupLinearAddress[sablierV2LockupLinearChainId], BigInt(tokenId)],
-    query: { enabled: sablierV2LockupLinearChainId !== undefined && sablierV2NftDescriptorChainId !== undefined },
+    query: {
+      enabled: open && sablierV2LockupLinearChainId !== undefined && sablierV2NftDescriptorChainId !== undefined,
+    },
   });
   const { spacing } = useTheme();
 
@@ -296,7 +296,9 @@ const WithdrawAndCancel: React.FC<{
 type ActiveStreamProps = {
   tokenId: number;
   depositAmount: bigint;
+  reserveAmount?: bigint;
   withdrawnAmount: bigint;
+  withdrawableAmount: bigint;
   startTime: number;
   endTime: number;
   cancellable: boolean;
@@ -306,7 +308,9 @@ type ActiveStreamProps = {
 const ActiveStream: FC<ActiveStreamProps> = ({
   tokenId,
   depositAmount,
+  reserveAmount,
   withdrawnAmount,
+  withdrawableAmount,
   startTime,
   endTime,
   cancellable,
@@ -314,16 +318,6 @@ const ActiveStream: FC<ActiveStreamProps> = ({
 }) => {
   const { t } = useTranslation();
   const { account: walletAddress, isImpersonating: impersonateActive } = useReadOnly();
-  const { data: reserve, isLoading: reserveIsLoading } = useReadEscrowedExaReserves({
-    chainId: escrowedExaChainId,
-    args: [BigInt(tokenId)],
-    query: { enabled: escrowedExaChainId !== undefined, staleTime: 30_000 },
-  });
-  const { data: withdrawable, isLoading: withdrawableIsLoading } = useReadSablierV2LockupLinearWithdrawableAmountOf({
-    chainId: sablierV2LockupLinearChainId,
-    args: [BigInt(tokenId)],
-    query: { enabled: sablierV2LockupLinearChainId !== undefined },
-  });
   const { writeContractAsync: cancelStream } = useWriteEscrowedExaCancel();
   const { writeContractAsync: withdrawMax } = useWriteEscrowedExaWithdrawMax();
   const [loading, setLoading] = useState(false);
@@ -481,11 +475,11 @@ const ActiveStream: FC<ActiveStreamProps> = ({
                 height={20}
                 style={{ maxWidth: '100%', height: 'auto' }}
               />
-              {reserveIsLoading ? (
+              {reserveAmount === undefined ? (
                 <Skeleton width={30} />
               ) : (
                 <Typography fontSize={18} fontWeight={500} data-testid={`vesting-stream-${tokenId}-reserved`}>
-                  {formatNumber(Number(reserve ?? 0n) / 1e18)}
+                  {formatNumber(Number(reserveAmount) / 1e18)}
                 </Typography>
               )}
             </Box>
@@ -531,13 +525,9 @@ const ActiveStream: FC<ActiveStreamProps> = ({
                 height={20}
                 style={{ maxWidth: '100%', height: 'auto' }}
               />
-              {withdrawableIsLoading ? (
-                <Skeleton width={30} />
-              ) : (
-                <Typography fontSize={18} fontWeight={500} data-testid={`vesting-stream-${tokenId}-withdrawable`}>
-                  {formatNumber(Number(withdrawable) / 1e18)}
-                </Typography>
-              )}
+              <Typography fontSize={18} fontWeight={500} data-testid={`vesting-stream-${tokenId}-withdrawable`}>
+                {formatNumber(Number(withdrawableAmount) / 1e18)}
+              </Typography>
               <Typography fontSize={14} color="grey.400" data-testid={`vesting-stream-${tokenId}-left`}>
                 / {formatNumber(Number(depositAmount - withdrawnAmount) / 1e18)}
               </Typography>
