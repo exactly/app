@@ -4,7 +4,7 @@ import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
 import { createStorage, fallback, http, type Transport } from 'wagmi';
 import { optimism } from 'viem/chains';
 import * as viemChains from 'viem/chains';
-import type { Address, Chain, Hex } from 'viem';
+import { numberToHex, type Address, type Chain, type Hex } from 'viem';
 
 import { e2eConnector } from './connectors';
 
@@ -37,7 +37,35 @@ const alchemyRpcUrls = {
 } satisfies Partial<Record<number, (key: string) => string>>;
 
 function transportForChain(chain: Chain): Transport {
-  if (isE2E && e2e) return http(e2e.rpc);
+  if (isE2E && e2e)
+    return (parameters) => {
+      const transport = http(e2e.rpc)(parameters);
+      return {
+        ...transport,
+        request: ({ method, params }, options) => {
+          if (
+            (method === 'eth_call' || method === 'eth_estimateGas' || method === 'eth_sendTransaction') &&
+            Array.isArray(params) &&
+            params[0] &&
+            typeof params[0] === 'object'
+          ) {
+            const [{ maxFeePerGas, maxPriorityFeePerGas, ...transaction }, ...rest] = params as [
+              Record<string, unknown>,
+              ...unknown[],
+            ];
+            void maxFeePerGas;
+            void maxPriorityFeePerGas;
+            return transport.request(
+              { method, params: [{ ...transaction, gasPrice: numberToHex(0) }, ...rest] } as Parameters<
+                typeof transport.request
+              >[0],
+              options,
+            );
+          }
+          return transport.request({ method, params } as Parameters<typeof transport.request>[0], options);
+        },
+      };
+    };
 
   const alchemyRpcUrl = alchemyKey
     ? Object.entries(alchemyRpcUrls).find(([chainId]) => Number(chainId) === chain.id)?.[1](alchemyKey)

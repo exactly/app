@@ -16,6 +16,7 @@ import {
   parseUnits,
   toHex,
   type Address,
+  type Chain,
   type Hex,
 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
@@ -48,6 +49,14 @@ type AnvilRpcSchema = [
 const execFileAsync = promisify(execFile);
 const deployerPrivateKey = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
 const deployer = privateKeyToAccount(deployerPrivateKey);
+const chain = {
+  ...anvilChain,
+  fees: {
+    estimateFeesPerGas: async ({ type }) =>
+      type === 'legacy' ? { gasPrice: 0n } : { maxFeePerGas: 0n, maxPriorityFeePerGas: 0n },
+    maxPriorityFeePerGas: 0n,
+  },
+} satisfies Chain;
 
 const instance = (params: { dumpState?: string; loadState?: string } = {}) =>
   Instance.anvil({
@@ -91,12 +100,12 @@ const start = async (params: { dumpState?: string; loadState?: string } = {}, de
 
 const connect = async (url: string, destroy: () => Promise<void>): Promise<Anvil> => {
   const transport = http(url);
-  const walletClient = createWalletClient<typeof transport, typeof anvilChain, typeof deployer, AnvilRpcSchema>({
+  const walletClient = createWalletClient<typeof transport, typeof chain, typeof deployer, AnvilRpcSchema>({
     account: deployer,
-    chain: anvilChain,
+    chain,
     transport,
   });
-  const publicClient = createPublicClient({ chain: anvilChain, transport });
+  const publicClient = createPublicClient({ chain, transport });
 
   return {
     url: () => url,
@@ -121,26 +130,26 @@ const connect = async (url: string, destroy: () => Promise<void>): Promise<Anvil
 
           if (symbol === 'EXA') {
             await publicClient.waitForTransactionReceipt({
-              hash: await token.write.transfer([address, amount], { account: deployer, chain: anvilChain }),
+              hash: await token.write.transfer([address, amount], { account: deployer, chain }),
             });
           } else if (symbol === 'esEXA') {
             const exa = await erc20('EXA', { publicClient, walletClient });
             await publicClient.waitForTransactionReceipt({
-              hash: await exa.write.transfer([address, amount], { account: deployer, chain: anvilChain }),
+              hash: await exa.write.transfer([address, amount], { account: deployer, chain }),
             });
             await publicClient.waitForTransactionReceipt({
-              hash: await exa.write.approve([token.address, amount], { account: address, chain: anvilChain }),
+              hash: await exa.write.approve([token.address, amount], { account: address, chain }),
             });
             await publicClient.waitForTransactionReceipt({
               hash: await getContract({
                 address: token.address,
                 abi: escrowedExaAbi,
                 client: { public: publicClient, wallet: walletClient },
-              }).write.mint([amount, address], { account: address, chain: anvilChain }),
+              }).write.mint([amount, address], { account: address, chain }),
             });
           } else {
             await publicClient.waitForTransactionReceipt({
-              hash: await token.write.mint([address, amount], { account: deployer, chain: anvilChain }),
+              hash: await token.write.mint([address, amount], { account: deployer, chain }),
             });
           }
         }

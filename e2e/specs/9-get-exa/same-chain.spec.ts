@@ -56,7 +56,12 @@ test('Get EXA on same chain', async ({ page, web2, web3 }) => {
   });
 
   const balanceOf = await exa.read.balanceOf([web3.account.address]);
-  await exa.write.transfer(['0x0000000000000000000000000000000000000002', balanceOf], { account: web3.account, chain });
+  await web3.publicClient.waitForTransactionReceipt({
+    hash: await exa.write.transfer(['0x0000000000000000000000000000000000000002', balanceOf], {
+      account: web3.account,
+      chain,
+    }),
+  });
 
   await app.reload();
   await getEXA.waitForPageToBeReady();

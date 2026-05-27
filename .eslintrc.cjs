@@ -16,7 +16,7 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'plugin:@next/next/recommended',
   ],
-  ignorePatterns: ['generated/wagmi.ts'],
+  ignorePatterns: ['generated/wagmi.ts', 'test-results'],
   rules: {
     eqeqeq: ['error', 'always', { null: 'ignore' }],
     'no-console': 'error',

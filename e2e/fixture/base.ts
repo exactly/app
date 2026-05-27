@@ -27,7 +27,14 @@ const defaultOptions = {
   marketView: 'advanced',
 } as const;
 
-export const chain: Chain = anvilChain;
+export const chain: Chain = {
+  ...anvilChain,
+  fees: {
+    estimateFeesPerGas: async ({ type }) =>
+      type === 'legacy' ? { gasPrice: 0n } : { maxFeePerGas: 0n, maxPriorityFeePerGas: 0n },
+    maxPriorityFeePerGas: 0n,
+  },
+};
 
 const defaultPrivateKey = generatePrivateKey();
 

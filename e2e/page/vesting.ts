@@ -117,6 +117,7 @@ export default function (page: Page) {
 
   const waitForStreamCancelTransaction = async (streamId: number) => {
     await expect(page.getByTestId(`vesting-stream-${streamId}-cancel-submit`)).not.toBeVisible();
+    await expect(page.getByTestId(`vesting-stream-${streamId}`)).not.toBeVisible({ timeout: 30_000 });
   };
 
   return {

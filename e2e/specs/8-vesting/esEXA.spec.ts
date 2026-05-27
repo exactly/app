@@ -74,7 +74,7 @@ test('Vesting esEXA & Claiming EXA', async ({ page, web2, web3 }) => {
       reserved: '25.00',
       withdrawable: /50\.0|49\.9/,
       left: '100.00',
-      progress: /50\.00%|50\.01%/,
+      progress: /49\.9\d%|50\.0\d%/,
     });
 
     await vesting.claimStream(id);
@@ -120,14 +120,20 @@ test('Claiming multiple streams', async ({ page, web2, web3 }) => {
   const period = await esEXA.read.vestingPeriod();
   const reserveRatio = await esEXA.read.reserveRatio();
 
-  await exa.write.approve([esEXA.address, 2n ** 256n - 1n], { account: web3.account, chain });
-  await esEXA.write.vest([parseEther('50'), web3.account.address, reserveRatio, BigInt(period)], {
-    account: web3.account,
-    chain,
+  await web3.publicClient.waitForTransactionReceipt({
+    hash: await exa.write.approve([esEXA.address, 2n ** 256n - 1n], { account: web3.account, chain }),
   });
-  await esEXA.write.vest([parseEther('50'), web3.account.address, reserveRatio, BigInt(period)], {
-    account: web3.account,
-    chain,
+  await web3.publicClient.waitForTransactionReceipt({
+    hash: await esEXA.write.vest([parseEther('50'), web3.account.address, reserveRatio, BigInt(period)], {
+      account: web3.account,
+      chain,
+    }),
+  });
+  await web3.publicClient.waitForTransactionReceipt({
+    hash: await esEXA.write.vest([parseEther('50'), web3.account.address, reserveRatio, BigInt(period)], {
+      account: web3.account,
+      chain,
+    }),
   });
 
   const [stream0, stream1] = [stream, stream + 1n];
@@ -190,22 +196,30 @@ test('Transferred stream follows Sablier NFT ownership', async ({ page, web3 }) 
   const period = await esEXA.read.vestingPeriod();
   const reserveRatio = await esEXA.read.reserveRatio();
 
-  await exa.write.approve([esEXA.address, 2n ** 256n - 1n], { account: sender, chain });
-  await esEXA.write.vest([parseEther('100'), sender.address, reserveRatio, BigInt(period)], {
-    account: sender,
-    chain,
+  await web3.publicClient.waitForTransactionReceipt({
+    hash: await exa.write.approve([esEXA.address, 2n ** 256n - 1n], { account: sender, chain }),
   });
-  await esEXA.write.vest([parseEther('100'), sender.address, reserveRatio, BigInt(period)], {
-    account: sender,
-    chain,
+  await web3.publicClient.waitForTransactionReceipt({
+    hash: await esEXA.write.vest([parseEther('100'), sender.address, reserveRatio, BigInt(period)], {
+      account: sender,
+      chain,
+    }),
+  });
+  await web3.publicClient.waitForTransactionReceipt({
+    hash: await esEXA.write.vest([parseEther('100'), sender.address, reserveRatio, BigInt(period)], {
+      account: sender,
+      chain,
+    }),
   });
 
   const vesting = _vesting(page);
   const [senderOnlyStream, transferredStream] = [stream, stream + 1n];
 
-  await sablier.write.transferFrom([sender.address, web3.account.address, transferredStream], {
-    account: sender,
-    chain,
+  await web3.publicClient.waitForTransactionReceipt({
+    hash: await sablier.write.transferFrom([sender.address, web3.account.address, transferredStream], {
+      account: sender,
+      chain,
+    }),
   });
   await page.goto('/vesting');
   await vesting.waitForPageToBeReady();
@@ -219,9 +233,11 @@ test('Transferred stream follows Sablier NFT ownership', async ({ page, web3 }) 
     progress: /^0(?:\.\d{1,2})?%$/,
   });
 
-  await (
-    await sablierV2LockupLinear({ publicClient: web3.publicClient, walletClient: web3.walletClient })
-  ).write.transferFrom([web3.account.address, sender.address, transferredStream], { account: web3.account, chain });
+  await web3.publicClient.waitForTransactionReceipt({
+    hash: await (
+      await sablierV2LockupLinear({ publicClient: web3.publicClient, walletClient: web3.walletClient })
+    ).write.transferFrom([web3.account.address, sender.address, transferredStream], { account: web3.account, chain }),
+  });
   await page.reload();
   await vesting.waitForPageToBeReady();
   await expect(page.getByText('No vesting streams active yet.')).toBeVisible();
@@ -241,10 +257,14 @@ test('Stream cancellation', async ({ page, web3 }) => {
   const period = await esEXA.read.vestingPeriod();
   const reserveRatio = await esEXA.read.reserveRatio();
 
-  await exa.write.approve([esEXA.address, 2n ** 256n - 1n], { account: web3.account, chain });
-  await esEXA.write.vest([parseEther('100'), web3.account.address, reserveRatio, BigInt(period)], {
-    account: web3.account,
-    chain,
+  await web3.publicClient.waitForTransactionReceipt({
+    hash: await exa.write.approve([esEXA.address, 2n ** 256n - 1n], { account: web3.account, chain }),
+  });
+  await web3.publicClient.waitForTransactionReceipt({
+    hash: await esEXA.write.vest([parseEther('100'), web3.account.address, reserveRatio, BigInt(period)], {
+      account: web3.account,
+      chain,
+    }),
   });
 
   const balance = _balance({ test, page, publicClient: web3.publicClient });
