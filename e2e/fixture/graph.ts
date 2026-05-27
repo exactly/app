@@ -63,7 +63,6 @@ function graph(page: Page) {
       json: {
         data: {
           accounts: [],
-          stakingSharedFees: [],
           timelockControllerCalls: [],
           ...data,
         },

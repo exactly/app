@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FC, useMemo } from 'react';
 import { AvatarGroup, Avatar, Box, Skeleton, Typography, Tooltip } from '@mui/material';
 
 import { useTranslation } from 'react-i18next';
@@ -9,17 +9,22 @@ import useAccountData from 'hooks/useAccountData';
 import formatNumber from 'utils/formatNumber';
 import { calculateStakingRewardsAPR, calculateTotalStakingRewardsAPR } from 'utils/calculateStakingAPR';
 import { InfoOutlined } from '@mui/icons-material';
-import getStakingSharedFees from 'queries/getStakingSharedFees';
-import useGraphClient from 'hooks/useGraphClient';
 import { formatEther, getAddress } from 'viem';
 import getVouchersPrice from 'utils/getVouchersPrice';
+import { useContractEvents } from 'wagmi';
+import { stakedExaAbi, stakedExaAddress, stakedExaBlock } from 'generated/wagmi';
+import { defaultChain } from 'utils/client';
+
+const stakedExaChainId = Object.keys(stakedExaAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof stakedExaAddress => chainId === defaultChain.id);
 
 function StakedEXASummary() {
   const { t } = useTranslation();
   const { totalAssets, rewardsTokens, rewards } = useStakeEXA();
   const exaPrice = useEXAPrice();
   const { accountData } = useAccountData();
-  const request = useGraphClient();
+  const stakedEXA = stakedExaChainId === undefined ? undefined : stakedExaAddress[stakedExaChainId];
 
   const rewardsAPR = useMemo(() => {
     return calculateStakingRewardsAPR(totalAssets, rewards, accountData, exaPrice);
@@ -29,52 +34,42 @@ function StakedEXASummary() {
     return calculateTotalStakingRewardsAPR(rewardsAPR);
   }, [rewardsAPR]);
 
-  const [totalFees, setTotalFees] = useState<bigint | undefined>(undefined);
-  const [loading, setLoading] = useState<boolean>(false);
-  const fetchFees = useCallback(async () => {
-    interface StakingSharedFee {
-      id: string;
-      amount: string;
-    }
+  const {
+    data: rewardAmountNotified = {},
+    isLoading: totalFeesLoading,
+    isFetching: totalFeesFetching,
+    isError: totalFeesError,
+  } = useContractEvents({
+    address: stakedEXA,
+    abi: stakedExaAbi,
+    eventName: 'RewardAmountNotified',
+    strict: true,
+    args: stakedEXA ? { notifier: stakedEXA } : undefined,
+    fromBlock: stakedExaChainId === undefined ? undefined : stakedExaBlock[stakedExaChainId],
+    toBlock: 'latest',
+    chainId: stakedExaChainId,
+    query: {
+      enabled: Boolean(stakedEXA && accountData && rewards),
+      select: (logs) =>
+        logs.reduce(
+          (total, { args: { reward, amount } }) => {
+            total[reward] = (total[reward] || 0n) + amount;
+            return total;
+          },
+          {} as Record<string, bigint>,
+        ),
+    },
+  });
 
-    setLoading(true);
-    try {
-      const response = await request<{ stakingSharedFees: StakingSharedFee[] }>(getStakingSharedFees(), 'exactly');
-
-      if (!response) {
-        setLoading(false);
-        return;
-      }
-
-      const data = response.stakingSharedFees;
-
-      let totalUSD = 0n;
-
-      data.forEach(({ id, amount }) => {
-        if (!accountData || !rewards) return;
-        const reward = getAddress(id);
-
-        const rr = accountData.find((a) => a.asset === reward || a.market === reward);
-        const symbol = rewards.find((r) => r.reward === reward)?.symbol;
-
-        const decimals = rr?.decimals || 18;
-        const decimalWAD = 10n ** BigInt(decimals);
-        const usdPrice = getVouchersPrice(accountData, symbol || '');
-
-        const feeUSD = (BigInt(amount) * usdPrice) / decimalWAD;
-        totalUSD += feeUSD;
-      });
-      setTotalFees(totalUSD);
-    } catch (error) {
-      setTotalFees(undefined);
-    } finally {
-      setLoading(false);
-    }
-  }, [accountData, request, rewards]);
-
-  useEffect(() => {
-    fetchFees();
-  }, [fetchFees]);
+  const totalFees = useMemo(() => {
+    if (!accountData || !rewards || !stakedEXA || totalFeesError) return;
+    return Object.entries(rewardAmountNotified).reduce((total, [id, amount]) => {
+      const reward = getAddress(id);
+      const rr = accountData.find((a) => a.asset === reward || a.market === reward);
+      const symbol = rewards.find((r) => r.reward === reward)?.symbol;
+      return total + (amount * getVouchersPrice(accountData, symbol || '')) / 10n ** BigInt(rr?.decimals || 18);
+    }, 0n);
+  }, [accountData, rewardAmountNotified, rewards, stakedEXA, totalFeesError]);
 
   return (
     <Box display="flex" flexDirection={{ xs: 'column', md: 'row' }} gap={7}>
@@ -142,7 +137,7 @@ function StakedEXASummary() {
       <Box>
         <Typography variant="h6">{t('Total Fees Shared')}</Typography>
         <Box display="flex" gap={1}>
-          {loading || totalFees === undefined ? (
+          {totalFeesLoading || totalFeesFetching || totalFees === undefined ? (
             <Skeleton variant="text" width={80} />
           ) : (
             <Typography fontSize={32} fontWeight={500}>

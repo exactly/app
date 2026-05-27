@@ -146,7 +146,11 @@ export default defineConfig({
     contract('EscrowedEXA', { optimism: 'esEXA', 'op-sepolia': 'esEXA', anvil: 'esEXA' }, true),
     { name: 'L1GasPriceOracle', abi: GasPriceOracle as Abi },
     contract('InstallmentsRouter', ['op-sepolia', 'optimism', 'base', 'base-sepolia', 'anvil'], true),
-    contract('StakedEXA', { 'op-sepolia': 'stEXA', optimism: 'stEXA' }, true),
+    contract(
+      'StakedEXA',
+      { 'op-sepolia': { name: 'stEXA', block: true }, optimism: { name: 'stEXA', block: true } },
+      true,
+    ),
     contract('StakingPreviewer', ['op-sepolia', 'optimism'], true),
     contract('PriceFeedDAI', ['ethereum', 'op-sepolia', 'base-sepolia']),
     contract('PriceFeedETH', ['ethereum']),
