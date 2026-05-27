@@ -55,35 +55,15 @@ export default withSentryConfig(
     ],
 
     images: { unoptimized: true },
-    webpack(config) {
-      const entry = config.entry;
-      config.entry = async () => {
-        const entries = await entry();
-        Object.keys(entries).forEach((key) => {
-          if (key.endsWith('.md')) delete entries[key];
-        });
-        return entries;
-      };
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        '@metamask/connect-evm': false,
-        accounts: false,
-        porto: false,
-        'porto/internal': false,
-      };
-      return config;
-    },
   },
   {
     silent: true,
     org: 'exactly',
     project: 'webapp',
-  },
-  {
-    disableServerWebpackPlugin: DISABLE_SENTRY_PLUGIN,
-    disableClientWebpackPlugin: DISABLE_SENTRY_PLUGIN,
+    sourcemaps: {
+      disable: DISABLE_SENTRY_PLUGIN,
+      deleteSourcemapsAfterUpload: false,
+    },
     widenClientFileUpload: true,
-    hideSourceMaps: true,
-    disableLogger: true,
   },
 );

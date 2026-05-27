@@ -33,7 +33,7 @@ const Activity = ({ contracts }: Props) => {
           component="h1"
           variant="h5"
           fontWeight={700}
-          color={({ palette }) => (palette.mode === 'dark' ? 'white' : 'black')}
+          sx={({ palette }) => ({ color: palette.mode === 'dark' ? 'white' : 'black' })}
         >
           {t('Protocol Activity Monitor')}
         </Typography>

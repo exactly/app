@@ -80,7 +80,7 @@ const ContractInfo: FC<Props> = ({
     >
       <AccordionSummary
         expandIcon={<ExpandMoreRoundedIcon />}
-        sx={{ p: 1, borderBottom: ({ palette }) => (withBorder ? `1px solid ${palette.grey[300]}` : 'none') }}
+        sx={{ p: 1, borderBottom: withBorder ? 1 : 0, borderColor: 'grey.300' }}
       >
         <Box display="flex" gap={1} alignItems="center" justifyContent="space-between" width="100%" pr={1}>
           <Box display="flex" alignItems="center" gap={1}>

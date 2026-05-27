@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme, Box, Typography, popoverClasses, Menu, MenuItem, Button } from '@mui/material';
+import type { SvgIconProps } from '@mui/material/SvgIcon';
 import Link from 'next/link';
 import ExpandLessIcon from '@mui/icons-material/ExpandLessRounded';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMoreRounded';
@@ -9,11 +10,11 @@ import useRouter from 'hooks/useRouter';
 
 type Props = {
   name: string;
-  icon: React.ReactElement;
+  icon: React.ReactElement<SvgIconProps>;
   options: {
     pathname: string;
     name: string;
-    icon: React.ReactElement;
+    icon: React.ReactElement<SvgIconProps>;
     isNew?: boolean;
   }[];
 };

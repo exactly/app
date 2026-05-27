@@ -21,7 +21,7 @@ export const AccountDataProvider: FC<PropsWithChildren> = ({ children }) => {
   const { refreshAccountData } = useAccountData();
   const { rates } = useRewards();
 
-  const focusTimeout = useRef<number>();
+  const focusTimeout = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     const safeConnector = connectors.find(({ id }) => id === 'safe');

@@ -27,10 +27,10 @@ import { track } from 'utils/mixpanel';
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
   return (
-    <Draggable nodeRef={ref} cancel={'[class*="MuiDialogContent-root"]'}>
+    <Draggable nodeRef={ref as unknown as React.RefObject<HTMLElement>} cancel={'[class*="MuiDialogContent-root"]'}>
       <Paper
-        ref={ref}
         {...props}
+        ref={ref}
         sx={{
           borderRadius: '6px',
           minWidth: '400px',

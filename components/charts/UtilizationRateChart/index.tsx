@@ -50,87 +50,95 @@ function UtilizationRateChart({ type, symbol }: Props) {
           <LoadingChart />
         ) : (
           <Plot
-            data={[
-              {
-                x: data[0],
-                y: data[1],
-                z: data[2],
-                type: 'surface',
-                opacity: 0.8,
-                colorscale,
-                colorbar: {
-                  tickfont: { family: 'Inter, sans-serif', size: 11, color: palette.text.primary },
-                  outlinecolor: palette.text.primary,
-                  outlinewidth: 0.5,
-                  x: 0.89,
-                  y: 0.5,
-                  len: 0.8,
-                  thickness: 11,
-                  tickformat: '.0%',
-                  xanchor: 'left',
-                  yanchor: 'middle',
+            data={
+              [
+                {
+                  x: data[0],
+                  y: data[1],
+                  z: data[2],
+                  type: 'surface',
+                  opacity: 0.8,
+                  colorscale,
+                  colorbar: {
+                    tickfont: { family: 'Inter, sans-serif', size: 11, color: palette.text.primary },
+                    outlinecolor: palette.text.primary,
+                    outlinewidth: 0.5,
+                    x: 0.89,
+                    y: 0.5,
+                    len: 0.8,
+                    thickness: 11,
+                    tickformat: '.0%',
+                    xanchor: 'left',
+                    yanchor: 'middle',
+                  },
+                  lighting: { ambient: 1, diffuse: 0, specular: 0, fresnel: 0 },
+                  contours: {
+                    x: { color: palette.text.primary, highlightcolor: palette.text.primary },
+                    y: { color: palette.text.primary, highlightcolor: palette.text.primary },
+                    z: { color: palette.text.primary, highlightcolor: palette.text.primary },
+                  },
+                  hovertemplate: `<b>Variable Utilization: %{x}<br>Global Utilization: %{y}<br>Variable APR: %{z:.2%}</b><extra></extra>`,
                 },
-                lighting: { ambient: 1, diffuse: 0, specular: 0, fresnel: 0 },
-                contours: {
-                  // @ts-expect-error -- missing in types
-                  x: { color: palette.text.primary, highlightcolor: palette.text.primary },
-                  y: { color: palette.text.primary, highlightcolor: palette.text.primary },
-                  z: { color: palette.text.primary, highlightcolor: palette.text.primary },
+                {
+                  type: 'scatter3d',
+                  mode: 'markers',
+                  x: [formatEther(currentUtilization[0].utilization)],
+                  y: [formatEther(globalUtilization)],
+                  z: [borrowAPR],
+                  marker: { symbol: 'cross', size: 8, color: palette.text.primary },
+                  hovertemplate:
+                    '<b>Variable Utilization: %{x:.2%}<br>Global Utilization: %{y:.2%}<br>Variable APR: %{z:.2%}<br>Current</b><extra></extra>',
                 },
-                hovertemplate: `<b>Variable Utilization: %{x}<br>Global Utilization: %{y}<br>Variable APR: %{z:.2%}</b><extra></extra>`,
-              },
-              {
-                type: 'scatter3d',
-                mode: 'markers',
-                x: [formatEther(currentUtilization[0].utilization)],
-                y: [formatEther(globalUtilization)],
-                z: [borrowAPR],
-                marker: { symbol: 'cross', size: 8, color: palette.text.primary },
-                hovertemplate:
-                  '<b>Variable Utilization: %{x:.2%}<br>Global Utilization: %{y:.2%}<br>Variable APR: %{z:.2%}<br>Current</b><extra></extra>',
-              },
-            ]}
+              ] as React.ComponentProps<typeof Plot>['data']
+            }
             config={{ displayModeBar: false, responsive: true, scrollZoom: false }}
-            layout={{
-              paper_bgcolor: 'transparent',
-              scene: {
-                xaxis: {
-                  title: 'Variable Utilization',
-                  tickformat: '.0%',
-                  titlefont: { family: 'Inter, sans-serif', size: 14, color: palette.text.primary },
-                  tickfont: { family: 'Inter, sans-serif', size: 11, color: palette.text.primary },
+            layout={
+              {
+                paper_bgcolor: 'transparent',
+                scene: {
+                  xaxis: {
+                    title: {
+                      text: 'Variable Utilization',
+                      font: { family: 'Inter, sans-serif', size: 14, color: palette.text.primary },
+                    },
+                    tickformat: '.0%',
+                    tickfont: { family: 'Inter, sans-serif', size: 11, color: palette.text.primary },
+                  },
+                  yaxis: {
+                    title: {
+                      text: 'Global Utilization',
+                      font: { family: 'Inter, sans-serif', size: 14, color: palette.text.primary },
+                    },
+                    tickformat: '.0%',
+                    tickfont: { family: 'Inter, sans-serif', size: 11, color: palette.text.primary },
+                  },
+                  zaxis: {
+                    title: {
+                      text: 'Variable APR',
+                      font: { family: 'Inter, sans-serif', size: 14, color: palette.text.primary },
+                    },
+                    tickformat: '.0%',
+                    tickfont: { family: 'Inter, sans-serif', size: 11, color: palette.text.primary },
+                  },
+                  camera: {
+                    eye: { x: 1, y: -1, z: 0.7 },
+                    projection: { type: 'orthographic' },
+                  },
+                  aspectmode: 'manual',
+                  aspectratio: { x: 1.25, y: 1.25, z: 1.25 },
                 },
-                yaxis: {
-                  title: 'Global Utilization',
-                  tickformat: '.0%',
-                  titlefont: { family: 'Inter, sans-serif', size: 14, color: palette.text.primary },
-                  tickfont: { family: 'Inter, sans-serif', size: 11, color: palette.text.primary },
+                autosize: true,
+                width: ref.current?.clientWidth ?? 500,
+                height: ref.current?.clientHeight ?? 500,
+                margin: { l: 0, r: 0, b: 0, t: 0 },
+                hoverlabel: {
+                  align: 'right',
+                  bgcolor: palette.grey[100],
+                  bordercolor: palette.text.primary,
+                  font: { family: 'Inter, sans-serif', size: 13, color: palette.text.primary },
                 },
-                zaxis: {
-                  title: 'Variable APR',
-                  tickformat: '.0%',
-                  titlefont: { family: 'Inter, sans-serif', size: 14, color: palette.text.primary },
-                  tickfont: { family: 'Inter, sans-serif', size: 11, color: palette.text.primary },
-                },
-                camera: {
-                  eye: { x: 1, y: -1, z: 0.7 },
-                  // @ts-expect-error -- missing in types
-                  projection: { type: 'orthographic' },
-                },
-                aspectmode: 'manual',
-                aspectratio: { x: 1.25, y: 1.25, z: 1.25 },
-              },
-              autosize: true,
-              width: ref.current?.clientWidth ?? 500,
-              height: ref.current?.clientHeight ?? 500,
-              margin: { l: 0, r: 0, b: 0, t: 0 },
-              hoverlabel: {
-                align: 'right',
-                bgcolor: palette.grey[100],
-                bordercolor: palette.text.primary,
-                font: { family: 'Inter, sans-serif', size: 13, color: palette.text.primary },
-              },
-            }}
+              } as React.ComponentProps<typeof Plot>['layout']
+            }
           />
         )}
       </Box>

@@ -20,8 +20,9 @@ export default function useHandleOperationError(): HandleOperationErrorFunc {
         symbol === 'WETH' &&
         ['withdraw', 'withdrawAtMaturity', 'borrow', 'borrowAtMaturity'].includes(operation) &&
         exception &&
-        exception?.code &&
-        exception?.code === 'UNPREDICTABLE_GAS_LIMIT'
+        typeof exception === 'object' &&
+        'code' in exception &&
+        exception.code === 'UNPREDICTABLE_GAS_LIMIT'
       ) {
         return '';
       }

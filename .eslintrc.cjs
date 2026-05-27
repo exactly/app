@@ -14,9 +14,9 @@ module.exports = {
     'plugin:react-hooks/recommended',
     'plugin:eslint-comments/recommended',
     'plugin:@typescript-eslint/recommended',
-    'plugin:@next/next/recommended',
+    'plugin:@next/next/recommended-legacy',
   ],
-  ignorePatterns: ['generated/wagmi.ts', 'test-results'],
+  ignorePatterns: ['generated/wagmi.ts', 'next-env.d.ts', 'test-results'],
   rules: {
     eqeqeq: ['error', 'always', { null: 'ignore' }],
     'no-console': 'error',

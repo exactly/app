@@ -5,9 +5,11 @@ const config: KnipConfig = {
   ignoreDependencies: [
     '@base-org/account',
     '@coinbase/wallet-sdk',
+    '@metamask/connect-evm',
     '@safe-global/safe-apps-provider',
     '@sentry/cli',
     '@walletconnect/ethereum-provider',
+    'porto',
     'sharp',
     'solmate',
     'ts-node',

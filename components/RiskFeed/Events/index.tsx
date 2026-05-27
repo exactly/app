@@ -44,7 +44,7 @@ export default function Events({ title, empty, data, isLoading }: Props) {
         variant="h2"
         fontSize={24}
         fontWeight={700}
-        color={({ palette }) => (palette.mode === 'dark' ? 'white' : 'black')}
+        sx={({ palette }) => ({ color: palette.mode === 'dark' ? 'white' : 'black' })}
       >
         {title}
       </Typography>

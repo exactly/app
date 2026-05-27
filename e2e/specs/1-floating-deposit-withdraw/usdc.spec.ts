@@ -7,7 +7,7 @@ const test = base();
 
 test('USDC floating deposit/withdraw', async ({ page, web3 }) => {
   await web3.anvil.setBalance(web3.account.address, {
-    ETH: 1,
+    ETH: 100,
     USDC: 5,
   });
 

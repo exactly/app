@@ -4,6 +4,7 @@ import BarChartRoundedIcon from '@mui/icons-material/BarChartRounded';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Box, Button, Menu, MenuItem, popoverClasses, Typography, useTheme } from '@mui/material';
+import type { SvgIconProps } from '@mui/material/SvgIcon';
 import Link from 'next/link';
 import useRouter from 'hooks/useRouter';
 import { Timeout } from 'react-number-format/types/types';
@@ -16,7 +17,7 @@ type ViewOption = {
   type: MarketView;
   title: string;
   description: string;
-  icon: ReactElement;
+  icon: ReactElement<SvgIconProps>;
 };
 
 const SelectMarketsView: FC = () => {

@@ -101,7 +101,7 @@ const CustomProgressBar: React.FC<{ value: number; 'data-testid'?: string }> = (
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
   return (
-    <Draggable nodeRef={ref} cancel={'[class*="MuiDialogContent-root"]'}>
+    <Draggable nodeRef={ref as unknown as React.RefObject<HTMLElement>} cancel={'[class*="MuiDialogContent-root"]'}>
       <Paper {...props} ref={ref} />
     </Draggable>
   );

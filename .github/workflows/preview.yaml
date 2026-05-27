@@ -20,7 +20,6 @@ jobs:
       SENTRY_PROJECT: webapp
       SENTRY_ENVIRONMENT: development
       NEXT_PUBLIC_NETWORK: 11155420
-      NODE_OPTIONS: --max_old_space_size=8192
       E2E_WORKERS: ${{ inputs.e2e_workers || 1 }}
     steps:
       - uses: actions/checkout@v6
