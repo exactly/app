@@ -1,11 +1,12 @@
 import { execFile } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { mkdir, open, rm } from 'node:fs/promises';
-import { dirname } from 'node:path';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 
 import { test } from '@playwright/test';
-import { Instance, Pool } from 'prool';
+import { Instance, Pool, Server } from 'prool';
 import {
   createPublicClient,
   createWalletClient,
@@ -47,30 +48,25 @@ type AnvilRpcSchema = [
 const execFileAsync = promisify(execFile);
 const deployerPrivateKey = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
 const deployer = privateKeyToAccount(deployerPrivateKey);
-let cached: Promise<Anvil> | undefined;
-let destroyTimer: NodeJS.Timeout | undefined;
+
+const instance = (params: { dumpState?: string; loadState?: string } = {}) =>
+  Instance.anvil({
+    autoImpersonate: true,
+    balance: 1_000_000n,
+    chainId: anvilChain.id,
+    codeSizeLimit: 100_000,
+    disableBlockGasLimit: true,
+    hardfork: 'Cancun',
+    ...params,
+  });
 
 const start = async (params: { dumpState?: string; loadState?: string } = {}, deploy = true): Promise<Anvil> => {
   const pool = Pool.define({
-    instance: Instance.anvil({
-      autoImpersonate: true,
-      balance: 1_000_000n,
-      chainId: anvilChain.id,
-      codeSizeLimit: 100_000,
-      disableBlockGasLimit: true,
-      hardfork: 'Cancun',
-      ...params,
-    }),
+    instance: instance(params),
   });
-  const instance = await pool.start(1);
-  const url = `http://${instance.host}:${instance.port}`;
-  const transport = http(url);
-  const walletClient = createWalletClient<typeof transport, typeof anvilChain, typeof deployer, AnvilRpcSchema>({
-    account: deployer,
-    chain: anvilChain,
-    transport,
-  });
-  const publicClient = createPublicClient({ chain: anvilChain, transport });
+  const local = await pool.start(1);
+  const url = `http://${local.host}:${local.port}`;
+  const result = await connect(url, () => pool.destroy(1));
 
   if (deploy) {
     await execFileAsync(
@@ -87,6 +83,18 @@ const start = async (params: { dumpState?: string; loadState?: string } = {}, de
       { cwd: new URL('../foundry', import.meta.url), timeout: 120_000 },
     );
   }
+
+  return result;
+};
+
+const connect = async (url: string, destroy: () => Promise<void>): Promise<Anvil> => {
+  const transport = http(url);
+  const walletClient = createWalletClient<typeof transport, typeof anvilChain, typeof deployer, AnvilRpcSchema>({
+    account: deployer,
+    chain: anvilChain,
+    transport,
+  });
+  const publicClient = createPublicClient({ chain: anvilChain, transport });
 
   return {
     url: () => url,
@@ -136,53 +144,66 @@ const start = async (params: { dumpState?: string; loadState?: string } = {}, de
         throw new Error('Failed to revert anvil');
       }
     },
-    destroy: () => pool.destroy(1),
+    destroy,
   };
 };
 
-export const anvil = async (): Promise<Anvil> => {
-  if (destroyTimer) {
-    clearTimeout(destroyTimer);
-    destroyTimer = undefined;
+const prepareState = async () => {
+  const state = process.env.E2E_ANVIL_STATE;
+  if (!state) return undefined;
+
+  await mkdir(dirname(state), { recursive: true });
+  const lockPath = `${state}.lock`;
+
+  while (!existsSync(state) || existsSync(lockPath)) {
+    try {
+      const lock = await open(lockPath, 'wx');
+      try {
+        await (await start({ dumpState: state })).destroy();
+      } finally {
+        await lock.close();
+        await rm(lockPath, { force: true });
+      }
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error;
+      await new Promise((done) => setTimeout(done, 250));
+    }
   }
 
-  const current = (cached ??= (async () => {
-    const state = process.env.E2E_ANVIL_STATE;
-
-    if (!state) return start();
-    await mkdir(dirname(state), { recursive: true });
-
-    const lockPath = `${state}.lock`;
-    while (!existsSync(state) || existsSync(lockPath)) {
-      try {
-        const lock = await open(lockPath, 'wx');
-        try {
-          await (await start({ dumpState: state })).destroy();
-        } finally {
-          await lock.close();
-          await rm(lockPath, { force: true });
-        }
-      } catch (error) {
-        if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error;
-        await new Promise((resolve) => setTimeout(resolve, 250));
-      }
-    }
-
-    return start({ loadState: state }, false);
-  })());
-  const local = await current;
-
-  return {
-    ...local,
-    destroy: async () => {
-      if (destroyTimer) clearTimeout(destroyTimer);
-      destroyTimer = setTimeout(() => {
-        void current
-          .then((instance) => instance.destroy())
-          .finally(() => {
-            if (cached === current) cached = undefined;
-          });
-      }, 1_000);
-    },
-  };
+  return state;
 };
+
+export const anvil = async (id = 1): Promise<Anvil> => {
+  const port = process.env.E2E_ANVIL_PORT;
+
+  if (port) {
+    await fetch(`http://127.0.0.1:${port}/${id}/destroy`);
+    return connect(`http://127.0.0.1:${port}/${id}`, async () => {
+      const response = await fetch(`http://127.0.0.1:${port}/${id}/destroy`);
+      if (!response.ok) throw new Error(`Failed to destroy anvil ${id}`);
+    });
+  }
+
+  const state = await prepareState();
+  return state ? start({ loadState: state }, false) : start();
+};
+
+export const serve = async () => {
+  const state = await prepareState();
+  const server = Server.create({ instance: instance(state ? { loadState: state } : undefined) });
+  const stop = await server.start();
+  const address = server.address();
+
+  if (!address) throw new Error('Failed to start anvil server');
+  process.stdout.write(`Anvil server listening on ${address.port}\n`);
+
+  for (const signal of ['SIGINT', 'SIGTERM'] as const) {
+    process.once(signal, () => {
+      void stop().catch(() => {
+        process.exitCode = 1;
+      });
+    });
+  }
+};
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) void serve();

@@ -1,4 +1,4 @@
-import { test } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import {
   type Account,
   type Address,
@@ -63,14 +63,27 @@ const baseTest = test.extend<TestProps, { anvil: Anvil }>({
   privateKey: [defaultPrivateKey, { option: true }],
   options: [defaultOptions, { option: true }],
   page: async ({ page }, use) => {
+    const errors: string[] = [];
     const goto = page.goto.bind(page);
+    page.on('console', (message) => {
+      if (
+        message.type() === 'error' &&
+        !message.text().startsWith('Failed to load resource:') &&
+        !message.text().startsWith('Analytics SDK:') &&
+        !message.text().startsWith('Error checking Cross-Origin-Opener-Policy:')
+      ) {
+        errors.push(message.text());
+      }
+    });
+    page.on('pageerror', (error) => errors.push(error.stack ?? error.message));
     page.goto = ((url, options) => test.step(`navigation: ${url}`, () => goto(url, options))) as typeof page.goto;
     await use(page);
+    expect(errors).toEqual([]);
   },
   anvil: [
-    async ({ browserName }, use) => {
+    async ({ browserName }, use, workerInfo) => {
       void browserName;
-      const local = await anvil();
+      const local = await anvil(workerInfo.parallelIndex + 1);
       await use(local);
       await local.destroy();
     },

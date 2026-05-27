@@ -46,9 +46,12 @@ export default function (page: Page) {
   };
 
   const switchTab = async (tab: 'deposit' | 'borrow') => {
-    const t = page.getByTestId(`tab-${tab}`);
-    await expect(t).toBeVisible();
-    await t.click();
+    await expect(async () => {
+      const t = page.getByTestId(`tab-${tab}`);
+      await expect(t).toBeVisible();
+      await t.click({ timeout: 2_000 });
+      await expect(t).toHaveAttribute('aria-selected', 'true');
+    }).toPass({ timeout: 10_000 });
   };
 
   const checkFloatingTableRow = async (type: 'deposit' | 'borrow', symbol: ERC20TokenSymbol) => {
