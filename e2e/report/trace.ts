@@ -47,6 +47,11 @@ type TraceEvent =
 const stepKind = ({ category, title }: Pick<Step, 'category' | 'title'>) =>
   category === 'test.step' && title.includes(':') ? title.slice(0, title.indexOf(':')) : category;
 
+const parentPath = (path: string) => {
+  const separator = path.lastIndexOf(' > ');
+  return separator === -1 ? '' : path.slice(0, separator);
+};
+
 const toStep = (step: TestStep, origin: number): Step => ({
   category: step.category,
   children: step.steps.length,
@@ -183,13 +188,15 @@ export default class TraceReporter implements Reporter {
       }
 
       for (const parent of [
-        { duration: run.duration, path: run.title, start: 0 },
-        ...run.steps.filter(({ children }) => children > 0),
+        { childrenPath: '', duration: run.duration, gapPath: run.title, start: 0 },
+        ...run.steps
+          .filter(({ children }) => children > 0)
+          .map(({ duration, path, start }) => ({ childrenPath: path, duration, gapPath: path, start })),
       ]) {
         const end = Math.min(run.duration, parent.start + parent.duration);
         let cursor = Math.min(run.duration, Math.max(0, parent.start));
         for (const step of run.steps
-          .filter(({ path }) => path.slice(0, path.lastIndexOf(' > ')) === parent.path)
+          .filter(({ path }) => parentPath(path) === parent.childrenPath)
           .sort((a, b) => a.start - b.start || b.duration - a.duration)) {
           const start = Math.min(end, Math.max(cursor, step.start));
           if (start - cursor > 1) {
@@ -201,14 +208,24 @@ export default class TraceReporter implements Reporter {
               'unstepped time',
               'gap',
               'gap',
-              `${parent.path} > unstepped time`,
+              `${parent.gapPath} > unstepped time`,
               false,
             );
           }
           cursor = Math.max(cursor, Math.min(end, step.start + step.duration));
         }
         if (end - cursor > 1) {
-          addSlice(run, index, cursor, end, 'unstepped time', 'gap', 'gap', `${parent.path} > unstepped time`, false);
+          addSlice(
+            run,
+            index,
+            cursor,
+            end,
+            'unstepped time',
+            'gap',
+            'gap',
+            `${parent.gapPath} > unstepped time`,
+            false,
+          );
         }
       }
     }
