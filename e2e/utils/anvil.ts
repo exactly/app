@@ -53,9 +53,11 @@ const instance = (params: { dumpState?: string; loadState?: string } = {}) =>
   Instance.anvil({
     autoImpersonate: true,
     balance: 1_000_000n,
+    blockBaseFeePerGas: 0,
     chainId: anvilChain.id,
     codeSizeLimit: 100_000,
     disableBlockGasLimit: true,
+    gasPrice: 0,
     hardfork: 'Cancun',
     ...params,
   });
@@ -118,18 +120,28 @@ const connect = async (url: string, destroy: () => Promise<void>): Promise<Anvil
           const amount = parseUnits(String(value), await token.read.decimals());
 
           if (symbol === 'EXA') {
-            await token.write.transfer([address, amount], { account: deployer, chain: anvilChain });
+            await publicClient.waitForTransactionReceipt({
+              hash: await token.write.transfer([address, amount], { account: deployer, chain: anvilChain }),
+            });
           } else if (symbol === 'esEXA') {
             const exa = await erc20('EXA', { publicClient, walletClient });
-            await exa.write.transfer([address, amount], { account: deployer, chain: anvilChain });
-            await exa.write.approve([token.address, amount], { account: address, chain: anvilChain });
-            await getContract({
-              address: token.address,
-              abi: escrowedExaAbi,
-              client: { public: publicClient, wallet: walletClient },
-            }).write.mint([amount, address], { account: address, chain: anvilChain });
+            await publicClient.waitForTransactionReceipt({
+              hash: await exa.write.transfer([address, amount], { account: deployer, chain: anvilChain }),
+            });
+            await publicClient.waitForTransactionReceipt({
+              hash: await exa.write.approve([token.address, amount], { account: address, chain: anvilChain }),
+            });
+            await publicClient.waitForTransactionReceipt({
+              hash: await getContract({
+                address: token.address,
+                abi: escrowedExaAbi,
+                client: { public: publicClient, wallet: walletClient },
+              }).write.mint([amount, address], { account: address, chain: anvilChain }),
+            });
           } else {
-            await token.write.mint([address, amount], { account: deployer, chain: anvilChain });
+            await publicClient.waitForTransactionReceipt({
+              hash: await token.write.mint([address, amount], { account: deployer, chain: anvilChain }),
+            });
           }
         }
       }),
@@ -149,11 +161,11 @@ const connect = async (url: string, destroy: () => Promise<void>): Promise<Anvil
 };
 
 const prepareState = async () => {
-  const state = process.env.E2E_ANVIL_STATE;
-  if (!state) return undefined;
+  const state = 'test-results/anvil.json';
 
   await mkdir(dirname(state), { recursive: true });
   const lockPath = `${state}.lock`;
+  if (!existsSync(lockPath)) await rm(state, { force: true });
 
   while (!existsSync(state) || existsSync(lockPath)) {
     try {
@@ -177,20 +189,22 @@ export const anvil = async (id = 1): Promise<Anvil> => {
   const port = process.env.E2E_ANVIL_PORT;
 
   if (port) {
-    await fetch(`http://127.0.0.1:${port}/${id}/destroy`);
+    const request = async (action: 'reset' | 'stop') => {
+      const response = await fetch(`http://127.0.0.1:${port}/${id}/${action === 'reset' ? 'restart' : action}`);
+      if (!response.ok) throw new Error(`Failed to ${action} anvil ${id}`);
+    };
+
+    await request('reset');
     return connect(`http://127.0.0.1:${port}/${id}`, async () => {
-      const response = await fetch(`http://127.0.0.1:${port}/${id}/destroy`);
-      if (!response.ok) throw new Error(`Failed to destroy anvil ${id}`);
+      await request('stop');
     });
   }
 
-  const state = await prepareState();
-  return state ? start({ loadState: state }, false) : start();
+  return start({ loadState: await prepareState() }, false);
 };
 
 export const serve = async () => {
-  const state = await prepareState();
-  const server = Server.create({ instance: instance(state ? { loadState: state } : undefined) });
+  const server = Server.create({ instance: instance({ loadState: await prepareState() }) });
   const stop = await server.start();
   const address = server.address();
 

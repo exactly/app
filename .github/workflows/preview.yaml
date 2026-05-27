@@ -4,9 +4,14 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      e2e_workers: { description: Playwright worker count, required: false, type: string }
+
+run-name: ${{ github.event.head_commit.message || github.sha }}${{ inputs.e2e_workers && format(' ({0} workers)', inputs.e2e_workers) || '' }}
 
 jobs:
-  check:
+  test:
+    if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.draft }}
     runs-on: ubuntu-latest
     environment: Preview
     env:
@@ -15,88 +20,26 @@ jobs:
       SENTRY_PROJECT: webapp
       SENTRY_ENVIRONMENT: development
       NEXT_PUBLIC_NETWORK: 11155420
+      NODE_OPTIONS: --max_old_space_size=8192
+      E2E_WORKERS: ${{ inputs.e2e_workers || 1 }}
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          package-manager-cache: false
+        with: { node-version: 24, package-manager-cache: false }
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
       - run: pnpm run check
-
-  e2e:
-    needs: [check]
-    if: ${{ !github.event.pull_request.draft }}
-    timeout-minutes: 30
-    runs-on: ubuntu-latest
-    environment: Test
-    env:
-      NEXT_PUBLIC_SOCKET_API_KEY: ${{ secrets.NEXT_PUBLIC_SOCKET_API_KEY }}
-      TENDERLY_ACCESS_KEY: ${{ secrets.TENDERLY_ACCESS_KEY }}
-      TENDERLY_PROJECT: exactly
-      TENDERLY_USER: exactly
-      NODE_OPTIONS: '--max_old_space_size=4096'
-    strategy:
-      fail-fast: false
-      matrix:
-        shardIndex: [1, 2, 3, 4]
-        shardTotal: [4]
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          package-manager-cache: false
-      - run: corepack enable
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm run build:e2e
+      - uses: foundry-rs/foundry-toolchain@v1
       - run: pnpm exec playwright install chromium --with-deps
-      - run: pnpm exec playwright test --project=chromium --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+      - id: e2e
+        run: pnpm test
       - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: blob-report-${{ matrix.shardIndex }}
-          path: blob-report
-          retention-days: 1
-
-  e2e-report:
-    needs: [e2e]
-    if: ${{ always() }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          package-manager-cache: false
-      - run: corepack enable
-      - run: pnpm install --frozen-lockfile
-      - uses: actions/download-artifact@v8
-        with:
-          path: all-blob-reports
-          pattern: blob-report-*
-          merge-multiple: true
-      - run: pnpm exec playwright merge-reports --reporter html ./all-blob-reports
-      - uses: actions/upload-artifact@v7
-        with:
-          name: html-report
-          path: playwright-report
-          retention-days: 30
-
-  e2e-report-publish:
-    needs: [e2e-report]
-    if: ${{ always() && needs.e2e-report.result == 'success' && github.ref == 'refs/heads/main' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/download-artifact@v8
-        with:
-          name: html-report
-          path: html-report
+        if: ${{ always() }}
+        with: { name: test-results, path: test-results }
       - uses: cloudflare/wrangler-action@v4
+        if: ${{ steps.e2e.conclusion == 'success' && github.ref == 'refs/heads/main' }}
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: 569f3c4008862b4cc595f409db748f41
           packageManager: npm
-          command: pages deploy html-report --project-name=app-test --branch=${{ github.ref_name }}
+          command: pages deploy test-results/report --project-name=app-test --branch=${{ github.ref_name }}

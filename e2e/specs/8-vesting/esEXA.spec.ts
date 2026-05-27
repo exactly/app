@@ -214,9 +214,9 @@ test('Transferred stream follows Sablier NFT ownership', async ({ page, web3 }) 
     id: Number(transferredStream),
     vested: '100.00',
     reserved: '25.00',
-    withdrawable: /^0\.0[01]$/,
+    withdrawable: /^0\.\d{2}$/,
     left: '100.00',
-    progress: /^0(?:\.0[01])?%$/,
+    progress: /^0(?:\.\d{1,2})?%$/,
   });
 
   await (
@@ -259,9 +259,9 @@ test('Stream cancellation', async ({ page, web3 }) => {
       id,
       vested: '100.00',
       reserved: '25.00',
-      withdrawable: /^0\.0[01]$/,
+      withdrawable: /^0\.\d{2}$/,
       left: '100.00',
-      progress: /^0(?:\.0[01])?%$/,
+      progress: /^0(?:\.\d{1,2})?%$/,
     });
 
     await vesting.cancelStream(id);

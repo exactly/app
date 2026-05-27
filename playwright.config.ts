@@ -1,12 +1,5 @@
-import { join } from 'node:path';
-
 import { devices, type PlaywrightTestConfig } from '@playwright/test';
-import dotenv from 'dotenv';
-
-dotenv.config();
-
-delete process.env.NO_COLOR;
-process.env.E2E_ANVIL_STATE ??= join(process.cwd(), 'test-results', `anvil-${process.pid}.json`);
+import 'dotenv/config';
 
 const config: PlaywrightTestConfig = {
   testDir: './e2e/specs',
@@ -20,15 +13,15 @@ const config: PlaywrightTestConfig = {
   retries: process.env.CI ? 2 : 0,
   ...(process.env.E2E_WORKERS ? { workers: Number(process.env.E2E_WORKERS) } : {}),
   reporter: [
-    process.env.CI ? ['blob'] : ['list'],
-    ['json', { outputFile: 'test-results/e2e-results.json' }],
-    ['./e2e/report/trace.ts'],
+    ['list'],
+    ['html', { open: 'never', outputFolder: 'test-results/report' }],
+    ['json', { outputFile: 'test-results/report/e2e-results.json' }],
+    ['./e2e/report/trace.ts', { traceFile: 'test-results/report/e2e-trace.json' }],
   ],
   use: {
     userAgent:
       'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36',
     headless: true,
-    actionTimeout: 10_000,
     baseURL: 'http://localhost:3000',
     screenshot: 'only-on-failure',
     trace: 'on-first-retry',
@@ -45,7 +38,7 @@ const config: PlaywrightTestConfig = {
       },
     },
   ],
-  outputDir: 'test-results/',
+  outputDir: 'test-results/artifacts',
   webServer: [
     {
       command: 'pnpm start:e2e',
@@ -63,7 +56,7 @@ const config: PlaywrightTestConfig = {
       stdout: 'pipe',
       stderr: 'pipe',
       timeout: 240_000,
-      wait: { stdout: /Anvil server listening on (?<E2E_ANVIL_PORT>\d+)/ },
+      wait: { stdout: new RegExp('Anvil server listening on (?<E2E_ANVIL_PORT>\\d+)') },
     },
   ],
 };

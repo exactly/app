@@ -26,7 +26,9 @@ const actions = ({ publicClient, walletClient }: ActionParams) => {
       if (!walletClient.account) return;
       const args = [erc20MarketContract.address] as const;
       const gas = await auditorContract.estimateGas.enterMarket(args, options(walletClient));
-      await auditorContract.write.enterMarket(args, { ...options(walletClient), gas: gas * 2n });
+      await publicClient.waitForTransactionReceipt({
+        hash: await auditorContract.write.enterMarket(args, { ...options(walletClient), gas: gas * 2n }),
+      });
     });
 
   const exitMarket = async (symbol: ERC20TokenSymbol) =>
@@ -35,7 +37,9 @@ const actions = ({ publicClient, walletClient }: ActionParams) => {
       const erc20MarketContract = await erc20Market(symbol);
       const args = [erc20MarketContract.address] as const;
       const gas = await auditorContract.estimateGas.exitMarket(args, options(walletClient));
-      await auditorContract.write.exitMarket(args, { ...options(walletClient), gas: gas * 2n });
+      await publicClient.waitForTransactionReceipt({
+        hash: await auditorContract.write.exitMarket(args, { ...options(walletClient), gas: gas * 2n }),
+      });
     });
 
   type FloatingOperationParams = {
@@ -51,10 +55,12 @@ const actions = ({ publicClient, walletClient }: ActionParams) => {
         const qty = parseEther(amount);
         const args = { value: qty };
         const gas = await ethRouterContract.estimateGas.deposit({ ...options(walletClient), ...args });
-        await ethRouterContract.write.deposit({
-          ...options(walletClient),
-          ...args,
-          gas: gas * 2n,
+        await publicClient.waitForTransactionReceipt({
+          hash: await ethRouterContract.write.deposit({
+            ...options(walletClient),
+            ...args,
+            gas: gas * 2n,
+          }),
         });
       } else {
         const erc20Contract = await erc20(symbol, { walletClient, publicClient });
@@ -62,15 +68,19 @@ const actions = ({ publicClient, walletClient }: ActionParams) => {
         const qty = parseUnits(amount, await erc20Contract.read.decimals());
         const approveArgs = [erc20MarketContract.address, MaxUint256] as const;
         const approveGas = await erc20Contract.estimateGas.approve(approveArgs, options(walletClient));
-        await erc20Contract.write.approve(approveArgs, {
-          ...options(walletClient),
-          gas: approveGas * 2n,
+        await publicClient.waitForTransactionReceipt({
+          hash: await erc20Contract.write.approve(approveArgs, {
+            ...options(walletClient),
+            gas: approveGas * 2n,
+          }),
         });
         const args = [qty, receiver] as const;
         const gas = await erc20MarketContract.estimateGas.deposit(args, options(walletClient));
-        await erc20MarketContract.write.deposit(args, {
-          ...options(walletClient),
-          gas: gas * 2n,
+        await publicClient.waitForTransactionReceipt({
+          hash: await erc20MarketContract.write.deposit(args, {
+            ...options(walletClient),
+            gas: gas * 2n,
+          }),
         });
       }
     });
@@ -83,15 +93,19 @@ const actions = ({ publicClient, walletClient }: ActionParams) => {
         const qty = parseEther(amount);
         const approveArgs = [ethRouterContract.address, MaxUint256] as const;
         const approveGas = await wethMarketContract.estimateGas.approve(approveArgs, options(walletClient));
-        await wethMarketContract.write.approve(approveArgs, {
-          ...options(walletClient),
-          gas: approveGas * 2n,
+        await publicClient.waitForTransactionReceipt({
+          hash: await wethMarketContract.write.approve(approveArgs, {
+            ...options(walletClient),
+            gas: approveGas * 2n,
+          }),
         });
         const args = [qty] as const;
         const gas = await ethRouterContract.estimateGas.borrow(args, options(walletClient));
-        await ethRouterContract.write.borrow(args, {
-          ...options(walletClient),
-          gas: gas * 2n,
+        await publicClient.waitForTransactionReceipt({
+          hash: await ethRouterContract.write.borrow(args, {
+            ...options(walletClient),
+            gas: gas * 2n,
+          }),
         });
       } else {
         const erc20Contract = await erc20(symbol, { publicClient });
@@ -99,9 +113,11 @@ const actions = ({ publicClient, walletClient }: ActionParams) => {
         const qty = parseUnits(amount, await erc20Contract.read.decimals());
         const args = [qty, receiver, receiver] as const;
         const gas = await erc20MarketContract.estimateGas.borrow(args, options(walletClient));
-        await erc20MarketContract.write.borrow(args, {
-          ...options(walletClient),
-          gas: gas * 2n,
+        await publicClient.waitForTransactionReceipt({
+          hash: await erc20MarketContract.write.borrow(args, {
+            ...options(walletClient),
+            gas: gas * 2n,
+          }),
         });
       }
     });
@@ -126,10 +142,12 @@ const actions = ({ publicClient, walletClient }: ActionParams) => {
           ...options(walletClient),
           value: qty,
         });
-        await ethRouterContract.write.depositAtMaturity(args, {
-          ...options(walletClient),
-          value: qty,
-          gas: gas * 2n,
+        await publicClient.waitForTransactionReceipt({
+          hash: await ethRouterContract.write.depositAtMaturity(args, {
+            ...options(walletClient),
+            value: qty,
+            gas: gas * 2n,
+          }),
         });
       } else {
         const erc20Contract = await erc20(symbol, { walletClient, publicClient });
@@ -137,15 +155,19 @@ const actions = ({ publicClient, walletClient }: ActionParams) => {
         const qty = parseUnits(amount, await erc20Contract.read.decimals());
         const approveArgs = [erc20MarketContract.address, MaxUint256] as const;
         const approveGas = await erc20Contract.estimateGas.approve(approveArgs, options(walletClient));
-        await erc20Contract.write.approve(approveArgs, {
-          ...options(walletClient),
-          gas: approveGas * 2n,
+        await publicClient.waitForTransactionReceipt({
+          hash: await erc20Contract.write.approve(approveArgs, {
+            ...options(walletClient),
+            gas: approveGas * 2n,
+          }),
         });
         const args = [maturity, qty, minAssets(qty), receiver] as const;
         const gas = await erc20MarketContract.estimateGas.depositAtMaturity(args, options(walletClient));
-        await erc20MarketContract.write.depositAtMaturity(args, {
-          ...options(walletClient),
-          gas: gas * 2n,
+        await publicClient.waitForTransactionReceipt({
+          hash: await erc20MarketContract.write.depositAtMaturity(args, {
+            ...options(walletClient),
+            gas: gas * 2n,
+          }),
         });
       }
     });
@@ -158,15 +180,19 @@ const actions = ({ publicClient, walletClient }: ActionParams) => {
         const qty = parseEther(amount);
         const approveArgs = [ethRouterContract.address, MaxUint256] as const;
         const approveGas = await wethMarketContract.estimateGas.approve(approveArgs, options(walletClient));
-        await wethMarketContract.write.approve(approveArgs, {
-          ...options(walletClient),
-          gas: approveGas * 2n,
+        await publicClient.waitForTransactionReceipt({
+          hash: await wethMarketContract.write.approve(approveArgs, {
+            ...options(walletClient),
+            gas: approveGas * 2n,
+          }),
         });
         const args = [maturity, qty, maxAssets(qty)] as const;
         const gas = await ethRouterContract.estimateGas.borrowAtMaturity(args, options(walletClient));
-        await ethRouterContract.write.borrowAtMaturity(args, {
-          ...options(walletClient),
-          gas: gas * 2n,
+        await publicClient.waitForTransactionReceipt({
+          hash: await ethRouterContract.write.borrowAtMaturity(args, {
+            ...options(walletClient),
+            gas: gas * 2n,
+          }),
         });
       } else {
         const erc20Contract = await erc20(symbol, { publicClient });
@@ -174,9 +200,11 @@ const actions = ({ publicClient, walletClient }: ActionParams) => {
         const qty = parseUnits(amount, await erc20Contract.read.decimals());
         const args = [maturity, qty, maxAssets(qty), receiver, receiver] as const;
         const gas = await erc20MarketContract.estimateGas.borrowAtMaturity(args, options(walletClient));
-        await erc20MarketContract.write.borrowAtMaturity(args, {
-          ...options(walletClient),
-          gas: gas * 2n,
+        await publicClient.waitForTransactionReceipt({
+          hash: await erc20MarketContract.write.borrowAtMaturity(args, {
+            ...options(walletClient),
+            gas: gas * 2n,
+          }),
         });
       }
     });
