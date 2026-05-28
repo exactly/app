@@ -5,21 +5,19 @@ import React, {
   useContext,
   useState,
   useCallback,
+  useEffect,
   useReducer,
 } from 'react';
-import type { Hex } from 'viem';
-import waitForTransaction from 'utils/waitForTransaction';
+import { erc20Abi, type Address, type Hex } from 'viem';
+import { useSendCalls, useWaitForCallsStatus, usePublicClient } from 'wagmi';
 
 import type { ErrorData } from 'types/Error';
 import type { Transaction } from 'types/Transaction';
 import type { Position } from 'components/DebtManager/types';
-import useDebtManager from 'hooks/useDebtManager';
 import useAccountData from 'hooks/useAccountData';
-import useMarket from 'hooks/useMarket';
-import type { Market } from 'types/contracts';
+import { debtManagerAddress, marketAbi } from 'generated/wagmi';
 import handleOperationError from 'utils/handleOperationError';
 import useIsContract from 'hooks/useIsContract';
-import { gasLimit } from 'utils/gas';
 import { Args } from './ModalContext';
 import useReadOnly from 'hooks/useReadOnly';
 import { defaultChain } from 'utils/client';
@@ -62,8 +60,7 @@ type ContextValues = {
   setPercent: (to: number) => void;
   setSlippage: (slippage: string) => void;
 
-  debtManager?: ReturnType<typeof useDebtManager>;
-  market?: Market;
+  debtManager?: Address;
 
   errorData?: ErrorData;
   setErrorData: React.Dispatch<React.SetStateAction<ErrorData | undefined>>;
@@ -86,84 +83,102 @@ export const DebtManagerContextProvider: FC<PropsWithChildren<Props>> = ({ args,
   const { account: walletAddress } = useReadOnly();
   const { getMarketAccount, refreshAccountData } = useAccountData();
   const isContract = useIsContract();
+  const publicClient = usePublicClient();
+  const { mutateAsync: sendCalls, isPending: sendCallsPending } = useSendCalls();
+  const [approveCallId, setApproveCallId] = useState<string>();
+  const { data: approveStatus, isLoading: approveWaiting } = useWaitForCallsStatus({
+    id: approveCallId,
+    query: { enabled: Boolean(approveCallId) },
+  });
+  const [submitting, setSubmitting] = useState(false);
   const [errorData, setErrorData] = useState<ErrorData | undefined>();
 
   const [input, dispatch] = useReducer(reducer, { ...initState, ...args });
 
   const [tx, setTx] = useState<Transaction | undefined>();
-  const [isLoading, setIsLoading] = useState(false);
 
   const setFrom = useCallback((from: Position) => dispatch({ ...initState, from }), []);
   const setTo = useCallback((to: Position) => dispatch({ to }), []);
   const setPercent = useCallback((percent: number) => dispatch({ percent }), []);
   const setSlippage = useCallback((slippage: string) => dispatch({ slippage }), []);
 
-  const debtManager = useDebtManager();
+  const debtManager = Object.entries(debtManagerAddress).find(([chainId]) => Number(chainId) === defaultChain.id)?.[1];
 
-  const market = useMarket(input.from && getMarketAccount(input.from.symbol)?.market);
+  const market = input.from && getMarketAccount(input.from.symbol)?.market;
+
+  useEffect(() => {
+    if (approveStatus?.status === 'success' || approveStatus?.status === 'failure') setApproveCallId(undefined);
+  }, [approveStatus?.status]);
 
   const needsApproval = useCallback(
     async (qty: bigint): Promise<boolean> => {
-      if (!walletAddress || !market || !debtManager || !walletAddress || qty === 0n) return true;
+      if (!walletAddress || !market || !debtManager || !publicClient || qty === 0n) return true;
       try {
         const isMultiSig = await isContract(walletAddress);
         if (!isMultiSig) return false;
 
-        const shares = await market.read.previewWithdraw([qty], { account: walletAddress });
-        const allowance = await market.read.allowance([walletAddress, debtManager.address], {
-          account: walletAddress,
-        });
+        const [shares, allowance] = await Promise.all([
+          publicClient.readContract({
+            address: market,
+            abi: marketAbi,
+            functionName: 'previewWithdraw',
+            args: [qty],
+            account: walletAddress,
+          }),
+          publicClient.readContract({
+            address: market,
+            abi: erc20Abi,
+            functionName: 'allowance',
+            args: [walletAddress, debtManager],
+            account: walletAddress,
+          }),
+        ]);
         return allowance < shares;
       } catch (e: unknown) {
         setErrorData({ status: true, message: handleOperationError(e) });
         return true;
       }
     },
-    [walletAddress, market, debtManager, isContract],
+    [walletAddress, market, debtManager, publicClient, isContract],
   );
 
   const approve = useCallback(
     async (assets: bigint) => {
-      if (!debtManager || !market || !walletAddress) return;
-
-      setIsLoading(true);
+      if (!debtManager || !market || !walletAddress || !publicClient) return;
       try {
-        const max = await market.read.previewWithdraw([(assets * 100_005n) / 100_000n], {
+        const max = await publicClient.readContract({
+          address: market,
+          abi: marketAbi,
+          functionName: 'previewWithdraw',
+          args: [(assets * 100_005n) / 100_000n],
           account: walletAddress,
         });
-        const gasEstimation = await market.estimateGas.approve([debtManager.address, max], {
+        const { id } = await sendCalls({
           account: walletAddress,
+          chainId: defaultChain.id,
+          experimental_fallback: true,
+          calls: [{ to: market, abi: erc20Abi, functionName: 'approve', args: [debtManager, max] }],
         });
-        const hash = await market.write.approve([debtManager.address, max], {
-          account: walletAddress,
-          chain: defaultChain,
-          gas: gasLimit(gasEstimation),
-        });
-        await waitForTransaction({ hash });
+        setApproveCallId(id);
       } catch (e: unknown) {
         setErrorData({ status: true, message: handleOperationError(e) });
-      } finally {
-        setIsLoading(false);
       }
     },
-    [debtManager, market, walletAddress],
+    [debtManager, market, walletAddress, publicClient, sendCalls],
   );
 
   const submit = useCallback(
     async (execute: () => Promise<Hex | undefined>): Promise<void> => {
-      setIsLoading(true);
+      setSubmitting(true);
       try {
         const hash = await execute();
         if (!hash) return;
-        setTx({ status: 'processing', hash });
-        const { status, transactionHash } = await waitForTransaction({ hash });
-        setTx({ status: status ? 'success' : 'error', hash: transactionHash });
-
+        setTx({ status: 'success', hash });
         await refreshAccountData();
       } catch (e: unknown) {
         setErrorData({ status: true, message: handleOperationError(e) });
       } finally {
-        setIsLoading(false);
+        setSubmitting(false);
       }
     },
     [refreshAccountData],
@@ -177,12 +192,11 @@ export const DebtManagerContextProvider: FC<PropsWithChildren<Props>> = ({ args,
     setSlippage,
 
     debtManager,
-    market,
 
     errorData,
     setErrorData,
     tx,
-    isLoading,
+    isLoading: sendCallsPending || approveWaiting || submitting,
 
     needsApproval,
     approve,

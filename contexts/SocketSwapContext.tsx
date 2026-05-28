@@ -8,10 +8,10 @@ import React, {
   type PropsWithChildren,
 } from 'react';
 
-import { parseEther, parseUnits, zeroAddress, Address } from 'viem';
-import * as viemChains from 'viem/chains';
+import { erc20Abi, parseEther, parseUnits, zeroAddress, type Address } from 'viem';
 
-import { useWalletClient } from 'wagmi';
+import { usePublicClient, useSendCalls } from 'wagmi';
+import { waitForCallsStatus } from '@wagmi/core';
 import { optimism } from 'viem/chains';
 
 import {
@@ -36,11 +36,8 @@ import {
   socketRequest,
 } from 'utils/socket';
 import { useTranslation } from 'react-i18next';
-import useERC20 from 'hooks/useERC20';
-import { gasLimit } from 'utils/gas';
-import waitForTransaction from 'utils/waitForTransaction';
 import useDelayedEffect from 'hooks/useDelayedEffect';
-import { defaultChain } from 'utils/client';
+import { wagmi } from 'utils/client';
 import useReadOnly from 'hooks/useReadOnly';
 
 export enum Screen {
@@ -114,13 +111,10 @@ export const SocketSwapProvider: FC<PropsWithChildren> = ({ children }) => {
   const [toChainId, setToChainId] = useState<ContextValues['toChainId']>();
 
   const { account: walletAddress } = useReadOnly();
-  const { data: walletClient } = useWalletClient({ chainId: sourceChain?.chainId });
+  const publicClient = usePublicClient({ chainId: sourceChain?.chainId });
+  const { mutateAsync: sendCalls } = useSendCalls();
   const { t } = useTranslation();
-  const isBridge = sourceChain?.chainId !== defaultChain.id;
-  const erc20 = useERC20(
-    fromAssetAddress === NATIVE_TOKEN_ADDRESS ? undefined : fromAssetAddress,
-    sourceChain?.chainId,
-  );
+  const isBridge = sourceChain?.chainId !== optimism.id;
 
   const fetchChains = useCallback(async () => {
     const allChains = await socketChains();
@@ -136,7 +130,7 @@ export const SocketSwapProvider: FC<PropsWithChildren> = ({ children }) => {
   }, [setChains, walletAddress]);
 
   const fetchRoutes = useCallback(async () => {
-    if (!fromAssetAddress || !toAssetAddress || !sourceChain || !walletAddress || !toChainId) return;
+    if (!fromAssetAddress || !toAssetAddress || !sourceChain || !walletAddress || !toChainId || !publicClient) return;
 
     setRoutes(undefined);
     setSocketError(undefined);
@@ -146,7 +140,14 @@ export const SocketSwapProvider: FC<PropsWithChildren> = ({ children }) => {
     }
 
     try {
-      const fromAssetDecimals = (await erc20?.read.decimals()) || 18;
+      const fromAssetDecimals =
+        fromAssetAddress === NATIVE_TOKEN_ADDRESS
+          ? 18
+          : await publicClient.readContract({
+              address: fromAssetAddress,
+              abi: erc20Abi,
+              functionName: 'decimals',
+            });
 
       const quote = await socketQuote({
         fromChainId: sourceChain.chainId,
@@ -161,29 +162,23 @@ export const SocketSwapProvider: FC<PropsWithChildren> = ({ children }) => {
 
       setRoutes(quote?.routes || []);
       setRoute(quote?.routes[0]);
-    } catch (e) {
+    } catch {
       setRoutes([]);
       setRoute(undefined);
       setSocketError({ message: t('Error fetching routes from socket'), status: true });
     }
-  }, [fromAssetAddress, toAssetAddress, sourceChain, walletAddress, toChainId, qtyIn, erc20?.read, recipient, t]);
+  }, [fromAssetAddress, toAssetAddress, sourceChain, walletAddress, toChainId, qtyIn, publicClient, recipient, t]);
 
   const approve = useCallback(async () => {
     setTXError(undefined);
     if (fromAssetAddress === NATIVE_TOKEN_ADDRESS) setTXStep(TXStep.CONFIRM);
 
-    if (!walletAddress || !walletClient || !route || !erc20 || !walletAddress) return;
+    if (!walletAddress || !route || !fromAssetAddress || fromAssetAddress === NATIVE_TOKEN_ADDRESS || !publicClient)
+      return;
 
     const {
       userTxs: [{ approvalData }],
     } = route;
-
-    const supportedChains = Object.values(viemChains);
-
-    const crossChainOpts = {
-      account: walletAddress,
-      chain: supportedChains.find((c) => c.id === sourceChain?.chainId),
-    };
 
     if (!approvalData) {
       setTXStep(TXStep.CONFIRM);
@@ -192,18 +187,30 @@ export const SocketSwapProvider: FC<PropsWithChildren> = ({ children }) => {
 
     setTXStep(TXStep.APPROVE_PENDING);
     try {
-      const allowance = await erc20.read.allowance([walletAddress, approvalData.allowanceTarget], crossChainOpts);
+      const allowance = await publicClient.readContract({
+        address: fromAssetAddress,
+        abi: erc20Abi,
+        functionName: 'allowance',
+        args: [walletAddress, approvalData.allowanceTarget],
+      });
 
       const minimumApprovalAmount = BigInt(approvalData.minimumApprovalAmount);
 
       if (allowance < minimumApprovalAmount) {
-        const args = [approvalData.allowanceTarget, minimumApprovalAmount] as const;
-        const gas = await erc20.estimateGas.approve(args, { account: walletAddress });
-        const hash = await erc20.write.approve(args, {
-          ...crossChainOpts,
-          gas: gasLimit(gas),
+        const { id } = await sendCalls({
+          account: walletAddress,
+          chainId: sourceChain?.chainId,
+          experimental_fallback: true,
+          calls: [
+            {
+              to: fromAssetAddress,
+              abi: erc20Abi,
+              functionName: 'approve',
+              args: [approvalData.allowanceTarget, minimumApprovalAmount],
+            },
+          ],
         });
-        await waitForTransaction({ hash });
+        await waitForCallsStatus(wagmi, { id });
       }
       setTXStep(TXStep.CONFIRM);
     } catch (err) {
@@ -212,29 +219,29 @@ export const SocketSwapProvider: FC<PropsWithChildren> = ({ children }) => {
       }
       setTXStep(TXStep.APPROVE);
     }
-  }, [sourceChain?.chainId, erc20, fromAssetAddress, route, walletAddress, walletClient]);
+  }, [sourceChain?.chainId, fromAssetAddress, route, walletAddress, publicClient, sendCalls]);
 
   const submit = useCallback(async () => {
-    if (txStep !== TXStep.CONFIRM || !walletClient || !route) return;
+    if (txStep !== TXStep.CONFIRM || !route || !walletAddress) return;
 
     try {
       const { txTarget, txData, value } = await socketBuildTX({ route });
       setTXStep(TXStep.CONFIRM_PENDING);
-      const txHash_ = await walletClient.sendTransaction({
-        to: txTarget,
-        data: txData,
-        value: BigInt(value),
+      const { id } = await sendCalls({
+        account: walletAddress,
+        chainId: sourceChain?.chainId,
+        experimental_fallback: true,
+        calls: [{ to: txTarget, data: txData, value: BigInt(value) }],
       });
-
-      setTX({ status: 'processing', hash: txHash_ });
-      const { status, transactionHash } = await waitForTransaction({ hash: txHash_ });
-      setTX({ status: status ? 'success' : 'error', hash: transactionHash });
+      const { receipts, status } = await waitForCallsStatus(wagmi, { id });
+      const hash = receipts?.[receipts.length - 1]?.transactionHash;
+      setTX({ status: status === 'success' && hash ? 'success' : 'error', hash: hash ?? '0x' });
       setScreen(Screen.TX_STATUS);
     } catch (err) {
       setTXError({ status: true, message: handleOperationError(err) });
       setTXStep(TXStep.CONFIRM);
     }
-  }, [route, txStep, walletClient]);
+  }, [route, sourceChain?.chainId, txStep, walletAddress, sendCalls]);
 
   useEffect(() => {
     if (!isBridge) return;
@@ -351,5 +358,3 @@ export const useSocketSwap = () => {
   }
   return ctx;
 };
-
-export default SocketSwapContext;

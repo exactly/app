@@ -2,7 +2,8 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Box, Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
-import { useContractEvents, usePublicClient, useSignTypedData } from 'wagmi';
+import { useContractEvents, usePublicClient, useSendCalls, useSignTypedData } from 'wagmi';
+import { waitForCallsStatus } from '@wagmi/core';
 import dayjs from 'dayjs';
 import { formatUnits, hexToSignature, isAddress, parseEther, trim, pad, type Hex } from 'viem';
 import { WAD } from '@exactly/lib';
@@ -29,8 +30,8 @@ import LoadingTransaction from 'components/common/modal/Loading';
 import OperationSquare from 'components/common/OperationSquare';
 import Submit from '../Submit';
 import useIsContract from 'hooks/useIsContract';
-import { gasLimit } from 'utils/gas';
 import {
+  debtManagerAbi,
   legacyPreviewerAddress,
   marketAbi,
   marketBlocks,
@@ -71,7 +72,6 @@ function Operation() {
     setPercent,
     setSlippage,
     debtManager,
-    market: marketContract,
     errorData,
     setErrorData,
     isLoading,
@@ -79,6 +79,7 @@ function Operation() {
     approve,
     submit,
   } = useDebtManagerContext();
+  const { mutateAsync: sendCalls } = useSendCalls();
 
   const onClose = useCallback(() => setSheetOpen([false, false]), []);
 
@@ -343,48 +344,67 @@ function Operation() {
   const [requiresApproval, setRequiresApproval] = useState(false);
 
   const executeTransaction = useCallback(async (): Promise<Hex | undefined> => {
-    if (!account || !debtManager || !marketContract || !input.from || !input.to || !publicClient) {
+    const market = input.from ? getMarketAccount(input.from.symbol)?.market : undefined;
+    if (!account || !debtManager || !market || !input.from || !input.to || !publicClient) {
       return;
     }
 
     const percentage = (BigInt(input.percent) * WAD) / 100n;
-    const accountOptions = { account, chain: defaultChain };
+    const isMultiSig = await isContract(account);
 
-    if (await isContract(account)) {
+    const send = async (functionName: 'rollFixed' | 'rollFloatingToFixed' | 'rollFixedToFloating', args: unknown[]) => {
+      await publicClient.simulateContract({
+        address: debtManager,
+        abi: debtManagerAbi,
+        functionName,
+        args: args as never,
+        account,
+      });
+      const { id } = await sendCalls({
+        account,
+        chainId: defaultChain.id,
+        experimental_fallback: true,
+        calls: [{ to: debtManager, abi: debtManagerAbi, functionName, args: args as never }],
+      });
+      const { receipts } = await waitForCallsStatus(wagmi, { id });
+      return receipts?.[receipts.length - 1]?.transactionHash;
+    };
+
+    if (isMultiSig) {
       if (input.from.maturity && input.to.maturity) {
-        const args = [
-          marketContract.address,
+        return send('rollFixed', [
+          market,
           input.from.maturity,
           input.to.maturity,
           maxRepayAssets,
           maxBorrowAssets,
           percentage,
-        ] as const;
-        const gas = await debtManager.estimateGas.rollFixed(args, accountOptions);
-        const options = { ...accountOptions, gas: gasLimit(gas) };
-        await debtManager.simulate.rollFixed(args, options);
-        return debtManager.write.rollFixed(args, options);
+        ]);
       } else if (input.to.maturity) {
-        const args = [marketContract.address, input.to.maturity, maxBorrowAssets, percentage] as const;
-        const gas = await debtManager.estimateGas.rollFloatingToFixed(args, accountOptions);
-        const options = { ...accountOptions, gas: gasLimit(gas) };
-        await debtManager.simulate.rollFloatingToFixed(args, options);
-        return debtManager.write.rollFloatingToFixed(args, options);
+        return send('rollFloatingToFixed', [market, input.to.maturity, maxBorrowAssets, percentage]);
       } else if (input.from.maturity) {
-        const args = [marketContract.address, input.from.maturity, maxRepayAssets, percentage] as const;
-        const gas = await debtManager.estimateGas.rollFixedToFloating(args, accountOptions);
-        const options = { ...accountOptions, gas: gasLimit(gas) };
-        await debtManager.simulate.rollFixedToFloating(args, options);
-        return debtManager.write.rollFixedToFloating(args, options);
+        return send('rollFixedToFloating', [market, input.from.maturity, maxRepayAssets, percentage]);
       } else return;
     }
 
-    const [marketImpl, marketNonce] = await Promise.all([
+    const [marketImpl, marketNonce, value] = await Promise.all([
       publicClient.getStorageAt({
-        address: marketContract.address,
+        address: market,
         slot: '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc',
       }),
-      marketContract.read.nonces([account], accountOptions),
+      publicClient.readContract({
+        address: market,
+        abi: marketAbi,
+        functionName: 'nonces',
+        args: [account],
+        account,
+      }),
+      publicClient.readContract({
+        address: market,
+        abi: marketAbi,
+        functionName: 'previewWithdraw',
+        args: [maxBorrowAssets],
+      }),
     ]);
 
     if (!marketImpl) return;
@@ -392,7 +412,6 @@ function Operation() {
     const verifyingContract = pad(trim(marketImpl as `0x${string}`), { size: 20 });
     if (!isAddress(verifyingContract)) return;
 
-    const value = await marketContract.read.previewWithdraw([maxBorrowAssets]);
     const { v, r, s } = await signTypedDataAsync({
       primaryType: 'Permit',
       domain: {
@@ -412,7 +431,7 @@ function Operation() {
       },
       message: {
         owner: account,
-        spender: debtManager.address,
+        spender: debtManager,
         value,
         nonce: marketNonce,
         deadline,
@@ -427,43 +446,32 @@ function Operation() {
     } as const;
 
     if (input.from.maturity && input.to.maturity) {
-      const args = [
-        marketContract.address,
+      return send('rollFixed', [
+        market,
         input.from.maturity,
         input.to.maturity,
         maxRepayAssets,
         maxBorrowAssets,
         percentage,
         permit,
-      ] as const;
-      const gas = await debtManager.estimateGas.rollFixed(args, accountOptions);
-      const options = { ...accountOptions, gas: gasLimit(gas) };
-      await debtManager.simulate.rollFixed(args, options);
-      return debtManager.write.rollFixed(args, options);
+      ]);
     } else if (input.to.maturity) {
-      const args = [marketContract.address, input.to.maturity, maxBorrowAssets, percentage, permit] as const;
-      const gas = await debtManager.estimateGas.rollFloatingToFixed(args, accountOptions);
-      const options = { ...accountOptions, gas: gasLimit(gas) };
-      await debtManager.simulate.rollFloatingToFixed(args, options);
-      return debtManager.write.rollFloatingToFixed(args, options);
+      return send('rollFloatingToFixed', [market, input.to.maturity, maxBorrowAssets, percentage, permit]);
     } else if (input.from.maturity) {
-      const args = [marketContract.address, input.from.maturity, maxRepayAssets, percentage, permit] as const;
-      const gas = await debtManager.estimateGas.rollFixedToFloating(args, accountOptions);
-      const options = { ...accountOptions, gas: gasLimit(gas) };
-      await debtManager.simulate.rollFixedToFloating(args, options);
-      return debtManager.write.rollFixedToFloating(args, options);
+      return send('rollFixedToFloating', [market, input.from.maturity, maxRepayAssets, percentage, permit]);
     }
   }, [
+    account,
     debtManager,
+    getMarketAccount,
     input.from,
     input.percent,
     input.to,
     isContract,
-    marketContract,
     maxBorrowAssets,
     maxRepayAssets,
     publicClient,
-    account,
+    sendCalls,
     signTypedDataAsync,
   ]);
 

@@ -1,4 +1,6 @@
-import base, { chain } from '../../fixture/base';
+import { anvil as chain } from 'viem/chains';
+
+import base from '../../fixture/base';
 import _app from '../../common/app';
 import _balance from '../../common/balance';
 import _allowance from '../../common/allowance';

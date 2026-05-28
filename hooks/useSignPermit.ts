@@ -1,16 +1,26 @@
 import { useCallback } from 'react';
-import { Address, hexToSignature } from 'viem';
-import { useSignTypedData } from 'wagmi';
+import { erc20Abi, hexToSignature, type Address } from 'viem';
+import { usePublicClient, useSignTypedData } from 'wagmi';
 import dayjs from 'dayjs';
 import useContractVersion from 'hooks/useContractVersion';
-import { Market } from 'types/contracts';
 import { defaultChain } from 'utils/client';
 import useReadOnly from 'hooks/useReadOnly';
+
+const noncesAbi = [
+  {
+    type: 'function',
+    name: 'nonces',
+    stateMutability: 'view',
+    inputs: [{ name: 'owner', type: 'address' }],
+    outputs: [{ name: '', type: 'uint256' }],
+  },
+] as const;
 
 export default function useSignPermit() {
   const { signTypedDataAsync } = useSignTypedData();
   const { account: walletAddress } = useReadOnly();
   const contractVersion = useContractVersion();
+  const publicClient = usePublicClient();
 
   return useCallback(
     async ({
@@ -18,25 +28,39 @@ export default function useSignPermit() {
       value,
       duration = 3600, // TODO why 1 hour?
       verifyingContract,
+      noncesFrom,
     }: {
       spender: Address;
       value: bigint;
       duration: number;
-      verifyingContract: Market;
+      verifyingContract: Address;
+      noncesFrom?: Address;
     }) => {
-      if (!verifyingContract || !walletAddress) return;
-      const nonce = await verifyingContract.read.nonces([walletAddress], {
+      if (!walletAddress || !publicClient) return;
+      const nonce = await publicClient.readContract({
+        address: noncesFrom ?? verifyingContract,
+        abi: noncesAbi,
+        functionName: 'nonces',
+        args: [walletAddress],
         account: walletAddress,
       });
-      const version = await contractVersion(verifyingContract.address);
+      const version = await contractVersion(verifyingContract);
       const deadline = BigInt(dayjs().unix() + duration);
+      const name = noncesFrom
+        ? ''
+        : await publicClient.readContract({
+            address: verifyingContract,
+            abi: erc20Abi,
+            functionName: 'name',
+            account: walletAddress,
+          });
       const signatureHex = await signTypedDataAsync({
         primaryType: 'Permit',
         domain: {
-          name: '',
+          name,
           version,
           chainId: defaultChain.id,
-          verifyingContract: verifyingContract.address,
+          verifyingContract,
         },
         types: {
           Permit: [
@@ -65,6 +89,6 @@ export default function useSignPermit() {
         s,
       };
     },
-    [contractVersion, signTypedDataAsync, walletAddress],
+    [contractVersion, publicClient, signTypedDataAsync, walletAddress],
   );
 }

@@ -12,11 +12,7 @@ import {
   TransactionExecutionError,
 } from 'viem';
 
-function parse(name?: string): string {
-  const defaultErr = i18n.t('There was an error, please try again');
-  if (!name) {
-    return defaultErr;
-  }
+function humanize(name?: string): string | undefined {
   switch (name) {
     case 'InsufficientAccountLiquidity':
       return i18n.t('There is not enough liquidity in your account');
@@ -41,7 +37,7 @@ function parse(name?: string): string {
     case 'MarketFrozen':
       return i18n.t('The current market is frozen');
     default:
-      return defaultErr;
+      return undefined;
   }
 }
 
@@ -58,7 +54,7 @@ export default (error: unknown, captureException: typeof sentryCaptureException 
         | ContractFunctionRevertedError
         | undefined;
       if (revert && revert.name === 'ContractFunctionRevertedError') {
-        return parse(revert.data?.errorName);
+        return humanize(revert.data?.errorName) ?? revert.reason ?? revert.data?.errorName ?? revert.shortMessage;
       }
 
       const call = error.walk((e) => e instanceof CallExecutionError) as CallExecutionError | undefined;
@@ -74,7 +70,7 @@ export default (error: unknown, captureException: typeof sentryCaptureException 
           return defaultErr;
         }
         const decoded = decodeErrorResult({ abi: errorAbi, data });
-        return parse(decoded.errorName);
+        return humanize(decoded.errorName) ?? decoded.errorName ?? defaultErr;
       } catch {
         //ignore
       }

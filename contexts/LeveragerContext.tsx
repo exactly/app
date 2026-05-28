@@ -8,9 +8,10 @@ import React, {
   useReducer,
   useMemo,
 } from 'react';
-import { useSignTypedData, usePublicClient } from 'wagmi';
-import waitForTransaction from 'utils/waitForTransaction';
+import { useSendCalls, useSignTypedData, usePublicClient } from 'wagmi';
+import { readContract, waitForCallsStatus } from '@wagmi/core';
 import {
+  erc20Abi,
   formatEther,
   formatUnits,
   Hex,
@@ -29,10 +30,7 @@ import { MAX_UINT256, WAD } from '@exactly/lib';
 
 import type { ErrorData } from 'types/Error';
 import type { Transaction } from 'types/Transaction';
-import useDebtManager from 'hooks/useDebtManager';
 import useAccountData, { type MarketAccount } from 'hooks/useAccountData';
-import useMarket from 'hooks/useMarket';
-import type { Market } from 'types/contracts';
 import handleOperationError from 'utils/handleOperationError';
 import useIsContract from 'hooks/useIsContract';
 import useBalance from 'hooks/useBalance';
@@ -42,19 +40,23 @@ import { useTheme } from '@mui/material';
 import formatNumber from 'utils/formatNumber';
 import useHealthFactor from 'hooks/useHealthFactor';
 import parseHealthFactor from 'utils/parseHealthFactor';
-import useERC20 from 'hooks/useERC20';
 import dayjs from 'dayjs';
 import { type Limit, type Leverage as LeverageStatus, type Rates } from 'hooks/useDebtPreviewer';
 import useDelayedEffect from 'hooks/useDelayedEffect';
 import useRewards from 'hooks/useRewards';
 import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
-import { debtManagerAbi, debtPreviewerAbi, debtPreviewerAddress, permit2Address } from 'generated/wagmi';
+import {
+  debtManagerAbi,
+  debtManagerAddress,
+  debtPreviewerAbi,
+  debtPreviewerAddress,
+  marketAbi,
+  permit2Address,
+} from 'generated/wagmi';
 import useStETHNativeAPR from 'hooks/useStETHNativeAPR';
 import useIsPermit from 'hooks/useIsPermit';
-import { gasLimit } from 'utils/gas';
 import useContractVersion from 'hooks/useContractVersion';
 import { defaultChain, wagmi } from 'utils/client';
-import { readContract } from '@wagmi/core';
 import useReadOnly from 'hooks/useReadOnly';
 
 type Params<T extends ExtractAbiFunctionNames<typeof debtManagerAbi>> = AbiParametersToPrimitiveTypes<
@@ -125,9 +127,6 @@ type ContextValues = {
 
   getHealthFactorColor: (healthFactor?: string) => { color: string; bg: string };
 
-  debtManager?: ReturnType<typeof useDebtManager>;
-  market?: Market;
-
   errorData?: ErrorData;
   setErrorData: React.Dispatch<React.SetStateAction<ErrorData | undefined>>;
   tx?: Transaction;
@@ -165,13 +164,14 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
   const isPermit = useIsPermit();
   const { signTypedDataAsync } = useSignTypedData();
   const publicClient = usePublicClient();
+  const { mutateAsync: sendCalls, isPending: sendCallsPending } = useSendCalls();
   const [viewSummary, setViewSummary] = useState(false);
   const [errorData, setErrorData] = useState<ErrorData | undefined>();
 
   const [input, dispatch] = useReducer(reducer, initState);
 
   const [tx, setTx] = useState<Transaction | undefined>();
-  const [isLoading, setIsLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const options = useAssets();
@@ -187,12 +187,12 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     [getMarketAccount, input.borrowSymbol],
   );
 
-  const marketIn = useMarket(maIn?.market);
-  const marketOut = useMarket(maOut?.market);
-  const assetIn = useERC20(maIn?.asset);
-  const assetOut = useERC20(maOut?.asset);
+  const marketIn = maIn?.market;
+  const marketOut = maOut?.market;
+  const assetIn = maIn?.asset;
+  const assetOut = maOut?.asset;
 
-  const debtManager = useDebtManager();
+  const debtManager = Object.entries(debtManagerAddress).find(([chainId]) => Number(chainId) === defaultChain.id)?.[1];
   const debtPreviewer = Object.entries(debtPreviewerAddress).find(
     ([chainId]) => Number(chainId) === defaultChain.id,
   )?.[1];
@@ -599,8 +599,8 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       !permit2 ||
       !debtManager ||
       !limit ||
-      !walletAddress ||
-      !leverageStatus
+      !leverageStatus ||
+      !publicClient
     ) {
       return true;
     }
@@ -610,34 +610,53 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       if (await isContract(walletAddress)) {
         if (input.secondaryOperation === 'deposit') {
           setApprovalStatus('ERC20');
-          const assetAllowance = await assetIn.read.allowance([walletAddress, debtManager.address], {
+          const assetAllowance = await publicClient.readContract({
+            address: assetIn,
+            abi: erc20Abi,
+            functionName: 'allowance',
+            args: [walletAddress, debtManager],
             account: walletAddress,
           });
           if (assetAllowance < userInput) return true;
 
           setApprovalStatus('MARKET-OUT');
-          const marketOutAllownce = await marketOut.read.allowance([walletAddress, debtManager.address], {
+          const marketOutAllownce = await publicClient.readContract({
+            address: marketOut,
+            abi: erc20Abi,
+            functionName: 'allowance',
+            args: [walletAddress, debtManager],
             account: walletAddress,
           });
           const _slippage = (leverageStatus.borrow * ((maIn.floatingBorrowRate * 300n) / 31_536_000n)) / WAD;
-          const borrowShares = await marketIn.read.previewWithdraw([limit.borrow - leverageStatus.borrow + _slippage], {
+          const borrowShares = await publicClient.readContract({
+            address: marketIn,
+            abi: marketAbi,
+            functionName: 'previewWithdraw',
+            args: [limit.borrow - leverageStatus.borrow + _slippage],
             account: walletAddress,
           });
           if (marketOutAllownce < borrowShares) return true;
         } else {
           setApprovalStatus('MARKET-IN');
-          const marketInAllowance = await marketIn.read.allowance([walletAddress, debtManager.address], {
+          const marketInAllowance = await publicClient.readContract({
+            address: marketIn,
+            abi: erc20Abi,
+            functionName: 'allowance',
+            args: [walletAddress, debtManager],
             account: walletAddress,
           });
           const _slippage = (maIn.floatingBorrowAssets * ((maIn.floatingBorrowRate * 300n) / 31_536_000n)) / WAD;
-          const permitShares = await marketIn.read.previewWithdraw(
-            [
+          const permitShares = await publicClient.readContract({
+            address: marketIn,
+            abi: marketAbi,
+            functionName: 'previewWithdraw',
+            args: [
               (maIn.floatingBorrowAssets < limit.borrow ? 0n : maIn.floatingBorrowAssets - limit.borrow) +
                 userInput +
                 _slippage,
             ],
-            { account: walletAddress },
-          );
+            account: walletAddress,
+          });
           if (marketInAllowance < permitShares) return true;
         }
 
@@ -647,7 +666,11 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
       if (!(await isPermit(maIn.asset)) && input.secondaryOperation === 'deposit') {
         setApprovalStatus('ERC20-PERMIT2');
-        const allowance = await assetIn.read.allowance([walletAddress, permit2], {
+        const allowance = await publicClient.readContract({
+          address: assetIn,
+          abi: erc20Abi,
+          functionName: 'allowance',
+          args: [walletAddress, permit2],
           account: walletAddress,
         });
         if (allowance < userInput) return true;
@@ -672,10 +695,25 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     debtManager,
     limit,
     leverageStatus,
+    publicClient,
     isContract,
     isPermit,
     userInput,
   ]);
+
+  const sendApprove = useCallback(
+    async (token: `0x${string}`, spender: `0x${string}`, amount: bigint) => {
+      if (!walletAddress) return;
+      const { id } = await sendCalls({
+        account: walletAddress,
+        chainId: defaultChain.id,
+        experimental_fallback: true,
+        calls: [{ to: token, abi: erc20Abi, functionName: 'approve', args: [spender, amount] }],
+      });
+      await waitForCallsStatus(wagmi, { id });
+    },
+    [sendCalls, walletAddress],
+  );
 
   const approve = useCallback(async () => {
     if (
@@ -687,86 +725,54 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       !permit2 ||
       !limit ||
       !walletAddress ||
-      !leverageStatus
+      !leverageStatus ||
+      !publicClient
     )
       return;
 
-    setIsLoading(true);
     try {
-      let hash: Hex | undefined;
       switch (approvalStatus) {
         case 'ERC20': {
-          const args = [debtManager.address, userInput] as const;
-          const gasEstimation = await assetIn.estimateGas.approve(args, {
-            account: walletAddress,
-          });
-          hash = await assetIn.write.approve(args, {
-            account: walletAddress,
-            chain: defaultChain,
-            gas: gasLimit(gasEstimation),
-          });
+          await sendApprove(assetIn, debtManager, userInput);
           break;
         }
         case 'ERC20-PERMIT2': {
-          const args = [permit2, MAX_UINT256] as const;
-          const gasEstimation = await assetIn.estimateGas.approve(args, {
-            account: walletAddress,
-          });
-          hash = await assetIn.write.approve(args, {
-            account: walletAddress,
-            chain: defaultChain,
-            gas: gasLimit(gasEstimation),
-          });
+          await sendApprove(assetIn, permit2, MAX_UINT256);
           break;
         }
         case 'MARKET-IN': {
           const _slippage = (maIn.floatingBorrowAssets * ((maIn.floatingBorrowRate * 5000n) / 31_536_000n)) / WAD;
-          const permitShares = await marketIn.read.previewWithdraw(
-            [
+          const permitShares = await publicClient.readContract({
+            address: marketIn,
+            abi: marketAbi,
+            functionName: 'previewWithdraw',
+            args: [
               (maIn.floatingBorrowAssets < limit.borrow ? 0n : maIn.floatingBorrowAssets - limit.borrow) +
                 userInput +
                 _slippage,
             ],
-            { account: walletAddress },
-          );
-          const args = [debtManager.address, permitShares] as const;
-          const gasEstimation = await marketIn.estimateGas.approve(args, {
             account: walletAddress,
           });
-          hash = await marketIn.write.approve(args, {
-            account: walletAddress,
-            chain: defaultChain,
-            gas: gasLimit(gasEstimation),
-          });
+          await sendApprove(marketIn, debtManager, permitShares);
           break;
         }
         case 'MARKET-OUT': {
           const _slippage = (leverageStatus.borrow * ((maIn.floatingBorrowRate * 3_600n * 12n) / 31_536_000n)) / WAD;
-
-          const borrowShares = await marketIn.read.previewWithdraw([limit.borrow - leverageStatus.borrow + _slippage], {
+          const borrowShares = await publicClient.readContract({
+            address: marketIn,
+            abi: marketAbi,
+            functionName: 'previewWithdraw',
+            args: [limit.borrow - leverageStatus.borrow + _slippage],
             account: walletAddress,
           });
-          const args = [debtManager.address, borrowShares] as const;
-          const gasEstimation = await marketOut.estimateGas.approve(args, {
-            account: walletAddress,
-          });
-          hash = await marketOut.write.approve(args, {
-            account: walletAddress,
-            chain: defaultChain,
-            gas: gasLimit(gasEstimation),
-          });
+          await sendApprove(marketOut, debtManager, borrowShares);
           break;
         }
         default:
           return;
       }
-
-      if (!hash) return;
-      await waitForTransaction({ hash });
     } catch (e: unknown) {
       setErrorData({ status: true, message: handleOperationError(e) });
-    } finally {
-      setIsLoading(false);
     }
   }, [
     approvalStatus,
@@ -778,6 +784,8 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     marketIn,
     marketOut,
     permit2,
+    publicClient,
+    sendApprove,
     userInput,
     walletAddress,
   ]);
@@ -789,7 +797,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       }
 
       const deadline = BigInt(dayjs().unix() + 3_600);
-      const permitAllowed = await isPermit(assetIn.address);
+      const permitAllowed = await isPermit(assetIn);
 
       if (who === 'assetIn' && !permitAllowed) {
         const signature = await signTypedDataAsync({
@@ -813,10 +821,10 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
           },
           message: {
             permitted: {
-              token: assetIn.address,
+              token: assetIn,
               amount: value,
             },
-            spender: debtManager.address,
+            spender: debtManager,
             deadline,
             nonce: hexToBigInt(
               keccak256(
@@ -827,7 +835,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
                     { name: 'assets', type: 'uint256' },
                     { name: 'deadline', type: 'uint256' },
                   ],
-                  [walletAddress, assetIn.address, value, deadline],
+                  [walletAddress, assetIn, value, deadline],
                 ),
               ),
             ),
@@ -842,28 +850,40 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
         return { type: 'permit2', value: permit } as const;
       }
 
+      const tokenAddress = who === 'marketIn' ? marketIn : who === 'marketOut' ? marketOut : assetIn;
       const [impl, nonce] = await Promise.all([
         who.startsWith('market')
           ? publicClient.getStorageAt({
-              address: who === 'marketIn' ? marketIn.address : marketOut.address,
+              address: tokenAddress,
               slot: '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc',
             })
-          : assetIn.address,
-        who.startsWith('market')
-          ? (who === 'marketIn' ? marketIn : marketOut).read.nonces([walletAddress], {
-              account: walletAddress,
-            })
-          : assetIn.read.nonces([walletAddress], { account: walletAddress }),
+          : assetIn,
+        publicClient.readContract({
+          address: tokenAddress,
+          abi: erc20PermitAbi,
+          functionName: 'nonces',
+          args: [walletAddress],
+          account: walletAddress,
+        }),
       ]);
 
       if (!impl) return;
       const verifyingContract = pad(trim(impl as Hex), { size: 20 });
       if (!isAddress(verifyingContract)) return;
 
+      const name = who.startsWith('market')
+        ? ''
+        : await publicClient.readContract({
+            address: assetIn,
+            abi: erc20Abi,
+            functionName: 'name',
+            account: walletAddress,
+          });
+
       const { v, r, s } = await signTypedDataAsync({
         primaryType: 'Permit',
         domain: {
-          name: who.startsWith('market') ? '' : await assetIn.read.name({ account: walletAddress }),
+          name,
           version: await contractVersion(verifyingContract),
           chainId: defaultChain.id,
           verifyingContract,
@@ -879,7 +899,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
         },
         message: {
           owner: walletAddress,
-          spender: debtManager.address,
+          spender: debtManager,
           value,
           nonce,
           deadline,
@@ -910,6 +930,21 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     ],
   );
 
+  const sendLeverage = useCallback(
+    async <T extends 'leverage' | 'deleverage'>(functionName: T, args: Params<T>) => {
+      if (!walletAddress || !debtManager) return;
+      const { id } = await sendCalls({
+        account: walletAddress,
+        chainId: defaultChain.id,
+        experimental_fallback: true,
+        calls: [{ to: debtManager, abi: debtManagerAbi, functionName, args } as never],
+      });
+      const { receipts, status } = await waitForCallsStatus(wagmi, { id });
+      return { hash: receipts?.[receipts.length - 1]?.transactionHash, status };
+    },
+    [debtManager, sendCalls, walletAddress],
+  );
+
   const submit = useCallback(async () => {
     if (
       !walletAddress ||
@@ -924,40 +959,36 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       !maOut ||
       !leverageStatus ||
       !limit ||
-      !walletAddress
+      !publicClient
     ) {
       return;
     }
 
-    setIsLoading(true);
+    setSubmitting(true);
     try {
       const ratio = parseEther(String(input.leverageRatio));
       const isMultiSig = await isContract(walletAddress);
 
-      let hash: Hex | undefined;
+      let result: { hash?: Hex; status: string | undefined } | undefined;
 
       if (input.collateralSymbol === input.borrowSymbol) {
         switch (input.secondaryOperation) {
           case 'deposit': {
-            let args: Params<'leverage'> = [marketIn.address, userInput, ratio];
+            const args: Params<'leverage'> = [marketIn, userInput, ratio];
 
             if (isMultiSig) {
-              const gasEstimation = await debtManager.estimateGas.leverage(args, {
-                account: walletAddress,
-              });
-              hash = await debtManager.write.leverage(args, {
-                account: walletAddress,
-                chain: defaultChain,
-                gas: gasLimit(gasEstimation),
-              });
+              result = await sendLeverage('leverage', args);
               break;
             }
 
             const _slippage = (leverageStatus.borrow * ((maIn.floatingBorrowRate * 300n) / 31_536_000n)) / WAD;
-            const borrowShares = await marketIn.read.previewWithdraw(
-              [limit.borrow - leverageStatus.borrow + _slippage],
-              { account: walletAddress },
-            );
+            const borrowShares = await publicClient.readContract({
+              address: marketIn,
+              abi: marketAbi,
+              functionName: 'previewWithdraw',
+              args: [limit.borrow - leverageStatus.borrow + _slippage],
+              account: walletAddress,
+            });
             const [assetPermit, marketPermit] = await Promise.all([
               signPermit(userInput, 'assetIn'),
               signPermit(borrowShares, 'marketIn'),
@@ -969,87 +1000,60 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
             switch (assetPermit.type) {
               case 'permit': {
-                const _args = [marketIn.address, ratio, marketPermit.value, assetPermit.value] as const;
-                const gasEstimation = await debtManager.estimateGas.leverage(_args, {
-                  account: walletAddress,
-                });
-                hash = await debtManager.write.leverage(_args, {
-                  account: walletAddress,
-                  chain: defaultChain,
-                  gas: gasLimit(gasEstimation),
-                });
+                result = await sendLeverage('leverage', [
+                  marketIn,
+                  ratio,
+                  marketPermit.value,
+                  assetPermit.value,
+                ] as never);
                 break;
               }
               case 'permit2': {
-                args = [...args, marketPermit.value, assetPermit.value];
-                const gasEstimation = await debtManager.estimateGas.leverage(args, {
-                  account: walletAddress,
-                });
-                hash = await debtManager.write.leverage(args, {
-                  account: walletAddress,
-                  chain: defaultChain,
-                  gas: gasLimit(gasEstimation),
-                });
+                result = await sendLeverage('leverage', [...args, marketPermit.value, assetPermit.value] as never);
                 break;
               }
             }
             break;
           }
           case 'withdraw': {
-            const args: Params<'deleverage'> = [marketIn.address, userInput, ratio] as const;
+            const args: Params<'deleverage'> = [marketIn, userInput, ratio] as const;
 
             if (isMultiSig) {
-              const gasEstimation = await debtManager.estimateGas.deleverage(args, {
-                account: walletAddress,
-              });
-              hash = await debtManager.write.deleverage(args, {
-                account: walletAddress,
-                chain: defaultChain,
-                gas: gasLimit(gasEstimation),
-              });
+              result = await sendLeverage('deleverage', args);
               break;
             }
 
             const _slippage = (maIn.floatingBorrowAssets * ((maIn.floatingBorrowRate * 300n) / 31_536_000n)) / WAD;
-            const permitShares = await marketIn.read.previewWithdraw(
-              [
+            const permitShares = await publicClient.readContract({
+              address: marketIn,
+              abi: marketAbi,
+              functionName: 'previewWithdraw',
+              args: [
                 (maIn.floatingBorrowAssets < limit.borrow ? 0n : maIn.floatingBorrowAssets - limit.borrow) +
                   userInput +
                   _slippage,
               ],
-              { account: walletAddress },
-            );
+              account: walletAddress,
+            });
             const marketPermit = await signPermit(permitShares, 'marketIn');
 
             if (!marketPermit || marketPermit.type === 'permit2') {
               return;
             }
 
-            const _args = [marketIn.address, userInput, ratio, marketPermit.value] as const;
-            const gasEstimation = await debtManager.estimateGas.deleverage(_args, {
-              account: walletAddress,
-            });
-            hash = await debtManager.write.deleverage(_args, {
-              account: walletAddress,
-              chain: defaultChain,
-              gas: gasLimit(gasEstimation),
-            });
+            result = await sendLeverage('deleverage', [marketIn, userInput, ratio, marketPermit.value] as never);
             break;
           }
         }
       }
 
-      if (!hash) return;
-
-      setTx({ status: 'processing', hash });
-      const { status, transactionHash } = await waitForTransaction({ hash });
-      setTx({ status: status ? 'success' : 'error', hash: transactionHash });
-
+      if (!result?.hash) return;
+      setTx({ status: result.status === 'success' ? 'success' : 'error', hash: result.hash });
       await refreshAccountData();
     } catch (e: unknown) {
       setErrorData({ status: true, message: handleOperationError(e) });
     } finally {
-      setIsLoading(false);
+      setSubmitting(false);
     }
   }, [
     walletAddress,
@@ -1066,9 +1070,11 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     maOut,
     leverageStatus,
     limit,
+    publicClient,
     isContract,
     refreshAccountData,
     userInput,
+    sendLeverage,
     signPermit,
   ]);
 
@@ -1107,9 +1113,6 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     marketRewards,
     nativeRewards,
 
-    debtManager,
-    market: marketIn,
-
     disabledSubmit,
     disabledConfirm,
     blockModal,
@@ -1120,7 +1123,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     errorData,
     setErrorData,
     tx,
-    isLoading: isLoading,
+    isLoading: sendCallsPending || submitting,
     loadingUserInput: previewIsLoading,
 
     approvalStatus,
@@ -1141,3 +1144,13 @@ export function useLeveragerContext() {
 }
 
 export default LeveragerContext;
+
+const erc20PermitAbi = [
+  {
+    type: 'function',
+    name: 'nonces',
+    stateMutability: 'view',
+    inputs: [{ name: 'owner', type: 'address' }],
+    outputs: [{ name: '', type: 'uint256' }],
+  },
+] as const;

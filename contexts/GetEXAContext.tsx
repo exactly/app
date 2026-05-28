@@ -10,21 +10,20 @@ import React, {
 } from 'react';
 
 import {
-  type Hash,
   encodeFunctionData,
-  parseEther,
-  parseUnits,
-  zeroAddress,
+  erc20Abi,
+  formatUnits,
   hexToBigInt,
   hexToSignature,
   keccak256,
   encodeAbiParameters,
-  formatUnits,
+  parseEther,
+  parseUnits,
+  zeroAddress,
 } from 'viem';
-import * as viemChains from 'viem/chains';
 
-import { useSignTypedData, useWalletClient } from 'wagmi';
-import { simulateContract, writeContract } from '@wagmi/core';
+import { usePublicClient, useSendCalls, useSignTypedData } from 'wagmi';
+import { simulateContract, waitForCallsStatus } from '@wagmi/core';
 import { optimism } from 'viem/chains';
 
 import { MAX_UINT256, WAD } from '@exactly/lib';
@@ -54,11 +53,8 @@ import {
   socketRequest,
 } from 'utils/socket';
 import { useTranslation } from 'react-i18next';
-import useERC20 from 'hooks/useERC20';
-import { gasLimit } from 'utils/gas';
 import useIsContract from 'hooks/useIsContract';
 import useIsPermit from 'hooks/useIsPermit';
-import waitForTransaction from 'utils/waitForTransaction';
 import dayjs from 'dayjs';
 import useDelayedEffect from 'hooks/useDelayedEffect';
 import { track } from 'utils/mixpanel';
@@ -132,7 +128,9 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
 
   const { account: walletAddress } = useReadOnly();
   const destinationChain = isE2E ? defaultChain.id : optimism.id;
-  const { data: walletClient } = useWalletClient({ chainId: sourceChain?.chainId });
+  const sourcePublicClient = usePublicClient({ chainId: sourceChain?.chainId });
+  const defaultPublicClient = usePublicClient();
+  const { mutateAsync: sendCalls } = useSendCalls();
   const { t } = useTranslation();
   const swapper = Object.entries(swapperAddress).find(([chainId]) => Number(chainId) === defaultChain.id)?.[1];
   const exaethPrice = useEXAETHPrice();
@@ -188,14 +186,12 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
       setRoutes(quote?.routes || []);
       setDestinationCallData(quote?.destinationCallData);
       setRoute(quote?.routes[0]);
-    } catch (e) {
+    } catch {
       setRoutes([]);
       setRoute(undefined);
       setSocketError({ message: t('Error fetching routes from socket'), status: true });
     }
   }, [asset, sourceChain, destinationChain, qtyIn, swapper, t, walletAddress]);
-
-  const erc20 = useERC20(asset?.address === NATIVE_TOKEN_ADDRESS ? undefined : asset?.address, sourceChain?.chainId);
 
   const isMultiSig = useIsContract();
   const isPermit = useIsPermit();
@@ -203,94 +199,122 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
   const permit2 = Object.entries(permit2Address).find(([chainId]) => Number(chainId) === defaultChain.id)?.[1];
 
   const approveSameChain = useCallback(async () => {
-    if (!walletAddress || !erc20 || !swapper || !asset || !walletAddress || !permit2) return;
+    if (
+      !walletAddress ||
+      !swapper ||
+      !asset ||
+      !permit2 ||
+      !defaultPublicClient ||
+      asset.address === NATIVE_TOKEN_ADDRESS
+    )
+      return;
     try {
       const minimumApprovalAmount = parseUnits(qtyIn, asset.decimals);
       const approvePermit2 = !(await isPermit(asset.address));
+      const send = async (spender: typeof swapper | typeof permit2, amount: bigint) => {
+        const { id } = await sendCalls({
+          account: walletAddress,
+          chainId: defaultChain.id,
+          experimental_fallback: true,
+          calls: [{ to: asset.address, abi: erc20Abi, functionName: 'approve', args: [spender, amount] }],
+        });
+        const { receipts, status } = await waitForCallsStatus(wagmi, { id });
+        return { hash: receipts?.[receipts.length - 1]?.transactionHash, status };
+      };
 
       if (await isMultiSig(walletAddress)) {
-        const allowance = await erc20.read.allowance([walletAddress, swapper], {
+        const allowance = await defaultPublicClient.readContract({
+          address: asset.address,
+          abi: erc20Abi,
+          functionName: 'allowance',
+          args: [walletAddress, swapper],
           account: walletAddress,
         });
 
         if (allowance < minimumApprovalAmount) {
-          const args = [swapper, minimumApprovalAmount] as const;
-          const gas = await erc20.estimateGas.approve(args, { account: walletAddress });
-          const hash = await erc20.write.approve(args, {
-            account: walletAddress,
-            chain: defaultChain,
-            gas: gasLimit(gas),
-          });
-          track('TX Signed', {
-            contractName: 'ERC20',
-            method: 'approve',
-            amount: qtyIn,
-            hash,
-          });
-          const { status } = await waitForTransaction({ hash });
+          const { hash, status } = await send(swapper, minimumApprovalAmount);
+          track('TX Signed', { contractName: 'ERC20', method: 'approve', amount: qtyIn, hash: hash ?? '0x' });
           track('TX Completed', {
             contractName: 'ERC20',
             method: 'approve',
             amount: qtyIn,
-            hash,
-            status,
+            hash: hash ?? '0x',
+            status: status === 'success' ? 'success' : 'reverted',
             symbol: asset.symbol,
           });
         }
       } else if (approvePermit2) {
-        const allowance = await erc20.read.allowance([walletAddress, permit2], {
+        const allowance = await defaultPublicClient.readContract({
+          address: asset.address,
+          abi: erc20Abi,
+          functionName: 'allowance',
+          args: [walletAddress, permit2],
           account: walletAddress,
         });
 
         if (allowance < minimumApprovalAmount) {
-          const args = [permit2, MAX_UINT256] as const;
-          const gas = await erc20.estimateGas.approve(args, { account: walletAddress });
-          const hash = await erc20.write.approve(args, {
-            account: walletAddress,
-            chain: defaultChain,
-            gas: gasLimit(gas),
-          });
-          setTX({ status: 'processing', hash });
+          const { hash, status } = await send(permit2, MAX_UINT256);
+          if (hash) setTX({ status: 'processing', hash });
           track('TX Signed', {
             contractName: 'ERC20',
             method: 'approve',
             amount: 'MAX_UINT256',
-            hash,
+            hash: hash ?? '0x',
             to: permit2,
             symbol: asset.symbol,
           });
-          const { status, transactionHash } = await waitForTransaction({ hash });
           track('TX Completed', {
             contractName: 'ERC20',
             method: 'approve',
             amount: 'MAX_UINT256',
-            hash,
-            status,
+            hash: hash ?? '0x',
+            status: status === 'success' ? 'success' : 'reverted',
             to: permit2,
             symbol: asset.symbol,
           });
-          setTX({ status: status ? 'success' : 'error', hash: transactionHash });
+          setTX({ status: status === 'success' && hash ? 'success' : 'error', hash: hash ?? '0x' });
         }
       }
       setTXStep(TXStep.CONFIRM);
-    } catch (err) {
+    } catch {
       setTXError({ message: t('Error approving token'), status: true });
     }
-  }, [asset, erc20, isMultiSig, isPermit, permit2, qtyIn, swapper, t, walletAddress]);
+  }, [asset, defaultPublicClient, isMultiSig, isPermit, permit2, qtyIn, sendCalls, swapper, t, walletAddress]);
 
   const { signTypedDataAsync } = useSignTypedData();
 
   const sign = useCallback(async () => {
-    if (!walletAddress || !asset || !erc20 || !permit2 || !swapper) return;
+    if (
+      !walletAddress ||
+      !asset ||
+      !permit2 ||
+      !swapper ||
+      !defaultPublicClient ||
+      asset.address === NATIVE_TOKEN_ADDRESS
+    )
+      return;
 
     const deadline = BigInt(dayjs().unix() + 3_600);
     const value = parseUnits(qtyIn || '0', asset.decimals);
     const chainId = defaultChain.id;
 
     if (await isPermit(asset.address)) {
-      const nonce = await erc20.read.nonces([walletAddress], { account: walletAddress });
-      const name = await erc20.read.name({ account: walletAddress });
-      const version = await contractVersion(asset.address);
+      const [nonce, name, version] = await Promise.all([
+        defaultPublicClient.readContract({
+          address: asset.address,
+          abi: erc20PermitAbi,
+          functionName: 'nonces',
+          args: [walletAddress],
+          account: walletAddress,
+        }),
+        defaultPublicClient.readContract({
+          address: asset.address,
+          abi: erc20Abi,
+          functionName: 'name',
+          account: walletAddress,
+        }),
+        contractVersion(asset.address),
+      ]);
 
       const { v, r, s } = await signTypedDataAsync({
         primaryType: 'Permit',
@@ -298,7 +322,7 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
           name,
           version,
           chainId,
-          verifyingContract: erc20.address,
+          verifyingContract: asset.address,
         },
         types: {
           Permit: [
@@ -376,23 +400,34 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
     } as const;
 
     return { type: 'permit2', value: permit } as const;
-  }, [asset, contractVersion, erc20, isPermit, permit2, qtyIn, signTypedDataAsync, swapper, walletAddress]);
+  }, [
+    asset,
+    contractVersion,
+    defaultPublicClient,
+    isPermit,
+    permit2,
+    qtyIn,
+    signTypedDataAsync,
+    swapper,
+    walletAddress,
+  ]);
 
   const approveCrossChain = useCallback(async () => {
     if (asset?.symbol === 'ETH') setTXStep(TXStep.CONFIRM);
 
-    if (screen !== Screen.REVIEW_ROUTE || !walletAddress || !walletClient || !route || !erc20 || !walletAddress) return;
+    if (
+      screen !== Screen.REVIEW_ROUTE ||
+      !walletAddress ||
+      !route ||
+      !asset ||
+      asset.address === NATIVE_TOKEN_ADDRESS ||
+      !sourcePublicClient
+    )
+      return;
 
     const {
       userTxs: [{ approvalData }],
     } = route;
-
-    const supportedChains = Object.values(viemChains);
-
-    const crossChainOpts = {
-      account: walletAddress,
-      chain: supportedChains.find((c) => c.id === sourceChain?.chainId),
-    };
 
     if (!approvalData) {
       setTXStep(TXStep.CONFIRM);
@@ -401,35 +436,47 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
 
     setTXStep(TXStep.APPROVE_PENDING);
     try {
-      const allowance = await erc20.read.allowance([walletAddress, approvalData.allowanceTarget], crossChainOpts);
+      const allowance = await sourcePublicClient.readContract({
+        address: asset.address,
+        abi: erc20Abi,
+        functionName: 'allowance',
+        args: [walletAddress, approvalData.allowanceTarget],
+      });
 
       const minimumApprovalAmount = BigInt(approvalData.minimumApprovalAmount);
 
       if (allowance < minimumApprovalAmount) {
-        const args = [approvalData.allowanceTarget, minimumApprovalAmount] as const;
-        const gas = await erc20.estimateGas.approve(args, { account: walletAddress });
-        const hash = await erc20.write.approve(args, {
-          ...crossChainOpts,
-          gas: gasLimit(gas),
+        const { id } = await sendCalls({
+          account: walletAddress,
+          chainId: sourceChain?.chainId,
+          experimental_fallback: true,
+          calls: [
+            {
+              to: asset.address,
+              abi: erc20Abi,
+              functionName: 'approve',
+              args: [approvalData.allowanceTarget, minimumApprovalAmount],
+            },
+          ],
         });
+        const { receipts, status } = await waitForCallsStatus(wagmi, { id });
+        const hash = receipts?.[receipts.length - 1]?.transactionHash;
         track('TX Signed', {
           contractName: 'ERC20',
           method: 'approve',
-          amount: formatUnits(minimumApprovalAmount, asset?.decimals || 18),
-          hash,
+          amount: formatUnits(minimumApprovalAmount, asset.decimals),
+          hash: hash ?? '0x',
           to: approvalData.allowanceTarget,
-          symbol: asset?.symbol,
+          symbol: asset.symbol,
         });
-        const { status } = await waitForTransaction({ hash });
-
         track('TX Completed', {
           contractName: 'ERC20',
           method: 'approve',
-          amount: formatUnits(minimumApprovalAmount, asset?.decimals || 18),
-          hash,
+          amount: formatUnits(minimumApprovalAmount, asset.decimals),
+          hash: hash ?? '0x',
           to: approvalData.allowanceTarget,
-          status,
-          symbol: asset?.symbol,
+          status: status === 'success' ? 'success' : 'reverted',
+          symbol: asset.symbol,
         });
       }
       setTXStep(TXStep.CONFIRM);
@@ -439,7 +486,7 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
       }
       setTXStep(TXStep.APPROVE);
     }
-  }, [asset, sourceChain?.chainId, erc20, route, screen, walletAddress, walletClient]);
+  }, [asset, sourceChain?.chainId, route, screen, sendCalls, sourcePublicClient, walletAddress]);
 
   const nativeSwap = asset?.symbol === 'ETH' && sourceChain?.chainId === destinationChain;
   const qtyOut =
@@ -454,144 +501,125 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
         : undefined;
 
   const confirmBridge = useCallback(async () => {
-    if (txStep !== TXStep.CONFIRM || !walletClient || !route) return;
+    if (txStep !== TXStep.CONFIRM || !route || !walletAddress) return;
 
     try {
       const { txTarget, txData, value } = await socketBuildTX({ route, destinationCallData });
       setTXStep(TXStep.CONFIRM_PENDING);
-      const txHash_ = await walletClient.sendTransaction({
-        to: txTarget,
-        data: txData,
-        value: BigInt(value),
+      const { id } = await sendCalls({
+        account: walletAddress,
+        chainId: sourceChain?.chainId,
+        experimental_fallback: true,
+        calls: [{ to: txTarget, data: txData, value: BigInt(value) }],
       });
-
-      setTX({ status: 'processing', hash: txHash_ });
-
+      const { receipts, status } = await waitForCallsStatus(wagmi, { id });
+      const hash = receipts?.[receipts.length - 1]?.transactionHash;
       track('TX Signed', {
         contractName: 'SocketGateway',
         method: 'swap',
         amount: qtyIn,
         symbol: asset?.symbol,
-        hash: txHash_,
+        hash: hash ?? '0x',
         to: txTarget,
       });
-
-      const { status, transactionHash } = await waitForTransaction({ hash: txHash_ });
-
       track('TX Completed', {
         contractName: 'ERC20',
         method: 'approve',
         amount: qtyIn,
         symbol: asset?.symbol,
-        hash: transactionHash,
+        hash: hash ?? '0x',
         to: txTarget,
-        status,
+        status: status === 'success' ? 'success' : 'reverted',
       });
-      setTX({ status: status ? 'success' : 'error', hash: transactionHash });
+      setTX({ status: status === 'success' && hash ? 'success' : 'error', hash: hash ?? '0x' });
       setScreen(Screen.TX_STATUS);
     } catch (err) {
       setTXError({ status: true, message: handleOperationError(err) });
       setTXStep(TXStep.CONFIRM);
     }
-  }, [asset?.symbol, destinationCallData, qtyIn, route, txStep, walletClient]);
+  }, [asset?.symbol, destinationCallData, qtyIn, route, sendCalls, sourceChain?.chainId, txStep, walletAddress]);
 
   const socketSubmit = useCallback(async () => {
     const minEXA = 0n;
     const keepETH = 0n;
     if (isBridge) return confirmBridge();
 
-    if (!walletAddress || !route || !swapper || !erc20?.address || !walletAddress || !asset) return;
+    if (!walletAddress || !route || !swapper || !asset || asset.address === NATIVE_TOKEN_ADDRESS) return;
 
     setTXStep(TXStep.CONFIRM_PENDING);
 
-    let hash: Hash;
-
     try {
       const { txData } = await socketBuildTX({ route });
-      if (await isMultiSig(walletAddress)) {
-        const amount = parseUnits(qtyIn, asset.decimals);
-        const args = [erc20.address, amount, txData, minEXA, keepETH] as const;
-        const { request } = await simulateContract(wagmi, {
+      const submitSwap = async (args: readonly unknown[]) => {
+        await simulateContract(wagmi, {
           account: walletAddress,
           address: swapper,
           abi: swapperAbi,
           functionName: 'swap',
           chainId: defaultChain.id,
-          args,
+          args: args as never,
         });
-        hash = await writeContract(wagmi, request);
+        const { id } = await sendCalls({
+          account: walletAddress,
+          chainId: defaultChain.id,
+          experimental_fallback: true,
+          calls: [{ to: swapper, abi: swapperAbi, functionName: 'swap', args: args as never }],
+        });
+        const { receipts, status } = await waitForCallsStatus(wagmi, { id });
+        return { hash: receipts?.[receipts.length - 1]?.transactionHash, status };
+      };
+
+      if (await isMultiSig(walletAddress)) {
+        const amount = parseUnits(qtyIn, asset.decimals);
+        const { hash, status } = await submitSwap([asset.address, amount, txData, minEXA, keepETH]);
+        if (hash) {
+          setScreen(Screen.TX_STATUS);
+          setTX({ status: status === 'success' ? 'success' : 'error', hash });
+        }
       } else {
         const permit = await sign();
         if (!permit) return;
-
-        switch (permit.type) {
-          case 'permit': {
-            const args = [erc20.address, permit.value, txData, minEXA, keepETH] as const;
-            const { request } = await simulateContract(wagmi, {
-              account: walletAddress,
-              address: swapper,
-              abi: swapperAbi,
-              functionName: 'swap',
-              chainId: defaultChain.id,
-              args,
-            });
-            hash = await writeContract(wagmi, request);
-            break;
-          }
-          case 'permit2': {
-            const args = [erc20.address, permit.value, txData, minEXA, keepETH] as const;
-            const { request } = await simulateContract(wagmi, {
-              account: walletAddress,
-              address: swapper,
-              abi: swapperAbi,
-              functionName: 'swap',
-              chainId: defaultChain.id,
-              args,
-            });
-            hash = await writeContract(wagmi, request);
-            break;
-          }
-        }
-
+        const { hash, status } = await submitSwap([asset.address, permit.value, txData, minEXA, keepETH]);
         if (!hash) return;
         setScreen(Screen.TX_STATUS);
-        setTX({ status: 'processing', hash });
-        const { status, transactionHash } = await waitForTransaction({ hash });
-        setTX({ status: status ? 'success' : 'error', hash: transactionHash });
+        setTX({ status: status === 'success' ? 'success' : 'error', hash });
       }
     } catch (err) {
       setTXError({ status: true, message: handleOperationError(err) });
     } finally {
       setTXStep(undefined);
     }
-  }, [isBridge, confirmBridge, walletAddress, route, swapper, erc20, asset, isMultiSig, qtyIn, sign]);
+  }, [asset, confirmBridge, isBridge, isMultiSig, qtyIn, route, sendCalls, sign, swapper, walletAddress]);
 
   const submit = useCallback(async () => {
     if (!walletAddress || !swapper) return;
     setTXStep(TXStep.CONFIRM_PENDING);
 
     try {
-      const txHash_ = await writeContract(wagmi, {
+      const { id } = await sendCalls({
         account: walletAddress,
-        address: swapper,
-        abi: swapperAbi,
-        functionName: 'swap',
         chainId: defaultChain.id,
-        args: [walletAddress, 0n, 0n],
-        value: parseEther(qtyIn),
+        experimental_fallback: true,
+        calls: [
+          {
+            to: swapper,
+            abi: swapperAbi,
+            functionName: 'swap',
+            args: [walletAddress, 0n, 0n],
+            value: parseEther(qtyIn),
+          },
+        ],
       });
-
+      const { receipts, status } = await waitForCallsStatus(wagmi, { id });
+      const hash = receipts?.[receipts.length - 1]?.transactionHash;
       setScreen(Screen.TX_STATUS);
-
-      setTX({ status: 'processing', hash: txHash_ });
-      const { status, transactionHash } = await waitForTransaction({ hash: txHash_ });
-      setTX({ status: status ? 'success' : 'error', hash: transactionHash });
+      setTX({ status: status === 'success' && hash ? 'success' : 'error', hash: hash ?? '0x' });
     } catch (err) {
       setTXError({ status: true, message: handleOperationError(err) });
     } finally {
       setTXStep(undefined);
     }
-  }, [qtyIn, setTXError, setScreen, setTXStep, swapper, walletAddress]);
+  }, [qtyIn, sendCalls, swapper, walletAddress]);
 
   useEffect(() => {
     if (!isBridge) return;
@@ -711,3 +739,13 @@ export const useGetEXA = () => {
 };
 
 export default GetEXAContext;
+
+const erc20PermitAbi = [
+  {
+    type: 'function',
+    name: 'nonces',
+    stateMutability: 'view',
+    inputs: [{ name: 'owner', type: 'address' }],
+    outputs: [{ name: '', type: 'uint256' }],
+  },
+] as const;

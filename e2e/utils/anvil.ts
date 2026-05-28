@@ -16,11 +16,10 @@ import {
   parseUnits,
   toHex,
   type Address,
-  type Chain,
   type Hex,
 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-import { anvil as anvilChain } from 'viem/chains';
+import { anvil as chain } from 'viem/chains';
 
 import { erc20, type Coin } from './contracts';
 import { escrowedExaAbi } from '../../generated/wagmi';
@@ -49,22 +48,14 @@ type AnvilRpcSchema = [
 const execFileAsync = promisify(execFile);
 const deployerPrivateKey = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
 const deployer = privateKeyToAccount(deployerPrivateKey);
-const chain = {
-  ...anvilChain,
-  fees: {
-    estimateFeesPerGas: async ({ type }) =>
-      type === 'legacy' ? { gasPrice: 0n } : { maxFeePerGas: 0n, maxPriorityFeePerGas: 0n },
-    maxPriorityFeePerGas: 0n,
-  },
-} satisfies Chain;
 
 const instance = (params: { dumpState?: string; loadState?: string } = {}) =>
   Instance.anvil({
     autoImpersonate: true,
     balance: 1_000_000n,
     blockBaseFeePerGas: 0,
-    chainId: anvilChain.id,
-    codeSizeLimit: 100_000,
+    chainId: chain.id,
+    codeSizeLimit: 1_000_000,
     disableBlockGasLimit: true,
     gasPrice: 0,
     hardfork: 'Cancun',
@@ -86,6 +77,7 @@ const start = async (params: { dumpState?: string; loadState?: string } = {}, de
         'script',
         'script/Protocol.s.sol:DeployProtocol',
         '--broadcast',
+        '--disable-code-size-limit',
         '--rpc-url',
         url,
         '--private-key',

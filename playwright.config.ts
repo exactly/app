@@ -10,7 +10,6 @@ const config: PlaywrightTestConfig = {
   },
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
   ...(process.env.E2E_WORKERS ? { workers: Number(process.env.E2E_WORKERS) } : {}),
   reporter: [
     ['list'],

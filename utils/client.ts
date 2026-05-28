@@ -4,9 +4,9 @@ import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
 import { createStorage, fallback, http, type Transport } from 'wagmi';
 import { optimism } from 'viem/chains';
 import * as viemChains from 'viem/chains';
-import { numberToHex, type Address, type Chain, type Hex } from 'viem';
+import type { Address, Chain, Hex } from 'viem';
 
-import { e2eConnector } from './connectors';
+import { e2eConnector } from './e2eWallet';
 
 declare global {
   interface Window {
@@ -20,7 +20,10 @@ const e2e = typeof window !== 'undefined' ? window.e2e : undefined;
 export const isE2E = Boolean(JSON.parse(process.env.NEXT_PUBLIC_IS_E2E ?? 'false') && e2e);
 
 const networkId = Number(process.env.NEXT_PUBLIC_NETWORK ?? optimism.id);
-export const defaultChain: Chain = Object.values(viemChains).find((chain) => chain.id === networkId) ?? optimism;
+export const defaultChain: Chain = {
+  ...(Object.values(viemChains).find((chain) => chain.id === networkId) ?? optimism),
+  ...(isE2E && e2e ? { rpcUrls: { default: { http: [e2e.rpc] }, public: { http: [e2e.rpc] } } } : {}),
+};
 
 const sortedChains = (
   isE2E ? [defaultChain] : [defaultChain, ...Object.values(viemChains).filter((chain) => chain.id !== defaultChain.id)]
@@ -37,36 +40,7 @@ const alchemyRpcUrls = {
 } satisfies Partial<Record<number, (key: string) => string>>;
 
 function transportForChain(chain: Chain): Transport {
-  if (isE2E && e2e)
-    return (parameters) => {
-      const transport = http(e2e.rpc)(parameters);
-      return {
-        ...transport,
-        request: ({ method, params }, options) => {
-          if (
-            (method === 'eth_call' || method === 'eth_estimateGas' || method === 'eth_sendTransaction') &&
-            Array.isArray(params) &&
-            params[0] &&
-            typeof params[0] === 'object'
-          ) {
-            const [{ maxFeePerGas, maxPriorityFeePerGas, ...transaction }, ...rest] = params as [
-              Record<string, unknown>,
-              ...unknown[],
-            ];
-            void maxFeePerGas;
-            void maxPriorityFeePerGas;
-            return transport.request(
-              { method, params: [{ ...transaction, gasPrice: numberToHex(0) }, ...rest] } as Parameters<
-                typeof transport.request
-              >[0],
-              options,
-            );
-          }
-          return transport.request({ method, params } as Parameters<typeof transport.request>[0], options);
-        },
-      };
-    };
-
+  if (isE2E && e2e) return http(e2e.rpc);
   const alchemyRpcUrl = alchemyKey
     ? Object.entries(alchemyRpcUrls).find(([chainId]) => Number(chainId) === chain.id)?.[1](alchemyKey)
     : undefined;

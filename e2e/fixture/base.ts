@@ -9,8 +9,9 @@ import {
   http,
 } from 'viem';
 import { privateKeyToAccount, generatePrivateKey } from 'viem/accounts';
-import { anvil as anvilChain, type Chain } from 'viem/chains';
+import { anvil as chain } from 'viem/chains';
 
+import { e2eTransport } from '../../utils/e2eWallet';
 import { anvil, type Anvil } from '../utils/anvil';
 import actions, { type Actions } from './actions';
 import socket, { type Socket } from './socket';
@@ -26,15 +27,6 @@ type Options = {
 const defaultOptions = {
   marketView: 'advanced',
 } as const;
-
-export const chain: Chain = {
-  ...anvilChain,
-  fees: {
-    estimateFeesPerGas: async ({ type }) =>
-      type === 'legacy' ? { gasPrice: 0n } : { maxFeePerGas: 0n, maxPriorityFeePerGas: 0n },
-    maxPriorityFeePerGas: 0n,
-  },
-};
 
 const defaultPrivateKey = generatePrivateKey();
 
@@ -103,10 +95,11 @@ const baseTest = test.extend<TestProps, { anvil: Anvil }>({
     const account = privateKeyToAccount(privateKey);
     const snapshot = await local.snapshot();
 
-    const walletClient = createWalletClient({ account, chain, transport: http(local.url()) });
+    const transport = e2eTransport(local.url());
+    const walletClient = createWalletClient({ account, chain, transport });
     const publicClient = createPublicClient({ chain, transport: http(local.url()) });
 
-    const injected = { privateKey: privateKey, rpc: local.url(), chainId: chain.id };
+    const injected = { privateKey, rpc: local.url(), chainId: chain.id };
 
     await page.addInitScript((_injected) => {
       window.e2e = _injected;
