@@ -22,7 +22,6 @@ const config: PlaywrightTestConfig = {
     userAgent:
       'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36',
     headless: true,
-    baseURL: 'http://localhost:3000',
     screenshot: 'only-on-failure',
     trace: 'on-first-retry',
   },
@@ -41,12 +40,12 @@ const config: PlaywrightTestConfig = {
   outputDir: 'test-results/artifacts',
   webServer: [
     {
-      command: 'pnpm start:e2e',
+      command: `PORT=${process.env.E2E_APP_PORT || 0} pnpm start:e2e`,
       timeout: 240_000,
-      url: 'http://127.0.0.1:3000',
       reuseExistingServer: false,
-      stdout: 'ignore',
+      stdout: 'pipe',
       stderr: 'pipe',
+      wait: { stdout: /Local:\s+(?<PLAYWRIGHT_TEST_BASE_URL>https?:\/\/localhost:\d+)/ },
     },
     {
       command:
