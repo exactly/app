@@ -144,7 +144,6 @@ export default function useBorrowInInstallments() {
       if (isBorrowETH && borrowETHSimulation.error) throw borrowETHSimulation.error;
       if (!isBorrowETH && borrowSimulation.error) throw borrowSimulation.error;
       const { id } = await sendCalls({
-        account: walletAddress,
         chainId: defaultChain.id,
         experimental_fallback: true,
         calls: [

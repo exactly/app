@@ -318,7 +318,6 @@ const RepayAtMaturity: FC = () => {
         if (!marketEthRouter) return;
         if (ethRepaySimulation.error) throw ethRepaySimulation.error;
         ({ id } = await sendCalls({
-          account: walletAddress,
           chainId: defaultChain.id,
           experimental_fallback: true,
           calls: [
@@ -335,7 +334,6 @@ const RepayAtMaturity: FC = () => {
         if (requiresBatchedApproval && approveSimulation.error) throw approveSimulation.error;
         if (!requiresBatchedApproval && repaySimulation.error) throw repaySimulation.error;
         ({ id } = await sendCalls({
-          account: walletAddress,
           chainId: defaultChain.id,
           experimental_fallback: true,
           calls: [

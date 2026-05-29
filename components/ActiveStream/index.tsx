@@ -339,7 +339,6 @@ const ActiveStream: FC<ActiveStreamProps> = ({
     setLoading(true);
     try {
       const tx = await cancelStream({
-        account: walletAddress,
         chainId: escrowedExaChainId,
         args: [[BigInt(tokenId)]],
       });
@@ -377,7 +376,6 @@ const ActiveStream: FC<ActiveStreamProps> = ({
     setLoading(true);
     try {
       const tx = await withdrawMax({
-        account: walletAddress,
         chainId: escrowedExaChainId,
         args: [[BigInt(tokenId)]],
       });

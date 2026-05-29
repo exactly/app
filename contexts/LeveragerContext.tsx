@@ -705,7 +705,6 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     async (token: `0x${string}`, spender: `0x${string}`, amount: bigint) => {
       if (!walletAddress) return;
       const { id } = await sendCalls({
-        account: walletAddress,
         chainId: defaultChain.id,
         experimental_fallback: true,
         calls: [{ to: token, abi: erc20Abi, functionName: 'approve', args: [spender, amount] }],
@@ -934,7 +933,6 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     async <T extends 'leverage' | 'deleverage'>(functionName: T, args: Params<T>) => {
       if (!walletAddress || !debtManager) return;
       const { id } = await sendCalls({
-        account: walletAddress,
         chainId: defaultChain.id,
         experimental_fallback: true,
         calls: [{ to: debtManager, abi: debtManagerAbi, functionName, args } as never],

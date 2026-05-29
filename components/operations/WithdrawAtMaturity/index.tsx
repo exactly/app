@@ -301,7 +301,6 @@ const WithdrawAtMaturity: FC = () => {
         if (requiresBatchedApproval && approveSimulation.error) throw approveSimulation.error;
         if (!requiresBatchedApproval && ethWithdrawSimulation.error) throw ethWithdrawSimulation.error;
         ({ id } = await sendCalls({
-          account: walletAddress,
           chainId: defaultChain.id,
           experimental_fallback: true,
           calls: [
@@ -326,7 +325,6 @@ const WithdrawAtMaturity: FC = () => {
       } else {
         if (withdrawSimulation.error) throw withdrawSimulation.error;
         ({ id } = await sendCalls({
-          account: walletAddress,
           chainId: defaultChain.id,
           experimental_fallback: true,
           calls: [

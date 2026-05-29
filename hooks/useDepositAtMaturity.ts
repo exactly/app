@@ -292,7 +292,6 @@ export default (): DepositAtMaturity => {
         if (!marketEthRouter) return;
         if (ethDepositSimulation.error) throw ethDepositSimulation.error;
         ({ id } = await sendCalls({
-          account: walletAddress,
           chainId: defaultChain.id,
           experimental_fallback: true,
           calls: [
@@ -309,7 +308,6 @@ export default (): DepositAtMaturity => {
         if (requiresBatchedApproval && approveSimulation.error) throw approveSimulation.error;
         if (!requiresBatchedApproval && depositSimulation.error) throw depositSimulation.error;
         ({ id } = await sendCalls({
-          account: walletAddress,
           chainId: defaultChain.id,
           experimental_fallback: true,
           calls: [

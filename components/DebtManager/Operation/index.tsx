@@ -361,7 +361,6 @@ function Operation() {
         account,
       });
       const { id } = await sendCalls({
-        account,
         chainId: defaultChain.id,
         experimental_fallback: true,
         calls: [{ to: debtManager, abi: debtManagerAbi, functionName, args: args as never }],

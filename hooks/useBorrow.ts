@@ -279,7 +279,6 @@ export default (): Borrow => {
         if (requiresBatchedApproval && approveSimulation.error) throw approveSimulation.error;
         if (!requiresBatchedApproval && ethBorrowSimulation.error) throw ethBorrowSimulation.error;
         ({ id } = await sendCalls({
-          account: walletAddress,
           chainId: defaultChain.id,
           experimental_fallback: true,
           calls: [
@@ -304,7 +303,6 @@ export default (): Borrow => {
       } else {
         if (borrowSimulation.error) throw borrowSimulation.error;
         ({ id } = await sendCalls({
-          account: walletAddress,
           chainId: defaultChain.id,
           experimental_fallback: true,
           calls: [

@@ -259,7 +259,6 @@ function Repay() {
           throw isMax ? ethRefundSimulation.error : ethRepaySimulation.error;
         }
         ({ id } = await sendCalls({
-          account: walletAddress,
           chainId: defaultChain.id,
           experimental_fallback: true,
           calls: [
@@ -286,7 +285,6 @@ function Repay() {
           throw isMax ? refundSimulation.error : repaySimulation.error;
         }
         ({ id } = await sendCalls({
-          account: walletAddress,
           chainId: defaultChain.id,
           experimental_fallback: true,
           calls: [

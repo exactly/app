@@ -37,7 +37,6 @@ const RevokeButton = ({
     if (!walletAddress) return;
     try {
       const { id } = await sendCalls({
-        account: walletAddress,
         chainId: defaultChain.id,
         experimental_fallback: true,
         calls: [{ to: token, abi: erc20Abi, functionName: 'approve', args: [spenderAddress, 0n] }],

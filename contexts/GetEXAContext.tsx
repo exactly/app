@@ -213,7 +213,6 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
       const approvePermit2 = !(await isPermit(asset.address));
       const send = async (spender: typeof swapper | typeof permit2, amount: bigint) => {
         const { id } = await sendCalls({
-          account: walletAddress,
           chainId: defaultChain.id,
           experimental_fallback: true,
           calls: [{ to: asset.address, abi: erc20Abi, functionName: 'approve', args: [spender, amount] }],
@@ -447,7 +446,6 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
 
       if (allowance < minimumApprovalAmount) {
         const { id } = await sendCalls({
-          account: walletAddress,
           chainId: sourceChain?.chainId,
           experimental_fallback: true,
           calls: [
@@ -507,7 +505,6 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
       const { txTarget, txData, value } = await socketBuildTX({ route, destinationCallData });
       setTXStep(TXStep.CONFIRM_PENDING);
       const { id } = await sendCalls({
-        account: walletAddress,
         chainId: sourceChain?.chainId,
         experimental_fallback: true,
         calls: [{ to: txTarget, data: txData, value: BigInt(value) }],
@@ -560,7 +557,6 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
           args: args as never,
         });
         const { id } = await sendCalls({
-          account: walletAddress,
           chainId: defaultChain.id,
           experimental_fallback: true,
           calls: [{ to: swapper, abi: swapperAbi, functionName: 'swap', args: args as never }],
@@ -597,7 +593,6 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
 
     try {
       const { id } = await sendCalls({
-        account: walletAddress,
         chainId: defaultChain.id,
         experimental_fallback: true,
         calls: [

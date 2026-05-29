@@ -198,7 +198,6 @@ export const SocketSwapProvider: FC<PropsWithChildren> = ({ children }) => {
 
       if (allowance < minimumApprovalAmount) {
         const { id } = await sendCalls({
-          account: walletAddress,
           chainId: sourceChain?.chainId,
           experimental_fallback: true,
           calls: [
@@ -228,7 +227,6 @@ export const SocketSwapProvider: FC<PropsWithChildren> = ({ children }) => {
       const { txTarget, txData, value } = await socketBuildTX({ route });
       setTXStep(TXStep.CONFIRM_PENDING);
       const { id } = await sendCalls({
-        account: walletAddress,
         chainId: sourceChain?.chainId,
         experimental_fallback: true,
         calls: [{ to: txTarget, data: txData, value: BigInt(value) }],

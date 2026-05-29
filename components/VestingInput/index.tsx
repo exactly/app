@@ -340,7 +340,7 @@ function VestingInput({ refetch }: Props) {
 
         const vestRequest = vestSimulation.data ?? (await vestSimulation.refetch()).data;
         if (!vestRequest || !vestArgs) return;
-        hash = await vest({ account: walletAddress, chainId: escrowedExaChainId, args: vestArgs });
+        hash = await vest({ chainId: escrowedExaChainId, args: vestArgs });
       } else {
         const p = await sign();
         if (!p) return;
@@ -385,7 +385,7 @@ function VestingInput({ refetch }: Props) {
       let hash;
       try {
         if (!permitVestArgs) return;
-        hash = await vest({ account: walletAddress, chainId: escrowedExaChainId, args: permitVestArgs });
+        hash = await vest({ chainId: escrowedExaChainId, args: permitVestArgs });
         setTx({ status: 'processing', hash });
         const { status, transactionHash } = await waitForTransaction({ hash });
         setTx({ status: status === 'success' ? 'success' : 'error', hash: transactionHash });

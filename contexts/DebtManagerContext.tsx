@@ -154,7 +154,6 @@ export const DebtManagerContextProvider: FC<PropsWithChildren<Props>> = ({ args,
           account: walletAddress,
         });
         const { id } = await sendCalls({
-          account: walletAddress,
           chainId: defaultChain.id,
           experimental_fallback: true,
           calls: [{ to: market, abi: erc20Abi, functionName: 'approve', args: [debtManager, max] }],

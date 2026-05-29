@@ -263,7 +263,6 @@ const Withdraw: FC = () => {
           throw isMax ? ethRedeemSimulation.error : ethWithdrawSimulation.error;
         }
         ({ id } = await sendCalls({
-          account: walletAddress,
           chainId: defaultChain.id,
           experimental_fallback: true,
           calls: [
@@ -297,7 +296,6 @@ const Withdraw: FC = () => {
           throw isMax ? redeemSimulation.error : withdrawSimulation.error;
         }
         ({ id } = await sendCalls({
-          account: walletAddress,
           chainId: defaultChain.id,
           experimental_fallback: true,
           calls: [
