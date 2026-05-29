@@ -43,7 +43,7 @@ export default function ({ test, page }: CommonTest) {
         await modal.checkAssetSelection(symbol);
 
         if (balance) {
-          await modal.checkWalletBalance(balance);
+          await modal.checkWalletBalance(balance, symbol === 'WETH');
         }
 
         if (type === 'fixed') {

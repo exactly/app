@@ -2,12 +2,11 @@ on:
   pull_request:
     types: [opened, reopened, synchronize, ready_for_review]
   push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       e2e_workers: { description: Playwright worker count, required: false, type: string }
 
-run-name: ${{ github.event.head_commit.message || github.sha }}${{ inputs.e2e_workers && format(' ({0} workers)', inputs.e2e_workers) || '' }}
+run-name: ${{ github.event.head_commit.message || github.sha }}${{ format(' ({0} workers)', inputs.e2e_workers || 4) }}
 
 jobs:
   test:
@@ -20,7 +19,7 @@ jobs:
       SENTRY_PROJECT: webapp
       SENTRY_ENVIRONMENT: development
       NEXT_PUBLIC_NETWORK: 11155420
-      E2E_WORKERS: ${{ inputs.e2e_workers || 1 }}
+      E2E_WORKERS: ${{ inputs.e2e_workers || 4 }}
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6

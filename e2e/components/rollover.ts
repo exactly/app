@@ -60,7 +60,7 @@ export default function (page: Page) {
   const submit = async () => {
     const button = page.getByTestId('rollover-submit');
     await expect(button).toBeVisible();
-    await expect(button).not.toBeDisabled({ timeout: 10_000 });
+    await expect(button).not.toBeDisabled();
 
     await button.click();
   };

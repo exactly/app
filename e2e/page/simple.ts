@@ -10,7 +10,7 @@ export default function (page: Page) {
 
   const tabIsActive = async (tab: 'deposit' | 'borrow') => {
     const locator = page.getByTestId(`simple-view-${tab}-tab`);
-    await expect(locator).toHaveAttribute('data-active', 'true', { timeout: 1_000 });
+    await expect(locator).toHaveAttribute('data-active', 'true');
   };
 
   const checkAction = async (action: string) => {

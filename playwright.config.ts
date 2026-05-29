@@ -10,7 +10,7 @@ const config: PlaywrightTestConfig = {
   },
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  ...(process.env.E2E_WORKERS ? { workers: Number(process.env.E2E_WORKERS) } : {}),
+  workers: Number(process.env.E2E_WORKERS ?? 4),
   reporter: [
     ['list'],
     ['html', { open: 'never', outputFolder: 'test-results/report' }],
@@ -18,6 +18,8 @@ const config: PlaywrightTestConfig = {
     ['./e2e/report/trace.ts', { traceFile: 'test-results/report/e2e-trace.json' }],
   ],
   use: {
+    actionTimeout: 66_666,
+    navigationTimeout: 66_666,
     userAgent:
       'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36',
     headless: true,

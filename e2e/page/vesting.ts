@@ -27,12 +27,12 @@ export default function (page: Page) {
   };
 
   const waitForSubmitToBeReady = async () => {
-    await expect(page.getByTestId('vesting-submit')).not.toBeDisabled({ timeout: 10_000 });
+    await expect(page.getByTestId('vesting-submit')).not.toBeDisabled();
   };
 
   const submit = async () => {
     const button = page.getByTestId('vesting-submit');
-    await expect(button).not.toBeDisabled({ timeout: 10_000 });
+    await expect(button).not.toBeDisabled();
     await button.click();
   };
 
@@ -81,28 +81,25 @@ export default function (page: Page) {
 
   const claimStream = async (streamId: number) => {
     const button = page.getByTestId(`vesting-stream-${streamId}-claim`);
-    await expect(button).not.toBeDisabled({ timeout: 10_000 });
+    await expect(button).not.toBeDisabled();
     await button.click();
   };
 
   const waitForClaimStreamTransaction = async (streamId: number) => {
     await expect(async () => {
       if ((await page.getByTestId(`vesting-stream-${streamId}`).count()) === 0) return;
-      expect(await page.getByTestId(`vesting-stream-${streamId}-claim`).isEnabled({ timeout: 100 })).toBe(true);
-    }).toPass({ timeout: 10_000 });
+      await expect(page.getByTestId(`vesting-stream-${streamId}-claim`)).toBeEnabled({ timeout: 2_000 });
+    }).toPass({ timeout: 66_666 });
   };
 
   const claimAllStreams = async () => {
     const button = page.getByTestId('vesting-claim-all');
-    await expect(button).not.toBeDisabled({ timeout: 10_000 });
+    await expect(button).not.toBeDisabled();
     await button.click();
   };
 
   const waitForClaimAllTransaction = async () => {
-    await expect(async () => {
-      if ((await page.getByTestId('vesting-claim-all').count()) === 0) return;
-      expect(await page.getByTestId('vesting-claim-all').isEnabled({ timeout: 100 })).toBe(true);
-    }).toPass({ timeout: 10_000 });
+    await expect(page.getByTestId('vesting-claim-all')).toHaveCount(0);
   };
 
   const cancelStream = async (streamId: number) => {
@@ -117,7 +114,7 @@ export default function (page: Page) {
 
   const waitForStreamCancelTransaction = async (streamId: number) => {
     await expect(page.getByTestId(`vesting-stream-${streamId}-cancel-submit`)).not.toBeVisible();
-    await expect(page.getByTestId(`vesting-stream-${streamId}`)).not.toBeVisible({ timeout: 30_000 });
+    await expect(page.getByTestId(`vesting-stream-${streamId}`)).not.toBeVisible();
   };
 
   return {

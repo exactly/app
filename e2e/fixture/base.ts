@@ -5,10 +5,12 @@ import {
   type PublicClient,
   type WalletClient,
   createPublicClient,
+  createTestClient,
   createWalletClient,
   http,
 } from 'viem';
 import { privateKeyToAccount, generatePrivateKey } from 'viem/accounts';
+import { setNonce } from 'viem/actions';
 import { anvil as chain } from 'viem/chains';
 
 import { e2eTransport } from '../../utils/e2eWallet';
@@ -98,6 +100,8 @@ const baseTest = test.extend<TestProps, { anvil: Anvil }>({
     const transport = e2eTransport(local.url());
     const walletClient = createWalletClient({ account, chain, transport });
     const publicClient = createPublicClient({ chain, transport: http(local.url()) });
+
+    await setNonce(createTestClient({ mode: 'anvil', chain, transport }), { address: account.address, nonce: 1 });
 
     const injected = { privateKey, rpc: local.url(), chainId: chain.id };
 

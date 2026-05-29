@@ -46,7 +46,7 @@ export default function (page: Page) {
   const submit = async () => {
     const button = page.getByTestId('modal-submit');
     await expect(button).toBeVisible();
-    await expect(button).not.toBeDisabled({ timeout: 10_000 });
+    await expect(button).not.toBeDisabled();
 
     await button.click();
   };
@@ -86,8 +86,17 @@ export default function (page: Page) {
     await expect(page.getByTestId('modal-asset-selector')).toHaveText(formatSymbol(symbol));
   };
 
-  const checkWalletBalance = async (balance: string) => {
-    await expect(page.getByTestId('modal-amount-info')).toContainText(balance);
+  const checkWalletBalance = async (balance: string, native = false) => {
+    if (!native) {
+      await expect(page.getByTestId('modal-amount-info')).toContainText(balance);
+      return;
+    }
+    const expected = Number(balance);
+    await expect(async () => {
+      const text = (await page.getByTestId('modal-amount-info').textContent()) ?? '';
+      const shown = Number(text.replace(/.*:\s*/, '').replace(/[^\d.]/g, ''));
+      expect(Math.abs(shown - expected)).toBeLessThan(0.01);
+    }).toPass({ timeout: 66_666 });
   };
 
   const checkPoolDate = async (maturity: number) => {

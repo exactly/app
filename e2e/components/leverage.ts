@@ -12,7 +12,7 @@ export default function (page: Page) {
     for (const action of ['approve', 'submit']) {
       const button = page.getByTestId(`leverage-${action}`);
       if (await button.count()) {
-        await expect(button).not.toBeDisabled({ timeout: 10_000 });
+        await expect(button).not.toBeDisabled();
       }
     }
   };
@@ -146,7 +146,7 @@ export default function (page: Page) {
   const approve = async () => {
     const button = page.getByTestId('leverage-approve');
     await expect(button).toBeVisible();
-    await expect(button).not.toBeDisabled({ timeout: 10_000 });
+    await expect(button).not.toBeDisabled();
 
     await button.click();
   };
@@ -154,7 +154,7 @@ export default function (page: Page) {
   const submit = async () => {
     const button = page.getByTestId('leverage-submit');
     await expect(button).toBeVisible();
-    await expect(button).not.toBeDisabled({ timeout: 10_000 });
+    await expect(button).not.toBeDisabled();
 
     await button.click();
   };

@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import { createWalletClient, http, parseEther } from 'viem';
+import { createWalletClient, parseEther } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 
 import { anvil as chain } from 'viem/chains';
@@ -10,6 +10,7 @@ import _balance from '../../common/balance';
 import _allowance from '../../common/allowance';
 import _vesting from '../../page/vesting';
 import { escrowedEXA, sablierV2LockupLinear, erc20 } from '../../utils/contracts';
+import { e2eTransport } from '../../../utils/e2eWallet';
 
 const test = base();
 
@@ -182,7 +183,7 @@ test('Claiming multiple streams', async ({ page, web2, web3 }) => {
 
 test('Transferred stream follows Sablier NFT ownership', async ({ page, web3 }) => {
   const sender = privateKeyToAccount(generatePrivateKey());
-  const senderWalletClient = createWalletClient({ account: sender, chain, transport: http(web3.anvil.url()) });
+  const senderWalletClient = createWalletClient({ account: sender, chain, transport: e2eTransport(web3.anvil.url()) });
 
   await web3.anvil.setBalance(web3.account.address, { ETH: 1 });
   await web3.anvil.setBalance(sender.address, {

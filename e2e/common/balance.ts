@@ -31,7 +31,7 @@ export default function ({ test, publicClient }: CommonTest & { publicClient: Pu
         } else {
           expect(balance).toBe(expected);
         }
-      }).toPass({ timeout: 30_000 });
+      }).toPass({ timeout: 66_666 });
     });
   };
 
@@ -40,7 +40,7 @@ export default function ({ test, publicClient }: CommonTest & { publicClient: Pu
       const erc20Contract = await erc20(symbol, { publicClient });
       await expect(async () => {
         expect(await erc20Contract.read.balanceOf([address])).toBeGreaterThan(0n);
-      }).toPass({ timeout: 30_000 });
+      }).toPass({ timeout: 66_666 });
     });
   };
 

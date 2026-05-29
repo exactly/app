@@ -80,7 +80,7 @@ export default function (page: Page) {
   };
 
   const waitForApproveTransaction = async () => {
-    await expect(page.getByTestId('get-exa-submit')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId('get-exa-submit')).toBeVisible();
   };
 
   return {
