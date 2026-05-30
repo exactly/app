@@ -12,7 +12,7 @@ const DelegateRegistryABI = require('./abi/DelegateRegistry.json');
 const GasPriceOracle = require('./abi/GasPriceOracle.json');
 
 type DeploymentNetwork = 'ethereum' | 'optimism' | 'op-sepolia' | 'base' | 'base-sepolia' | 'anvil';
-type Deployment = { abi?: Abi; address: Address; receipt?: { blockNumber?: number } };
+type Deployment = { abi?: Abi; address: Address; deployedBytecode?: string; receipt?: { blockNumber?: number } };
 type ContractEntry = string | { name?: string; block?: true | number };
 
 const addressOnlyAbi = [] as const satisfies Abi;
@@ -120,6 +120,25 @@ const blocks = {
         .replace(/"(\d+)":/gm, '$1:')
         .replace(/: (\d+)/g, ': $1n')} as const`,
     ].join('\n\n'),
+  }),
+};
+
+const ratePreviewerCodes = {
+  name: 'ratePreviewerCode',
+  run: () => ({
+    content: `export const ratePreviewerCode = ${JSON.stringify(
+      Object.fromEntries(
+        (['optimism', 'base', 'op-sepolia', 'base-sepolia', 'anvil'] as const).map((network) => [
+          chainIdByDeploymentNetwork[network],
+          deployment('optimism', 'RatePreviewer_Implementation').deployedBytecode?.replace(
+            /7f0{64}/g,
+            `7f${deployment(network, 'Auditor').address.slice(2).toLowerCase().padStart(64, '0')}`,
+          ),
+        ]),
+      ),
+      null,
+      2,
+    ).replace(/"(\d+)":/gm, '$1:')} as const`,
   }),
 };
 
@@ -295,5 +314,5 @@ export default defineConfig({
       anvil: 'esEXA_Implementation',
     }),
   ],
-  plugins: [blocks, actions(), react()],
+  plugins: [blocks, ratePreviewerCodes, actions(), react()],
 });

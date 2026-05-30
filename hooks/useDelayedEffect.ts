@@ -15,17 +15,19 @@ export default function useDelayedEffect({ effect, skip = false, delay = 1000 }:
     setIsLoading(true);
 
     let cancel = false;
+    let done: ReturnType<typeof setTimeout> | undefined;
     const timeout = setTimeout(async () => {
       try {
         await effect(() => cancel);
       } finally {
-        setTimeout(() => setIsLoading(false), 250);
+        if (!cancel) done = setTimeout(() => setIsLoading(false), 250);
       }
     }, delay);
 
     return () => {
       cancel = true;
       clearTimeout(timeout);
+      clearTimeout(done);
     };
   }, [skip, delay, effect]);
 

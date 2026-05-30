@@ -68,7 +68,7 @@
     "react-number-format": "^5.3.4",
     "react-plotly.js": "^2.6.0",
     "react-transition-group": "^4.4.5",
-    "recharts": "^2.12.3",
+    "recharts": "^3.8.1",
     "viem": "^2.50.4",
     "wagmi": "^3.6.15"
   },

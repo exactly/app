@@ -15,7 +15,7 @@ export type TooltipChartProps = {
   labelFormatter?: (value: Date | undefined) => ReactNode;
   formatter?: (value: number | undefined) => ReactNode;
   formatterName?: (name: string | undefined) => ReactNode;
-  itemSorter?: (a: Entry, b: Entry) => number;
+  sortItems?: (a: Entry, b: Entry) => number;
   ignoreKeys?: string[];
   additionalInfo?: ReactNode;
   additionalInfoPosition?: 'top' | 'bottom';
@@ -29,15 +29,15 @@ function TooltipChart({
   labelFormatter,
   formatterName,
   formatter,
-  itemSorter,
+  sortItems,
   ignoreKeys,
   additionalInfo,
   opacity = 1,
   additionalInfoPosition = 'bottom',
 }: TooltipChartProps) {
   const sortedPayload = useMemo(
-    () => (itemSorter && payload ? payload.sort(itemSorter) : payload),
-    [payload, itemSorter],
+    () => (typeof sortItems === 'function' && payload ? [...payload].sort(sortItems) : payload),
+    [payload, sortItems],
   );
 
   if (!active || !sortedPayload || !sortedPayload.length) return null;

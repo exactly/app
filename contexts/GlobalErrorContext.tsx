@@ -1,5 +1,5 @@
 import Close from '@mui/icons-material/Close';
-import { Alert, IconButton, Link, Slide, SlideProps, Snackbar, Typography } from '@mui/material';
+import { Alert, IconButton, Slide, SlideProps, Snackbar, Typography } from '@mui/material';
 import React, { createContext, useState, useCallback, PropsWithChildren, FC, useContext, ReactNode } from 'react';
 import { Trans } from 'react-i18next';
 
@@ -25,20 +25,7 @@ export const GlobalErrorProvider: FC<PropsWithChildren> = ({ children }) => {
   const setIndexerError = useCallback(() => {
     setError(
       <Typography>
-        <Trans
-          i18nKey="Whoops! Our <1>indexer node</1> is currently experiencing issues and some information may not be displayed."
-          components={{
-            1: (
-              <Link
-                href="https://status.thegraph.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ textDecoration: 'none' }}
-                sx={{ color: 'blue' }}
-              />
-            ),
-          }}
-        />
+        <Trans i18nKey="Whoops! We're having trouble loading some data right now. Please try again shortly." />
       </Typography>,
     );
   }, []);

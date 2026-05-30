@@ -117,7 +117,7 @@ const StakeChart = () => {
               <Tooltip
                 labelFormatter={(value) => formatDate(new Date((value * 1000) as number))}
                 formatter={(value) => toPercentage(value as number)}
-                content={<TooltipChart itemSorter={(a, b) => (a.value > b.value ? -1 : 1)} />}
+                content={<TooltipChart sortItems={(a, b) => (a.value > b.value ? -1 : 1)} />}
               />
               <Area
                 yAxisId="left"
