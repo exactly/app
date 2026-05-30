@@ -11,5 +11,6 @@ allowBuilds:
   utf-8-validate: true
 packages: [.]
 blockExoticSubdeps: false
+optimisticRepeatInstall: false
 overrides:
   'regl@2.1.2': 'npm:@plotly/regl@2.1.2'
