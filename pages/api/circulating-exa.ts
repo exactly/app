@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import request from 'graphql-request';
-import { createPublicClient, getAddress, http, type Address } from 'viem';
+import { createPublicClient, getAddress, http, type Address, type ContractFunctionParameters } from 'viem';
 import { optimism } from 'viem/chains';
 import sablierV2LockupLinearDeployment from '@exactly/protocol/deployments/optimism/SablierV2LockupLinear.json';
 import timelockControllerDeployment from '@exactly/protocol/deployments/optimism/TimelockController.json';
@@ -8,10 +7,7 @@ import rewardsControllerDeployment from '@exactly/protocol/deployments/optimism/
 import escrowedEXADeployment from '@exactly/protocol/deployments/optimism/esEXA.json';
 import airdropDeployment from '@exactly/protocol/deployments/optimism/Airdrop.json';
 import exaDeployment from '@exactly/protocol/deployments/optimism/EXA.json';
-import { exaAbi, sablierV2LockupLinearAbi } from '../../generated/wagmi';
-import { getStreamsByCategory } from 'queries/getStreamsByCategory';
-import networkData from 'config/networkData.json';
-import { defaultChain } from 'utils/client';
+import { exaAbi, sablierV2LockupLinearAbi, sablierV2LockupLinearBlock } from '../../generated/wagmi';
 
 const { PRIVATE_ALCHEMY_API_KEY } = process.env;
 const client = createPublicClient({
@@ -47,48 +43,36 @@ const sablierLinear = {
   address: sablierV2LockupLinear,
 } as const;
 
-const subgraphUrl = networkData[String(defaultChain.id) as keyof typeof networkData]?.subgraph['sablier'];
-
-async function withdrawableFromCategory(category: 'LockupLinear' | 'LockupDynamic') {
-  let last: string | undefined = '';
-  let totalWithdrawable = 0n;
-
-  do {
-    const query = getStreamsByCategory(exa.address.toLowerCase(), last, category);
-    const { streams } = await request<{ streams: Stream[] }>(
-      subgraphUrl,
-      query,
-      {},
-      { origin: 'https://app.exact.ly' },
-    );
-    if (category === 'LockupLinear') {
-      const withdrawables = await Promise.all(
-        streams.map(({ tokenId }) =>
-          client.readContract({
-            ...sablierLinear,
-            functionName: 'withdrawableAmountOf',
-            args: [BigInt(tokenId)],
-          }),
-        ),
-      );
-      totalWithdrawable += withdrawables.reduce((total, result) => total + result, 0n);
-    }
-    last = streams.length ? streams[streams.length - 1].id : undefined;
-  } while (last);
-  return totalWithdrawable;
+async function withdrawableFromStreams() {
+  const logs = await client.getContractEvents({
+    ...sablierLinear,
+    eventName: 'CreateLockupLinearStream',
+    args: { asset: exaAddress },
+    fromBlock: sablierV2LockupLinearBlock[optimism.id],
+    strict: true,
+  });
+  const streamIds = [...new Set(logs.map((log) => log.args.streamId))];
+  const contracts = (functionName: 'withdrawableAmountOf' | 'wasCanceled'): ContractFunctionParameters[] =>
+    streamIds.map((streamId) => ({ ...sablierLinear, functionName, args: [streamId] }));
+  const [amounts, canceled] = await Promise.all([
+    client.multicall({ contracts: contracts('withdrawableAmountOf') }),
+    client.multicall({ contracts: contracts('wasCanceled') }),
+  ]);
+  return streamIds.reduce(
+    (total, _, index) =>
+      amounts[index].status === 'success' && canceled[index].status === 'success' && !canceled[index].result
+        ? total + (amounts[index].result as bigint)
+        : total,
+    0n,
+  );
 }
-
-type Stream = {
-  id: string;
-  tokenId: string;
-};
 
 export default async function (_: NextApiRequest, res: NextApiResponse) {
   if (!PRIVATE_ALCHEMY_API_KEY) throw new Error('No Alchemy API key');
   res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=3600');
 
   try {
-    const [decimals, totalSupply, balances] = await Promise.all([
+    const [decimals, totalSupply, balances, totalWithdrawable] = await Promise.all([
       client.readContract({ ...exa, functionName: 'decimals' }),
       client.readContract({ ...exa, functionName: 'totalSupply' }),
       Promise.all(
@@ -96,8 +80,8 @@ export default async function (_: NextApiRequest, res: NextApiResponse) {
           client.readContract({ ...exa, functionName: 'balanceOf', args: [address] }),
         ),
       ),
+      withdrawableFromStreams(),
     ]);
-    const totalWithdrawable = await withdrawableFromCategory('LockupLinear');
     const nonCirculatingSupply = balances.reduce((total, result) => total + result, 0n);
     const circulatingSupply = totalSupply - nonCirculatingSupply + totalWithdrawable;
     res.status(200).json(Number(circulatingSupply) / 10 ** Number(decimals));

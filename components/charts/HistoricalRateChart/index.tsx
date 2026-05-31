@@ -37,7 +37,7 @@ const CONCURRENCY = 8;
 const HistoricalRateChart: FC<Props> = ({ symbol }) => {
   const { t } = useTranslation();
   const { palette } = useTheme();
-  const { setIndexerError } = useGlobalError();
+  const { setLoadError } = useGlobalError();
   const [showUtilization, setShowUtilization] = useState(false);
   const [range, setRange] = useState<Range>('6M');
 
@@ -116,8 +116,8 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
   const loading = isLoading || !marketAccount;
 
   useEffect(() => {
-    if (isError) setIndexerError();
-  }, [isError, setIndexerError]);
+    if (isError) setLoadError();
+  }, [isError, setLoadError]);
 
   const buttons = useMemo(
     () => [

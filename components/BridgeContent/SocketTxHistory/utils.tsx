@@ -3,7 +3,6 @@ import SuccessIcon from '@mui/icons-material/CheckCircleRounded';
 import ErrorIcon from '@mui/icons-material/ErrorRounded';
 import InfoIcon from '@mui/icons-material/InfoRounded';
 import i18n from 'i18n';
-import networkData from 'config/networkData.json' assert { type: 'json' };
 import { optimism } from 'viem/chains';
 
 export function routeToTxData(route: ActiveRoute) {
@@ -38,6 +37,6 @@ export function routeToTxData(route: ActiveRoute) {
     protocol: userTxs[0]?.protocol || userTxs[0]?.steps?.[0]?.protocol,
     type: isBridge ? (isSwap ? 'Bridge + Swap' : 'Bridge') : 'Swap',
     status: status[routeStatus],
-    url: `${isBridge ? 'https://socketscan.io/tx/' : `${networkData[optimism.id].etherscan}/tx/`}${bridgeTxHash}`,
+    url: `${isBridge ? 'https://socketscan.io/tx/' : `${optimism.blockExplorers.default.url}/tx/`}${bridgeTxHash}`,
   };
 }

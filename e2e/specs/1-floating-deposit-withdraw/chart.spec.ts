@@ -8,7 +8,7 @@ import { marketWethAddress, ratePreviewerAbi, ratePreviewerAddress } from '../..
 const test = base();
 
 test('Historical rate chart renders deposit & borrow lines from RatePreviewer reads', async ({ page, web2, web3 }) => {
-  void web2; // stub the subgraph empty so the chart can only come from on-chain reads
+  void web2; // register the web2 route mocks (socket/time)
 
   const ratePreviewer = ratePreviewerAddress[anvil.id].toLowerCase();
   const now = Math.floor(Date.now() / 1_000);

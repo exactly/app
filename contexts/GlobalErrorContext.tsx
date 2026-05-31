@@ -4,13 +4,11 @@ import React, { createContext, useState, useCallback, PropsWithChildren, FC, use
 import { Trans } from 'react-i18next';
 
 export type GlobalErrorContextType = {
-  setError: (error: string) => void;
-  setIndexerError: () => void;
+  setLoadError: () => void;
 };
 
 export const GlobalErrorContext = createContext<GlobalErrorContextType>({
-  setError: () => undefined,
-  setIndexerError: () => undefined,
+  setLoadError: () => undefined,
 });
 
 function SlideTransition(props: SlideProps) {
@@ -22,7 +20,7 @@ export const GlobalErrorProvider: FC<PropsWithChildren> = ({ children }) => {
 
   const cleanError = useCallback(() => setError(null), []);
 
-  const setIndexerError = useCallback(() => {
+  const setLoadError = useCallback(() => {
     setError(
       <Typography>
         <Trans i18nKey="Whoops! We're having trouble loading some data right now. Please try again shortly." />
@@ -31,7 +29,7 @@ export const GlobalErrorProvider: FC<PropsWithChildren> = ({ children }) => {
   }, []);
 
   return (
-    <GlobalErrorContext.Provider value={{ setError, setIndexerError }}>
+    <GlobalErrorContext.Provider value={{ setLoadError }}>
       {error && (
         <Snackbar
           open={true}

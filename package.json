@@ -52,8 +52,6 @@
     "add-to-calendar-button": "^2.6.8",
     "blockies-ts": "^1.0.0",
     "dayjs": "^1.11.10",
-    "graphql": "^16.8.1",
-    "graphql-request": "^6.1.0",
     "i18next": "^23.10.1",
     "i18next-browser-languagedetector": "^7.2.0",
     "merkletreejs": "^0.3.11",

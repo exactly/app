@@ -1,15 +1,14 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { Hex, Address } from 'viem';
 
-import networkData from 'config/networkData.json' assert { type: 'json' };
 import { defaultChain } from 'utils/client';
 
+const explorer = defaultChain.blockExplorers?.default.url ?? '';
+
 export default function useEtherscanLink() {
-  const etherscan = useMemo(() => networkData[String(defaultChain.id) as keyof typeof networkData]?.etherscan, []);
+  const tx = useCallback((hash: Hex) => `${explorer}/tx/${hash}`, []);
 
-  const tx = useCallback((hash: Hex) => `${etherscan}/tx/${hash}`, [etherscan]);
-
-  const address = useCallback((addr: Address) => `${etherscan}/address/${addr}`, [etherscan]);
+  const address = useCallback((addr: Address) => `${explorer}/address/${addr}`, []);
 
   return { tx, address };
 }

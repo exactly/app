@@ -17,7 +17,6 @@ import { e2eTransport } from '../../utils/e2eWallet';
 import { anvil, type Anvil } from '../utils/anvil';
 import actions, { type Actions } from './actions';
 import socket, { type Socket } from './socket';
-import graph, { type Graph } from './graph';
 import time, { type Time } from './time';
 
 type MarketView = 'simple' | 'advanced';
@@ -34,7 +33,6 @@ const defaultPrivateKey = generatePrivateKey();
 
 type Web2 = {
   socket: Socket;
-  graph: Graph;
   time: Time;
 };
 
@@ -91,7 +89,7 @@ const baseTest = test.extend<TestProps, { anvil: Anvil }>({
     { scope: 'worker' },
   ],
   web2: async ({ page }, use) => {
-    await use({ graph: graph(page), time: time(page), socket: socket(page) });
+    await use({ time: time(page), socket: socket(page) });
   },
   web3: async ({ page, anvil: local, privateKey, options }, use) => {
     const account = privateKeyToAccount(privateKey);
