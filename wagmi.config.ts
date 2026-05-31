@@ -164,6 +164,17 @@ export default defineConfig({
     contract('RatePreviewer', ['op-sepolia', 'optimism', 'base', 'base-sepolia', 'anvil'], true),
     contract('RewardsController', ['optimism', 'op-sepolia'], true),
     contract(
+      'TimelockController',
+      {
+        ethereum: { block: true },
+        optimism: { block: true },
+        'op-sepolia': { block: true },
+        base: { block: true },
+        'base-sepolia': { block: true },
+      },
+      true,
+    ),
+    contract(
       'SablierV2LockupLinear',
       { optimism: { block: 106_405_061 }, 'op-sepolia': { block: 0 }, anvil: { block: true } },
       true,

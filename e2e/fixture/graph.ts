@@ -9,7 +9,7 @@ function graph(page: Page) {
   });
 
   void page.route(/127\.0\.0\.1:31337\/subgraphs\/exactly/, async (route) => {
-    await route.fulfill({ json: { data: { accounts: [], timelockControllerCalls: [] } } });
+    await route.fulfill({ json: { data: { accounts: [] } } });
   });
 
   type Stream = {

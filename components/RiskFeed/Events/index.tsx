@@ -12,16 +12,19 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMoreRounded';
 import { useTranslation } from 'react-i18next';
-import { getAddress } from 'viem';
 import Link from 'next/link';
+import { useQuery } from '@tanstack/react-query';
 
-import { type SafeResponse, type Transaction, useTransaction, type Call } from '../api';
 import Decode, { DecodeCall } from '../Decode';
+import type { Call, SafeResponse, SafeTransaction, Transaction } from '../types';
 
+import { defaultChain } from 'utils/client';
 import { formatTx, formatWallet } from 'utils/utils';
 import parseTimestamp from 'utils/parseTimestamp';
 import useEtherscanLink from 'hooks/useEtherscanLink';
 import Pill from 'components/common/Pill';
+
+const base = `https://safe-client.safe.global/v1/chains/${defaultChain.id}`;
 
 export type Entry = {
   schedule?: Transaction;
@@ -362,7 +365,14 @@ function EventSummary({
   inner?: boolean;
 }) {
   const { t } = useTranslation();
-  const { data, isLoading } = useTransaction(tx.id);
+  const { data, isLoading } = useQuery({
+    queryKey: ['safe', 'transaction', tx.id],
+    queryFn: (): Promise<SafeTransaction> =>
+      fetch(`${base}/transactions/${tx.id}`).then((response) => {
+        if (!response.ok) throw new Error(`safe ${response.status}`);
+        return response.json();
+      }),
+  });
 
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
@@ -457,17 +467,6 @@ function EventSummary({
 
 function EventSummaryCall({ calls }: { calls: Call[] }) {
   const { t } = useTranslation();
-
-  const { breakpoints } = useTheme();
-  const isMobile = useMediaQuery(breakpoints.down('sm'));
-
-  const { address } = useEtherscanLink();
-
-  const format = (value: string) => {
-    const addr = getAddress(value);
-    return isMobile ? formatWallet(addr) : addr;
-  };
-
   const call = calls[0];
 
   return (
@@ -475,29 +474,13 @@ function EventSummaryCall({ calls }: { calls: Call[] }) {
       <Row title={t('ID')}>
         <Value>{call.id}</Value>
       </Row>
-      <Row title={t('Scheduler')}>
-        <Value>
-          <Link href={address(call.scheduler)} target="_blank" rel="noopener noreferrer">
-            {format(call.scheduler)}
-          </Link>
-        </Value>
-      </Row>
       <Row title={t('Scheduled At')}>
         <Value>{parseTimestamp(call.scheduledAt, 'YYYY-MM-DD HH:mm:ss')}</Value>
       </Row>
-      {call.executedAt && call.executor && (
-        <>
-          <Row title={t('Executor')}>
-            <Value>
-              <Link href={address(call.executor)} target="_blank" rel="noopener noreferrer">
-                {format(call.executor)}
-              </Link>
-            </Value>
-          </Row>
-          <Row title={t('Executed At')}>
-            <Value>{parseTimestamp(call.executedAt, 'YYYY-MM-DD HH:mm:ss')}</Value>
-          </Row>
-        </>
+      {call.executedAt && (
+        <Row title={t('Executed At')}>
+          <Value>{parseTimestamp(call.executedAt, 'YYYY-MM-DD HH:mm:ss')}</Value>
+        </Row>
       )}
       <Row title={calls.length === 1 ? t('Action') : t('Actions')}>
         <Box display="flex" flexDirection="column" gap={2}>

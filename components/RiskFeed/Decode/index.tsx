@@ -5,7 +5,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
 
-import { DataDecoded } from '../api';
+import { DataDecoded } from '../types';
 import useEtherscanLink from 'hooks/useEtherscanLink';
 import { formatWallet, formatHex } from 'utils/utils';
 
