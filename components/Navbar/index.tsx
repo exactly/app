@@ -31,7 +31,6 @@ import { identify, track } from '../../utils/mixpanel';
 import useReadOnly from 'hooks/useReadOnly';
 import { AccountInput } from 'components/AccountInput';
 import StakingNavButton from 'components/staking/StakingNavButton';
-import { StakeEXAProvider } from 'contexts/StakeEXAContext';
 import { defaultChain } from 'utils/client';
 
 const { onlyMobile, onlyDesktopFlex } = globals;
@@ -223,11 +222,7 @@ function Navbar() {
               <Chip label="OP Sepolia Faucet" onClick={openFaucet} sx={{ my: 'auto', display: onlyDesktopFlex }} />
             )}
             <Box display="flex" gap={0.5}>
-              {!isEthereum && (
-                <StakeEXAProvider>
-                  <StakingNavButton />
-                </StakeEXAProvider>
-              )}
+              {!isEthereum && <StakingNavButton />}
               {!isMobile && !isEthereum && <RewardsButton />}
               {isReadOnly && !impersonateActive ? <AccountInput /> : <Wallet />}
               {!isMobile && <Settings />}

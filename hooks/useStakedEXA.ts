@@ -1,10 +1,24 @@
-import { formatEther, parseEther } from 'viem';
+import { formatEther, parseEther, zeroAddress } from 'viem';
 import { WAD, lnWad, expWad } from '@exactly/lib';
 import { useCallback, useMemo } from 'react';
-import { useStakeEXA } from 'contexts/StakeEXAContext';
+import { stakingPreviewerAddress, useReadStakingPreviewerStaking } from 'generated/wagmi';
+import { defaultChain } from 'utils/client';
+import useReadOnly from 'hooks/useReadOnly';
+
+const stakingPreviewerChainId = Object.keys(stakingPreviewerAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof stakingPreviewerAddress => chainId === defaultChain.id);
 
 export const useStakedEXAChart = () => {
-  const { start, balance, parameters } = useStakeEXA();
+  const { account } = useReadOnly();
+  const { data } = useReadStakingPreviewerStaking({
+    chainId: stakingPreviewerChainId,
+    args: [account ?? zeroAddress],
+    query: { enabled: stakingPreviewerChainId !== undefined, staleTime: 5_000 },
+  });
+  const start = data?.start;
+  const balance = data?.balance;
+  const parameters = data?.parameters;
 
   const calculateValue = useCallback(
     (

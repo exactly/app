@@ -1,7 +1,10 @@
 import React, { FC, useMemo } from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { useStakeEXA } from 'contexts/StakeEXAContext';
+import { zeroAddress } from 'viem';
+import { stakingPreviewerAddress, useReadStakingPreviewerStaking } from 'generated/wagmi';
+import { defaultChain } from 'utils/client';
+import useReadOnly from 'hooks/useReadOnly';
 import { useEXAPrice } from 'hooks/useEXA';
 import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import Image from 'next/image';
@@ -9,9 +12,20 @@ import formatNumber from 'utils/formatNumber';
 import Link from 'next/link';
 import { calculateStakingRewardsAPR, calculateTotalStakingRewardsAPR } from 'utils/calculateStakingAPR';
 
+const stakingPreviewerChainId = Object.keys(stakingPreviewerAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof stakingPreviewerAddress => chainId === defaultChain.id);
+
 const StakingNavButton: FC = () => {
   const { t } = useTranslation();
-  const { totalAssets, rewards } = useStakeEXA();
+  const { account } = useReadOnly();
+  const { data } = useReadStakingPreviewerStaking({
+    chainId: stakingPreviewerChainId,
+    args: [account ?? zeroAddress],
+    query: { enabled: stakingPreviewerChainId !== undefined, staleTime: 5_000 },
+  });
+  const totalAssets = data?.totalAssets;
+  const rewards = data?.rewards;
   const exaPrice = useEXAPrice();
   const { data: accountData } = usePreviewerExactly();
 

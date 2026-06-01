@@ -19,8 +19,12 @@ import { TransitionProps } from '@mui/material/transitions';
 import { hexToSignature, formatEther, parseEther, zeroAddress, type Hex } from 'viem';
 import waitForTransaction from 'utils/waitForTransaction';
 import {
+  exaAbi,
   exaAddress,
+  stakedExaAbi,
   stakedExaAddress,
+  stakingPreviewerAbi,
+  stakingPreviewerAddress,
   useReadExaAllowance,
   useReadExaBalanceOf,
   useReadExaName,
@@ -50,11 +54,12 @@ import formatNumber from 'utils/formatNumber';
 import { Transaction } from 'types/Transaction';
 import LoadingTransaction from 'components/common/modal/Loading';
 import { track } from 'utils/mixpanel';
-import { useStakeEXA } from 'contexts/StakeEXAContext';
+import useStakingRewardTotals from 'hooks/useStakingRewardTotals';
 import dayjs from 'dayjs';
 import { useConnection, useSignTypedData } from 'wagmi';
+import { readContractQueryKey } from '@wagmi/core/query';
 import useIsContract from 'hooks/useIsContract';
-import { defaultChain } from 'utils/client';
+import { defaultChain, queryClient } from 'utils/client';
 import useReadOnly from 'hooks/useReadOnly';
 
 type Permit = { value: bigint; deadline: bigint; v: number; r: Hex; s: Hex };
@@ -65,6 +70,9 @@ const exaChainId = Object.keys(exaAddress)
 const stakedExaChainId = Object.keys(stakedExaAddress)
   .map(Number)
   .find((chainId): chainId is keyof typeof stakedExaAddress => chainId === defaultChain.id);
+const stakingPreviewerChainId = Object.keys(stakingPreviewerAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof stakingPreviewerAddress => chainId === defaultChain.id);
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
@@ -153,11 +161,10 @@ function LoadingModal({ tx, onClose }: { tx: Transaction; onClose: () => void })
 }
 
 type Props = {
-  refetch: () => void;
   operation: 'deposit' | 'withdraw';
 };
 
-function StakingEXAInput({ refetch, operation }: Props) {
+function StakingEXAInput({ operation }: Props) {
   const { t } = useTranslation();
   const { account: walletAddress } = useReadOnly();
 
@@ -171,7 +178,7 @@ function StakingEXAInput({ refetch, operation }: Props) {
     args: [walletAddress ?? zeroAddress],
     query: { enabled: exaChainId !== undefined, staleTime: 30_000 },
   });
-  const { rewardsTokens } = useStakeEXA();
+  const { rewardsTokens } = useStakingRewardTotals();
   const EXAPrice = useEXAPrice();
   const { isConnected } = useConnection();
   const exa = exaChainId === undefined ? undefined : exaAddress[exaChainId];
@@ -244,6 +251,36 @@ function StakingEXAInput({ refetch, operation }: Props) {
   const { writeContractAsync: deposit } = useWriteStakedExaDeposit();
   const { writeContractAsync: permitAndDeposit } = useWriteStakedExaPermitAndDeposit();
   const { writeContractAsync: withdraw } = useWriteStakedExaWithdraw();
+
+  const invalidate = useCallback(() => {
+    if (stakingPreviewerChainId !== undefined)
+      void queryClient.invalidateQueries({
+        queryKey: readContractQueryKey({
+          abi: stakingPreviewerAbi,
+          address: stakingPreviewerAddress[stakingPreviewerChainId],
+          functionName: 'staking',
+          chainId: stakingPreviewerChainId,
+        }),
+      });
+    if (stakedExaChainId !== undefined)
+      void queryClient.invalidateQueries({
+        queryKey: readContractQueryKey({
+          abi: stakedExaAbi,
+          address: stakedExaAddress[stakedExaChainId],
+          functionName: 'balanceOf',
+          chainId: stakedExaChainId,
+        }),
+      });
+    if (exaChainId !== undefined)
+      void queryClient.invalidateQueries({
+        queryKey: readContractQueryKey({
+          abi: exaAbi,
+          address: exaAddress[exaChainId],
+          functionName: 'balanceOf',
+          chainId: exaChainId,
+        }),
+      });
+  }, []);
 
   const insufficientFunds = useMemo(() => {
     return operation === 'deposit' ? amount > (exaBalance || 0n) || !qty : amount > (balance || 0n) || !qty;
@@ -338,7 +375,7 @@ function StakingEXAInput({ refetch, operation }: Props) {
       if (hash) setTx({ status: 'error', hash });
     } finally {
       if (!permitPending) {
-        refetch();
+        invalidate();
         setIsLoading(false);
       }
     }
@@ -358,7 +395,7 @@ function StakingEXAInput({ refetch, operation }: Props) {
     sign,
     withdrawSimulation,
     withdraw,
-    refetch,
+    invalidate,
   ]);
 
   useEffect(() => {
@@ -375,11 +412,11 @@ function StakingEXAInput({ refetch, operation }: Props) {
         if (hash) setTx({ status: 'error', hash });
       } finally {
         setPermit(undefined);
-        refetch();
+        invalidate();
         setIsLoading(false);
       }
     })();
-  }, [permitAndDeposit, permitAndDepositSimulation.data, refetch, submitPermitAndDeposit]);
+  }, [permitAndDeposit, permitAndDepositSimulation.data, invalidate, submitPermitAndDeposit]);
 
   useEffect(() => {
     if (!submitPermitAndDeposit || !permitAndDepositSimulation.error) return;
@@ -400,8 +437,7 @@ function StakingEXAInput({ refetch, operation }: Props) {
   const onClose = useCallback(() => {
     setTx(undefined);
     setQty('');
-    refetch();
-  }, [refetch]);
+  }, []);
 
   return (
     <Box display="flex" flexDirection="column" gap={9}>

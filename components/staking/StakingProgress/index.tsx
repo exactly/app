@@ -3,12 +3,19 @@ import Tooltip from '@mui/material/Tooltip';
 import { styled } from '@mui/material/styles';
 import { Avatar, AvatarGroup, Box, Grid, Typography, useTheme } from '@mui/material';
 import formatNumber from 'utils/formatNumber';
-import { formatEther } from 'viem';
-import { useStakeEXA } from 'contexts/StakeEXAContext';
+import { formatEther, zeroAddress } from 'viem';
+import { stakingPreviewerAddress, useReadStakingPreviewerStaking } from 'generated/wagmi';
+import useStakingRewardTotals from 'hooks/useStakingRewardTotals';
+import useReadOnly from 'hooks/useReadOnly';
 import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
 import parseTimestamp from 'utils/parseTimestamp';
 import { WAD } from '@exactly/lib';
+import { defaultChain } from 'utils/client';
+
+const stakingPreviewerChainId = Object.keys(stakingPreviewerAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof stakingPreviewerAddress => chainId === defaultChain.id);
 
 const ProgressBar = styled('div')<{ ended: boolean }>(({ ended, theme }) => ({
   display: 'flex',
@@ -118,7 +125,15 @@ const StakingProgressBar: FC<DualProgressBarProps> = ({
 }) => {
   const { palette } = useTheme();
   const { t } = useTranslation();
-  const { rewardsTokens, claimableTokens, claimedTokens, earnedTokens, start, parameters } = useStakeEXA();
+  const { account } = useReadOnly();
+  const { data } = useReadStakingPreviewerStaking({
+    chainId: stakingPreviewerChainId,
+    args: [account ?? zeroAddress],
+    query: { enabled: stakingPreviewerChainId !== undefined, staleTime: 5_000 },
+  });
+  const start = data?.start;
+  const parameters = data?.parameters;
+  const { rewardsTokens, claimableTokens, claimedTokens, earnedTokens } = useStakingRewardTotals();
 
   const claimedPercentage = total > 0n ? Number((claimed * 100n) / total) : 0;
   const claimablePercentage = total > 0n ? Number((claimable * 100n) / total) : 0;

@@ -1,17 +1,33 @@
 import React, { useMemo } from 'react';
 import { Box, Tooltip, Typography, useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { useStakeEXA } from 'contexts/StakeEXAContext';
-import { parseEther } from 'viem';
+import { parseEther, zeroAddress } from 'viem';
 import { WAD } from '@exactly/lib';
 import StakingProgressBar from '../StakingProgress';
 import { InfoOutlined } from '@mui/icons-material';
+import { stakingPreviewerAddress, useReadStakingPreviewerStaking } from 'generated/wagmi';
+import { defaultChain } from 'utils/client';
+import useReadOnly from 'hooks/useReadOnly';
+import useStakingRewardTotals from 'hooks/useStakingRewardTotals';
+
+const stakingPreviewerChainId = Object.keys(stakingPreviewerAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof stakingPreviewerAddress => chainId === defaultChain.id);
 
 function Progress() {
   const { t } = useTranslation();
   const { palette } = useTheme();
 
-  const { start, totalClaimable, totalClaimed, totalEarned, parameters, balance } = useStakeEXA();
+  const { account } = useReadOnly();
+  const { data } = useReadStakingPreviewerStaking({
+    chainId: stakingPreviewerChainId,
+    args: [account ?? zeroAddress],
+    query: { enabled: stakingPreviewerChainId !== undefined, staleTime: 5_000 },
+  });
+  const start = data?.start;
+  const parameters = data?.parameters;
+  const balance = data?.balance;
+  const { totalClaimable, totalClaimed, totalEarned } = useStakingRewardTotals();
 
   const isEnded = useMemo(() => {
     if (!start || !parameters || !balance || balance === 0n) return false;

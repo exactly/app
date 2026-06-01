@@ -17,14 +17,29 @@ import { useStakedEXAChart } from 'hooks/useStakedEXA';
 
 import LoadingChart from 'components/charts/LoadingChart';
 import TooltipChart from 'components/charts/TooltipChart';
-import { useStakeEXA } from 'contexts/StakeEXAContext';
-import { parseEther } from 'viem';
+import { parseEther, zeroAddress } from 'viem';
 import { WAD } from '@exactly/lib';
+import { stakingPreviewerAddress, useReadStakingPreviewerStaking } from 'generated/wagmi';
+import { defaultChain } from 'utils/client';
+import useReadOnly from 'hooks/useReadOnly';
+import useStakingRewardTotals from 'hooks/useStakingRewardTotals';
+
+const stakingPreviewerChainId = Object.keys(stakingPreviewerAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof stakingPreviewerAddress => chainId === defaultChain.id);
 
 const StakeChart = () => {
   const { t } = useTranslation();
   const { palette } = useTheme();
-  const { totalClaimable, totalClaimed, totalEarned, start, parameters } = useStakeEXA();
+  const { totalClaimable, totalClaimed, totalEarned } = useStakingRewardTotals();
+  const { account } = useReadOnly();
+  const { data: stakingData } = useReadStakingPreviewerStaking({
+    chainId: stakingPreviewerChainId,
+    args: [account ?? zeroAddress],
+    query: { enabled: stakingPreviewerChainId !== undefined, staleTime: 5_000 },
+  });
+  const start = stakingData?.start;
+  const parameters = stakingData?.parameters;
   const data = useStakedEXAChart();
 
   const loading = false;

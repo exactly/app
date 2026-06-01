@@ -34,6 +34,12 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: ${{ always() }}
         with: { name: test-results, path: test-results }
+      - uses: codecov/codecov-action@v5
+        if: ${{ always() }}
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: test-results/coverage/lcov.info
+          disable_search: true
       - uses: cloudflare/wrangler-action@v4
         if: ${{ steps.e2e.conclusion == 'success' && github.ref == 'refs/heads/main' }}
         with:

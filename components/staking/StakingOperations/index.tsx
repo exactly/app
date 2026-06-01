@@ -25,9 +25,9 @@ import StakingEXAInput from '../StakingEXAInput';
 import formatNumber from 'utils/formatNumber';
 import { useEXAPrice } from 'hooks/useEXA';
 import { WAD } from '@exactly/lib';
-import { formatEther, parseEther } from 'viem';
+import { formatEther, parseEther, zeroAddress } from 'viem';
 import { Transaction } from 'types/Transaction';
-import { useStakeEXA } from 'contexts/StakeEXAContext';
+import useStakingRewardTotals from 'hooks/useStakingRewardTotals';
 import parseTimestamp from 'utils/parseTimestamp';
 import { LoadingButton } from '@mui/lab';
 import waitForTransaction from 'utils/waitForTransaction';
@@ -35,8 +35,18 @@ import LoadingTransaction from 'components/common/modal/Loading';
 import { toPercentage } from 'utils/utils';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { stakedExaAddress, useSimulateStakedExaClaimAll, useWriteStakedExaClaimAll } from 'generated/wagmi';
-import { defaultChain } from 'utils/client';
+import {
+  exaAbi,
+  exaAddress,
+  stakedExaAddress,
+  stakingPreviewerAbi,
+  stakingPreviewerAddress,
+  useReadStakingPreviewerStaking,
+  useSimulateStakedExaClaimAll,
+  useWriteStakedExaClaimAll,
+} from 'generated/wagmi';
+import { readContractQueryKey } from '@wagmi/core/query';
+import { defaultChain, queryClient } from 'utils/client';
 import useReadOnly from 'hooks/useReadOnly';
 import { useConnection } from 'wagmi';
 import useConnectWallet from 'hooks/useConnectWallet';
@@ -44,6 +54,14 @@ import useConnectWallet from 'hooks/useConnectWallet';
 const stakedExaChainId = Object.keys(stakedExaAddress)
   .map(Number)
   .find((chainId): chainId is keyof typeof stakedExaAddress => chainId === defaultChain.id);
+
+const stakingPreviewerChainId = Object.keys(stakingPreviewerAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof stakingPreviewerAddress => chainId === defaultChain.id);
+
+const exaChainId = Object.keys(exaAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof exaAddress => chainId === defaultChain.id);
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
@@ -73,7 +91,6 @@ const StakeEXAModal: React.FC<{
 }> = ({ operation, open, onClose }) => {
   const { spacing, breakpoints } = useTheme();
   const { t } = useTranslation();
-  const { refetch } = useStakeEXA();
 
   const isMobile = useMediaQuery(breakpoints.down('sm'));
 
@@ -126,7 +143,7 @@ const StakeEXAModal: React.FC<{
         }}
       >
         <DialogContent sx={{ p: 1, overflow: 'hidden' }}>
-          <StakingEXAInput refetch={() => refetch()} operation={operation} />
+          <StakingEXAInput operation={operation} />
         </DialogContent>
       </Box>
     </Dialog>
@@ -141,7 +158,15 @@ function StakingProgress() {
   const { isConnected } = useConnection();
   const connect = useConnectWallet();
 
-  const { start: stakingStart, balance, totalClaimable, totalEarned, parameters, refetch } = useStakeEXA();
+  const { data } = useReadStakingPreviewerStaking({
+    chainId: stakingPreviewerChainId,
+    args: [walletAddress ?? zeroAddress],
+    query: { enabled: stakingPreviewerChainId !== undefined, staleTime: 5_000 },
+  });
+  const stakingStart = data?.start;
+  const balance = data?.balance;
+  const parameters = data?.parameters;
+  const { totalClaimable, totalEarned } = useStakingRewardTotals();
   const [tx, setTx] = useState<Transaction>();
   const [isLoading, setIsLoading] = useState(false);
   const { data: claimAllSimulation } = useSimulateStakedExaClaimAll({
@@ -224,10 +249,27 @@ function StakingProgress() {
     } catch (e) {
       if (hash) setTx({ status: 'error', hash });
     } finally {
-      refetch();
+      if (stakingPreviewerChainId !== undefined)
+        void queryClient.invalidateQueries({
+          queryKey: readContractQueryKey({
+            abi: stakingPreviewerAbi,
+            address: stakingPreviewerAddress[stakingPreviewerChainId],
+            functionName: 'staking',
+            chainId: stakingPreviewerChainId,
+          }),
+        });
+      if (exaChainId !== undefined)
+        void queryClient.invalidateQueries({
+          queryKey: readContractQueryKey({
+            abi: exaAbi,
+            address: exaAddress[exaChainId],
+            functionName: 'balanceOf',
+            chainId: exaChainId,
+          }),
+        });
       setIsLoading(false);
     }
-  }, [claimAllSimulation, refetch, writeClaimAll]);
+  }, [claimAllSimulation, writeClaimAll]);
 
   return (
     <Box display="flex" flexDirection="column" gap={2}>
@@ -248,7 +290,7 @@ function StakingProgress() {
               {t('Stake Amount')}
             </Typography>
             <Box display="flex" gap={1}>
-              <StakingEXAInput refetch={() => refetch()} operation={'deposit'} />
+              <StakingEXAInput operation={'deposit'} />
             </Box>
           </Box>
         </Box>
@@ -388,7 +430,7 @@ export default React.memo(StakingProgress);
 function SuccesMessage() {
   const { query } = useRouter();
   const { t } = useTranslation();
-  const { claimableTokens } = useStakeEXA();
+  const { claimableTokens } = useStakingRewardTotals();
 
   const ct = Object.keys(claimableTokens).filter((key) => {
     return key.startsWith('exa') && key.length > 3;

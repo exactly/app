@@ -3,25 +3,44 @@ import { AvatarGroup, Avatar, Box, Skeleton, Typography, Tooltip } from '@mui/ma
 
 import { useTranslation } from 'react-i18next';
 import Image from 'next/image';
-import { useStakeEXA } from 'contexts/StakeEXAContext';
+import useStakingRewardTotals from 'hooks/useStakingRewardTotals';
 import { useEXAPrice } from 'hooks/useEXA';
 import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import formatNumber from 'utils/formatNumber';
 import { calculateStakingRewardsAPR, calculateTotalStakingRewardsAPR } from 'utils/calculateStakingAPR';
 import { InfoOutlined } from '@mui/icons-material';
-import { formatEther, getAddress } from 'viem';
+import { formatEther, getAddress, zeroAddress } from 'viem';
 import getVouchersPrice from 'utils/getVouchersPrice';
 import { useContractEvents } from 'wagmi';
-import { stakedExaAbi, stakedExaAddress, stakedExaBlock } from 'generated/wagmi';
+import {
+  stakedExaAbi,
+  stakedExaAddress,
+  stakedExaBlock,
+  stakingPreviewerAddress,
+  useReadStakingPreviewerStaking,
+} from 'generated/wagmi';
 import { defaultChain } from 'utils/client';
+import useReadOnly from 'hooks/useReadOnly';
 
 const stakedExaChainId = Object.keys(stakedExaAddress)
   .map(Number)
   .find((chainId): chainId is keyof typeof stakedExaAddress => chainId === defaultChain.id);
 
+const stakingPreviewerChainId = Object.keys(stakingPreviewerAddress)
+  .map(Number)
+  .find((chainId): chainId is keyof typeof stakingPreviewerAddress => chainId === defaultChain.id);
+
 function StakedEXASummary() {
   const { t } = useTranslation();
-  const { totalAssets, rewardsTokens, rewards } = useStakeEXA();
+  const { account } = useReadOnly();
+  const { data } = useReadStakingPreviewerStaking({
+    chainId: stakingPreviewerChainId,
+    args: [account ?? zeroAddress],
+    query: { enabled: stakingPreviewerChainId !== undefined, staleTime: 5_000 },
+  });
+  const totalAssets = data?.totalAssets;
+  const rewards = data?.rewards;
+  const { rewardsTokens } = useStakingRewardTotals();
   const exaPrice = useEXAPrice();
   const { data: accountData } = usePreviewerExactly();
   const stakedEXA = stakedExaChainId === undefined ? undefined : stakedExaAddress[stakedExaChainId];

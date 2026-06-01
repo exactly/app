@@ -16,6 +16,20 @@ const config: PlaywrightTestConfig = {
     ['html', { open: 'never', outputFolder: 'test-results/report' }],
     ['json', { outputFile: 'test-results/report/e2e-results.json' }],
     ['./e2e/report/trace.ts', { traceFile: 'test-results/report/e2e-trace.json' }],
+    [
+      'monocart-reporter',
+      {
+        outputFile: 'test-results/coverage/index.html',
+        coverage: {
+          lcov: true,
+          outputDir: 'test-results/coverage',
+          entryFilter: (entry: { source?: string }) => Boolean(entry.source?.includes('sourceMappingURL')),
+          sourceFilter: (path: string) =>
+            !path.startsWith('[') && !path.includes('node_modules') && !path.includes('/turbopack/'),
+          sourcePath: { '[project]/': '' },
+        },
+      },
+    ],
   ],
   use: {
     actionTimeout: 66_666,
@@ -32,9 +46,7 @@ const config: PlaywrightTestConfig = {
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1920, height: 1080 },
-        launchOptions: {
-          args: ['--disable-web-security'],
-        },
+        launchOptions: { args: ['--disable-web-security'] },
       },
     },
   ],

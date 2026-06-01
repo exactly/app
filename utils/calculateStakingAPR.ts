@@ -1,6 +1,6 @@
 import { MarketAccount } from 'hooks/usePreviewerExactly';
 import getVouchersPrice from './getVouchersPrice';
-import { Rewards } from 'contexts/StakeEXAContext';
+import { Rewards } from 'hooks/useStakingRewardTotals';
 
 export const calculateStakingRewardsAPR = (
   totalAssets: bigint | undefined,

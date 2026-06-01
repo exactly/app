@@ -13,6 +13,8 @@ import { privateKeyToAccount, generatePrivateKey } from 'viem/accounts';
 import { setNonce } from 'viem/actions';
 import { anvil as chain } from 'viem/chains';
 
+import { addCoverageReport } from 'monocart-reporter';
+
 import { e2eTransport } from '../../utils/e2eWallet';
 import { anvil, type Anvil } from '../utils/anvil';
 import actions, { type Actions } from './actions';
@@ -76,7 +78,9 @@ const baseTest = test.extend<TestProps, { anvil: Anvil }>({
     });
     page.on('pageerror', (error) => errors.push(error.stack ?? error.message));
     page.goto = ((url, options) => test.step(`navigation: ${url}`, () => goto(url, options))) as typeof page.goto;
+    await page.coverage.startJSCoverage({ resetOnNavigation: false });
     await use(page);
+    await addCoverageReport(await page.coverage.stopJSCoverage(), test.info());
     expect(errors).toEqual([]);
   },
   anvil: [
