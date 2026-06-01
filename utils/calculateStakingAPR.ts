@@ -1,4 +1,4 @@
-import { MarketAccount } from 'hooks/useAccountData';
+import { MarketAccount } from 'hooks/usePreviewerExactly';
 import getVouchersPrice from './getVouchersPrice';
 import { Rewards } from 'contexts/StakeEXAContext';
 

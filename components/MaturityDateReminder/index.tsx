@@ -3,7 +3,7 @@ import Snackbar from '@mui/material/Snackbar';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
 import { Alert, Box, IconButton, Slide, SlideProps } from '@mui/material';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import parseTimestamp from 'utils/parseTimestamp';
 import CloseIcon from '@mui/icons-material/Close';
 
@@ -12,7 +12,7 @@ const RANGE_IN_SECONDS = SECONDS_IN_A_DAY * 5n;
 
 export default function MaturityDateReminder() {
   const { t } = useTranslation();
-  const { accountData } = useAccountData();
+  const { data: accountData } = usePreviewerExactly();
   const [isReminderOpen, setIsReminderOpen] = useState(false);
 
   const [date] = useMemo(

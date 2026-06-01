@@ -10,7 +10,7 @@ import { ItemInfoProps } from 'components/common/ItemInfo';
 import HeaderInfo from 'components/common/HeaderInfo';
 import OrderAction from 'components/OrderAction';
 import { Box } from '@mui/material';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
 import useRewards from 'hooks/useRewards';
 import ItemCell from 'components/common/ItemCell';
@@ -22,7 +22,8 @@ type FloatingPoolInfoProps = {
 const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
   const { t } = useTranslation();
   const { depositAPR } = useFloatingPoolAPR(symbol);
-  const { marketAccount } = useAccountData(symbol);
+  const { data } = usePreviewerExactly();
+  const marketAccount = data?.find((market) => market.assetSymbol === symbol);
 
   const { rates } = useRewards();
   const { deposited, borrowed, borrowAPR } = useMemo(() => {

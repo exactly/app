@@ -8,7 +8,7 @@ import { usePublicClient } from 'wagmi';
 import { floatingDepositRates, floatingUtilization } from '@exactly/lib';
 
 import { ratePreviewerAbi, ratePreviewerAddress, ratePreviewerCode } from 'generated/wagmi';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import { useGlobalError } from 'contexts/GlobalErrorContext';
 import { defaultChain } from 'utils/client';
 import { toPercentage } from 'utils/utils';
@@ -41,7 +41,7 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
   const [showUtilization, setShowUtilization] = useState(false);
   const [range, setRange] = useState<Range>('6M');
 
-  const { marketAccount } = useAccountData(symbol);
+  const marketAccount = usePreviewerExactly().data?.find((market) => market.assetSymbol === symbol);
   const market = marketAccount?.market;
   const client = usePublicClient({ chainId: defaultChain.id });
   const ratePreviewer = ratePreviewerAddress[defaultChain.id as keyof typeof ratePreviewerAddress];

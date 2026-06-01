@@ -11,7 +11,7 @@ import React, {
 } from 'react';
 import { Address, parseUnits } from 'viem';
 
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import { ErrorData } from 'types/Error';
 import numbers from 'config/numbers.json';
 import type { Operation } from 'types/Operation';
@@ -66,7 +66,11 @@ export const OperationContextProvider: FC<PropsWithChildren<Props>> = ({ args, c
   const [operation, setOperation] = useState<Operation>(args?.operation ?? 'deposit');
   const [date, setDate] = useState<bigint | undefined>(args?.maturity);
 
-  const { marketAccount } = useAccountData(marketSymbol);
+  const { data } = usePreviewerExactly();
+  const marketAccount = useMemo(
+    () => data?.find((market) => market.assetSymbol === marketSymbol),
+    [data, marketSymbol],
+  );
 
   const dates = useMemo<bigint[]>(() => marketAccount?.fixedPools.map((pool) => pool.maturity) ?? [], [marketAccount]);
 

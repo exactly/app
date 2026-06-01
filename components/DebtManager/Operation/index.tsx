@@ -12,7 +12,7 @@ import { ModalBox, ModalBoxRow } from 'components/common/modal/ModalBox';
 import ModalAdvancedSettings from 'components/common/modal/ModalAdvancedSettings';
 import ModalSheet from 'components/common/modal/ModalSheet';
 import CustomSlider from 'components/common/CustomSlider';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import { useDebtManagerContext } from 'contexts/DebtManagerContext';
 import parseTimestamp from 'utils/parseTimestamp';
 import ModalSheetButton from 'components/common/modal/ModalSheetButton';
@@ -51,7 +51,7 @@ const previewerChainId = Object.keys(previewerAddress)
 
 function Operation() {
   const { t } = useTranslation();
-  const { accountData, getMarketAccount } = useAccountData();
+  const { data: accountData } = usePreviewerExactly();
   const { account } = useReadOnly();
   const publicClient = usePublicClient();
   const { signTypedDataAsync } = useSignTypedData();
@@ -166,7 +166,7 @@ function Operation() {
     async (cancelled: () => boolean) => {
       if (!input.from) return;
 
-      const marketAccount = getMarketAccount(input.from.symbol);
+      const marketAccount = accountData?.find((market) => market.assetSymbol === input.from?.symbol);
       if (!marketAccount) return;
 
       const { floatingBorrowRate, floatingBorrowAssets, fixedBorrowPositions, usdPrice, assetSymbol, decimals } =
@@ -269,7 +269,7 @@ function Operation() {
         setToRows([]);
       }
     },
-    [input.from, input.percent, getMarketAccount, fromRows, rates],
+    [input.from, input.percent, accountData, fromRows, rates],
   );
 
   const { isLoading: loadingToRows } = useDelayedEffect({ effect: updateToRows });
@@ -278,7 +278,9 @@ function Operation() {
     const row = fromRows.find((r) => r.symbol === input.from?.symbol && r.maturity === input.from?.maturity);
     if (row) return row;
 
-    const marketAccount = input.from ? getMarketAccount(input.from.symbol) : undefined;
+    const marketAccount = input.from
+      ? accountData?.find((market) => market.assetSymbol === input.from?.symbol)
+      : undefined;
     if (!marketAccount) return undefined;
 
     const { floatingBorrowRate, floatingBorrowAssets, fixedBorrowPositions, usdPrice, assetSymbol, decimals } =
@@ -307,7 +309,7 @@ function Operation() {
             decimals,
           }
         : undefined;
-  }, [fromRows, getMarketAccount, input.from]);
+  }, [fromRows, accountData, input.from]);
 
   const toRow = useMemo(
     () => toRows.find((row) => input.to?.symbol === row.symbol && input.to?.maturity === row.maturity),
@@ -344,7 +346,9 @@ function Operation() {
   const [requiresApproval, setRequiresApproval] = useState(false);
 
   const executeTransaction = useCallback(async (): Promise<Hex | undefined> => {
-    const market = input.from ? getMarketAccount(input.from.symbol)?.market : undefined;
+    const market = input.from
+      ? accountData?.find(({ assetSymbol }) => assetSymbol === input.from?.symbol)?.market
+      : undefined;
     if (!account || !debtManager || !market || !input.from || !input.to || !publicClient) {
       return;
     }
@@ -462,7 +466,7 @@ function Operation() {
   }, [
     account,
     debtManager,
-    getMarketAccount,
+    accountData,
     input.from,
     input.percent,
     input.to,

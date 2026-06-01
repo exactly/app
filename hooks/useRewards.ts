@@ -2,7 +2,7 @@ import { useMemo, useCallback, useEffect, useRef, useState } from 'react';
 import type { Address } from 'viem';
 
 import handleOperationError from 'utils/handleOperationError';
-import useAccountData from './useAccountData';
+import usePreviewerExactly from './usePreviewerExactly';
 
 import { AbiParametersToPrimitiveTypes, ExtractAbiFunction } from 'abitype';
 import {
@@ -33,7 +33,7 @@ type ClaimArgs = AbiParametersToPrimitiveTypes<ExtractAbiFunction<typeof rewards
 export default () => {
   const { account: walletAddress } = useReadOnly();
   const { isConnected } = useConnection();
-  const { accountData, getMarketAccount, refreshAccountData } = useAccountData();
+  const { data: accountData, refetch } = usePreviewerExactly();
   const rewardsControllerChainId = Object.keys(rewardsControllerAddress)
     .map(Number)
     .find((chainId): chainId is keyof typeof rewardsControllerAddress => chainId === defaultChain.id);
@@ -47,7 +47,7 @@ export default () => {
   });
 
   const rewards = useMemo<Rewards>(() => {
-    if (!accountData || !getMarketAccount) return {};
+    if (!accountData) return {};
 
     const price = accountData
       .flatMap(({ rewardRates }) => rewardRates)
@@ -70,7 +70,7 @@ export default () => {
         acc[assetSymbol].amount += amount;
         return acc;
       }, {} as Rewards);
-  }, [accountData, getMarketAccount]);
+  }, [accountData]);
 
   const claimable = useMemo<boolean>(() => {
     return Object.values(rewards).some(({ amount }) => amount > 0n);
@@ -100,13 +100,13 @@ export default () => {
       const hash = await writeClaimAll(claimAllRequest.request);
       await waitForTransaction({ hash });
 
-      await refreshAccountData();
+      await refetch();
     } catch (e) {
       handleOperationError(e);
     } finally {
       setIsLoading(false);
     }
-  }, [claimAllSimulation, claimable, walletAddress, refreshAccountData, writeClaimAll]);
+  }, [claimAllSimulation, claimable, walletAddress, refetch, writeClaimAll]);
 
   const rates = useMemo<Rates>(() => {
     if (!accountData) return {};
@@ -164,7 +164,7 @@ export default () => {
         const { status } = await waitForTransaction({ hash });
         claimSetTx.current?.({ hash, status: status === 'success' ? 'success' : 'error' });
 
-        await refreshAccountData();
+        await refetch();
       } catch (e) {
         handleOperationError(e);
       } finally {
@@ -172,7 +172,7 @@ export default () => {
         setIsLoading(false);
       }
     })();
-  }, [claimArgs, claimSimulation.data, refreshAccountData, rewardsControllerChainId, walletAddress, writeClaim]);
+  }, [claimArgs, claimSimulation.data, refetch, rewardsControllerChainId, walletAddress, writeClaim]);
 
   useEffect(() => {
     if (!claimArgs || !claimSimulation.error) return;

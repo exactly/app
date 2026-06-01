@@ -3,7 +3,7 @@ import { Box, Button } from '@mui/material';
 
 import ModalInput from 'components/OperationsModal/ModalInput';
 import USDValue from 'components/OperationsModal/USDValue';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import Image from 'next/image';
 import formatSymbol from 'utils/formatSymbol';
 import { useLeveragerContext } from 'contexts/LeveragerContext';
@@ -15,7 +15,7 @@ type Props = {
 
 function AssetInput({ symbol }: Props) {
   const { input, handleInputChange, onMax, available, blockModal } = useLeveragerContext();
-  const { marketAccount } = useAccountData(symbol || 'USDC');
+  const marketAccount = usePreviewerExactly().data?.find((market) => market.assetSymbol === (symbol || 'USDC'));
   const { decimals = 18 } = marketAccount ?? {};
   const handleBlur = useCallback(() => {
     track('Input Unfocused', {

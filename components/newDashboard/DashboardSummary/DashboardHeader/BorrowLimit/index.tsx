@@ -6,13 +6,13 @@ import { WAD } from '@exactly/lib';
 import { BorrowLimitIcon } from 'components/Icons';
 import { useTranslation } from 'react-i18next';
 import useHealthFactor from 'hooks/useHealthFactor';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import formatNumber from 'utils/formatNumber';
 
 const BorrowLimit = () => {
   const { t } = useTranslation();
   const healthFactor = useHealthFactor();
-  const { accountData, isFetching } = useAccountData();
+  const { data: accountData, isFetching } = usePreviewerExactly();
 
   const maximumBorrow = useMemo((): string => {
     if (!accountData || !healthFactor) return '';

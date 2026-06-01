@@ -11,7 +11,7 @@ import StrategyRowCard from 'components/strategies/StrategyRowCard';
 import useRouter from 'hooks/useRouter';
 import useHealthFactor from 'hooks/useHealthFactor';
 import parseHealthFactor from 'utils/parseHealthFactor';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import { toPercentage } from 'utils/utils';
 import { type Props as Strategy } from 'components/strategies/StrategyCard';
 import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
@@ -32,7 +32,7 @@ const Strategies: NextPage = () => {
   const hf = useHealthFactor();
   const hfLabel = parseHealthFactor(hf?.debt ?? 0n, hf?.collateral ?? 0n);
 
-  const { accountData, getMarketAccount } = useAccountData();
+  const { data: accountData } = usePreviewerExactly();
   const lowestBorrowAPR = useMemo(() => {
     if (!accountData) return undefined;
     const lowestAPR = accountData.reduce((apr, marketAccount) => {
@@ -49,7 +49,7 @@ const Strategies: NextPage = () => {
   const { rates } = useRewards();
 
   const maxYield = useMemo(() => {
-    const usdc = getMarketAccount('USDC');
+    const usdc = accountData?.find((market) => market.assetSymbol === 'USDC');
     if (!usdc || !usdcDepositAPR) return '0%';
     const ratio = (WAD * WAD) / (WAD - (usdc.adjustFactor * usdc.adjustFactor) / WAD);
 
@@ -63,7 +63,7 @@ const Strategies: NextPage = () => {
       rates['USDC']?.map((r) => (r.borrow * (ratio - WAD)) / WAD).reduce((acc, curr) => acc + curr, 0n) ?? 0n;
 
     return toPercentage(Number(marketAPR + collateralRewardsAPR + borrowRewardsAPR) / 1e18);
-  }, [getMarketAccount, rates, usdcDepositAPR]);
+  }, [accountData, rates, usdcDepositAPR]);
 
   const veloRate = useVELOPoolAPR() ?? '0%';
 

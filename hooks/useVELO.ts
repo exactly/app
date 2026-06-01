@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import { useAssetPrice } from './useSocketAPI';
 import { useEXAPrice } from './useEXA';
-import useAccountData from './useAccountData';
+import usePreviewerExactly from './usePreviewerExactly';
 import { parseEther, zeroAddress } from 'viem';
 import { toPercentage } from 'utils/utils';
 import { WAD } from '@exactly/lib';
@@ -45,7 +45,8 @@ export const useVELOPoolAPR = () => {
     chainId: exaPoolChainId,
     query: { enabled: exaPoolChainId !== undefined, staleTime: 30_000 },
   });
-  const { marketAccount: weth } = useAccountData('WETH');
+  const { data } = usePreviewerExactly();
+  const weth = data?.find((market) => market.assetSymbol === 'WETH');
 
   const apr = useMemo(() => {
     if (!asset || !weth || rewardRate === undefined || !reserves) return;
@@ -64,7 +65,8 @@ export default (): VELOAccountStatus => {
   const { account: walletAddress } = useReadOnly();
   const asset = useAssetPrice(veloChainId === undefined ? undefined : veloAddress[veloChainId]);
   const exa = useEXAPrice();
-  const { marketAccount: weth } = useAccountData('WETH');
+  const { data } = usePreviewerExactly();
+  const weth = data?.find((market) => market.assetSymbol === 'WETH');
 
   const { data: rewardRate, refetch: refetchEXAGaugeRewardRate } = useReadExaGaugeRewardRate({
     chainId: exaGaugeChainId,

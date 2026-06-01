@@ -9,7 +9,7 @@ import {
   globalUtilization,
 } from '@exactly/lib';
 
-import useAccountData from './useAccountData';
+import usePreviewerExactly from './usePreviewerExactly';
 import useIRM from './useIRM';
 import { useReadMarketPreviewFloatingAssetsAverage } from 'generated/wagmi';
 import { defaultChain } from 'utils/client';
@@ -20,7 +20,8 @@ export const INTERVAL = 0.005;
 const levels = 8;
 
 export default function useSpreadModel(symbol: string) {
-  const { marketAccount } = useAccountData(symbol);
+  const { data: accountData } = usePreviewerExactly();
+  const marketAccount = accountData?.find((market) => market.assetSymbol === symbol);
   const irm = useIRM(symbol);
   const { data: floatingAssetsAverage } = useReadMarketPreviewFloatingAssetsAverage({
     address: marketAccount?.market,

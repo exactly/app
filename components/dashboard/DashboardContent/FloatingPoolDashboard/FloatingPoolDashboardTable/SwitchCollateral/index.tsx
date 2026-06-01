@@ -9,7 +9,7 @@ import StyledSwitch from 'components/Switch';
 import parseHealthFactor from 'utils/parseHealthFactor';
 import handleOperationError from 'utils/handleOperationError';
 import useHealthFactor from 'hooks/useHealthFactor';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import { useTranslation } from 'react-i18next';
 import { track } from 'utils/mixpanel';
 import { auditorAbi, auditorAddress } from 'generated/wagmi';
@@ -22,7 +22,8 @@ type Props = {
 
 function SwitchCollateral({ symbol }: Props) {
   const { t } = useTranslation();
-  const { marketAccount, refreshAccountData } = useAccountData(symbol);
+  const { data, refetch } = usePreviewerExactly();
+  const marketAccount = data?.find((market) => market.assetSymbol === symbol);
   const chainId = useChainId();
   const { account: walletAddress } = useReadOnly();
   const { writeContractAsync } = useWriteContract();
@@ -89,7 +90,7 @@ function SwitchCollateral({ symbol }: Props) {
       });
       await waitForTransaction({ hash });
 
-      await refreshAccountData();
+      await refetch();
     } catch (error) {
       target = checked;
       handleOperationError(error);
@@ -97,7 +98,7 @@ function SwitchCollateral({ symbol }: Props) {
       setOptimistic(target);
       setLoading(false);
     }
-  }, [marketAccount, checked, symbol, writeContractAsync, refreshAccountData, walletAddress]);
+  }, [marketAccount, checked, symbol, writeContractAsync, refetch, walletAddress]);
 
   const switchNetworkAndToggle = useCallback(async () => {
     if (chainId === defaultChain.id) {

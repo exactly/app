@@ -5,7 +5,7 @@ import type { Hex } from 'viem';
 import ModalGif from 'components/OperationsModal/ModalGif';
 
 import useBalance from 'hooks/useBalance';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import { useOperationContext } from 'contexts/OperationContext';
 import { ModalBox, ModalBoxRow, ModalBoxCell } from 'components/common/modal/ModalBox';
 import ModalInfoHealthFactor from 'components/OperationsModal/Info/ModalInfoHealthFactor';
@@ -30,7 +30,7 @@ const Deposit = ({ children, onSuccess }: { children?: ReactNode; onSuccess?: (h
   const { symbol, errorData, qty } = useOperationContext();
   const { isLoading, isPreparing, onMax, handleInputChange, handleSubmitAction, deposit, txStatus, txHash } =
     useDeposit();
-  const { marketAccount } = useAccountData(symbol);
+  const marketAccount = usePreviewerExactly().data?.find((market) => market.assetSymbol === symbol);
   const walletBalance = useBalance(symbol, marketAccount?.asset);
 
   const { depositAPR, loading } = useFloatingPoolAPR(symbol, qty, 'deposit');

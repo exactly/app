@@ -65,7 +65,7 @@ const storage = createStorage({
       : undefined,
 });
 
-export const queryClient = new QueryClient();
+export const queryClient = new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: true } } });
 
 export const chains = sortedChains;
 

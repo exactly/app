@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import Image from 'next/image';
 import { useStakeEXA } from 'contexts/StakeEXAContext';
 import { useEXAPrice } from 'hooks/useEXA';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import formatNumber from 'utils/formatNumber';
 import { calculateStakingRewardsAPR, calculateTotalStakingRewardsAPR } from 'utils/calculateStakingAPR';
 import { InfoOutlined } from '@mui/icons-material';
@@ -23,7 +23,7 @@ function StakedEXASummary() {
   const { t } = useTranslation();
   const { totalAssets, rewardsTokens, rewards } = useStakeEXA();
   const exaPrice = useEXAPrice();
-  const { accountData } = useAccountData();
+  const { data: accountData } = usePreviewerExactly();
   const stakedEXA = stakedExaChainId === undefined ? undefined : stakedExaAddress[stakedExaChainId];
 
   const rewardsAPR = useMemo(() => {

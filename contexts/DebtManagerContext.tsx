@@ -14,7 +14,9 @@ import { useSendCalls, useWaitForCallsStatus, usePublicClient } from 'wagmi';
 import type { ErrorData } from 'types/Error';
 import type { Transaction } from 'types/Transaction';
 import type { Position } from 'components/DebtManager/types';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
+import { useQueryClient } from '@tanstack/react-query';
+import { getContractEventsQueryKey } from '@wagmi/core/query';
 import { debtManagerAddress, marketAbi } from 'generated/wagmi';
 import handleOperationError from 'utils/handleOperationError';
 import useIsContract from 'hooks/useIsContract';
@@ -81,7 +83,8 @@ type Props = {
 
 export const DebtManagerContextProvider: FC<PropsWithChildren<Props>> = ({ args, children }) => {
   const { account: walletAddress } = useReadOnly();
-  const { getMarketAccount, refreshAccountData } = useAccountData();
+  const { data, refetch } = usePreviewerExactly();
+  const queryClient = useQueryClient();
   const isContract = useIsContract();
   const publicClient = usePublicClient();
   const { mutateAsync: sendCalls, isPending: sendCallsPending } = useSendCalls();
@@ -104,7 +107,7 @@ export const DebtManagerContextProvider: FC<PropsWithChildren<Props>> = ({ args,
 
   const debtManager = Object.entries(debtManagerAddress).find(([chainId]) => Number(chainId) === defaultChain.id)?.[1];
 
-  const market = input.from && getMarketAccount(input.from.symbol)?.market;
+  const market = input.from && data?.find((m) => m.assetSymbol === input.from?.symbol)?.market;
 
   useEffect(() => {
     if (approveStatus?.status === 'success' || approveStatus?.status === 'failure') setApproveCallId(undefined);
@@ -173,14 +176,32 @@ export const DebtManagerContextProvider: FC<PropsWithChildren<Props>> = ({ args,
         const hash = await execute();
         if (!hash) return;
         setTx({ status: 'success', hash });
-        await refreshAccountData();
+        await refetch();
+        if (walletAddress) {
+          void queryClient.invalidateQueries({
+            queryKey: getContractEventsQueryKey({
+              abi: marketAbi,
+              eventName: 'BorrowAtMaturity',
+              args: { borrower: walletAddress },
+              chainId: defaultChain.id,
+            }),
+          });
+          void queryClient.invalidateQueries({
+            queryKey: getContractEventsQueryKey({
+              abi: marketAbi,
+              eventName: 'RepayAtMaturity',
+              args: { borrower: walletAddress },
+              chainId: defaultChain.id,
+            }),
+          });
+        }
       } catch (e: unknown) {
         setErrorData({ status: true, message: handleOperationError(e) });
       } finally {
         setSubmitting(false);
       }
     },
-    [refreshAccountData],
+    [refetch, queryClient, walletAddress],
   );
 
   const value: ContextValues = {

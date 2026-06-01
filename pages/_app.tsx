@@ -3,14 +3,13 @@ import '../styles/variables.css';
 
 import 'i18n';
 
-import React from 'react';
+import React, { startTransition, useEffect } from 'react';
 import Head from 'next/head';
-import { WagmiProvider } from 'wagmi';
+import { WagmiProvider, useConnect, useReconnect } from 'wagmi';
 import { QueryClientProvider } from '@tanstack/react-query';
 import type { AppProps } from 'next/app';
 import { Box } from '@mui/material';
 
-import { AccountDataProvider } from 'contexts/AccountDataContext';
 import { ThemeProvider } from 'contexts/ThemeContext';
 import { wagmi, isE2E, queryClient } from 'utils/client';
 import Footer from 'components/Footer';
@@ -35,6 +34,19 @@ import EXACard from 'components/ExaCard';
 
 dayjs.extend(isToday);
 const { maxWidth } = globals;
+
+const Reconnect = () => {
+  const { connect, connectors } = useConnect();
+  const { mutate: reconnect } = useReconnect();
+  useEffect(() => {
+    const safeConnector = connectors.find(({ id }) => id === 'safe');
+    startTransition(() => {
+      if (safeConnector) connect({ connector: safeConnector }, { onError: () => reconnect() });
+      else reconnect();
+    });
+  }, [connect, connectors, reconnect]);
+  return null;
+};
 
 const Modals = () => (
   <>
@@ -89,7 +101,8 @@ export default function App({ Component, pageProps, router }: AppProps) {
           <ThemeProvider>
             <ModalContextProvider>
               <GlobalErrorProvider>
-                <AccountDataProvider>
+                <>
+                  <Reconnect />
                   <NewIRMBanner />
                   <Box display="flex" flexDirection="column" px={2} height="100%">
                     <Navbar />
@@ -112,7 +125,7 @@ export default function App({ Component, pageProps, router }: AppProps) {
                   <Modals />
                   <MaturityDateReminder />
                   <EXACard />
-                </AccountDataProvider>
+                </>
               </GlobalErrorProvider>
             </ModalContextProvider>
           </ThemeProvider>

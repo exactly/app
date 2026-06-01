@@ -3,7 +3,7 @@ import PieChartOutlineRoundedIcon from '@mui/icons-material/PieChartOutlineRound
 
 import ModalInfo, { FromTo, Variant } from 'components/common/modal/ModalInfo';
 import type { Operation } from 'types/Operation';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import { toPercentage } from 'utils/utils';
 import useDelayedEffect from 'hooks/useDelayedEffect';
 import { useTranslation } from 'react-i18next';
@@ -41,7 +41,8 @@ const previewerChainId = Object.keys(previewerAddress)
 function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'column' }: Props) {
   const { t } = useTranslation();
   const { account: walletAddress } = useReadOnly();
-  const { marketAccount } = useAccountData(symbol);
+  const { data } = usePreviewerExactly();
+  const marketAccount = data?.find((market) => market.assetSymbol === symbol);
   const { date } = useOperationContext();
 
   const from = useMemo(() => {

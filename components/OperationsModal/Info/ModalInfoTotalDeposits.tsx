@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
 import { formatUnits, parseUnits } from 'viem';
 
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import formatNumber from 'utils/formatNumber';
 import ModalInfo, { Variant, FromTo } from 'components/common/modal/ModalInfo';
 import { isFixedOperation, type Operation } from 'types/Operation';
@@ -21,7 +21,8 @@ type Props = {
 
 function ModalInfoTotalDeposits({ qty, symbol, operation, variant = 'column' }: Props) {
   const { t } = useTranslation();
-  const { marketAccount } = useAccountData(symbol);
+  const { data } = usePreviewerExactly();
+  const marketAccount = data?.find((market) => market.assetSymbol === symbol);
   const { date } = useOperationContext();
 
   const [from, to] = useMemo(() => {

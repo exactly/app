@@ -30,7 +30,7 @@ import { MAX_UINT256, WAD } from '@exactly/lib';
 
 import type { ErrorData } from 'types/Error';
 import type { Transaction } from 'types/Transaction';
-import useAccountData, { type MarketAccount } from 'hooks/useAccountData';
+import usePreviewerExactly, { type MarketAccount } from 'hooks/usePreviewerExactly';
 import handleOperationError from 'utils/handleOperationError';
 import useIsContract from 'hooks/useIsContract';
 import useBalance from 'hooks/useBalance';
@@ -159,7 +159,11 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
   const { palette } = useTheme();
   const { account: walletAddress } = useReadOnly();
   const healthFactor = useHealthFactor();
-  const { getMarketAccount, refreshAccountData } = useAccountData();
+  const { data, refetch } = usePreviewerExactly();
+  const getMarketAccount = useCallback(
+    (symbol: string) => data?.find((market) => market.assetSymbol === symbol),
+    [data],
+  );
   const isContract = useIsContract();
   const isPermit = useIsPermit();
   const { signTypedDataAsync } = useSignTypedData();
@@ -1047,7 +1051,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
       if (!result?.hash) return;
       setTx({ status: result.status === 'success' ? 'success' : 'error', hash: result.hash });
-      await refreshAccountData();
+      await refetch();
     } catch (e: unknown) {
       setErrorData({ status: true, message: handleOperationError(e) });
     } finally {
@@ -1070,7 +1074,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     limit,
     publicClient,
     isContract,
-    refreshAccountData,
+    refetch,
     userInput,
     sendLeverage,
     signPermit,

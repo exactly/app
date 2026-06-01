@@ -2,7 +2,7 @@ import React, { useCallback, useMemo } from 'react';
 import DropdownMenu from 'components/DropdownMenu';
 import formatNumber from 'utils/formatNumber';
 import { useOperationContext } from 'contexts/OperationContext';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import { formatUnits } from 'viem';
 import { Box, Skeleton, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
@@ -16,7 +16,7 @@ type OptionProps = {
 
 export function Option({ installments, repayAmount, option = false }: OptionProps) {
   const { symbol } = useOperationContext();
-  const { marketAccount } = useAccountData(symbol);
+  const marketAccount = usePreviewerExactly().data?.find((market) => market.assetSymbol === symbol);
 
   return (
     <Typography
@@ -42,7 +42,7 @@ export function Option({ installments, repayAmount, option = false }: OptionProp
 export default function InstallmentsOptions() {
   const { t } = useTranslation();
   const { installments, onInstallmentsChange, installmentsOptions, symbol } = useOperationContext();
-  const { marketAccount } = useAccountData(symbol);
+  const marketAccount = usePreviewerExactly().data?.find((market) => market.assetSymbol === symbol);
 
   const handleChange = useCallback(
     (option: { installments: number }) => {

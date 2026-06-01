@@ -4,7 +4,7 @@ import { Box, capitalize, Divider, Tooltip, Typography, useTheme } from '@mui/ma
 import AssetInput from 'components/OperationsModal/AssetInput';
 import { MarketsBasicOption, MarketsBasicProvider, useMarketsBasic } from 'contexts/MarketsBasicContext';
 import { OperationContextProvider, useOperationContext } from 'contexts/OperationContext';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import useBalance from 'hooks/useBalance';
 import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
 import usePreviewFixedOperation from 'hooks/usePreviewFixedOperation';
@@ -32,7 +32,7 @@ const MarketsBasic: FC = () => {
   const { palette } = useTheme();
   const { errorData, qty } = useOperationContext();
   const { symbol, operation, selected, setSelected } = useMarketsBasic();
-  const { marketAccount } = useAccountData(symbol);
+  const marketAccount = usePreviewerExactly().data?.find((market) => market.assetSymbol === symbol);
   const walletBalance = useBalance(symbol, marketAccount?.asset);
   const { options: fixedOptions, loading: loadingFixedOptions } = usePreviewFixedOperation(operation);
   const { handleInputChange: handleDeposit, onMax: onMaxDeposit } = useDepositAtMaturity();

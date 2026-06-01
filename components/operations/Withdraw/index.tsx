@@ -13,7 +13,7 @@ import ModalInfoFloatingUtilizationRate from 'components/OperationsModal/Info/Mo
 import ModalInfoBorrowLimit from 'components/OperationsModal/Info/ModalInfoBorrowLimit';
 import ModalAlert from 'components/common/modal/ModalAlert';
 import ModalSubmit from 'components/OperationsModal/ModalSubmit';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import useHandleOperationError from 'hooks/useHandleOperationError';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
@@ -50,7 +50,8 @@ const Withdraw: FC = () => {
   } = useOperationContext();
 
   const handleOperationError = useHandleOperationError();
-  const { marketAccount, refreshAccountData } = useAccountData(symbol);
+  const { data, refetch } = usePreviewerExactly();
+  const marketAccount = data?.find((market) => market.assetSymbol === symbol);
   const [isMax, setIsMax] = useState(false);
   const { mutateAsync: sendCalls, isPending: sendCallsPending } = useSendCalls();
   const [callId, setCallId] = useState<string>();
@@ -224,9 +225,9 @@ const Withdraw: FC = () => {
 
   useEffect(() => {
     if (!callsStatus.data?.receipts?.length) return;
-    void refreshAccountData();
+    void refetch();
     if (marketAccount?.assetSymbol === 'WETH') void refetchMarketAllowance();
-  }, [callsStatus.data?.receipts, marketAccount?.assetSymbol, refetchMarketAllowance, refreshAccountData]);
+  }, [callsStatus.data?.receipts, marketAccount?.assetSymbol, refetchMarketAllowance, refetch]);
 
   const onMax = useCallback(() => {
     setQty(parsedAmount);

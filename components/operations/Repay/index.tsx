@@ -15,7 +15,7 @@ import ModalInfoBorrowLimit from 'components/OperationsModal/Info/ModalInfoBorro
 import ModalInfoFloatingUtilizationRate from 'components/OperationsModal/Info/ModalInfoFloatingUtilizationRate';
 import ModalAlert from 'components/common/modal/ModalAlert';
 import ModalSubmit from 'components/OperationsModal/ModalSubmit';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import useHandleOperationError from 'hooks/useHandleOperationError';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
@@ -54,7 +54,8 @@ function Repay() {
   } = useOperationContext();
 
   const handleOperationError = useHandleOperationError();
-  const { marketAccount, refreshAccountData } = useAccountData(symbol);
+  const { data, refetch } = usePreviewerExactly();
+  const marketAccount = data?.find((market) => market.assetSymbol === symbol);
   const [isMax, setIsMax] = useState(false);
   const walletBalance = useBalance(symbol, marketAccount?.asset);
   const { mutateAsync: sendCalls, isPending: sendCallsPending } = useSendCalls();
@@ -210,9 +211,9 @@ function Repay() {
 
   useEffect(() => {
     if (!callsStatus.data?.receipts?.length) return;
-    void refreshAccountData();
+    void refetch();
     if (marketAccount?.assetSymbol !== 'WETH') void refetchAllowance();
-  }, [callsStatus.data?.receipts, marketAccount?.assetSymbol, refetchAllowance, refreshAccountData]);
+  }, [callsStatus.data?.receipts, marketAccount?.assetSymbol, refetchAllowance, refetch]);
 
   const onMax = useCallback(() => {
     setQty(finalAmount);

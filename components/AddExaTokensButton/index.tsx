@@ -5,13 +5,13 @@ import { Tooltip, Typography } from '@mui/material';
 import handleOperationError from 'utils/handleOperationError';
 import useAssets from 'hooks/useAssets';
 import imageToBase64 from 'utils/imageToBase64';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import { useTranslation } from 'react-i18next';
 import { track } from 'utils/mixpanel';
 
 const AddExaTokensButton = () => {
   const { t } = useTranslation();
-  const { accountData } = useAccountData();
+  const { data: accountData } = usePreviewerExactly();
   const { connector } = useAccount();
   const { mutateAsync: watchAsset } = useWatchAsset();
   const assets = useAssets();

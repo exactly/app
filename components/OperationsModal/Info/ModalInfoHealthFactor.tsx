@@ -10,7 +10,7 @@ import type { Operation } from 'types/Operation';
 
 import ModalInfo, { FromTo, Variant } from 'components/common/modal/ModalInfo';
 import useHealthFactor from 'hooks/useHealthFactor';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 
 type Props = {
   qty: string;
@@ -21,7 +21,8 @@ type Props = {
 
 function ModalInfoHealthFactor({ qty, symbol, operation, variant = 'column' }: Props) {
   const { t } = useTranslation();
-  const { marketAccount } = useAccountData(symbol);
+  const { data } = usePreviewerExactly();
+  const marketAccount = data?.find((market) => market.assetSymbol === symbol);
 
   const healthFactor = useHealthFactor();
 

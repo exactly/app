@@ -10,7 +10,7 @@ import formatNumber from 'utils/formatNumber';
 import formatSymbol from 'utils/formatSymbol';
 import Link from 'next/link';
 import SwitchCollateral from 'components/dashboard/DashboardContent/FloatingPoolDashboard/FloatingPoolDashboardTable/SwitchCollateral';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import useActionButton, { useStartDebtManagerButton } from 'hooks/useActionButton';
 import useRouter from 'hooks/useRouter';
 import { useTranslation } from 'react-i18next';
@@ -31,7 +31,8 @@ type Props = {
 function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmount, type, apr, simple }: Props) {
   const { t } = useTranslation();
   const { query } = useRouter();
-  const { marketAccount } = useAccountData(symbol);
+  const { data } = usePreviewerExactly();
+  const marketAccount = data?.find((market) => market.assetSymbol === symbol);
 
   const { handleActionClick } = useActionButton();
   const { startDebtManager, isRolloverDisabled } = useStartDebtManagerButton();

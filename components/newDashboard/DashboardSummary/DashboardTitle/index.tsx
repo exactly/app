@@ -3,19 +3,19 @@ import { Box, IconButton, Skeleton, Typography } from '@mui/material';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import ReplayIcon from '@mui/icons-material/Replay';
 import { useTranslation } from 'react-i18next';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import dayjs from 'dayjs';
 import { track } from 'utils/mixpanel';
 
 const DashboardTitle = () => {
   const { t } = useTranslation();
-  const { refreshAccountData, lastSync } = useAccountData();
+  const { refetch, dataUpdatedAt } = usePreviewerExactly();
   const [loading, setLoading] = useState(false);
-  const [minutes, setMinutes] = useState(dayjs(Date.now()).diff(lastSync, 'minutes'));
+  const [minutes, setMinutes] = useState(dataUpdatedAt ? dayjs(Date.now()).diff(dataUpdatedAt, 'minutes') : 0);
 
   const refreshData = async () => {
     setLoading(true);
-    await refreshAccountData();
+    await refetch();
     setLoading(false);
     track('Button Clicked', {
       name: 'refresh',
@@ -25,12 +25,12 @@ const DashboardTitle = () => {
   };
 
   useEffect(() => {
-    const updateMinutes = () => setMinutes(dayjs(Date.now()).diff(lastSync, 'minutes'));
+    const updateMinutes = () => setMinutes(dataUpdatedAt ? dayjs(Date.now()).diff(dataUpdatedAt, 'minutes') : 0);
     updateMinutes();
 
     const interval = setInterval(updateMinutes, 60 * 1000);
     return () => clearInterval(interval);
-  }, [lastSync]);
+  }, [dataUpdatedAt]);
 
   return (
     <Box display="flex" alignItems="center" justifyContent="space-between" mb={0.5}>

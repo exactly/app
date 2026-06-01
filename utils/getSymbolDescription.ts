@@ -1,4 +1,4 @@
-import { MarketAccount } from 'hooks/useAccountData';
+import { MarketAccount } from 'hooks/usePreviewerExactly';
 
 export default (marketAccount: MarketAccount, symbol: string) => {
   if (symbol === 'WETH') {

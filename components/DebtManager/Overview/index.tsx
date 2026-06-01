@@ -19,7 +19,7 @@ import { WAD } from '@exactly/lib';
 import AddIcon from '@mui/icons-material/Add';
 import ClearIcon from '@mui/icons-material/Clear';
 
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import { toPercentage } from 'utils/utils';
 import { PositionTableRow } from '../PositionTable';
 import useRewards from 'hooks/useRewards';
@@ -47,7 +47,8 @@ type Props = {
 function Overview({ from, to, percent }: Props) {
   const { t } = useTranslation();
   const { account: walletAddress } = useReadOnly();
-  const { marketAccount } = useAccountData(from.symbol);
+  const { data } = usePreviewerExactly();
+  const marketAccount = data?.find((market) => market.assetSymbol === from.symbol);
   const { rates } = useRewards();
   const healthFactor = useHealthFactor();
   const [openDetails, setOpenDetails] = useState(false);

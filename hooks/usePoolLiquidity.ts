@@ -1,10 +1,10 @@
 import { formatUnits } from 'viem';
-import useAccountData from './useAccountData';
+import usePreviewerExactly from './usePreviewerExactly';
 import { useOperationContext } from 'contexts/OperationContext';
 
 export default (symbol: string): number | undefined => {
   const { date: maturityDate } = useOperationContext();
-  const { marketAccount } = useAccountData(symbol);
+  const marketAccount = usePreviewerExactly().data?.find((market) => market.assetSymbol === symbol);
 
   if (!marketAccount || !maturityDate) return;
 

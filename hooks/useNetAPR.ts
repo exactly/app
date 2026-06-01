@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { WAD } from '@exactly/lib';
 
-import useAccountData from './useAccountData';
+import usePreviewerExactly from './usePreviewerExactly';
 import useDashboard from './useDashboard';
 import { Address, parseEther } from 'viem';
 import useRewards from './useRewards';
@@ -35,7 +35,7 @@ const parseAPR = (apr?: number) => parseEther((apr !== undefined && Number.isFin
 
 export default () => {
   const { account } = useReadOnly();
-  const { accountData, isFetching, lastSync } = useAccountData();
+  const { data: accountData, isFetching } = usePreviewerExactly();
   const { floatingRows: floatingDeposit } = useDashboard('deposit');
   const { floatingRows: floatingBorrow } = useDashboard('borrow');
   const stETHNativeAPR = useStETHNativeAPR();
@@ -76,7 +76,6 @@ export default () => {
     fromBlock,
     toBlock: 'latest',
     chainId: defaultChain.id,
-    scopeKey: String(lastSync ?? ''),
     query: {
       enabled: hasFixedDeposits && Boolean(account && marketAddresses.length),
       select: (logs) =>
@@ -108,7 +107,6 @@ export default () => {
     fromBlock,
     toBlock: 'latest',
     chainId: defaultChain.id,
-    scopeKey: String(lastSync ?? ''),
     query: {
       enabled: hasFixedDeposits && Boolean(account && marketAddresses.length),
       select: (logs) =>
@@ -138,7 +136,6 @@ export default () => {
     fromBlock,
     toBlock: 'latest',
     chainId: defaultChain.id,
-    scopeKey: String(lastSync ?? ''),
     query: {
       enabled: hasFixedBorrows && Boolean(account && marketAddresses.length),
       select: (logs) =>
@@ -170,7 +167,6 @@ export default () => {
     fromBlock,
     toBlock: 'latest',
     chainId: defaultChain.id,
-    scopeKey: String(lastSync ?? ''),
     query: {
       enabled: hasFixedBorrows && Boolean(account && marketAddresses.length),
       select: (logs) =>

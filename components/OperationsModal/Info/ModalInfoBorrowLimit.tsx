@@ -8,7 +8,7 @@ import formatNumber from 'utils/formatNumber';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 import ModalInfo, { FromTo, Variant } from 'components/common/modal/ModalInfo';
 import type { Operation } from 'types/Operation';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 
 type Props = {
   qty: string;
@@ -19,7 +19,8 @@ type Props = {
 
 function ModalInfoBorrowLimit({ qty, symbol, operation, variant = 'column' }: Props) {
   const { t } = useTranslation();
-  const { marketAccount } = useAccountData(symbol);
+  const { data } = usePreviewerExactly();
+  const marketAccount = data?.find((market) => market.assetSymbol === symbol);
 
   const newQty = useMemo(() => {
     if (!marketAccount || !symbol) return;

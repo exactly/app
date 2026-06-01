@@ -3,7 +3,7 @@ import { Box, Button, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useStakeEXA } from 'contexts/StakeEXAContext';
 import { useEXAPrice } from 'hooks/useEXA';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import Image from 'next/image';
 import formatNumber from 'utils/formatNumber';
 import Link from 'next/link';
@@ -13,7 +13,7 @@ const StakingNavButton: FC = () => {
   const { t } = useTranslation();
   const { totalAssets, rewards } = useStakeEXA();
   const exaPrice = useEXAPrice();
-  const { accountData } = useAccountData();
+  const { data: accountData } = usePreviewerExactly();
 
   const rewardsAPR = useMemo(() => {
     return calculateStakingRewardsAPR(totalAssets, rewards, accountData, exaPrice);

@@ -5,7 +5,7 @@ import { formatUnits, parseUnits } from 'viem';
 
 import ModalInfo, { FromTo, Variant } from 'components/common/modal/ModalInfo';
 import type { Operation } from 'types/Operation';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import { toPercentage } from 'utils/utils';
 
 type Props = {
@@ -17,7 +17,8 @@ type Props = {
 
 function ModalInfoFloatingUtilizationRate({ qty, symbol, operation, variant = 'column' }: Props) {
   const { t } = useTranslation();
-  const { marketAccount } = useAccountData(symbol);
+  const { data } = usePreviewerExactly();
+  const marketAccount = data?.find((market) => market.assetSymbol === symbol);
 
   const [from, to] = useMemo(() => {
     if (!marketAccount) return [undefined, undefined, undefined, undefined];

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePublicClient } from 'wagmi';
 import { type Address, erc20Abi, erc4626Abi } from 'viem';
 import { MAX_UINT256, WAD } from '@exactly/lib';
-import useAccountData from './useAccountData';
+import usePreviewerExactly from './usePreviewerExactly';
 import useAssets from './useAssets';
 import { debtManagerAddress, installmentsRouterAddress, marketEthRouterAddress } from 'generated/wagmi';
 import { defaultChain } from 'utils/client';
@@ -41,7 +41,7 @@ type AllowanceDescriptor = {
 export const useAllowances = (): AllowancesState => {
   const [allowances, setAllowances] = useState<Allowance[]>();
   const [loading, setLoading] = useState(true);
-  const { getMarketAccount } = useAccountData();
+  const { data } = usePreviewerExactly();
   const { account: walletAddress } = useReadOnly();
   const client = usePublicClient({ chainId: defaultChain.id });
   const assetSymbols = useAssets();
@@ -102,7 +102,7 @@ export const useAllowances = (): AllowancesState => {
   const descriptorToAllowance = useCallback(
     async (descriptor: AllowanceDescriptor, owner: Address) => {
       if (!client) return;
-      const marketAccount = getMarketAccount(descriptor.symbol);
+      const marketAccount = data?.find((market) => market.assetSymbol === descriptor.symbol);
       if (!marketAccount) return;
       const { asset, market, usdPrice, decimals } = marketAccount;
       let spenderAddress, spenderName, token, symbol, allowanceUSD;
@@ -164,7 +164,7 @@ export const useAllowances = (): AllowancesState => {
         allowanceUSD: unlimited ? MAX_UINT256 : allowanceUSD,
       };
     },
-    [client, getMarketAccount],
+    [client, data],
   );
 
   const update = useCallback(async () => {

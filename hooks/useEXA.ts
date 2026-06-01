@@ -1,12 +1,12 @@
 import { useMemo } from 'react';
 import { WAD } from '@exactly/lib';
 
-import useAccountData from './useAccountData';
+import usePreviewerExactly from './usePreviewerExactly';
 import usePrices from './usePrices';
 import { NATIVE_TOKEN_ADDRESS } from 'types/Bridge';
 
 export const useEXAPrice = () => {
-  const { accountData } = useAccountData();
+  const { data: accountData } = usePreviewerExactly();
 
   return useMemo(() => {
     if (!accountData) return 0n;

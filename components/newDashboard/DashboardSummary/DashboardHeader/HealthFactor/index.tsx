@@ -4,13 +4,13 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { useTranslation } from 'react-i18next';
 import useHealthFactor from 'hooks/useHealthFactor';
 import parseHealthFactor from 'utils/parseHealthFactor';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
 const HealthFactor = () => {
   const { t } = useTranslation();
   const { palette } = useTheme();
-  const { isFetching } = useAccountData();
+  const { isFetching } = usePreviewerExactly();
   const hf = useHealthFactor();
   const healthFactor = useMemo(() => (hf ? parseHealthFactor(hf.debt, hf.collateral) : undefined), [hf]);
 

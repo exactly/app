@@ -1,10 +1,10 @@
 import { Hex } from 'viem';
-import useAccountData from './useAccountData';
+import usePreviewerExactly from './usePreviewerExactly';
 import { useMemo } from 'react';
 import { NATIVE_TOKEN_ADDRESS } from 'types/Bridge';
 
 const usePrices = (): Record<Hex, bigint> => {
-  const { accountData } = useAccountData();
+  const { data: accountData } = usePreviewerExactly();
 
   return useMemo(() => {
     if (!accountData) return {};

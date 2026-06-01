@@ -4,7 +4,7 @@ import { WAD } from '@exactly/lib';
 
 import ItemInfo, { ItemInfoProps } from 'components/common/ItemInfo';
 import formatNumber from 'utils/formatNumber';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import ExplorerMenu from './ExplorerMenu';
 import { Trans, useTranslation } from 'react-i18next';
 import DropdownMenu from 'components/DropdownMenu';
@@ -45,7 +45,8 @@ type Props = {
 
 const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
   const { t } = useTranslation();
-  const { marketAccount } = useAccountData(symbol);
+  const { data } = usePreviewerExactly();
+  const marketAccount = data?.find((market) => market.assetSymbol === symbol);
   const options = useAssets();
   const { push, query } = useRouter();
   const globalUtilization = useGlobalUtilization(symbol);

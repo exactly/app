@@ -2,14 +2,15 @@ import { useMemo } from 'react';
 import { parseEther } from 'viem';
 import { floatingRate } from '@exactly/lib';
 
-import useAccountData from './useAccountData';
+import usePreviewerExactly from './usePreviewerExactly';
 import useIRM from './useIRM';
 
 export const MAX = 10n ** 18n;
 export const INTERVAL = parseEther('0.005');
 
 export function useCurrentUtilizationRate(type: 'floating' | 'fixed', symbol: string) {
-  const { marketAccount } = useAccountData(symbol);
+  const { data } = usePreviewerExactly();
+  const marketAccount = data?.find((market) => market.assetSymbol === symbol);
 
   return useMemo(() => {
     if (!marketAccount) return undefined;

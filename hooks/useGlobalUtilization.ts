@@ -1,8 +1,8 @@
 import { globalUtilization } from '@exactly/lib';
-import useAccountData from './useAccountData';
+import usePreviewerExactly from './usePreviewerExactly';
 
 export default (symbol: string) => {
-  const { marketAccount } = useAccountData(symbol);
+  const marketAccount = usePreviewerExactly().data?.find((market) => market.assetSymbol === symbol);
   if (!marketAccount) return undefined;
 
   const { totalFloatingDepositAssets, totalFloatingBorrowAssets, floatingBackupBorrowed } = marketAccount;

@@ -1,6 +1,6 @@
 import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import { useEXAPrice } from 'hooks/useEXA';
 import { WAD } from '@exactly/lib';
 import getVouchersPrice from 'utils/getVouchersPrice';
@@ -79,7 +79,7 @@ export const StakeEXAProvider: FC<PropsWithChildren> = ({ children }) => {
     query: { enabled: stakingPreviewerChainId !== undefined, staleTime: 5_000 },
   });
 
-  const { accountData } = useAccountData();
+  const { data: accountData } = usePreviewerExactly();
   const exaPrice = useEXAPrice();
 
   const [state, setState] = useState<

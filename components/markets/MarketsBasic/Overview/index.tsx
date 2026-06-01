@@ -1,6 +1,6 @@
 import { Box, Skeleton, Typography, useTheme } from '@mui/material';
 import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasicContext';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import Image from 'next/image';
 import React, { FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -22,7 +22,7 @@ type Props = {
 const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
-  const { marketAccount } = useAccountData(symbol);
+  const marketAccount = usePreviewerExactly().data?.find((market) => market.assetSymbol === symbol);
   const rate = useMemo(
     () => (operation === 'borrow' ? option.borrowAPR : option.depositAPR) || 0,
     [operation, option.borrowAPR, option.depositAPR],

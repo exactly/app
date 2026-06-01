@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import { parseUnits } from 'viem';
 import { fixedUtilization, globalUtilization, splitInstallments } from '@exactly/lib';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import { INTERVAL } from 'utils/utils';
 import useIRM from 'hooks/useIRM';
 import { Operation } from 'types/Operation';
@@ -19,7 +19,8 @@ export default function useInstallmentsData({
   symbol: string;
   installments: number;
 }) {
-  const { marketAccount } = useAccountData(symbol);
+  const { data } = usePreviewerExactly();
+  const marketAccount = data?.find((market) => market.assetSymbol === symbol);
   const irmParameters = useIRM(symbol);
 
   const getDetails = useCallback(

@@ -16,8 +16,10 @@ import {
   legacyPreviewerAddress,
   previewerAddress,
 } from 'generated/wagmi';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import useBalance from 'hooks/useBalance';
+import { useQueryClient } from '@tanstack/react-query';
+import { getContractEventsQueryKey } from '@wagmi/core/query';
 import useHandleOperationError from 'hooks/useHandleOperationError';
 import { useTranslation } from 'react-i18next';
 import { formatUnits, parseUnits, type Hex } from 'viem';
@@ -70,7 +72,9 @@ export default (): DepositAtMaturity => {
     setErrorButton,
   } = useOperationContext();
 
-  const { marketAccount, refreshAccountData } = useAccountData(symbol);
+  const { data, refetch } = usePreviewerExactly();
+  const marketAccount = data?.find((market) => market.assetSymbol === symbol);
+  const queryClient = useQueryClient();
   const handleOperationError = useHandleOperationError();
   const [gtMaxYield, setGtMaxYield] = useState(false);
   const walletBalance = useBalance(symbol, marketAccount?.asset);
@@ -237,9 +241,19 @@ export default (): DepositAtMaturity => {
 
   useEffect(() => {
     if (!callsStatus.data?.receipts?.length) return;
-    void refreshAccountData();
+    void refetch();
+    if (walletAddress) {
+      void queryClient.invalidateQueries({
+        queryKey: getContractEventsQueryKey({
+          abi: marketAbi,
+          eventName: 'DepositAtMaturity',
+          args: { owner: walletAddress },
+          chainId: defaultChain.id,
+        }),
+      });
+    }
     if (marketAccount?.assetSymbol !== 'WETH') void refetchAllowance();
-  }, [callsStatus.data?.receipts, marketAccount?.assetSymbol, refetchAllowance, refreshAccountData]);
+  }, [callsStatus.data?.receipts, marketAccount?.assetSymbol, refetchAllowance, refetch, queryClient, walletAddress]);
 
   useEffect(() => {
     if (!callsStatus.data || !marketAccount || !txHash) return;

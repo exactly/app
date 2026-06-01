@@ -4,7 +4,7 @@ import { type Address as AddressType, getAddress } from 'viem';
 import { mainnet, optimism } from 'viem/chains';
 import { OperationContextProvider, useOperationContext } from '../../contexts/OperationContext';
 import { SocketSwapProvider, useSocketSwap } from '../../contexts/SocketSwapContext';
-import useAccountData from '../../hooks/useAccountData';
+import usePreviewerExactly from '../../hooks/usePreviewerExactly';
 import i18n from '../../i18n';
 import Welcome from './Welcome';
 import Apps from './Apps';
@@ -170,7 +170,8 @@ const Credit = () => {
   const [appIndex, setAppIndex] = useState<number>(0);
   const { isConnected } = useConnection();
   const { symbol, qty } = useOperationContext();
-  const { marketAccount, refreshAccountData } = useAccountData(symbol);
+  const { data, refetch } = usePreviewerExactly();
+  const marketAccount = data?.find((market) => market.assetSymbol === symbol);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const {
@@ -192,7 +193,7 @@ const Credit = () => {
   }, [marketAccount, qty, setFromAssetAddress, setQtyIn]);
 
   const handleConnectedNextStep = useCallback(async () => {
-    const accountData = await refreshAccountData(0);
+    const { data: accountData } = await refetch();
     if (!accountData) return;
     const hasDeposits = accountData.some(({ floatingDepositAssets }) => floatingDepositAssets > 0n);
     const hasCollateral = accountData.some(
@@ -205,10 +206,10 @@ const Credit = () => {
     } else {
       setStep(Step.DEPOSIT);
     }
-  }, [refreshAccountData]);
+  }, [refetch]);
 
   const handleNextStep = useCallback(async () => {
-    const accountData_ = await refreshAccountData(0);
+    const { data: accountData_ } = await refetch();
     const hasCollateral = accountData_?.some(
       ({ floatingDepositAssets, isCollateral }) => floatingDepositAssets > 0n && isCollateral,
     );
@@ -241,7 +242,7 @@ const Credit = () => {
         setStep(Step.STATUS);
         break;
     }
-  }, [direct, handleConnectedNextStep, isConnected, refreshAccountData, step]);
+  }, [direct, handleConnectedNextStep, isConnected, refetch, step]);
 
   const handleAppChange = useCallback(
     (index: number) => {

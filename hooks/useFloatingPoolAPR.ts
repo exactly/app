@@ -3,7 +3,7 @@ import { parseUnits } from 'viem';
 import { WAD, floatingRate, floatingUtilization, globalUtilization } from '@exactly/lib';
 
 import type { Operation } from 'types/Operation';
-import useAccountData from './useAccountData';
+import usePreviewerExactly from './usePreviewerExactly';
 import useIRM from './useIRM';
 import useFloatingDepositRates from './useFloatingDepositRates';
 
@@ -18,7 +18,8 @@ export default (
   qty?: string,
   operation?: Extract<Operation, 'deposit' | 'borrow'>,
 ): FloatingPoolAPR => {
-  const { marketAccount } = useAccountData(symbol);
+  const { data } = usePreviewerExactly();
+  const marketAccount = data?.find((market) => market.assetSymbol === symbol);
   const { data: depositAPRs, isLoading } = useFloatingDepositRates(operation !== 'borrow');
 
   const irm = useIRM(symbol);

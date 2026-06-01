@@ -2,12 +2,12 @@ import { useCallback, useMemo } from 'react';
 import { FloatingPoolItemData } from 'types/FloatingPoolItemData';
 import useAssets from './useAssets';
 import useFixedPools from './useFixedPools';
-import useAccountData, { MarketAccount } from './useAccountData';
+import usePreviewerExactly, { type MarketAccount } from './usePreviewerExactly';
 import { formatUnits } from 'viem';
 import useFloatingDepositRates from './useFloatingDepositRates';
 
 export default function useDashboard(type: 'deposit' | 'borrow') {
-  const { accountData, getMarketAccount } = useAccountData();
+  const { data: accountData } = usePreviewerExactly();
   const orderAssets = useAssets();
   const { deposits, borrows } = useFixedPools();
   const isDeposit = type === 'deposit';
@@ -20,12 +20,12 @@ export default function useDashboard(type: 'deposit' | 'borrow') {
 
   const getValueInUSD = useCallback(
     (symbol: string, amount: bigint): number => {
-      const { decimals, usdPrice } = getMarketAccount(symbol) ?? {};
+      const { decimals, usdPrice } = accountData?.find((market) => market.assetSymbol === symbol) ?? {};
       if (!decimals || !usdPrice) return 0;
       const usd = (amount * usdPrice) / 10n ** BigInt(decimals);
       return parseFloat(formatUnits(usd, 18));
     },
-    [getMarketAccount],
+    [accountData],
   );
 
   const floatingData = useMemo<FloatingPoolItemData[] | undefined>(() => {

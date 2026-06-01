@@ -7,7 +7,9 @@ import formatNumber from 'utils/formatNumber';
 
 import useBalance from 'hooks/useBalance';
 import { useOperationContext } from 'contexts/OperationContext';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
+import { useQueryClient } from '@tanstack/react-query';
+import { getContractEventsQueryKey } from '@wagmi/core/query';
 import { Grid } from '@mui/material';
 import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
 import AssetInput from 'components/OperationsModal/AssetInput';
@@ -81,7 +83,9 @@ const RepayAtMaturity: FC = () => {
   const handleOperationError = useHandleOperationError();
   const [penaltyAssets, setPenaltyAssets] = useState(0n);
   const [positionAssetsAmount, setPositionAssetsAmount] = useState(0n);
-  const { marketAccount, refreshAccountData } = useAccountData(symbol);
+  const { data, refetch } = usePreviewerExactly();
+  const marketAccount = data?.find((market) => market.assetSymbol === symbol);
+  const queryClient = useQueryClient();
   const walletBalance = useBalance(symbol, marketAccount?.asset);
   const { mutateAsync: sendCalls, isPending: sendCallsPending } = useSendCalls();
   const [callId, setCallId] = useState<string>();
@@ -260,9 +264,19 @@ const RepayAtMaturity: FC = () => {
 
   useEffect(() => {
     if (!callsStatus.data?.receipts?.length) return;
-    void refreshAccountData();
+    void refetch();
+    if (walletAddress) {
+      void queryClient.invalidateQueries({
+        queryKey: getContractEventsQueryKey({
+          abi: marketAbi,
+          eventName: 'RepayAtMaturity',
+          args: { borrower: walletAddress },
+          chainId: defaultChain.id,
+        }),
+      });
+    }
     if (marketAccount?.assetSymbol !== 'WETH') void refetchAllowance();
-  }, [callsStatus.data?.receipts, marketAccount?.assetSymbol, refetchAllowance, refreshAccountData]);
+  }, [callsStatus.data?.receipts, marketAccount?.assetSymbol, refetchAllowance, refetch, queryClient, walletAddress]);
 
   const onMax = useCallback(() => {
     if (!marketAccount) return;

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Box, Button, Typography } from '@mui/material';
 import FloatingPoolDashboardTable from '../dashboard/DashboardContent/FloatingPoolDashboard/FloatingPoolDashboardTable';
 import useDashboard from '../../hooks/useDashboard';
-import useAccountData from '../../hooks/useAccountData';
+import usePreviewerExactly from '../../hooks/usePreviewerExactly';
 
 type Props = {
   onNextStep: () => void;
@@ -12,11 +12,11 @@ type Props = {
 const Collateral = ({ onNextStep }: Props) => {
   const { t } = useTranslation();
   const { floatingRows } = useDashboard('deposit');
-  const { getMarketAccount } = useAccountData();
+  const { data } = usePreviewerExactly();
   const deposits = useMemo(() => floatingRows.filter(({ valueUSD }) => valueUSD !== 0), [floatingRows]);
   const hasCollateral = useMemo(
-    () => deposits.some((row) => getMarketAccount(row.symbol)?.isCollateral),
-    [deposits, getMarketAccount],
+    () => deposits.some((row) => data?.find((market) => market.assetSymbol === row.symbol)?.isCollateral),
+    [deposits, data],
   );
   return (
     <Box display="flex" flexDirection="column" gap={6}>

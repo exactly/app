@@ -1,14 +1,15 @@
 import { useMemo } from 'react';
 import { formatUnits, type Address } from 'viem';
 import { useBalance } from 'wagmi';
-import useAccountData from './useAccountData';
+import usePreviewerExactly from './usePreviewerExactly';
 import { defaultChain } from 'utils/client';
 import useReadOnly from 'hooks/useReadOnly';
 import { useReadErc20BalanceOf } from 'generated/wagmi';
 
 export default (symbol?: string, asset?: Address, useERC20 = false, chainId?: number): string | undefined => {
   const { account: walletAddress } = useReadOnly();
-  const { marketAccount } = useAccountData(symbol ?? '');
+  const { data } = usePreviewerExactly();
+  const marketAccount = data?.find((market) => market.assetSymbol === symbol);
   const shouldUseNativeBalance = symbol === 'WETH' && !useERC20;
 
   const { data: nativeBalance, error: nativeError } = useBalance({

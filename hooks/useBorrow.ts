@@ -12,7 +12,7 @@ import {
   useSimulateMarketBorrow,
   useSimulateMarketEthRouterBorrow,
 } from 'generated/wagmi';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import useHandleOperationError from 'hooks/useHandleOperationError';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 import useHealthFactor from './useHealthFactor';
@@ -49,7 +49,8 @@ export default (): Borrow => {
     setIsLoading: setIsLoadingOp,
   } = useOperationContext();
 
-  const { marketAccount, accountData, refreshAccountData } = useAccountData(symbol);
+  const { data: accountData, refetch } = usePreviewerExactly();
+  const marketAccount = accountData?.find((market) => market.assetSymbol === symbol);
   const handleOperationError = useHandleOperationError();
   const healthFactor = useHealthFactor();
   const { mutateAsync: sendCalls, isPending: sendCallsPending } = useSendCalls();
@@ -201,9 +202,9 @@ export default (): Borrow => {
 
   useEffect(() => {
     if (!callsStatus.data?.receipts?.length) return;
-    void refreshAccountData();
+    void refetch();
     if (marketAccount?.assetSymbol === 'WETH') void refetchMarketAllowance();
-  }, [callsStatus.data?.receipts, marketAccount?.assetSymbol, refetchMarketAllowance, refreshAccountData]);
+  }, [callsStatus.data?.receipts, marketAccount?.assetSymbol, refetchMarketAllowance, refetch]);
 
   useEffect(() => {
     if (!callsStatus.data || !marketAccount || !txHash) return;

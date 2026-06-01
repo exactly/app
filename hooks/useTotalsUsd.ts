@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import { parseUnits } from 'viem';
-import useAccountData from './useAccountData';
+import usePreviewerExactly from './usePreviewerExactly';
 
 export default () => {
-  const { accountData } = useAccountData();
+  const { data: accountData } = usePreviewerExactly();
 
   const { totalDepositedUSD, totalBorrowedUSD } = useMemo<{
     totalDepositedUSD: bigint;

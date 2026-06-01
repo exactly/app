@@ -11,7 +11,7 @@ import useDashboard from 'hooks/useDashboard';
 import formatNumber from 'utils/formatNumber';
 import parseTimestamp from 'utils/parseTimestamp';
 import SwitchCollateral from '../FloatingPoolDashboard/FloatingPoolDashboardTable/SwitchCollateral';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import { useTranslation } from 'react-i18next';
 import useReadOnly from 'hooks/useReadOnly';
 import { calculateAPR } from 'utils/calculateAPR';
@@ -26,7 +26,7 @@ type Props = {
 
 const DashboardMobile: FC<Props> = ({ type }) => {
   const { t } = useTranslation();
-  const { accountData, getMarketAccount } = useAccountData();
+  const { data: accountData } = usePreviewerExactly();
   const { handleActionClick } = useActionButton();
   const { startDebtManager, isRolloverDisabled } = useStartDebtManagerButton();
   const { floatingRows, fixedRows } = useDashboard(type);
@@ -47,7 +47,10 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                 {(depositedAmount !== undefined &&
                   borrowedAmount !== undefined &&
                   `${formatNumber(
-                    formatUnits(isDeposit ? depositedAmount : borrowedAmount, getMarketAccount(symbol)?.decimals ?? 18),
+                    formatUnits(
+                      isDeposit ? depositedAmount : borrowedAmount,
+                      accountData?.find((m) => m.assetSymbol === symbol)?.decimals ?? 18,
+                    ),
                     symbol,
                   )}`) || <Skeleton width={40} />}
               </FlexItem>
@@ -145,7 +148,7 @@ const DashboardMobile: FC<Props> = ({ type }) => {
         </Box>
       ) : (
         fixedRows.map(({ symbol, previewValue, maturity, decimals, market }) => {
-          const usdPrice = getMarketAccount(symbol)?.usdPrice;
+          const usdPrice = accountData?.find((m) => m.assetSymbol === symbol)?.usdPrice;
           return (
             <MobileAssetCard key={`dashboard_fixed_mobile_${symbol}_${type}_${maturity}`} symbol={symbol}>
               <>
@@ -224,9 +227,8 @@ const FixedAPR: FC<{
   market: Address;
   decimals: number;
   symbol: string;
-}> = ({ type, maturityDate, market, decimals, symbol }) => {
+}> = ({ type, maturityDate, market, decimals }) => {
   const { account } = useReadOnly();
-  const { lastSync } = useAccountData(symbol);
   const fromBlock = useMemo(
     () =>
       (marketBlocks[defaultChain.id as keyof typeof marketBlocks] as Record<string, bigint> | undefined)?.[
@@ -247,7 +249,6 @@ const FixedAPR: FC<{
     fromBlock,
     toBlock: 'latest',
     chainId: defaultChain.id,
-    scopeKey: lastSync?.toString(),
     query: {
       enabled: type === 'deposit' && Boolean(account),
       select: (logs) => logs.map(({ args, blockTimestamp }) => ({ ...args, blockTimestamp })),
@@ -266,7 +267,6 @@ const FixedAPR: FC<{
     fromBlock,
     toBlock: 'latest',
     chainId: defaultChain.id,
-    scopeKey: lastSync?.toString(),
     query: {
       enabled: type === 'borrow' && Boolean(account),
       select: (logs) => logs.map(({ args, blockTimestamp }) => ({ ...args, blockTimestamp })),

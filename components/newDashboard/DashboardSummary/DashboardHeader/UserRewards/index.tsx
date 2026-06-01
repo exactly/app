@@ -9,7 +9,7 @@ import formatNumber from 'utils/formatNumber';
 import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
 import useRewards from 'hooks/useRewards';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import useRouter from 'hooks/useRouter';
 import { track } from 'utils/mixpanel';
 
@@ -46,7 +46,7 @@ const Reward: FC<RewardProps> = ({ assetSymbol, amount, amountInUSD, xsDirection
 
 const UserRewards = () => {
   const { t } = useTranslation();
-  const { isFetching } = useAccountData();
+  const { isFetching } = usePreviewerExactly();
   const { rewards: rs, rates } = useRewards();
   const { query } = useRouter();
 

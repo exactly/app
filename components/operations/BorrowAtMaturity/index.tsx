@@ -14,7 +14,7 @@ import ModalAdvancedSettings from 'components/common/modal/ModalAdvancedSettings
 import ModalInfoEditableSlippage from 'components/OperationsModal/Info/ModalInfoEditableSlippage';
 import ModalAlert from 'components/common/modal/ModalAlert';
 import ModalSubmit from 'components/OperationsModal/ModalSubmit';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import useBorrowAtMaturity from 'hooks/useBorrowAtMaturity';
 import ModalRewards from 'components/OperationsModal/ModalRewards';
 import ModalPenaltyRate from 'components/OperationsModal/ModalPenaltyRate';
@@ -54,7 +54,7 @@ const BorrowAtMaturity: FC<PropsWithChildren<{ onSuccess?: (hash?: Hex) => void 
     txHash: borrowInInstallmentsTxHash,
   } = useBorrowInInstallments();
 
-  const { marketAccount } = useAccountData(symbol);
+  const marketAccount = usePreviewerExactly().data?.find((market) => market.assetSymbol === symbol);
   const container = useRef<HTMLDivElement>(null);
   const breakdownSheetRef = useRef<HTMLDivElement>(null);
   const [breakdownSheetOpen, setBreakdownSheetOpen] = useState(false);

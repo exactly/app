@@ -1,12 +1,12 @@
 import { useMemo } from 'react';
 import { WAD } from '@exactly/lib';
 
-import useAccountData from './useAccountData';
+import usePreviewerExactly from './usePreviewerExactly';
 import useTotalsUsd from './useTotalsUsd';
 import { AssetPosition } from 'components/newDashboard/DashboardSummary/DashboardOverview/DualProgressBarPosition';
 
 export default function useDashboardOverview(type: 'deposit' | 'borrow') {
-  const { accountData } = useAccountData();
+  const { data: accountData } = usePreviewerExactly();
   const { totalDepositedUSD, totalBorrowedUSD } = useTotalsUsd();
 
   const totalUSD = useMemo(

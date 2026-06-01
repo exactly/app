@@ -11,7 +11,7 @@ import {
   useSimulateMarketDeposit,
   useSimulateMarketEthRouterDeposit,
 } from 'generated/wagmi';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import useBalance from 'hooks/useBalance';
 import useHandleOperationError from 'hooks/useHandleOperationError';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -49,7 +49,8 @@ export default (): Deposit => {
   } = useOperationContext();
 
   const handleOperationError = useHandleOperationError();
-  const { marketAccount, refreshAccountData } = useAccountData(symbol);
+  const { data, refetch } = usePreviewerExactly();
+  const marketAccount = data?.find((market) => market.assetSymbol === symbol);
   const walletBalance = useBalance(symbol, marketAccount?.asset);
   const { mutateAsync: sendCalls, isPending: sendCallsPending } = useSendCalls();
   const [callId, setCallId] = useState<string>();
@@ -162,9 +163,9 @@ export default (): Deposit => {
 
   useEffect(() => {
     if (!callsStatus.data?.receipts?.length) return;
-    void refreshAccountData();
+    void refetch();
     if (marketAccount?.assetSymbol !== 'WETH') void refetchAllowance();
-  }, [callsStatus.data?.receipts, marketAccount?.assetSymbol, refetchAllowance, refreshAccountData]);
+  }, [callsStatus.data?.receipts, marketAccount?.assetSymbol, refetchAllowance, refetch]);
 
   useEffect(() => {
     if (!callsStatus.data || !marketAccount || !txHash) return;

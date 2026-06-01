@@ -18,7 +18,9 @@ import { track } from 'utils/mixpanel';
 import { WAD } from '@exactly/lib';
 import { defaultChain } from 'utils/client';
 import useReadOnly from 'hooks/useReadOnly';
-import useAccountData from './useAccountData';
+import usePreviewerExactly from './usePreviewerExactly';
+import { useQueryClient } from '@tanstack/react-query';
+import { getContractEventsQueryKey } from '@wagmi/core/query';
 
 type Permit = {
   value: bigint;
@@ -30,7 +32,9 @@ type Permit = {
 
 export default function useBorrowInInstallments() {
   const { installmentsDetails, installments, date, symbol, slippage, receiver, setErrorData } = useOperationContext();
-  const { marketAccount, refreshAccountData } = useAccountData(symbol);
+  const { data, refetch } = usePreviewerExactly();
+  const marketAccount = data?.find((market) => market.assetSymbol === symbol);
+  const queryClient = useQueryClient();
   const { account: walletAddress } = useReadOnly();
   const [permit, setPermit] = useState<Permit>();
   const [signingPermit, setSigningPermit] = useState(false);
@@ -107,9 +111,19 @@ export default function useBorrowInInstallments() {
 
   useEffect(() => {
     if (!callsStatus.data?.receipts?.length) return;
-    void refreshAccountData();
+    void refetch();
+    if (walletAddress) {
+      void queryClient.invalidateQueries({
+        queryKey: getContractEventsQueryKey({
+          abi: marketAbi,
+          eventName: 'BorrowAtMaturity',
+          args: { borrower: walletAddress },
+          chainId: defaultChain.id,
+        }),
+      });
+    }
     void allowance.refetch();
-  }, [allowance, callsStatus.data?.receipts, refreshAccountData]);
+  }, [allowance, callsStatus.data?.receipts, refetch, queryClient, walletAddress]);
 
   useEffect(() => {
     const error = approveSimulation.error || (isBorrowETH ? borrowETHSimulation.error : borrowSimulation.error);

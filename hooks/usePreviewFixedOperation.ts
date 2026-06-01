@@ -6,7 +6,7 @@ import { WAD } from '@exactly/lib';
 import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasicContext';
 import { useOperationContext } from 'contexts/OperationContext';
 import dayjs from 'dayjs';
-import useAccountData from './useAccountData';
+import usePreviewerExactly from './usePreviewerExactly';
 import useDelayedEffect from './useDelayedEffect';
 import useMaturityPools from './useMaturityPools';
 import {
@@ -36,7 +36,8 @@ const previewerChainId = Object.keys(previewerAddress)
 export default (operation: MarketsBasicOperation): PreviewFixedOperation => {
   const { symbol, qty } = useOperationContext();
   const maturityPools = useMaturityPools(symbol);
-  const { marketAccount } = useAccountData(symbol);
+  const { data } = usePreviewerExactly();
+  const marketAccount = data?.find((market) => market.assetSymbol === symbol);
   const [options, setOptions] = useState<MarketsBasicOption[]>(Array(maturityPools.length || MIN_OPTIONS).fill({}));
   const [loading, setLoading] = useState<boolean>(true);
 

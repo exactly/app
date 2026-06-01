@@ -4,7 +4,9 @@ import { WAD } from '@exactly/lib';
 import ModalGif from 'components/OperationsModal/ModalGif';
 
 import { useOperationContext } from 'contexts/OperationContext';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
+import { useQueryClient } from '@tanstack/react-query';
+import { getContractEventsQueryKey } from '@wagmi/core/query';
 import { Grid } from '@mui/material';
 import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
 import AssetInput from 'components/OperationsModal/AssetInput';
@@ -68,7 +70,9 @@ const WithdrawAtMaturity: FC = () => {
   } = useOperationContext();
 
   const handleOperationError = useHandleOperationError();
-  const { marketAccount, refreshAccountData } = useAccountData(symbol);
+  const { data, refetch } = usePreviewerExactly();
+  const marketAccount = data?.find((market) => market.assetSymbol === symbol);
+  const queryClient = useQueryClient();
   const { mutateAsync: sendCalls, isPending: sendCallsPending } = useSendCalls();
   const [callId, setCallId] = React.useState<string>();
   const amount = useMemo(() => {
@@ -264,9 +268,26 @@ const WithdrawAtMaturity: FC = () => {
 
   useEffect(() => {
     if (!callsStatus.data?.receipts?.length) return;
-    void refreshAccountData();
+    void refetch();
+    if (walletAddress) {
+      void queryClient.invalidateQueries({
+        queryKey: getContractEventsQueryKey({
+          abi: marketAbi,
+          eventName: 'WithdrawAtMaturity',
+          args: { owner: walletAddress },
+          chainId: defaultChain.id,
+        }),
+      });
+    }
     if (marketAccount?.assetSymbol === 'WETH') void refetchMarketAllowance();
-  }, [callsStatus.data?.receipts, marketAccount?.assetSymbol, refetchMarketAllowance, refreshAccountData]);
+  }, [
+    callsStatus.data?.receipts,
+    marketAccount?.assetSymbol,
+    refetchMarketAllowance,
+    refetch,
+    queryClient,
+    walletAddress,
+  ]);
 
   useEffect(() => {
     if (!qty || amount === undefined) return;

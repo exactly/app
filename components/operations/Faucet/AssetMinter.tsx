@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
 import { LoadingButton } from '@mui/lab';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import { erc20Abi } from 'generated/wagmi';
 import { parseUnits } from 'viem';
 import { t } from 'i18next';
@@ -12,9 +12,9 @@ type Props = {
 };
 
 const AssetMinter = ({ symbol }: Props) => {
-  const { getMarketAccount, refreshAccountData } = useAccountData();
+  const { data: accountData, refetch } = usePreviewerExactly();
 
-  const marketAccount = getMarketAccount(symbol);
+  const marketAccount = accountData?.find((market) => market.assetSymbol === symbol);
   const { account: walletAddress } = useReadOnly();
   const [loading, setLoading] = useState<string | undefined>(undefined);
 
@@ -33,9 +33,9 @@ const AssetMinter = ({ symbol }: Props) => {
 
   useEffect(() => {
     if (!receipt && !receiptError) return;
-    void refreshAccountData();
+    void refetch();
     setLoading(undefined);
-  }, [receipt, receiptError, refreshAccountData]);
+  }, [receipt, receiptError, refetch]);
 
   const mint = useCallback(
     (s: string) => {

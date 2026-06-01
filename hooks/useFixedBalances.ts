@@ -1,9 +1,10 @@
 import { useMemo } from 'react';
-import useAccountData from './useAccountData';
+import usePreviewerExactly from './usePreviewerExactly';
 import { WAD } from '@exactly/lib';
 
 export function useFixedBalances(symbol: string) {
-  const { marketAccount } = useAccountData(symbol);
+  const { data } = usePreviewerExactly();
+  const marketAccount = data?.find((market) => market.assetSymbol === symbol);
 
   const { fixedDeposits, fixedBorrows } = useMemo(() => {
     if (!marketAccount) return {};

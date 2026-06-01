@@ -13,7 +13,7 @@ import { globals } from 'styles/theme';
 import useAssets from 'hooks/useAssets';
 import PoolMobile from './poolMobile';
 import { TableHeader } from 'components/common/TableHeadCell';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import useRewards from 'hooks/useRewards';
 import { WEEK } from 'utils/utils';
 import useFloatingDepositRates from 'hooks/useFloatingDepositRates';
@@ -30,7 +30,7 @@ const sortByDefault = (defaultRows: TableRow[], toSort: TableRow[]) =>
 
 const MarketTables: FC = () => {
   const { t } = useTranslation();
-  const { accountData } = useAccountData();
+  const { data: accountData } = usePreviewerExactly();
   const { data: floatingDepositAPRs } = useFloatingDepositRates();
   const { rates } = useRewards();
   const assets = useAssets();

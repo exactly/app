@@ -12,7 +12,7 @@ import ModalAdvancedSettings from 'components/common/modal/ModalAdvancedSettings
 import ModalInfoFloatingUtilizationRate from 'components/OperationsModal/Info/ModalInfoFloatingUtilizationRate';
 import ModalAlert from 'components/common/modal/ModalAlert';
 import ModalSubmit from 'components/OperationsModal/ModalSubmit';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import useBorrow from 'hooks/useBorrow';
 import ModalRewards from 'components/OperationsModal/ModalRewards';
 import ModalInfoAPR from 'components/OperationsModal/Info/ModalInfoAPR';
@@ -36,7 +36,7 @@ const Borrow: FC = () => {
     txStatus,
     txHash,
   } = useBorrow();
-  const { marketAccount } = useAccountData(symbol);
+  const marketAccount = usePreviewerExactly().data?.find((market) => market.assetSymbol === symbol);
 
   if (txStatus) return <ModalGif status={txStatus} hash={txHash} tryAgain={borrow} />;
 

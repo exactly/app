@@ -4,7 +4,7 @@ import Box from '@mui/material/Box';
 import { useTranslation } from 'react-i18next';
 
 import useActionButton from 'hooks/useActionButton';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import { track } from 'utils/mixpanel';
 
 type Props = {
@@ -13,7 +13,7 @@ type Props = {
 
 const OrderAction: FC<Props> = ({ symbol }) => {
   const { t } = useTranslation();
-  const { marketAccount } = useAccountData(symbol);
+  const marketAccount = usePreviewerExactly().data?.find((market) => market.assetSymbol === symbol);
   const { handleActionClick } = useActionButton();
 
   const handleDepositButtonClick = useCallback(

@@ -3,7 +3,7 @@ import { Typography } from '@mui/material';
 import { formatUnits, parseUnits } from 'viem';
 import { WAD } from '@exactly/lib';
 
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import formatNumber from 'utils/formatNumber';
 import { checkPrecision } from 'utils/utils';
 
@@ -13,7 +13,8 @@ type Props = {
 };
 
 function USDValue({ qty, symbol }: Props) {
-  const { marketAccount } = useAccountData(symbol);
+  const { data } = usePreviewerExactly();
+  const marketAccount = data?.find((market) => market.assetSymbol === symbol);
 
   const value = useMemo(() => {
     if (!qty || !marketAccount || !checkPrecision(qty, marketAccount.decimals)) return;

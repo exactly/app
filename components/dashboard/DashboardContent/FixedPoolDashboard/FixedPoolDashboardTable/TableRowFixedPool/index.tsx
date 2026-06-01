@@ -20,7 +20,7 @@ import type { Deposit } from 'types/Deposit';
 import type { WithdrawMP } from 'types/WithdrawMP';
 import type { Borrow } from 'types/Borrow';
 import type { Repay } from 'types/Repay';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import useRouter from 'hooks/useRouter';
 import useReadOnly from 'hooks/useReadOnly';
 import { marketAbi, marketBlocks } from 'generated/wagmi';
@@ -38,7 +38,7 @@ type Props = {
 function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decimals }: Props) {
   const { t } = useTranslation();
   const { query } = useRouter();
-  const { marketAccount, lastSync } = useAccountData(symbol);
+  const marketAccount = usePreviewerExactly().data?.find((m) => m.assetSymbol === symbol);
   const { account } = useReadOnly();
   const [open, setOpen] = useState(false);
   const { handleActionClick } = useActionButton();
@@ -48,7 +48,7 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
     watch: open,
     query: { enabled: open },
   });
-  const scopeKey = `${lastSync ?? ''}-${blockNumber ?? ''}`;
+  const scopeKey = String(blockNumber ?? '');
 
   const fromBlock = useMemo(
     () =>

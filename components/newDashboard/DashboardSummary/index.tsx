@@ -5,10 +5,10 @@ import DashboardTitle from './DashboardTitle';
 import DashboardOverview from './DashboardOverview';
 import Legends from './Legends';
 import useTotalsUsd from 'hooks/useTotalsUsd';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 
 const DashboardSummary = () => {
-  const { accountData } = useAccountData();
+  const { data: accountData } = usePreviewerExactly();
   const { totalBorrowedUSD, totalDepositedUSD } = useTotalsUsd();
 
   const loading = useMemo(() => !accountData, [accountData]);

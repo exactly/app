@@ -16,7 +16,9 @@ import {
   useSimulateMarketBorrowAtMaturity,
   useSimulateMarketEthRouterBorrowAtMaturity,
 } from 'generated/wagmi';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
+import { useQueryClient } from '@tanstack/react-query';
+import { getContractEventsQueryKey } from '@wagmi/core/query';
 import useHandleOperationError from 'hooks/useHandleOperationError';
 import usePoolLiquidity from 'hooks/usePoolLiquidity';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
@@ -72,7 +74,9 @@ export default (): BorrowAtMaturity => {
   } = useOperationContext();
 
   const handleOperationError = useHandleOperationError();
-  const { accountData, marketAccount, refreshAccountData } = useAccountData(symbol);
+  const { data: accountData, refetch } = usePreviewerExactly();
+  const marketAccount = accountData?.find((market) => market.assetSymbol === symbol);
+  const queryClient = useQueryClient();
   const healthFactor = useHealthFactor();
   const poolLiquidity = usePoolLiquidity(symbol);
   const { mutateAsync: sendCalls, isPending: sendCallsPending } = useSendCalls();
@@ -264,9 +268,26 @@ export default (): BorrowAtMaturity => {
 
   useEffect(() => {
     if (!callsStatus.data?.receipts?.length) return;
-    void refreshAccountData();
+    void refetch();
+    if (walletAddress) {
+      void queryClient.invalidateQueries({
+        queryKey: getContractEventsQueryKey({
+          abi: marketAbi,
+          eventName: 'BorrowAtMaturity',
+          args: { borrower: walletAddress },
+          chainId: defaultChain.id,
+        }),
+      });
+    }
     if (marketAccount?.assetSymbol === 'WETH') void refetchMarketAllowance();
-  }, [callsStatus.data?.receipts, marketAccount?.assetSymbol, refetchMarketAllowance, refreshAccountData]);
+  }, [
+    callsStatus.data?.receipts,
+    marketAccount?.assetSymbol,
+    refetchMarketAllowance,
+    refetch,
+    queryClient,
+    walletAddress,
+  ]);
 
   useEffect(() => {
     if (!callsStatus.data || !marketAccount || !txHash) return;

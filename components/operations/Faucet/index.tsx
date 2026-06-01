@@ -8,13 +8,13 @@ import useAssets from 'hooks/useAssets';
 
 import { Box, Button, Divider, Typography } from '@mui/material';
 import formatSymbol from 'utils/formatSymbol';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import AssetMinter from './AssetMinter';
 
 function Faucet() {
   const { t } = useTranslation();
   const { mutateAsync: watchAsset } = useWatchAsset();
-  const { accountData } = useAccountData();
+  const { data: accountData } = usePreviewerExactly();
   const assets = useAssets();
 
   const addTokens = useCallback(async () => {

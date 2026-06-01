@@ -4,7 +4,8 @@ import React, { FC, useEffect, useMemo, useState } from 'react';
 import { toPercentage } from 'utils/utils';
 import numbers from 'config/numbers.json';
 import { LidoResponse } from 'hooks/useStETHNativeAPR';
-import { useAccountDataContext } from 'contexts/AccountDataContext';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
+import { parseEther } from 'viem';
 
 type Props = {
   symbol: string;
@@ -35,7 +36,22 @@ const Rates: FC<Props> = ({
   hideMarket = false,
   rateType = 'floating',
 }) => {
-  const { rates } = useAccountDataContext();
+  const { data } = usePreviewerExactly();
+
+  const rewardRates = useMemo(() => {
+    const marketAccount = data?.find((m) => m.assetSymbol === symbol);
+    if (!marketAccount) return undefined;
+    const min = parseEther('0.00005');
+    return marketAccount.rewardRates
+      .filter(
+        ({ assetSymbol, borrow, floatingDeposit }) => assetSymbol !== '' && (borrow >= min || floatingDeposit >= min),
+      )
+      .map(({ borrow, floatingDeposit, ...reward }) => ({
+        ...reward,
+        floatingDeposit: floatingDeposit < min ? 0n : floatingDeposit,
+        borrow: borrow < min ? 0n : borrow,
+      }));
+  }, [data, symbol]);
 
   const [native, setNative] = useState<number>(0);
 
@@ -54,27 +70,26 @@ const Rates: FC<Props> = ({
   const rewardRate = useMemo(() => {
     return (
       native +
-      (rates && rates[symbol]
-        ? rates[symbol]?.reduce(
+      (rewardRates
+        ? rewardRates.reduce(
             (acc, curr) => acc + Number(type === 'deposit' ? curr.floatingDeposit : curr.borrow) / 1e18,
             0,
           )
         : 0)
     );
-  }, [type, native, rates, symbol]);
+  }, [type, native, rewardRates]);
 
   const _rates = useMemo(() => {
     return (
-      rates &&
-      rates[symbol] &&
-      rates[symbol]
-        ?.map((r) => ({
+      rewardRates &&
+      rewardRates
+        .map((r) => ({
           symbol: r.assetSymbol,
           apr: Number(type === 'deposit' ? r.floatingDeposit : r.borrow) / 1e18,
         }))
         .filter((r) => r.apr > 0)
     );
-  }, [rates, symbol, type]);
+  }, [rewardRates, type]);
 
   if (rateType === 'fixed' && type === 'deposit') {
     return (

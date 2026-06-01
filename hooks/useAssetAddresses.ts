@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
-import useAccountData from './useAccountData';
+import usePreviewerExactly from './usePreviewerExactly';
 
 export default (): string[] => {
-  const { accountData } = useAccountData();
+  const { data: accountData } = usePreviewerExactly();
 
   return useMemo<string[]>(() => accountData?.map((m) => m.asset.toLowerCase()) ?? [], [accountData]);
 };

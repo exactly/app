@@ -1,4 +1,4 @@
-import { MarketAccount } from 'hooks/useAccountData';
+import { MarketAccount } from 'hooks/usePreviewerExactly';
 import { parseUnits } from 'viem';
 import { WAD } from '@exactly/lib';
 

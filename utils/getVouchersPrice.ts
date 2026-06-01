@@ -1,4 +1,4 @@
-import { MarketAccount } from 'hooks/useAccountData';
+import { MarketAccount } from 'hooks/usePreviewerExactly';
 
 const getVouchersPrice = (accountData: readonly MarketAccount[], symbol: string): bigint => {
   const isExaToken = symbol.length > 3 && symbol.startsWith('exa');

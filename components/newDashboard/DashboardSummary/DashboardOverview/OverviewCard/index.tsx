@@ -2,7 +2,7 @@ import React, { FC, PropsWithChildren, ReactNode, useMemo } from 'react';
 import { Box, Divider, Skeleton, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import OperationLegend from 'components/common/OperationLegend';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 
 type OverviewCardProps = {
   title: string;
@@ -31,7 +31,7 @@ const OverviewCard: FC<PropsWithChildren & OverviewCardProps> = ({
   mobileWrap,
 }) => {
   const { t } = useTranslation();
-  const { accountData, isFetching } = useAccountData();
+  const { data: accountData, isFetching } = usePreviewerExactly();
 
   const loading = useMemo(() => !accountData, [accountData]);
   const empty = useMemo(() => total === '$0.00', [total]);

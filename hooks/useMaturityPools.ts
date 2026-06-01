@@ -4,7 +4,7 @@ import { WAD } from '@exactly/lib';
 
 import formatNumber from 'utils/formatNumber';
 
-import useAccountData from './useAccountData';
+import usePreviewerExactly from './usePreviewerExactly';
 
 type APRsPerMaturityType = Record<string, { borrow: number; deposit: number }>;
 
@@ -17,7 +17,8 @@ type TableRow = {
 };
 
 export default function useMaturityPools(symbol: string): TableRow[] {
-  const { marketAccount } = useAccountData(symbol);
+  const { data } = usePreviewerExactly();
+  const marketAccount = data?.find((market) => market.assetSymbol === symbol);
   return useMemo<TableRow[]>(() => {
     if (!marketAccount) return [];
 

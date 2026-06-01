@@ -5,7 +5,7 @@ import { Box, Skeleton, Typography } from '@mui/material';
 import { useOperationContext } from '../../contexts/OperationContext';
 import { useSocketSwap } from '../../contexts/SocketSwapContext';
 import BorrowAtMaturity from '../operations/BorrowAtMaturity';
-import useAccountData from '../../hooks/useAccountData';
+import usePreviewerExactly from '../../hooks/usePreviewerExactly';
 import ModalAlert from '../common/modal/ModalAlert';
 import ModalInfo from '../common/modal/ModalInfo';
 import type { DepositConfig } from '.';
@@ -22,7 +22,8 @@ const Borrow = ({ onDeposit, direct, receiver, depositConfig, onNextStep }: Prop
   const { setSymbol, setQty, setReceiver, setOperation, symbol } = useOperationContext();
   const { route } = useSocketSwap();
 
-  const { marketAccount } = useAccountData('USDC.e');
+  const { data } = usePreviewerExactly();
+  const marketAccount = data?.find((market) => market.assetSymbol === 'USDC.e');
   const { t } = useTranslation();
   useEffect(() => {
     setOperation('borrowAtMaturity');

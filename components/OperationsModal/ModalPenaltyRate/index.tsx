@@ -4,7 +4,7 @@ import { Typography, Skeleton } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
 import ModalInfo from 'components/common/modal/ModalInfo';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import { toPercentage } from 'utils/utils';
 
 type Props = {
@@ -13,7 +13,7 @@ type Props = {
 
 function ModalPenaltyRate({ symbol }: Props) {
   const { t } = useTranslation();
-  const { marketAccount } = useAccountData(symbol);
+  const marketAccount = usePreviewerExactly().data?.find((market) => market.assetSymbol === symbol);
 
   return (
     <ModalInfo label={t('Late payment penalty daily rate')} variant="row">

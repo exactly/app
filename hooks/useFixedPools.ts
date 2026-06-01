@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import { FixedPool, Pool } from 'types/FixedPool';
-import useAccountData from './useAccountData';
+import usePreviewerExactly from './usePreviewerExactly';
 
 export default () => {
-  const { accountData } = useAccountData();
+  const { data: accountData } = usePreviewerExactly();
 
   const fixedPools = useMemo(() => {
     const data = { deposits: {} as FixedPool, borrows: {} as FixedPool };

@@ -12,7 +12,7 @@ import Image from 'next/image';
 import RewardsGroup from '../RewardsGroup';
 import handleOperationError from 'utils/handleOperationError';
 import formatNumber from 'utils/formatNumber';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import { useModal } from 'contexts/ModalContext';
 import MainActionButton from 'components/common/MainActionButton';
 import useReadOnly from 'hooks/useReadOnly';
@@ -43,8 +43,9 @@ const Summary = () => {
   } = useLeveragerContext();
   const { close } = useModal('leverager');
 
-  const { marketAccount: marketIn } = useAccountData(input.collateralSymbol ?? 'USDC');
-  const { marketAccount: marketOut } = useAccountData(input.borrowSymbol ?? 'USDC');
+  const { data } = usePreviewerExactly();
+  const marketIn = data?.find((market) => market.assetSymbol === (input.collateralSymbol ?? 'USDC'));
+  const marketOut = data?.find((market) => market.assetSymbol === (input.borrowSymbol ?? 'USDC'));
 
   const healthFactorColor = useMemo(
     () => getHealthFactorColor(newHealthFactor),

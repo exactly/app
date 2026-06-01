@@ -7,7 +7,7 @@ import { styled, useTheme } from '@mui/material/styles';
 import dayjs from 'dayjs';
 import ReportProblemRoundedIcon from '@mui/icons-material/ReportProblemRounded';
 import daysLeft from 'utils/daysLeft';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import { toPercentage } from 'utils/utils';
 import { useTranslation } from 'react-i18next';
 
@@ -40,7 +40,8 @@ type Props = {
 function MaturityLinearProgress({ symbol, operation, maturityDate }: Props) {
   const { t } = useTranslation();
   const { palette } = useTheme();
-  const { marketAccount } = useAccountData(symbol);
+  const { data } = usePreviewerExactly();
+  const marketAccount = data?.find((market) => market.assetSymbol === symbol);
   const progress = useMemo(() => {
     const oneHour = 3600;
     const oneDay = oneHour * 24;

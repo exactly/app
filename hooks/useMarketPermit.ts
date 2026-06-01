@@ -1,12 +1,13 @@
 import { useCallback } from 'react';
 import { pad, trim, type Address } from 'viem';
 import { usePublicClient } from 'wagmi';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import useSignPermit from 'hooks/useSignPermit';
 
 export default function useMarketPermit(marketSymbol: string) {
   const publicClient = usePublicClient();
-  const { marketAccount } = useAccountData(marketSymbol);
+  const { data } = usePreviewerExactly();
+  const marketAccount = data?.find((market) => market.assetSymbol === marketSymbol);
   const signPermit = useSignPermit();
 
   return useCallback(

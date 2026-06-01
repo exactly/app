@@ -3,7 +3,7 @@ import { Box, Button, CircularProgress, Typography } from '@mui/material';
 import { useOperationContext } from 'contexts/OperationContext';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import { track } from 'utils/mixpanel';
 import MainActionButton from 'components/common/MainActionButton';
 import useReadOnly from 'hooks/useReadOnly';
@@ -26,14 +26,14 @@ function ModalSubmit({ isLoading = false, disabled = false, refreshOnSubmit = tr
   const { isImpersonating: impersonateActive, exitReadOnly: exitImpersonate } = useReadOnly();
   const { isConnected } = useConnection();
   const connect = useConnectWallet();
-  const { refreshAccountData } = useAccountData();
+  const { refetch } = usePreviewerExactly();
 
   const handleSubmit = useCallback(async () => {
     await submit();
     if (refreshOnSubmit) {
-      await refreshAccountData();
+      await refetch();
     }
-  }, [submit, refreshAccountData, refreshOnSubmit]);
+  }, [submit, refetch, refreshOnSubmit]);
 
   const handleExitImpersonate = useCallback(() => {
     track('Button Clicked', {

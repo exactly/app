@@ -2,10 +2,10 @@ import { useMemo } from 'react';
 
 import { HealthFactor } from 'types/HealthFactor';
 import getHealthFactorData from 'utils/getHealthFactorData';
-import useAccountData from './useAccountData';
+import usePreviewerExactly from './usePreviewerExactly';
 
 export default function useHealthFactor(): HealthFactor | undefined {
-  const { accountData } = useAccountData();
+  const { data: accountData } = usePreviewerExactly();
   return useMemo(() => {
     if (!accountData) return;
     return getHealthFactorData(accountData);

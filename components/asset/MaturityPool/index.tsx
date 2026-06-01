@@ -6,7 +6,7 @@ import MaturityPoolsTable from './MaturityPoolsTable';
 import MaturityPoolInfo from './MaturityPoolInfo';
 import { Box, useMediaQuery, useTheme } from '@mui/material';
 import MaturityPoolsMobile from './MaturityPoolsMobile';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import { formatUnits } from 'viem';
 import SpreadModelChart from 'components/charts/SpreadModelChart';
 import { mainnet } from 'viem/chains';
@@ -22,7 +22,8 @@ type Props = {
 };
 
 const AssetMaturityPools: FC<Props> = ({ symbol }) => {
-  const { marketAccount } = useAccountData(symbol);
+  const { data } = usePreviewerExactly();
+  const marketAccount = data?.find((market) => market.assetSymbol === symbol);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { totalDeposited, totalBorrowed, bestDeposit, bestBorrow } = useMemo<{

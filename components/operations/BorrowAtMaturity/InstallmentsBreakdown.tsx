@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useOperationContext } from 'contexts/OperationContext';
 import TableHeadCell from 'components/common/TableHeadCell';
 import parseTimestamp from 'utils/parseTimestamp';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import { formatUnits } from 'viem';
 import Image from 'next/image';
 import formatNumber from 'utils/formatNumber';
@@ -12,7 +12,7 @@ import formatNumber from 'utils/formatNumber';
 export default function InstallmentsBreakdown({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation();
   const { installmentsDetails, symbol } = useOperationContext();
-  const { marketAccount } = useAccountData(symbol);
+  const marketAccount = usePreviewerExactly().data?.find((market) => market.assetSymbol === symbol);
   if (!installmentsDetails || !marketAccount) return <Skeleton />;
 
   return (

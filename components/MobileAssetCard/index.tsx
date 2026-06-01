@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import formatSymbol from 'utils/formatSymbol';
 import getSymbolDescription from 'utils/getSymbolDescription';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import useRouter from 'hooks/useRouter';
 import { useTranslation } from 'react-i18next';
 
@@ -18,7 +18,8 @@ type Props = PropsWithChildren<{
 const MobileAssetCard: FC<Props> = ({ symbol, isFloating, children, isMarkets = false, sx }) => {
   const { t } = useTranslation();
   const { query } = useRouter();
-  const { marketAccount } = useAccountData(symbol);
+  const { data } = usePreviewerExactly();
+  const marketAccount = data?.find((market) => market.assetSymbol === symbol);
   const { palette } = useTheme();
 
   const assetDescription = useCallback(

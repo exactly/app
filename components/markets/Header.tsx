@@ -7,13 +7,13 @@ import HeaderInfo from 'components/common/HeaderInfo';
 import { ItemInfoProps } from 'components/common/ItemInfo';
 
 import formatNumber from 'utils/formatNumber';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import { toPercentage } from 'utils/utils';
 import { Box, Typography } from '@mui/material';
 
 const MarketsHeader: FC = () => {
   const { t } = useTranslation();
-  const { accountData } = useAccountData();
+  const { data: accountData } = usePreviewerExactly();
 
   const { totalDeposited, totalBorrowed, totalAvailable } = useMemo<{
     totalDeposited?: bigint;

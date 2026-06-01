@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
-import useAccountData from './useAccountData';
+import usePreviewerExactly from './usePreviewerExactly';
 
 const def = ['USDC', 'WETH'];
 
 export default (): string[] => {
-  const { accountData } = useAccountData();
+  const { data: accountData } = usePreviewerExactly();
 
   return useMemo<string[]>(
     () =>

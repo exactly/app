@@ -5,7 +5,7 @@ import ModalGif from 'components/OperationsModal/ModalGif';
 import useBalance from 'hooks/useBalance';
 import { useOperationContext } from 'contexts/OperationContext';
 import { toPercentage } from 'utils/utils';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import { Grid } from '@mui/material';
 import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
 import AssetInput from 'components/OperationsModal/AssetInput';
@@ -45,7 +45,7 @@ const DepositAtMaturity: FC = () => {
     txHash,
   } = useDepositAtMaturity();
   const { symbol, errorData, qty } = useOperationContext();
-  const { marketAccount } = useAccountData(symbol);
+  const marketAccount = usePreviewerExactly().data?.find((market) => market.assetSymbol === symbol);
   const walletBalance = useBalance(symbol, marketAccount?.asset);
 
   useEffect(() => void updateAPR(), [updateAPR]);

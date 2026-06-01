@@ -10,7 +10,7 @@ import useDepositAtMaturity from 'hooks/useDepositAtMaturity';
 import { ErrorData } from 'types/Error';
 import daysLeft from 'utils/daysLeft';
 import formatNumber from 'utils/formatNumber';
-import useAccountData from 'hooks/useAccountData';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 import formatSymbol from 'utils/formatSymbol';
@@ -38,7 +38,7 @@ type SubmitProps = {
 const Submit: FC<SubmitProps> = ({ symbol, operation, option, qty, errorData }) => {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
-  const { marketAccount } = useAccountData(symbol);
+  const marketAccount = usePreviewerExactly().data?.find((market) => market.assetSymbol === symbol);
   const { reset } = useMarketsBasic();
   const deposit = useDeposit();
   const depositAtMaturity = useDepositAtMaturity();
