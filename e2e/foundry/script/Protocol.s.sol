@@ -16,6 +16,8 @@ import { InstallmentsRouter } from "@exactly/protocol/periphery/InstallmentsRout
 import { IntegrationPreviewer } from "@exactly/protocol/periphery/IntegrationPreviewer.sol";
 import { Previewer } from "@exactly/protocol/periphery/Previewer.sol";
 import { RatePreviewer } from "@exactly/protocol/periphery/RatePreviewer.sol";
+import { StakedEXA, Parameters as StakingParameters, IERC20 } from "@exactly/protocol/StakedEXA.sol";
+import { StakingPreviewer } from "@exactly/protocol/periphery/StakingPreviewer.sol";
 import { Firewall } from "@exactly/protocol/verified/Firewall.sol";
 import { ERC1967Proxy } from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { ERC20 } from "solmate/src/tokens/ERC20.sol";
@@ -62,6 +64,8 @@ contract DeployProtocol {
   Previewer public previewer;
   RatePreviewer public ratePreviewer;
   EscrowedEXA public esEXA;
+  StakedEXA public stEXA;
+  StakingPreviewer public stakingPreviewer;
 
   function run() external {
     vm.startBroadcast();
@@ -160,6 +164,34 @@ contract DeployProtocol {
     op.mint(msg.sender, 1_000_000e18);
     op.approve(address(marketOP), type(uint256).max);
     marketOP.deposit(1_000_000e18, msg.sender);
+
+    stEXA = StakedEXA(
+      address(
+        new ERC1967Proxy(
+          address(new StakedEXA()),
+          abi.encodeCall(
+            StakedEXA.initialize,
+            (
+              StakingParameters({
+                asset: IERC20(address(exa)),
+                minTime: 0,
+                refTime: 4 weeks,
+                excessFactor: 0.9e18,
+                penaltyGrowth: 2e18,
+                penaltyThreshold: 0.1e18,
+                market: marketUSDC,
+                provider: msg.sender,
+                savings: msg.sender,
+                duration: uint40(2 weeks),
+                providerRatio: 0.1e18
+              })
+            )
+          )
+        )
+      )
+    );
+    stakingPreviewer = new StakingPreviewer(stEXA);
+    marketUSDC.approve(address(stEXA), type(uint256).max);
 
     vm.stopBroadcast();
   }

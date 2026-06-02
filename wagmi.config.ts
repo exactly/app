@@ -187,10 +187,14 @@ export default defineConfig({
     contract('InstallmentsRouter', ['op-sepolia', 'optimism', 'base', 'base-sepolia', 'anvil'], true),
     contract(
       'StakedEXA',
-      { 'op-sepolia': { name: 'stEXA', block: true }, optimism: { name: 'stEXA', block: true } },
+      {
+        'op-sepolia': { name: 'stEXA', block: true },
+        optimism: { name: 'stEXA', block: true },
+        anvil: { name: 'stEXA', block: true },
+      },
       true,
     ),
-    contract('StakingPreviewer', ['op-sepolia', 'optimism'], true),
+    contract('StakingPreviewer', ['op-sepolia', 'optimism', 'anvil'], true),
     contract('PriceFeedDAI', ['ethereum', 'op-sepolia', 'base-sepolia']),
     contract('PriceFeedETH', ['ethereum']),
     contract('PriceFeedUSDC', ['ethereum', 'optimism', 'op-sepolia', 'base', 'base-sepolia', 'anvil']),

@@ -371,7 +371,7 @@ function StakingEXAInput({ operation }: Props) {
 
         setTx({ status: status === 'success' ? 'success' : 'error', hash: transactionHash });
       }
-    } catch (e) {
+    } catch {
       if (hash) setTx({ status: 'error', hash });
     } finally {
       if (!permitPending) {

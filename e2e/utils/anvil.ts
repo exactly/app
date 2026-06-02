@@ -83,7 +83,7 @@ const start = async (params: { dumpState?: string; loadState?: string } = {}, de
         '--private-key',
         deployerPrivateKey,
       ],
-      { cwd: new URL('../foundry', import.meta.url), timeout: 120_000 },
+      { cwd: new URL('../foundry', import.meta.url), timeout: 210_000 },
     );
   }
 

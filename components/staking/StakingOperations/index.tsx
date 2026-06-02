@@ -246,7 +246,7 @@ function StakingProgress() {
       const { status, transactionHash } = await waitForTransaction({ hash });
 
       setTx({ status: status === 'success' ? 'success' : 'error', hash: transactionHash });
-    } catch (e) {
+    } catch {
       if (hash) setTx({ status: 'error', hash });
     } finally {
       if (stakingPreviewerChainId !== undefined)
@@ -313,7 +313,9 @@ function StakingProgress() {
                 balance === undefined ? (
                   <Skeleton width={80} height={60} />
                 ) : (
-                  <Typography fontSize={38}>{formatNumber(Number(balance) / 1e18)}</Typography>
+                  <Typography fontSize={38} data-testid="staking-staked">
+                    {formatNumber(Number(balance) / 1e18)}
+                  </Typography>
                 )
               ) : (
                 <Typography fontSize={38}>{'0'}</Typography>
