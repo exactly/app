@@ -6,7 +6,7 @@ import { optimism } from 'viem/chains';
 import * as viemChains from 'viem/chains';
 import type { Address, Chain, Hex } from 'viem';
 
-import { e2eConnector } from './e2eWallet';
+import { e2eConnector, e2eTransport } from './e2eWallet';
 
 declare global {
   interface Window {
@@ -40,7 +40,7 @@ const alchemyRpcUrls = {
 } satisfies Partial<Record<number, (key: string) => string>>;
 
 function transportForChain(chain: Chain): Transport {
-  if (isE2E && e2e) return http(e2e.rpc);
+  if (isE2E && e2e) return e2eTransport(e2e.rpc);
   const alchemyRpcUrl = alchemyKey
     ? Object.entries(alchemyRpcUrls).find(([chainId]) => Number(chainId) === chain.id)?.[1](alchemyKey)
     : undefined;

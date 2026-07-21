@@ -8,6 +8,21 @@ import { erc20Market } from '../../utils/contracts';
 
 const test = base();
 
+test('signs explicit-account transactions locally', async ({ web3 }) => {
+  await web3.anvil.setBalance(web3.account.address, { ETH: 1 });
+
+  await expect(
+    web3.publicClient.waitForTransactionReceipt({
+      hash: await web3.walletClient.sendTransaction({
+        account: web3.account.address,
+        chain: web3.walletClient.chain,
+        to: web3.account.address,
+        value: 0n,
+      }),
+    }),
+  ).resolves.toMatchObject({ status: 'success' });
+});
+
 test('stake EXA refreshes balances without reload', async ({ page, web3 }) => {
   await web3.anvil.setBalance(web3.account.address, { ETH: 1, EXA: 100 });
   const balance = _balance({ test, page, publicClient: web3.publicClient });
