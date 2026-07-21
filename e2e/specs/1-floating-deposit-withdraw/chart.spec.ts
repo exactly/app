@@ -7,7 +7,11 @@ import { marketWethAddress, ratePreviewerAbi, ratePreviewerAddress } from '../..
 
 const test = base();
 
-test('Historical rate chart renders deposit & borrow lines from RatePreviewer reads', async ({ page, web2, web3 }) => {
+test('Historical rate chart renders rates and total deposits from RatePreviewer reads', async ({
+  page,
+  web2,
+  web3,
+}) => {
   void web2; // register the web2 route mocks (socket/time)
 
   const ratePreviewer = ratePreviewerAddress[anvil.id].toLowerCase();
@@ -29,7 +33,7 @@ test('Historical rate chart renders deposit & borrow lines from RatePreviewer re
         lastAccumulatorAccrual: now,
         maxFuturePools: 3,
         interval: 2_419_200n,
-        totalAssets: 1000n * 10n ** 18n,
+        totalAssets: 1234n * 10n ** 18n,
         floatingRate: 5n * 10n ** 16n, // 5% borrow APR -> ~1% deposit APR at this utilization
       },
     ],
@@ -63,4 +67,9 @@ test('Historical rate chart renders deposit & borrow lines from RatePreviewer re
   // hovering must show the custom tooltip with the served rates (regression-guards the TooltipChart crash).
   await chart.locator('svg.recharts-surface').hover();
   await expect(chart.getByText(/Borrow APR:\s*5\.00%/)).toBeVisible();
+
+  await chart.getByLabel('Show total deposits').check();
+  await expect(chart.locator('.recharts-line-curve')).toHaveCount(3);
+  await chart.locator('svg.recharts-surface').hover();
+  await expect(chart.getByText(/Total Deposits:\s*1\.234k WETH/)).toBeVisible();
 });

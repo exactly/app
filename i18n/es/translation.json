@@ -25,6 +25,7 @@
   "3M": "3M",
   "Historical Variable Rates": "Tasas Variables Históricas",
   "Show utilization": "Ver utilización",
+  "Show total deposits": "Ver depósitos totales",
   "Loading data...": "Cargando...",
   "Utilization Rates (Fixed Rate Pools)": "Tasas de Utilización (Pools de Tasa Fija)",
   "Late repayment will result in a penalty daily rate of {{penaltyRate}}": "El retraso en el pago resultará en una tasa de penalización diaria de {{penaltyRate}}",

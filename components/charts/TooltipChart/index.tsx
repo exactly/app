@@ -13,7 +13,7 @@ export type TooltipChartProps = {
   payload?: Entry[];
   label?: Date;
   labelFormatter?: (value: Date | undefined) => ReactNode;
-  formatter?: (value: number | undefined) => ReactNode;
+  formatter?: (value: number, entry: Entry) => ReactNode;
   formatterName?: (name: string | undefined) => ReactNode;
   sortItems?: (a: Entry, b: Entry) => number;
   ignoreKeys?: string[];
@@ -57,9 +57,11 @@ function TooltipChart({
       {additionalInfoPosition === 'top' && additionalInfo}
       {sortedPayload
         .filter(({ dataKey }) => !ignoreKeys || !ignoreKeys.includes(dataKey))
-        .map(({ dataKey, name, value, color }) => (
-          <Typography key={dataKey} variant="h6" fontSize="12px" color={color}>
-            {`${formatterName ? formatterName(name) : name + ':'} ${formatter ? formatter(value) : value}`}
+        .map((entry) => (
+          <Typography key={entry.dataKey} variant="h6" fontSize="12px" color={entry.color}>
+            {`${formatterName ? formatterName(entry.name) : entry.name + ':'} ${
+              formatter ? formatter(entry.value, entry) : entry.value
+            }`}
           </Typography>
         ))}
       {additionalInfoPosition === 'bottom' && additionalInfo}

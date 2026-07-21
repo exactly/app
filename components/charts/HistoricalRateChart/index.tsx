@@ -3,14 +3,15 @@ import { useQuery } from '@tanstack/react-query';
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { formatEther } from 'viem';
+import { formatEther, formatUnits } from 'viem';
 import { usePublicClient } from 'wagmi';
-import { floatingDepositRates, floatingUtilization } from '@exactly/lib';
+import { floatingDepositRates } from '@exactly/lib';
 
 import { ratePreviewerAbi, ratePreviewerAddress, ratePreviewerCode } from 'generated/wagmi';
 import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import { useGlobalError } from 'contexts/GlobalErrorContext';
 import { defaultChain } from 'utils/client';
+import formatNumber from 'utils/formatNumber';
 import { toPercentage } from 'utils/utils';
 import { track } from 'utils/mixpanel';
 import ButtonsChart from '../ButtonsChart';
@@ -38,7 +39,7 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
   const { t } = useTranslation();
   const { palette } = useTheme();
   const { setLoadError } = useGlobalError();
-  const [showUtilization, setShowUtilization] = useState(false);
+  const [showDeposits, setShowDeposits] = useState(false);
   const [range, setRange] = useState<Range>('6M');
 
   const marketAccount = usePreviewerExactly().data?.find((market) => market.assetSymbol === symbol);
@@ -56,7 +57,7 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
     enabled: Boolean(client && market && ratePreviewer && code),
     staleTime: 60_000,
     queryFn: async () => {
-      if (!client || !market || !ratePreviewer || !code) return [];
+      if (!client || !market || !marketAccount || !ratePreviewer || !code) return [];
 
       const blockTime = SECONDS_PER_BLOCK[defaultChain.id] ?? 2;
       const latest = await client.getBlockNumber();
@@ -71,7 +72,7 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
         ),
       ];
 
-      const series: { date: number; depositApr: number; borrowApr: number; utilization: number }[] = [];
+      const series: { date: number; depositApr: number; borrowApr: number; deposits: number }[] = [];
       for (let i = 0; i < blocks.length; i += CONCURRENCY) {
         const batch = await Promise.allSettled(
           blocks.slice(i, i + CONCURRENCY).map(async (blockNumber) => {
@@ -100,9 +101,7 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
               date: timestamp * 1_000,
               depositApr: deposit ? Number(formatEther(deposit.rate)) : 0,
               borrowApr: Number(formatEther(state.floatingRate)),
-              utilization: state.floatingAssets
-                ? Number(formatEther(floatingUtilization(state.floatingAssets, state.floatingDebt)))
-                : 0,
+              deposits: Number(formatUnits(state.totalAssets, marketAccount.decimals)),
             };
           }),
         );
@@ -137,16 +136,16 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
     [],
   );
 
-  const onShowUtilizationChange = useCallback(() => {
-    setShowUtilization((prev) => !prev);
+  const onShowDepositsChange = useCallback(() => {
+    setShowDeposits((prev) => !prev);
     track('Option Selected', {
-      name: 'show utilization',
+      name: 'show total deposits',
       location: 'Historical Rate Chart',
       symbol,
-      value: !showUtilization,
-      prevValue: showUtilization,
+      value: !showDeposits,
+      prevValue: showDeposits,
     });
-  }, [showUtilization, symbol]);
+  }, [showDeposits, symbol]);
 
   return (
     <Box data-testid="historical-rate-chart" display="flex" flexDirection="column" width="100%" height="100%" gap={2}>
@@ -192,11 +191,11 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
                 tickLine={false}
                 width={50}
               />
-              {showUtilization && (
+              {showDeposits && (
                 <YAxis
                   yAxisId="right"
                   orientation="right"
-                  tickFormatter={(value) => `${((value as number) * 100).toFixed(2)}%`}
+                  tickFormatter={(value) => formatNumber(value as number, symbol)}
                   tick={{ fill: palette.blue, fontWeight: 500, fontSize: 11 }}
                   axisLine={false}
                   tickLine={false}
@@ -205,8 +204,14 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
               )}
               <Tooltip
                 labelFormatter={(value) => formatDate(new Date(value as number), true)}
-                formatter={(value) => toPercentage(value as number)}
-                content={<TooltipChart sortItems={(a, b) => (a.value > b.value ? -1 : 1)} />}
+                content={
+                  <TooltipChart
+                    formatter={(value, { dataKey }) =>
+                      dataKey === 'deposits' ? `${formatNumber(value, symbol)} ${symbol}` : toPercentage(value)
+                    }
+                    sortItems={(a, b) => (a.value > b.value ? -1 : 1)}
+                  />
+                }
               />
               <Line
                 yAxisId="left"
@@ -226,12 +231,12 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
                 dot={false}
                 strokeWidth={2}
               />
-              {showUtilization && (
+              {showDeposits && (
                 <Line
                   yAxisId="right"
                   type="monotone"
-                  dataKey="utilization"
-                  name={t('Utilization Rate')}
+                  dataKey="deposits"
+                  name={t('Total Deposits')}
                   stroke={palette.blue}
                   dot={false}
                   strokeDasharray="5 5"
@@ -246,13 +251,13 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
           control={
             <Checkbox
               size="small"
-              onChange={onShowUtilizationChange}
+              onChange={onShowDepositsChange}
               sx={{ color: palette.blue, '&.Mui-checked': { color: palette.blue } }}
             />
           }
           label={
             <Typography variant="subtitle1" fontSize="12px">
-              {t('Show utilization')}
+              {t('Show total deposits')}
             </Typography>
           }
         />
