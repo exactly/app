@@ -1,6 +1,6 @@
 import React, { FC, Fragment, useMemo } from 'react';
 import { Box, Typography, useTheme } from '@mui/material';
-import { ResponsiveContainer, XAxis, Tooltip, ComposedChart, Area, CartesianGrid, YAxis, Line } from 'recharts';
+import { XAxis, Tooltip, ComposedChart, Area, CartesianGrid, YAxis, Line } from 'recharts';
 import dayjs from 'dayjs';
 
 import parseTimestamp from 'utils/parseTimestamp';
@@ -37,74 +37,71 @@ const SpreadModel: FC<Props> = ({ symbol }) => {
         </Typography>
       </Box>
 
-      <ResponsiveContainer width="100%" height="100%">
-        {loading ? (
-          <LoadingChart />
-        ) : (
-          <ComposedChart data={data}>
-            <XAxis
-              xAxisId="xaxis"
-              scale="auto"
-              dataKey="date"
-              type="number"
-              interval={0}
-              domain={['dataMin', 'dataMax']}
-              tickFormatter={formatTimestampLabel}
-              ticks={ticks}
-              allowDataOverflow
-              tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 11 }}
-              padding={{ right: 16, left: 16 }}
-              fontSize="12px"
-              height={20}
-            />
-            <YAxis
-              scale="auto"
-              type="number"
-              tickFormatter={formatPercentage}
-              yAxisId="yaxis"
-              axisLine={false}
-              tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 11 }}
-              tickLine={false}
-              domain={['dataMin', 'dataMax']}
-              width={50}
-              interval={0}
-              tickCount={7}
-            />
-            <Tooltip content={<CustomTooltip highlights={highlights} highlightColor={palette.colors[0]} />} />
-            <CartesianGrid stroke={palette.grey[300]} vertical={false} />
-            {[...Array(levels)].map((_, i) => {
-              const factor = i / (levels - 1);
-              return (
-                <Area
-                  key={i}
-                  type="monotone"
-                  xAxisId="xaxis"
-                  yAxisId="yaxis"
-                  dataKey={`area${i}`}
-                  fillOpacity={0.2 + 0.1 * factor}
-                  fill={`hsl(0 100% ${50 + 12 * (1 - factor)}%)`}
-                  stroke="none"
-                  isAnimationActive={false}
-                  dot={false}
-                  activeDot={false}
-                />
-              );
-            })}
-            <Line
-              type="monotone"
-              xAxisId="xaxis"
-              yAxisId="yaxis"
-              dataKey="rate"
-              connectNulls
-              strokeWidth={2}
-              strokeDasharray="5 5"
-              stroke={palette.text.primary}
-              dot={{ r: 5, fill: palette.background.paper, strokeDasharray: '0' }}
-              isAnimationActive={false}
-            />
-          </ComposedChart>
-        )}
-      </ResponsiveContainer>
+      <Box position="relative" flex={1} minWidth={0} minHeight={0}>
+        <ComposedChart responsive style={{ width: '100%', height: '100%' }} data={data}>
+          <XAxis
+            xAxisId="xaxis"
+            scale="auto"
+            dataKey="date"
+            type="number"
+            interval={0}
+            domain={['dataMin', 'dataMax']}
+            tickFormatter={formatTimestampLabel}
+            ticks={ticks}
+            allowDataOverflow
+            tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 11 }}
+            padding={{ right: 16, left: 16 }}
+            fontSize="12px"
+            height={20}
+          />
+          <YAxis
+            scale="auto"
+            type="number"
+            tickFormatter={formatPercentage}
+            yAxisId="yaxis"
+            axisLine={false}
+            tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 11 }}
+            tickLine={false}
+            domain={['dataMin', 'dataMax']}
+            width={50}
+            interval={0}
+            tickCount={7}
+          />
+          <Tooltip content={<CustomTooltip highlights={highlights} highlightColor={palette.colors[0]} />} />
+          <CartesianGrid stroke={palette.grey[300]} vertical={false} />
+          {[...Array(levels)].map((_, i) => {
+            const factor = i / (levels - 1);
+            return (
+              <Area
+                key={i}
+                type="monotone"
+                xAxisId="xaxis"
+                yAxisId="yaxis"
+                dataKey={`area${i}`}
+                fillOpacity={0.2 + 0.1 * factor}
+                fill={`hsl(0 100% ${50 + 12 * (1 - factor)}%)`}
+                stroke="none"
+                isAnimationActive={false}
+                dot={false}
+                activeDot={false}
+              />
+            );
+          })}
+          <Line
+            type="monotone"
+            xAxisId="xaxis"
+            yAxisId="yaxis"
+            dataKey="rate"
+            connectNulls
+            strokeWidth={2}
+            strokeDasharray="5 5"
+            stroke={palette.text.primary}
+            dot={{ r: 5, fill: palette.background.paper, strokeDasharray: '0' }}
+            isAnimationActive={false}
+          />
+        </ComposedChart>
+        {loading && <LoadingChart overlay />}
+      </Box>
     </Box>
   );
 };

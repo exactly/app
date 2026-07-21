@@ -43,6 +43,7 @@ const HeaderInfo: FC<HeaderInfoProps> = ({
 
   return (
     <Grid
+      width="100%"
       sx={{ ...(transparent && { bgcolor: 'components.bg' }) }}
       p={isMobile ? '16px' : '24px'}
       boxShadow={({ palette }) => (palette.mode === 'light' && shadow ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : '')}
@@ -53,12 +54,13 @@ const HeaderInfo: FC<HeaderInfoProps> = ({
         </Grid>
       )}
       <Grid item container spacing={isMobile ? 2 : xs ? 1 : 4}>
-        {itemsInfo.map(({ label, value, underLabel, tooltipTitle, sx }) => (
+        {itemsInfo.map(({ label, value, underLabel, reserveUnderLabelSpace, tooltipTitle, sx }) => (
           <ItemInfo
             key={label.trim()}
             label={label}
             value={value}
             underLabel={underLabel}
+            reserveUnderLabelSpace={reserveUnderLabelSpace}
             tooltipTitle={tooltipTitle}
             xs={xs}
             sx={sx}

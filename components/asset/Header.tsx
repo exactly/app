@@ -214,7 +214,7 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
           )}
           {symbol === 'USDC.e' && <FrozenPill />}
 
-          <Typography sx={{ width: '100%' }} variant="dashboardMainSubtitle">
+          <Typography sx={{ width: '100%', minHeight: '16px' }} variant="dashboardMainSubtitle">
             {assetDescription(symbol)}
           </Typography>
         </Grid>

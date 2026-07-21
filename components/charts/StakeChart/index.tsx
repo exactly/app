@@ -1,17 +1,7 @@
 import { Box, Typography, useTheme } from '@mui/material';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Area,
-  CartesianGrid,
-  ComposedChart,
-  Line,
-  ReferenceLine,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
+import { Area, CartesianGrid, ComposedChart, Line, ReferenceLine, Tooltip, XAxis, YAxis } from 'recharts';
 import { toPercentage } from 'utils/utils';
 import { useStakedEXAChart } from 'hooks/useStakedEXA';
 
@@ -83,114 +73,110 @@ const StakeChart = () => {
         <Box display="flex" justifyContent="space-between">
           <Typography variant="h6">{t('Staking status')}</Typography>
         </Box>
-        <ResponsiveContainer width="100%" height="100%">
-          {loading ? (
-            <LoadingChart />
-          ) : (
-            <ComposedChart data={processedData} margin={{ top: 5, bottom: 5 }}>
-              <defs>
-                <pattern
-                  id="claimable"
-                  patternUnits="userSpaceOnUse"
-                  width="6"
-                  height="6"
-                  patternTransform="rotate(25)"
-                >
-                  <rect width="3" height="6" fill={palette.figma.green['500']} />
-                  <rect x="3" width="3" height="6" fill="#ffffff" />
-                </pattern>
-                <pattern id="rest" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(25)">
-                  <rect width="3" height="6" fill={isEnded ? 'red' : palette.figma.green['50']} />
-                  <rect x="3" width="3" height="6" fill={isEnded ? '#ffffff' : palette.figma.green['50']} />
-                </pattern>
-                <pattern id="claimed" patternUnits="userSpaceOnUse" width="6" height="6">
-                  <rect width="3" height="6" fill={palette.figma.green['500']} />
-                  <rect x="3" width="3" height="6" fill={palette.figma.green['500']} />
-                </pattern>
-              </defs>
-              <CartesianGrid horizontal vertical={false} stroke={palette.grey[300]} />
-              <XAxis
-                xAxisId="date"
-                dataKey="timestamp"
-                type="number"
-                domain={['dataMin', 'dataMax']}
-                minTickGap={50}
-                padding={{ left: 20, right: 30 }}
-                tickFormatter={(value) => formatDate(new Date((value * 1000) as number))}
-                stroke="#B4BABF"
-                fontSize="12px"
-                height={20}
-              />
-              <YAxis
-                yAxisId="left"
-                tickFormatter={(tick) => toPercentage(tick, 0)}
-                axisLine={false}
-                tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 11 }}
-                tickLine={false}
-                width={50}
-              />
-              <Tooltip
-                labelFormatter={(value) => formatDate(new Date((value * 1000) as number))}
-                formatter={(value) => toPercentage(value as number)}
-                content={<TooltipChart sortItems={(a, b) => (a.value > b.value ? -1 : 1)} />}
-              />
-              <Area
-                yAxisId="left"
-                xAxisId="date"
-                type="monotone"
-                dataKey="claimedPercentage"
-                name={t('Claimed')}
-                stroke="none"
-                fill="url(#claimed)"
-                fillOpacity={1}
-                dot={false}
-                stackId="1"
-              />
-              <Area
-                yAxisId="left"
-                xAxisId="date"
-                type="monotone"
-                dataKey="claimablePercentage"
-                name={t('Claimable')}
-                stroke="none"
-                fill="url(#claimable)"
-                fillOpacity={1}
-                dot={false}
-                stackId="1"
-              />
-              <Area
-                yAxisId="left"
-                xAxisId="date"
-                type="monotone"
-                dataKey="restValue"
-                name={isEnded ? t('Not available to claim') : t('Claimable on completion')}
-                stroke="none"
-                fill="url(#rest)"
-                fillOpacity={1}
-                dot={false}
-                stackId="1"
-              />
-              <Line
-                yAxisId="left"
-                xAxisId="date"
-                type="monotone"
-                dataKey="value"
-                name={t('Growth Factor')}
-                stroke={palette.mode === 'light' ? 'black' : 'white'}
-                dot={false}
-                strokeWidth={2}
-              />
-              <ReferenceLine
-                xAxisId="date"
-                yAxisId="left"
-                x={now}
-                stroke={palette.blue}
-                strokeDasharray="13 13"
-                strokeWidth="3"
-              />
-            </ComposedChart>
-          )}
-        </ResponsiveContainer>
+        <Box position="relative" flex={1} minWidth={0} minHeight={0}>
+          <ComposedChart
+            responsive
+            style={{ width: '100%', height: '100%' }}
+            data={processedData}
+            margin={{ top: 5, bottom: 5 }}
+          >
+            <defs>
+              <pattern id="claimable" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(25)">
+                <rect width="3" height="6" fill={palette.figma.green['500']} />
+                <rect x="3" width="3" height="6" fill="#ffffff" />
+              </pattern>
+              <pattern id="rest" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(25)">
+                <rect width="3" height="6" fill={isEnded ? 'red' : palette.figma.green['50']} />
+                <rect x="3" width="3" height="6" fill={isEnded ? '#ffffff' : palette.figma.green['50']} />
+              </pattern>
+              <pattern id="claimed" patternUnits="userSpaceOnUse" width="6" height="6">
+                <rect width="3" height="6" fill={palette.figma.green['500']} />
+                <rect x="3" width="3" height="6" fill={palette.figma.green['500']} />
+              </pattern>
+            </defs>
+            <CartesianGrid horizontal vertical={false} stroke={palette.grey[300]} />
+            <XAxis
+              xAxisId="date"
+              dataKey="timestamp"
+              type="number"
+              domain={['dataMin', 'dataMax']}
+              minTickGap={50}
+              padding={{ left: 20, right: 30 }}
+              tickFormatter={(value) => formatDate(new Date((value * 1000) as number))}
+              stroke="#B4BABF"
+              fontSize="12px"
+              height={20}
+            />
+            <YAxis
+              yAxisId="left"
+              tickFormatter={(tick) => toPercentage(tick, 0)}
+              axisLine={false}
+              tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 11 }}
+              tickLine={false}
+              width={50}
+            />
+            <Tooltip
+              labelFormatter={(value) => formatDate(new Date((value * 1000) as number))}
+              formatter={(value) => toPercentage(value as number)}
+              content={<TooltipChart sortItems={(a, b) => (a.value > b.value ? -1 : 1)} />}
+            />
+            <Area
+              yAxisId="left"
+              xAxisId="date"
+              type="monotone"
+              dataKey="claimedPercentage"
+              name={t('Claimed')}
+              stroke="none"
+              fill="url(#claimed)"
+              fillOpacity={1}
+              dot={false}
+              stackId="1"
+            />
+            <Area
+              yAxisId="left"
+              xAxisId="date"
+              type="monotone"
+              dataKey="claimablePercentage"
+              name={t('Claimable')}
+              stroke="none"
+              fill="url(#claimable)"
+              fillOpacity={1}
+              dot={false}
+              stackId="1"
+            />
+            <Area
+              yAxisId="left"
+              xAxisId="date"
+              type="monotone"
+              dataKey="restValue"
+              name={isEnded ? t('Not available to claim') : t('Claimable on completion')}
+              stroke="none"
+              fill="url(#rest)"
+              fillOpacity={1}
+              dot={false}
+              stackId="1"
+            />
+            <Line
+              yAxisId="left"
+              xAxisId="date"
+              type="monotone"
+              dataKey="value"
+              name={t('Growth Factor')}
+              stroke={palette.mode === 'light' ? 'black' : 'white'}
+              dot={false}
+              strokeWidth={2}
+            />
+            <ReferenceLine
+              xAxisId="date"
+              yAxisId="left"
+              x={now}
+              stroke={palette.blue}
+              strokeDasharray="13 13"
+              strokeWidth="3"
+            />
+          </ComposedChart>
+          {loading && <LoadingChart overlay />}
+        </Box>
       </Box>
     </Box>
   );

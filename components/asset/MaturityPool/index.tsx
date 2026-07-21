@@ -91,7 +91,7 @@ const AssetMaturityPools: FC<Props> = ({ symbol }) => {
           </Box>
         ) : (
           <Grid item xs={12} px={1.5} pb={3} bgcolor="components.bg" mt={-1}>
-            <MaturityPoolsTable symbol={symbol} />
+            <MaturityPoolsTable symbol={symbol} loading={!marketAccount} />
           </Grid>
         )}
       </Grid>

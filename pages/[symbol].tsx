@@ -36,10 +36,10 @@ const Market: NextPage<Props> = ({ symbol }: Props) => {
       </Box>
       <AssetHeaderInfo symbol={symbol} />
       <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} my="16px" gap="16px">
-        <Box maxWidth={{ xs: '100%', sm: '50%' }}>
+        <Box data-testid="floating-pool-column" width={{ xs: '100%', sm: 'calc((100% - 16px) / 2)' }} minWidth={0}>
           <AssetFloatingPool symbol={symbol} />
         </Box>
-        <Box maxWidth={{ xs: '100%', sm: '50%' }}>
+        <Box data-testid="maturity-pool-column" width={{ xs: '100%', sm: 'calc((100% - 16px) / 2)' }} minWidth={0}>
           <AssetMaturityPools symbol={symbol} />
         </Box>
       </Box>

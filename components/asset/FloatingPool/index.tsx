@@ -29,7 +29,9 @@ const AssetFloatingPool: FC<AssetFloatingPoolProps> = ({ symbol }) => {
         boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : '')}
         borderRadius="0px 0px 6px 6px"
         bgcolor="components.bg"
-        p="16px"
+        px="16px"
+        pt="16px"
+        pb="12px"
         height={280}
       >
         <HistoricalRateChart symbol={symbol} />

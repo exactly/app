@@ -68,7 +68,8 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
               symbol={bestDepositRate && bestDepositRate > minAPRValue ? symbol : undefined}
             />
           ) : undefined,
-        underLabel: bestDepositMaturity ? parseTimestamp(bestDepositMaturity) : undefined,
+        ...(bestDepositMaturity && { underLabel: parseTimestamp(bestDepositMaturity) }),
+        reserveUnderLabelSpace: true,
         tooltipTitle: t('The highest fixed interest APR for a deposit up to the optimal deposit size.'),
       },
       {
@@ -77,7 +78,8 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
           bestBorrowRate && bestBorrowRate > minAPRValue ? (
             <ItemCell key={symbol} value={toPercentage(bestBorrowRate)} symbol={symbol} />
           ) : undefined,
-        underLabel: bestBorrowMaturity ? parseTimestamp(bestBorrowMaturity) : undefined,
+        ...(bestBorrowMaturity && { underLabel: parseTimestamp(bestBorrowMaturity) }),
+        reserveUnderLabelSpace: true,
         tooltipTitle: t(
           'The lowest fixed borrowing interest APR at current utilization levels for all the Fixed Rate Pools.',
         ),

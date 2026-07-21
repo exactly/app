@@ -10,12 +10,13 @@ export type ItemInfoProps = {
   label: string;
   value?: string | React.ReactNode;
   underLabel?: string;
+  reserveUnderLabelSpace?: boolean;
   tooltipTitle?: string | React.ReactNode;
   xs?: number;
   sx?: BoxProps['sx'];
 };
 
-const ItemInfo: FC<ItemInfoProps> = ({ label, value, underLabel, tooltipTitle, xs, sx }) => {
+const ItemInfo: FC<ItemInfoProps> = ({ label, value, underLabel, reserveUnderLabelSpace, tooltipTitle, xs, sx }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -38,12 +39,16 @@ const ItemInfo: FC<ItemInfoProps> = ({ label, value, underLabel, tooltipTitle, x
           value
         )
       ) : (
-        <Skeleton height={50} />
+        <Skeleton variant="rounded" height={32} />
       )}
-      {!!underLabel && (
-        <Typography variant="subtitle1" fontSize="10px" color="grey.500" textTransform="uppercase">
-          {underLabel}
-        </Typography>
+      {(underLabel || reserveUnderLabelSpace) && (
+        <Box minHeight={reserveUnderLabelSpace ? '17.5px' : undefined}>
+          {underLabel && (
+            <Typography variant="subtitle1" fontSize="10px" color="grey.500" textTransform="uppercase">
+              {underLabel}
+            </Typography>
+          )}
+        </Box>
       )}
     </Grid>
   );

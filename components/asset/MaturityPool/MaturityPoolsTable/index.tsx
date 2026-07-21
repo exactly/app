@@ -8,6 +8,8 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';
+import Skeleton from '@mui/material/Skeleton';
+import { base, baseSepolia } from 'viem/chains';
 
 import parseTimestamp from 'utils/parseTimestamp';
 import { toPercentage } from 'utils/utils';
@@ -18,9 +20,11 @@ import useMaturityPools from 'hooks/useMaturityPools';
 import { useTranslation } from 'react-i18next';
 import getHourUTC2Local from 'utils/getHourUTC2Local';
 import { track } from 'utils/mixpanel';
+import { defaultChain } from 'utils/client';
 
 type MaturityPoolsTableProps = {
   symbol: string;
+  loading: boolean;
 };
 
 const HeadCell: FC<{ title: string; tooltipTitle?: string }> = ({ title, tooltipTitle }) => {
@@ -35,7 +39,7 @@ const HeadCell: FC<{ title: string; tooltipTitle?: string }> = ({ title, tooltip
   );
 };
 
-const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
+const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol, loading }) => {
   const { t } = useTranslation();
   const { handleActionClick } = useActionButton();
   const { minAPRValue } = numbers;
@@ -65,6 +69,29 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
           </TableRow>
         </TableHead>
         <TableBody>
+          {loading &&
+            Array.from(
+              { length: defaultChain.id === base.id || defaultChain.id === baseSepolia.id ? 3 : 7 },
+              (_, index) => (
+                <TableRow key={`maturity-pool-skeleton-${index}`} sx={{ height: 65, '&:last-child td': { border: 0 } }}>
+                  <TableCell sx={{ pl: 1.5 }}>
+                    <Skeleton variant="rounded" width={80} height={20} />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton variant="rounded" width={50} height={20} />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton variant="rounded" width={80} height={32} />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton variant="rounded" width={50} height={20} />
+                  </TableCell>
+                  <TableCell size="small">
+                    <Skeleton variant="rounded" width={80} height={32} />
+                  </TableCell>
+                </TableRow>
+              ),
+            )}
           {rows.map(({ maturity, totalDeposited, totalBorrowed, depositAPR, borrowAPR }) => (
             <TableRow
               key={Number(maturity)}
