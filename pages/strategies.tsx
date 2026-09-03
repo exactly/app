@@ -423,6 +423,31 @@ const Strategies: NextPage = () => {
     () =>
       [
         {
+          chainId: optimism.id,
+          title: t('Bridge EXA with Hyperlane'),
+          description: t('Bridge your EXA tokens between OP Mainnet and Base, powered by Hyperlane.'),
+          tags: [{ text: t('Cross Network') }, { text: t('Basic'), size: 'small' as const }],
+          button: (
+            <a href="https://bridge.exact.ly/" target="_blank" rel="noreferrer noopener" style={{ width: '100%' }}>
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={() =>
+                  track('Button Clicked', {
+                    location: 'Strategies',
+                    name: 'exa bridge',
+                    isNew: false,
+                    href: 'https://bridge.exact.ly/',
+                  })
+                }
+              >
+                {t('Bridge EXA')}
+              </Button>
+            </a>
+          ),
+          imgPath: '/img/strategies/hyperlane-logo.svg',
+        },
+        {
           title: t('Bridge & Swap with Socket'),
           description: t('Seamlessly bridge and swap assets to OP Mainnet from many different networks.'),
           tags: [{ text: t('Cross Network') }, { text: t('Basic'), size: 'small' as const }],
