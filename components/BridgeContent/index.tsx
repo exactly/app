@@ -6,6 +6,7 @@ import { ActiveRoute } from 'types/Bridge';
 import { useWeb3 } from 'hooks/useWeb3';
 import { fetchActiveRoutes } from './utils';
 import SocketTxHistory from './SocketTxHistory';
+import HyperlaneBridge from './HyperlaneBridge';
 
 const BridgeContent = () => {
   const [activeRoutes, setActiveRoutes] = useState<ActiveRoute[] | undefined>();
@@ -26,6 +27,12 @@ const BridgeContent = () => {
 
   return (
     <Box display="flex" justifyContent="center" flexDirection="column" mx="auto" mt={5} gap={2}>
+      <Box mb={4}>
+        <Typography variant="h2" fontSize={24} mb={2}>
+          {t('EXA Token Bridge')}
+        </Typography>
+        <HyperlaneBridge />
+      </Box>
       <Box>
         <Typography variant="h2" fontSize={24} mb={2}>
           {t('Bridge & Swap')}

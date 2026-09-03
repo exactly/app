@@ -23,6 +23,7 @@ import { useWeb3 } from 'hooks/useWeb3';
 import FeaturedStrategies from 'components/strategies/FeaturedStrategies';
 import { useModal } from '../contexts/ModalContext';
 import { track } from 'utils/mixpanel';
+import { EXA_BRIDGE_URL } from 'utils/const';
 
 const Strategies: NextPage = () => {
   const { t } = useTranslation();
@@ -428,7 +429,7 @@ const Strategies: NextPage = () => {
           description: t('Bridge your EXA tokens between OP Mainnet and Base, powered by Hyperlane.'),
           tags: [{ text: t('Cross Network') }, { text: t('Basic'), size: 'small' as const }],
           button: (
-            <a href="https://bridge.exact.ly/" target="_blank" rel="noreferrer noopener" style={{ width: '100%' }}>
+            <a href={EXA_BRIDGE_URL} target="_blank" rel="noreferrer noopener" style={{ width: '100%' }}>
               <Button
                 fullWidth
                 variant="contained"
@@ -437,7 +438,7 @@ const Strategies: NextPage = () => {
                     location: 'Strategies',
                     name: 'exa bridge',
                     isNew: false,
-                    href: 'https://bridge.exact.ly/',
+                    href: EXA_BRIDGE_URL,
                   })
                 }
               >
