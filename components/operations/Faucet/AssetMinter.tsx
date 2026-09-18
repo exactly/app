@@ -46,6 +46,7 @@ const AssetMinter = ({ symbol }: Props) => {
           OP: '1000',
           'USDC.e': '10000',
           wstETH: '10',
+          wARS: '1000000',
         };
 
         write({ args: [walletAddress, parseUnits(amounts[symbol], decimals)] });

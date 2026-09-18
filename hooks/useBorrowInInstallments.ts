@@ -46,6 +46,8 @@ export default function useBorrowInInstallments() {
     return [date, installmentsDetails.installmentsPrincipal, maxRepay] as const;
   }, [date, installmentsDetails, installmentsRouter, maxRepay]);
 
+  const receiver = walletAddress ?? zeroAddress;
+
   const config = useMemo(() => {
     if (!marketContract || !commonArgs || !installmentsRouter || installments === 1) return;
     const args = [marketContract.address, ...commonArgs] as const;
@@ -54,16 +56,16 @@ export default function useBorrowInInstallments() {
       chainId: chain.id,
       enabled: true,
       address: installmentsRouter.address,
-      account: walletAddress ?? zeroAddress,
-      args: permit ? ([...args, permit] as const) : args,
+      account: receiver,
+      args: permit ? ([...args, permit] as const) : ([...args, receiver] as const),
     };
-  }, [chain.id, commonArgs, installments, installmentsRouter, marketContract, opts, permit, walletAddress]);
+  }, [chain.id, commonArgs, installments, installmentsRouter, marketContract, opts, permit, receiver]);
 
   const ethConfig = useMemo(() => {
     if (!commonArgs || config === undefined) return;
-    const args = permit ? ([...commonArgs, permit] as const) : commonArgs;
+    const args = permit ? ([...commonArgs, permit, receiver] as const) : ([...commonArgs, receiver] as const);
     return { ...config, args };
-  }, [commonArgs, config, permit]);
+  }, [commonArgs, config, permit, receiver]);
 
   const prepare = usePrepareInstallmentsRouterBorrow(isBorrowETH ? undefined : config);
   const prepareETH = usePrepareInstallmentsRouterBorrowEth(isBorrowETH ? ethConfig : undefined);
