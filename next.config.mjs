@@ -5,6 +5,7 @@ const DISABLE_SENTRY_PLUGIN = JSON.parse(process.env.DISABLE_SENTRY_PLUGIN ?? 'f
 export default withSentryConfig(
   {
     reactStrictMode: true,
+    bundlePagesRouterDependencies: true,
     productionBrowserSourceMaps: true,
     pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
     redirects: () => [
