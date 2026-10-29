@@ -11,6 +11,8 @@ import { Box, IconButton, Tooltip, Typography, Grid } from '@mui/material';
 import Link from 'next/link';
 import useRouter from 'hooks/useRouter';
 import { useTranslation } from 'react-i18next';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
+import Custom404 from './404';
 
 type Props = {
   symbol: string;
@@ -19,6 +21,10 @@ type Props = {
 const Market: NextPage<Props> = ({ symbol }: Props) => {
   const { t } = useTranslation();
   const { query } = useRouter();
+  const { data: accountData } = usePreviewerExactly();
+  const marketAccount = accountData?.find(({ assetSymbol }) => assetSymbol === symbol);
+
+  if (accountData && !marketAccount) return <Custom404 />;
 
   return (
     <Grid container mt={-1}>
@@ -36,12 +42,18 @@ const Market: NextPage<Props> = ({ symbol }: Props) => {
       </Box>
       <AssetHeaderInfo symbol={symbol} />
       <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} my="16px" gap="16px">
-        <Box data-testid="floating-pool-column" width={{ xs: '100%', sm: 'calc((100% - 16px) / 2)' }} minWidth={0}>
+        <Box
+          data-testid="floating-pool-column"
+          width={{ xs: '100%', sm: marketAccount?.fixedPools.length === 0 ? '100%' : 'calc((100% - 16px) / 2)' }}
+          minWidth={0}
+        >
           <AssetFloatingPool symbol={symbol} />
         </Box>
-        <Box data-testid="maturity-pool-column" width={{ xs: '100%', sm: 'calc((100% - 16px) / 2)' }} minWidth={0}>
-          <AssetMaturityPools symbol={symbol} />
-        </Box>
+        {marketAccount?.fixedPools.length !== 0 && (
+          <Box data-testid="maturity-pool-column" width={{ xs: '100%', sm: 'calc((100% - 16px) / 2)' }} minWidth={0}>
+            <AssetMaturityPools symbol={symbol} />
+          </Box>
+        )}
       </Box>
     </Grid>
   );
@@ -67,7 +79,7 @@ export const getStaticPaths: GetStaticPaths<Props> = async () => {
   );
   return {
     paths: Array.from(new Set(markets.flat())).map((symbol) => ({ params: { symbol } })),
-    fallback: false,
+    fallback: 'blocking',
   };
 };
 
