@@ -53,7 +53,7 @@ const config: PlaywrightTestConfig = {
   outputDir: 'test-results/artifacts',
   webServer: [
     {
-      command: `PORT=${process.env.E2E_APP_PORT || 0} pnpm start:e2e`,
+      command: `PORT=${process.env.E2E_APP_PORT || 0} NODE_OPTIONS=--no-experimental-detect-module pnpm start:e2e`,
       timeout: 240_000,
       reuseExistingServer: false,
       stdout: 'pipe',
